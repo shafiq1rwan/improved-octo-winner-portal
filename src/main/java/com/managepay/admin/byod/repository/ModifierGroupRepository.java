@@ -32,51 +32,43 @@ public class ModifierGroupRepository {
 		return modifierGroup;
 	};
 
-	private ResultSetExtractor<List<ModifierGroup>> resultSetExtractor = (rs) -> {
-		Map<Long, ModifierGroup> map = new HashMap<Long, ModifierGroup>();
-
-		while (rs.next()) {
-			Long modifierGroupId = rs.getLong("mg_id");
-			ModifierGroup modifierGroup = map.get(modifierGroupId);
-
-			if (modifierGroup == null) {
-				modifierGroup = new ModifierGroup();
-				modifierGroup.setId(modifierGroupId);
-				modifierGroup.setBackendId(rs.getString("mg_backend_id"));
-				modifierGroup.setName(rs.getString("modifier_group_name"));
-				map.put(modifierGroupId, modifierGroup);
-			}
-			
-			List itemList = modifierGroup.getItems();
-			if (itemList == null) {
-				itemList = new ArrayList<Item>();
-				modifierGroup.setItems(itemList);
-
-				Item item = new Item();
-				item.setId(rs.getLong("id"));
-				item.setBackendId(rs.getString("backend_id"));
-				item.setModifierGroupId(rs.getLong("modifier_group_id"));
-				item.setName(rs.getString("item_name"));
-				item.setDescription(rs.getString("item_description"));
-				item.setImagePath(rs.getString("item_image_path"));
-				item.setBasePrice(rs.getBigDecimal("item_base_price"));
-				item.setTaxable(rs.getBoolean("taxable"));
-				item.setModifiable(rs.getBoolean("modifiable"));
-				item.setDiscountable(rs.getBoolean("discountable"));
-				item.setPublished(rs.getBoolean("published"));
-
-				itemList.add(item);
-			}
-			
-		}
-
-		return new ArrayList<ModifierGroup>(map.values());
-	};
+	/*
+	 * private ResultSetExtractor<List<ModifierGroup>> resultSetExtractor = (rs) ->
+	 * { Map<Long, ModifierGroup> map = new HashMap<Long, ModifierGroup>();
+	 * 
+	 * while (rs.next()) { Long modifierGroupId = rs.getLong("mg_id"); ModifierGroup
+	 * modifierGroup = map.get(modifierGroupId);
+	 * 
+	 * if (modifierGroup == null) { modifierGroup = new ModifierGroup();
+	 * modifierGroup.setId(modifierGroupId);
+	 * modifierGroup.setBackendId(rs.getString("mg_backend_id"));
+	 * modifierGroup.setName(rs.getString("modifier_group_name"));
+	 * map.put(modifierGroupId, modifierGroup); }
+	 * 
+	 * List itemList = modifierGroup.getItems(); if (itemList == null) { itemList =
+	 * new ArrayList<Item>(); modifierGroup.setItems(itemList);
+	 * 
+	 * Item item = new Item(); item.setId(rs.getLong("id"));
+	 * item.setBackendId(rs.getString("backend_id"));
+	 * item.setModifierGroupId(rs.getLong("modifier_group_id"));
+	 * item.setName(rs.getString("item_name"));
+	 * item.setDescription(rs.getString("item_description"));
+	 * item.setImagePath(rs.getString("item_image_path"));
+	 * item.setBasePrice(rs.getBigDecimal("item_base_price"));
+	 * item.setTaxable(rs.getBoolean("taxable"));
+	 * item.setModifiable(rs.getBoolean("modifiable"));
+	 * item.setDiscountable(rs.getBoolean("discountable"));
+	 * item.setPublished(rs.getBoolean("published"));
+	 * 
+	 * itemList.add(item); }
+	 * 
+	 * }
+	 * 
+	 * return new ArrayList<ModifierGroup>(map.values()); };
+	 */
 
 	public List<ModifierGroup> findModifierGroups() {
-		return jdbcTemplate.query(
-				"SELECT mg.id as mg_id, mg.modifier_group_name, mg.backend_id as mg_backend_id, i.* FROM modifier_group mg LEFT JOIN item i ON mg.id = i.modifier_group_id",
-				resultSetExtractor);
+		return jdbcTemplate.query("SELECT * FROM modifier_group", rowMapper);
 	}
 
 	public ModifierGroup findModifierGroupById(Long id) {

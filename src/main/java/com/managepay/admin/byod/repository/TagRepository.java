@@ -21,7 +21,7 @@ public class TagRepository {
 	public TagRepository(JdbcTemplate jdbcTemplate) {
 		this.jdbcTemplate = jdbcTemplate;
 	}
-	
+
 	private RowMapper<Tag> rowMapper = (rs, rowNum) -> {
 		Tag tag = new Tag();
 		tag.setId(rs.getLong("id"));
@@ -29,7 +29,7 @@ public class TagRepository {
 		tag.setName(rs.getString("tag_name"));
 		return tag;
 	};
-	
+
 	private ResultSetExtractor<List<Tag>> resultSetExtractor = (rs) -> {
 		Map<Long, Tag> map = new HashMap<Long, Tag>();
 
@@ -47,38 +47,48 @@ public class TagRepository {
 		}
 		return new ArrayList<Tag>(map.values());
 	};
-	
-	public List<Tag> findAllTag(){
+
+	public List<Tag> findAllTag() {
 		return jdbcTemplate.query("SELECT * FROM tag", resultSetExtractor);
 	}
-	
+
+	public List<Tag> findTagByItemId(Long itemId) {
+		return jdbcTemplate.query(
+				"SELECT t.* FROM tag t INNER JOIN item_tag it ON t.id = it.tag_id WHERE it.item_id = ? AND it.tag_id IS NOT NULL",
+				new Object[] { itemId }, resultSetExtractor);
+	}
+
 	public Tag findTagById(Long id) {
-		return jdbcTemplate.queryForObject("SELECT * FROM tag WHERE id = ?",new Object[] {id}, rowMapper);
+		return jdbcTemplate.queryForObject("SELECT * FROM tag WHERE id = ?", new Object[] { id }, rowMapper);
 	}
 
 	public int createTag(Tag tag) {
-		return jdbcTemplate.update("INSERT INTO tag(backend_id, tag_name) VALUES(?,?)", new Object[] { tag.getBackendId(), tag.getName() });
+		return jdbcTemplate.update("INSERT INTO tag(backend_id, tag_name) VALUES(?,?)",
+				new Object[] { tag.getBackendId(), tag.getName() });
 	}
 
 	public int editTag(Long id, Tag tag) {
-		return jdbcTemplate.update("UPDATE tag SET backend_id = ?,tag_name = ? WHERE id = ?", new Object[] { tag.getBackendId(), tag.getName(), id });
+		return jdbcTemplate.update("UPDATE tag SET backend_id = ?,tag_name = ? WHERE id = ?",
+				new Object[] { tag.getBackendId(), tag.getName(), id });
 	}
 
 	public int removeTag(Long id) {
 		return jdbcTemplate.update("DELETE FROM tag WHERE id = ?", new Object[] { id });
 	}
-	
-	//ItemTag
+
+	// ItemTag
 	public int addTagToItem(Long itemId, Long tagId) {
-		return jdbcTemplate.update("INSERT INTO item_tag(item_id, tag_id) VALUES (?,?)", new Object[] {
-				itemId, tagId
-		});
+		return jdbcTemplate.update("INSERT INTO item_tag(item_id, tag_id) VALUES (?,?)",
+				new Object[] { itemId, tagId });
 	}
-	
+
+	public int removeItemTagByItemIdAndTagId(Long itemId, Long tagId) {
+		return jdbcTemplate.update("DELETE FROM item_tag WHERE item_id = ? AND tag_id = ?",
+				new Object[] { itemId, tagId });
+	}
+
 	public int removeItemTag(Long id) {
-		return jdbcTemplate.update("DELETE FROM item_tag WHERE id = ?", new Object[] {
-				id
-		});
+		return jdbcTemplate.update("DELETE FROM item_tag WHERE id = ?", new Object[] { id });
 	}
-	
+
 }

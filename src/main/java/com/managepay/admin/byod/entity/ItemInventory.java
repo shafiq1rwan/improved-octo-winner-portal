@@ -1,15 +1,14 @@
-package managepay.com.admin.byod.entity;
+package com.managepay.admin.byod.entity;
 
-import java.math.BigDecimal;
-
-public class ItemPricing {
+public class ItemInventory {
 
 	private Long id;
 	private Long submenuId;
 	private Long itemId;
-	private BigDecimal price;
+	private int quantity;
 
-	public ItemPricing() {
+	public ItemInventory() {
+
 	}
 
 	public Long getId() {
@@ -36,12 +35,12 @@ public class ItemPricing {
 		this.itemId = itemId;
 	}
 
-	public BigDecimal getPrice() {
-		return price;
+	public int getQuantity() {
+		return quantity;
 	}
 
-	public void setPrice(BigDecimal price) {
-		this.price = price;
+	public void setQuantity(int quantity) {
+		this.quantity = quantity;
 	}
 
 }

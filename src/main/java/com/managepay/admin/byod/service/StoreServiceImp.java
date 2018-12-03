@@ -1,10 +1,10 @@
-package managepay.com.admin.byod.service;
+package com.managepay.admin.byod.service;
 
 import java.util.List;
 
-import managepay.com.admin.byod.entity.Store;
+import com.managepay.admin.byod.entity.Store;
 
-public interface IStoreService {
+public interface StoreServiceImp {
 
 	public Store findStoreById(Long id);
 

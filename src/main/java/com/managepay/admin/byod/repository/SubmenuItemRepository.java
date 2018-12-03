@@ -1,4 +1,4 @@
-package managepay.com.admin.byod.repository;
+package com.managepay.admin.byod.repository;
 
 import java.util.List;
 
@@ -7,7 +7,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
-import managepay.com.admin.byod.entity.ItemAvailability;
+import com.managepay.admin.byod.entity.ItemAvailability;
 
 @Repository
 public class SubmenuItemRepository {

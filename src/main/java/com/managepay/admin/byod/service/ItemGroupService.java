@@ -5,19 +5,24 @@ import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.managepay.admin.byod.entity.CategoryItemGroup;
 import com.managepay.admin.byod.entity.ItemGroup;
 import com.managepay.admin.byod.repository.ItemGroupRepository;
+import com.managepay.admin.byod.repository.ItemRepository;
 
 @Service
 public class ItemGroupService implements ItemGroupServiceImp {
 
 	private ItemGroupRepository itemGroupRepo;
+	private ItemRepository itemRepo;
 
-	public ItemGroupService(ItemGroupRepository itemGroupRepo) {
+	@Autowired
+	public ItemGroupService(ItemGroupRepository itemGroupRepo, ItemRepository itemRepo) {
 		this.itemGroupRepo = itemGroupRepo;
+		this.itemRepo = itemRepo;
 	}
 
 	@Override
@@ -74,6 +79,8 @@ public class ItemGroupService implements ItemGroupServiceImp {
 	public void removeItemGroup(Long id) {
 		try {
 			int affectedRow = itemGroupRepo.removeItemGroup(id);
+
+			// Remove Category ItemGroup
 			if (affectedRow != 0) {
 				List<CategoryItemGroup> categoryItemGroupList = findCategoryItemGroupByItemGroupId(id);
 				if (!categoryItemGroupList.isEmpty()) {
@@ -81,6 +88,8 @@ public class ItemGroupService implements ItemGroupServiceImp {
 						removeCategoryItemGroup(categoryItemGroup.getId());
 					}
 				}
+
+				itemRepo.removeItemGroupItemByItemGroupId(id);
 			}
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -93,7 +102,7 @@ public class ItemGroupService implements ItemGroupServiceImp {
 			JSONObject jsonData = new JSONObject(data);
 			Long categoryId = jsonData.getLong("categoryId");
 			Long itemGroupId = jsonData.getLong("itemGroupId");
-			
+
 			int sequenceNumber = checkSequenceNumber(categoryId);
 			return itemGroupRepo.addCategoryItemGroup(itemGroupId, categoryId, ++sequenceNumber);
 		} catch (Exception ex) {
@@ -105,18 +114,15 @@ public class ItemGroupService implements ItemGroupServiceImp {
 	@Override
 	public int editCategoryItemGroup(String data) {
 		try {
-			JSONObject jsonData = new JSONObject(data);
-			Long categoryId = jsonData.getLong("categoryId");
-			removeCategoryItemGroupInBatch(categoryId); //Perform Deletion(s) before Insertion
-			
-			JSONArray jsonArray = jsonData.getJSONArray("itemGroups");
-			int sequenceNumber = 1;
+
+			JSONArray jsonArray = new JSONArray(data);
 			int totalRowAffected = 0;
 
 			for (int i = 0; i < jsonArray.length(); i++) {
 				JSONObject jsonObj = jsonArray.getJSONObject(i);
-				Long itemGroupId = jsonObj.getLong("itemGroupId");
-				totalRowAffected += itemGroupRepo.addCategoryItemGroup(itemGroupId, categoryId, sequenceNumber++);
+				Long categoryItemGroupId = jsonObj.getLong("id");
+				int sequenceNumber = jsonObj.getInt("sequence");
+				totalRowAffected += itemGroupRepo.editCategoryItemGroup(categoryItemGroupId, sequenceNumber);
 			}
 			return totalRowAffected;
 		} catch (Exception ex) {

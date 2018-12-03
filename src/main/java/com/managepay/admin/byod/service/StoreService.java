@@ -1,4 +1,4 @@
-package managepay.com.admin.byod.service;
+package com.managepay.admin.byod.service;
 
 import java.util.Collections;
 import java.util.List;
@@ -6,11 +6,11 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import managepay.com.admin.byod.entity.Store;
-import managepay.com.admin.byod.repository.StoreRepository;
+import com.managepay.admin.byod.entity.Store;
+import com.managepay.admin.byod.repository.StoreRepository;
 
 @Service
-public class StoreService implements IStoreService {
+public class StoreService implements StoreServiceImp {
 
 	private StoreRepository storeRepo;
 	

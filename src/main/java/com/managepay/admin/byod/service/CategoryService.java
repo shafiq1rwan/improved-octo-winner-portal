@@ -3,18 +3,23 @@ package com.managepay.admin.byod.service;
 import java.util.Collections;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.managepay.admin.byod.entity.Category;
 import com.managepay.admin.byod.repository.CategoryRepository;
+import com.managepay.admin.byod.repository.ItemGroupRepository;
 
 @Service
 public class CategoryService implements CategoryServiceImp {
 
 	private CategoryRepository categoryRepo;
+	private ItemGroupRepository itemGroupRepo;
 
-	public CategoryService(CategoryRepository categoryRepo) {
+	@Autowired
+	public CategoryService(CategoryRepository categoryRepo, ItemGroupRepository itemGroupRepo) {
 		this.categoryRepo = categoryRepo;
+		this.itemGroupRepo = itemGroupRepo;
 	}
 
 	@Override
@@ -50,7 +55,9 @@ public class CategoryService implements CategoryServiceImp {
 	@Override
 	public int removeCategory(Long categoryId) {
 		try {
-			return categoryRepo.removeCategory(categoryId);
+			int affectedRow = categoryRepo.removeCategory(categoryId);
+			itemGroupRepo.removeCategoryItemGroupByCategoryId(categoryId);
+			return affectedRow;
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			return 0;

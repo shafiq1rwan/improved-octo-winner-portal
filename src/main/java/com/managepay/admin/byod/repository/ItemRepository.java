@@ -17,14 +17,14 @@ import com.managepay.admin.byod.entity.Tag;
 
 @Repository
 public class ItemRepository {
-	
+
 	private JdbcTemplate jdbcTemplate;
 
 	@Autowired
 	public ItemRepository(JdbcTemplate jdbcTemplate) {
 		this.jdbcTemplate = jdbcTemplate;
 	}
-	
+
 	private RowMapper<Item> rowMapper = (rs, rowNum) -> {
 		Item item = new Item();
 		item.setId(rs.getLong("id"));
@@ -40,24 +40,33 @@ public class ItemRepository {
 		item.setPublished(rs.getBoolean("published"));
 		return item;
 	};
-	
-	public List<Item> findItemByItemGroupId(Long itemGroupId){
-		return jdbcTemplate.query("SELECT i.* FROM item i INNER JOIN item_group_item igi ON i.id = igi.item_id WHERE igi.item_group_id = ? AND igi.item_group_id IS NOT NULL AND igi.item_id IS NOT NULL", new Object[] {itemGroupId},rowMapper);	
+
+	public List<Item> findItemByItemGroupId(Long itemGroupId) {
+		return jdbcTemplate.query(
+				"SELECT i.* FROM item i INNER JOIN item_group_item igi ON i.id = igi.item_id WHERE igi.item_group_id = ? AND igi.item_group_id IS NOT NULL AND igi.item_id IS NOT NULL",
+				new Object[] { itemGroupId }, rowMapper);
 	}
-	
-	public List<Item> findAllItem(){
+
+	public List<Item> findItemByModifierGroupId(Long modifierGroupId) {
+		return jdbcTemplate.query("SELECT * FROM item WHERE modifier_group_id = ?", rowMapper);
+	}
+
+	public List<Item> findAllItem() {
 		return jdbcTemplate.query("SELECT * FROM item", rowMapper);
 	}
-	
+
 	public Item findItemById(Long id) {
-		return jdbcTemplate.queryForObject("SELECT * FROM item WHERE id = ?", new Object[] {id}, rowMapper);
+		return jdbcTemplate.queryForObject("SELECT * FROM item WHERE id = ?", new Object[] { id }, rowMapper);
 	}
-	
+
 	public Long createItem(Item item) {
-		
+
 		KeyHolder keyHolder = new GeneratedKeyHolder();
 
-		jdbcTemplate.update(connection-> {PreparedStatement ps = connection.prepareStatement("INSERT INTO item(backend_id, modifier_group_id, item_name, item_description, item_image_path, item_base_price, taxable, modifiable,discountable, published) VALUES(?,?,?,?,?,?,?,?,?,?)", PreparedStatement.RETURN_GENERATED_KEYS);
+		jdbcTemplate.update(connection -> {
+			PreparedStatement ps = connection.prepareStatement(
+					"INSERT INTO item(backend_id, modifier_group_id, item_name, item_description, item_image_path, item_base_price, taxable, modifiable,discountable, published) VALUES(?,?,?,?,?,?,?,?,?,?)",
+					PreparedStatement.RETURN_GENERATED_KEYS);
 			ps.setString(1, item.getBackendId());
 			ps.setLong(2, item.getModifierGroupId());
 			ps.setString(3, item.getName());
@@ -69,87 +78,122 @@ public class ItemRepository {
 			ps.setBoolean(9, item.isDiscountable());
 			ps.setBoolean(10, item.isPublished());
 			return ps;
-		},keyHolder);
+		}, keyHolder);
 
-		return (Long)keyHolder.getKey();
+		return (Long) keyHolder.getKey();
 	}
-	
+
 	public int editItem(Long id, Item item) {
-		return jdbcTemplate.update("UPDATE item SET backend_id = ?, modifier_group_id = ?, item_name = ?, item_description = ?, item_image_path = ?, item_base_price = ?, taxable = ?, modifiable = ?,discountable = ?, published = ? WHERE id = ?", new Object[] {
-				item.getBackendId(), item.getModifierGroupId(), item.getName(), item.getDescription(), item.getImagePath(), item.getBasePrice(),item.isTaxable(), item.isModifiable(), item.isDiscountable(), item.isPublished(), id
-		});
+		return jdbcTemplate.update(
+				"UPDATE item SET backend_id = ?, modifier_group_id = ?, item_name = ?, item_description = ?, item_image_path = ?, item_base_price = ?, taxable = ?, modifiable = ?,discountable = ?, published = ? WHERE id = ?",
+				new Object[] { item.getBackendId(), item.getModifierGroupId(), item.getName(), item.getDescription(),
+						item.getImagePath(), item.getBasePrice(), item.isTaxable(), item.isModifiable(),
+						item.isDiscountable(), item.isPublished(), id });
 	}
-	
+
 	public int removeItem(Long id) {
-		return jdbcTemplate.update("DELETE FROM item WHERE id = ?", new Object[] {id});
+		return jdbcTemplate.update("DELETE FROM item WHERE id = ?", new Object[] { id });
 	}
-	
-	//ItemGroupItem
+
+	// ItemGroupItem
 	public int addItemIntoItemGroup(Long itemId, Long itemGroupId, int sequenceNumber) {
-		return jdbcTemplate.update("INSERT INTO item_group_item(item_id, item_group_id, item_group_item_sequence) VALUES(?,?,?)", new Object[] {
-				itemId, itemGroupId, sequenceNumber
-		});
+		return jdbcTemplate.update(
+				"INSERT INTO item_group_item(item_id, item_group_id, item_group_item_sequence) VALUES(?,?,?)",
+				new Object[] { itemId, itemGroupId, sequenceNumber });
 	}
-	
-	public int editItemIntoItemGroup(Long id, Long itemGroupId, int sequenceNumber) {
-		return jdbcTemplate.update("UPDATE item_group_item SET item_group_id = ?, item_group_item_sequence =? WHERE id = ?) VALUES(?,?,?)", new Object[] {
-				itemGroupId, sequenceNumber, id
-		});
+
+	// settle
+	public int editItemIntoItemGroup(Long id, int sequenceNumber) {
+		return jdbcTemplate.update("UPDATE item_group_item SET item_group_item_sequence =? WHERE id = ?",
+				new Object[] { sequenceNumber, id });
 	}
-	
+
+	// settle
 	public int removeItemGroupItem(Long id) {
-		return jdbcTemplate.update("DELETE FROM item_group_item WHERE id = ?", new Object[] {
-				id
-		});
+		return jdbcTemplate.update("DELETE FROM item_group_item WHERE id = ?", new Object[] { id });
 	}
-	
-	//ItemModifierGroup (Not yet handle)
+
+	// settle
+	public int removeItemGroupItemByItemGroupId(Long itemGroupId) {
+		return jdbcTemplate.update("DELETE FROM item_group_item WHERE item_group_id = ?", new Object[] { itemGroupId });
+	}
+
+	// settle
+	public int removeItemGroupItemByItemId(Long itemId) {
+		return jdbcTemplate.update("DELETE FROM item_group_item WHERE item_id = ?", new Object[] { itemId });
+	}
+
+	// settle (not yet test)
+	public int getItemGroupItemSequence(Long itemGroupId) {
+		return jdbcTemplate.queryForObject(
+				"SELECT item_group_item_sequence FROM item_group_item WHERE item_group_id = ? ORDER BY item_group_item_sequence DESC LIMIT 1",
+				Integer.class);
+	}
+
+	// ItemModifierGroup (Not yet handle)
 	public int addModifierItemIntoModifierGroup(Long itemId, Long modifierGroupId) {
-		return jdbcTemplate.update("INSERT INTO item_modifier_group (item_id, modifier_group_id) VALUES (?,?)", new Object[] {
-			itemId, modifierGroupId
-		});
+		return jdbcTemplate.update("INSERT INTO item_modifier_group (item_id, modifier_group_id) VALUES (?,?)",
+				new Object[] { itemId, modifierGroupId });
 	}
-	
+
 	public int editItemModifierGroup(Long id, Long modifierGroupId) {
-		return jdbcTemplate.update("UPDATE item_modifier_group SET modifier_group_id = ? WHERE id = ?", new Object[] {
-				modifierGroupId, id
-			});
+		return jdbcTemplate.update("UPDATE item_modifier_group SET modifier_group_id = ? WHERE id = ?",
+				new Object[] { modifierGroupId, id });
 	}
-	
+
 	public int removeItemModifierGroup(Long id) {
-		return jdbcTemplate.update("DELETE FROM item_modifier_group WHERE id = ?", new Object[] {
-				id
-		});
+		return jdbcTemplate.update("DELETE FROM item_modifier_group WHERE id = ?", new Object[] { id });
 	}
-	
-	//Item Set
+
+	public int removeItemModifierGroupByItemId(Long itemId) {
+		return jdbcTemplate.update("DELETE FROM item_modifier_group WHERE item_id = ?", new Object[] { itemId });
+	}
+
+	public int removeItemModifierGroupByModifierGroupId(Long modifierGroupId) {
+		return jdbcTemplate.update("DELETE FROM item_modifier_group WHERE modifier_group_id = ?",
+				new Object[] { modifierGroupId });
+	}
+
+	// Item Set
 	public List<ItemGroup> findItemGroupFromItemSet(Long id) {
-		return jdbcTemplate.query("SELECT * FROM item_group WHERE id IN (SELECT item_group_id FROM item_set WHERE item_id = ?)", new Object[] {id},	
-			(rs, rowNum) -> {
-				ItemGroup itemGroup = new ItemGroup();
-				itemGroup.setId(rs.getLong("id"));
-				itemGroup.setBackendId(rs.getString("backend_id"));
-				itemGroup.setName(rs.getString("item_group_name"));
-				return itemGroup;
-			});
+		return jdbcTemplate.query(
+				"SELECT * FROM item_group WHERE id IN (SELECT item_group_id FROM item_set WHERE item_id = ?)",
+				new Object[] { id }, (rs, rowNum) -> {
+					ItemGroup itemGroup = new ItemGroup();
+					itemGroup.setId(rs.getLong("id"));
+					itemGroup.setBackendId(rs.getString("backend_id"));
+					itemGroup.setName(rs.getString("item_group_name"));
+					return itemGroup;
+				});
+	}
+
+	public int findItemSetSequence(Long itemId) {
+		return jdbcTemplate.queryForObject(
+				"SELECT item_set_sequence WHERE item_id = ? ORDER BY item_set_sequence DESC LIMIT 1",
+				new Object[] { itemId }, Integer.class);
+
 	}
 
 	public int addItemSet(Long itemId, Long itemGroupId, int sequenceNumber) {
-		return jdbcTemplate.update("INSERT INTO item_set(item_id, item_group_id, item_set_sequence) VALUES (?,?,?)", new Object[] {
-				itemId, itemGroupId, sequenceNumber
-		});
+		return jdbcTemplate.update("INSERT INTO item_set(item_id, item_group_id, item_set_sequence) VALUES (?,?,?)",
+				new Object[] { itemId, itemGroupId, sequenceNumber });
 	}
-	
+
 	public int editItemSet(Long id, int sequenceNumber) {
-		return jdbcTemplate.update("UPDATE item_set SET item_group_id = ? , item_set_sequence = ? WHERE id = ?", new Object[] {
-				sequenceNumber,id
-			});
+		return jdbcTemplate.update("UPDATE item_set SET item_group_id = ? , item_set_sequence = ? WHERE id = ?",
+				new Object[] { sequenceNumber, id });
 	}
-	
+
 	public int removeItemSet(Long id) {
-		return jdbcTemplate.update("DELETE FROM item_set WHERE id = ?", new Object[] {
-				id
-		});
+		return jdbcTemplate.update("DELETE FROM item_set WHERE id = ?", new Object[] { id });
+	}
+
+	public int removeItemSetByItemId(Long itemId) {
+		return jdbcTemplate.update("DELETE FROM item_set WHERE item_id = ?", new Object[] { itemId });
+	}
+
+	public int removeItemSetByItemGroupId(Long itemGroupId) {
+		return jdbcTemplate.update("DELETE FROM item_set WHERE item_group_id = ?", new Object[] { itemGroupId });
 	}
 
 }

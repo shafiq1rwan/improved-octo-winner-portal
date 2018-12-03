@@ -1,13 +1,12 @@
-package managepay.com.admin.byod.entity;
+package com.managepay.admin.byod.entity;
 
-public class ItemInventory {
-
+public class ItemAvailability {
 	private Long id;
 	private Long submenuId;
 	private Long itemId;
-	private int quantity;
+	private String status;
 
-	public ItemInventory() {
+	public ItemAvailability() {
 
 	}
 
@@ -35,12 +34,12 @@ public class ItemInventory {
 		this.itemId = itemId;
 	}
 
-	public int getQuantity() {
-		return quantity;
+	public String getStatus() {
+		return status;
 	}
 
-	public void setQuantity(int quantity) {
-		this.quantity = quantity;
+	public void setStatus(String status) {
+		this.status = status;
 	}
 
 }

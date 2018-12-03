@@ -10,8 +10,10 @@ import com.managepay.admin.byod.entity.Tag;
 public interface ItemServiceImp {
 
 	public List<Item> findAllItem();
-	
+
 	public Item findItemById(Long id);
+
+	public List<Item> findItemByItemGroupId(Long itemGroupId);
 
 	public int createItem(Item item);
 
@@ -20,7 +22,7 @@ public interface ItemServiceImp {
 	public int removeItem(Long id);
 
 	public List<Tag> findAllTag();
-	
+
 	public Tag findTagById(Long id);
 
 	public int createTag(Tag tag);
@@ -28,15 +30,21 @@ public interface ItemServiceImp {
 	public int editTag(Long id, Tag tag);
 
 	public int removeTag(Long id);
-	
+
 	public int addTagToItem();
 
-	public int addItemSet(Long itemId, Long itemGroupId);
+	public int addItemSet(String data);
 
-	public int editItemSet(Long id, Long itemGroupId);
+	public int editItemSet(String data);
 
 	public int removeItemSet(Long id);
-	
+
 	public List<Category> findMasterMenu();
+
+	public int addItemIntoItemGroup(String data);
+
+	public int editItemGroupItem(String data);
+
+	public int removeItemGroupItem(Long id);
 
 }

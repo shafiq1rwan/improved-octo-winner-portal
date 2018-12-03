@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -54,15 +56,24 @@ public class ItemService implements ItemServiceImp {
 	}
 
 	@Override
+	public List<Item> findItemByItemGroupId(Long itemGroupId) {
+		try {
+			return itemRepo.findItemByItemGroupId(itemGroupId);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return Collections.emptyList();
+		}
+	}
+
+	@Override
 	public int createItem(Item item) {
 		try {
 			Long generatedItemId = itemRepo.createItem(item);
 			// add Tags if available
-			if (!item.getTags().isEmpty()) {
-				for (Tag tag : item.getTags()) {
-					tagRepo.addTagToItem(generatedItemId, tag.getId());
-				}
-			}
+			/*
+			 * if (!item.getTags().isEmpty()) { for (Tag tag : item.getTags()) {
+			 * tagRepo.addTagToItem(generatedItemId, tag.getId()); } }
+			 */
 			return 1;
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -73,15 +84,7 @@ public class ItemService implements ItemServiceImp {
 	@Override
 	public int editItem(Long id, Item item, Item existingItem) {
 		try {
-			// Make comparsion between old and new
-			if (!item.getTags().isEmpty()) {
-
-				if (!existingItem.getTags().isEmpty()) {
-
-				}
-			}
-
-			return itemRepo.editItem(id, item);
+			return itemRepo.editItem(id, existingItem);
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			return 0;
@@ -91,13 +94,20 @@ public class ItemService implements ItemServiceImp {
 	@Override
 	public int removeItem(Long id) {
 		try {
-			return itemRepo.removeItem(id);
+			int affectedRow = itemRepo.removeItem(id);
+			if (affectedRow != 0) {
+				itemRepo.removeItemSetByItemId(id);
+				itemRepo.removeItemGroupItemByItemId(id);
+				itemRepo.removeItemModifierGroupByItemId(id);
+			}
+			return affectedRow;
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			return 0;
 		}
 	}
 
+	// Tag
 	@Override
 	public List<Tag> findAllTag() {
 		try {
@@ -148,12 +158,16 @@ public class ItemService implements ItemServiceImp {
 		}
 	}
 
+	// ItemSet
 	@Override
-	public int addItemSet(Long itemId, Long itemGroupId) {
+	public int addItemSet(String data) {
 		try {
+			JSONObject jsonObj = new JSONObject(data);
+			Long itemId = jsonObj.getLong("itemId");
+			Long itemGroupId = jsonObj.getLong("itemGroupId");
 
-			// return itemRepo.addItemSet(itemId, itemGroupId, sequenceNumber);
-			return 1;
+			int sequenceNumber = findItemSetSequence(itemId);
+			return itemRepo.addItemSet(itemId, itemGroupId, ++sequenceNumber);
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			return 0;
@@ -161,11 +175,19 @@ public class ItemService implements ItemServiceImp {
 	}
 
 	@Override
-	public int editItemSet(Long id, Long itemGroupId) {
+	public int editItemSet(String data) {
 		try {
 
-			// return itemRepo.editItemSet(id, itemGroupId, sequenceNumber);
-			return 1;
+			JSONArray jsonArray = new JSONArray(data);
+			int totalRowAffected = 0;
+
+			for (int i = 0; i < jsonArray.length(); i++) {
+				JSONObject jsonObj = jsonArray.getJSONObject(i);
+				Long itemSetId = jsonObj.getLong("id");
+				int sequenceNumber = jsonObj.getInt("sequence");
+				totalRowAffected += itemRepo.editItemSet(itemSetId, sequenceNumber);
+			}
+			return totalRowAffected;
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			return 0;
@@ -210,6 +232,76 @@ public class ItemService implements ItemServiceImp {
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			return Collections.emptyList();
+		}
+	}
+
+	// ItemGroupItem
+	@Override
+	public int addItemIntoItemGroup(String data) {
+		try {
+			JSONObject jsonData = new JSONObject(data);
+			Long itemId = jsonData.getLong("itemId");
+			Long itemGroupId = jsonData.getLong("itemGroupId");
+			int sequenceNumber = findItemGroupItemSequence(itemGroupId);
+			return itemRepo.addItemIntoItemGroup(itemId, itemGroupId, ++sequenceNumber);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return 0;
+		}
+	}
+
+	@Override
+	public int editItemGroupItem(String data) {
+		try {
+			JSONArray jsonArray = new JSONArray(data);
+			int totalRowAffected = 0;
+
+			for (int i = 0; i < jsonArray.length(); i++) {
+				JSONObject jsonObj = jsonArray.getJSONObject(i);
+				Long itemGroupItemId = jsonObj.getLong("id");
+				int sequenceNumber = jsonObj.getInt("sequence");
+				totalRowAffected += itemRepo.editItemIntoItemGroup(itemGroupItemId, sequenceNumber);
+			}
+			return totalRowAffected;
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return 0;
+		}
+	}
+
+	@Override
+	public int removeItemGroupItem(Long id) {
+		try {
+			return itemRepo.removeItemGroupItem(id);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return 0;
+		}
+	}
+
+	private int findItemGroupItemSequence(Long itemGroupId) {
+		try {
+			return itemRepo.getItemGroupItemSequence(itemGroupId);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return 0;
+		}
+	}
+
+	private int findItemSetSequence(Long itemId) {
+		try {
+			return itemRepo.findItemSetSequence(itemId);
+		} catch (Exception ex) {
+			return 0;
+		}
+	}
+
+	private int removeItemGroupItemInBatch(Long itemGroupId) {
+		try {
+			return itemRepo.removeItemGroupItemByItemGroupId(itemGroupId);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return 0;
 		}
 	}
 

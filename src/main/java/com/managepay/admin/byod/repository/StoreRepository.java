@@ -1,4 +1,4 @@
-package managepay.com.admin.byod.repository;
+package com.managepay.admin.byod.repository;
 
 import java.util.List;
 
@@ -7,8 +7,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
-import managepay.com.admin.byod.entity.Location;
-import managepay.com.admin.byod.entity.Store;
+import com.managepay.admin.byod.entity.Location;
+import com.managepay.admin.byod.entity.Store;
 
 @Repository
 public class StoreRepository {

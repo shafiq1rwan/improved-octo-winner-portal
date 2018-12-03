@@ -1,4 +1,4 @@
-package managepay.com.admin.byod.entity;
+package com.managepay.admin.byod.entity;
 
 import java.util.Date;
 

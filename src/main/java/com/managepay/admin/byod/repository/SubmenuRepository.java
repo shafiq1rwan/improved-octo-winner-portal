@@ -1,11 +1,11 @@
-package managepay.com.admin.byod.repository;
+package com.managepay.admin.byod.repository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import managepay.com.admin.byod.entity.Submenu;
-import managepay.com.admin.byod.entity.SubmenuCreator;
+import com.managepay.admin.byod.entity.Submenu;
+import com.managepay.admin.byod.entity.SubmenuCreator;
 
 @Repository
 public class SubmenuRepository {
