@@ -1,0 +1,119 @@
+package com.managepay.admin.byod.rest;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
+
+
+@RestController
+@RequestMapping("/user")
+public class UserLoginRestController {
+	
+	/*@Autowired
+	UserService adminService;*/
+	
+	// SIGNIN
+	@RequestMapping(value = { "/signin" }, method = RequestMethod.GET)
+	public ModelAndView signIn() {
+		ModelAndView model = new ModelAndView();
+		model.setViewName("/login");
+		return model;
+	}
+	
+	// SEND HOME
+	@RequestMapping(value = {""}, method = RequestMethod.GET)
+	public ModelAndView home(/*Authentication authentication*/) {		
+		/*User user = (User) authentication.getPrincipal();
+		com.managepay.byod.model.User dbUser = adminService.getAdminDetail(user.getUsername());*/
+		
+		ModelAndView model = new ModelAndView();
+		/*model.addObject("role", dbUser.getRoles());*/
+		model.setViewName("/user/home");
+		return model;
+	}
+	
+	// USER - 403 UN-Authorize Access
+	@RequestMapping(value = { "/403" }, method = { RequestMethod.GET, RequestMethod.POST })
+	public ModelAndView user_403Page() {
+		ModelAndView model = new ModelAndView();
+		model.setViewName("/user/403");
+		return model;
+	}
+	
+	// USER - CHECK SESSION
+	@RequestMapping(value = { "/checksession" }, method = RequestMethod.GET)
+	public ResponseEntity<String> check_session(HttpServletRequest request) {
+		HttpSession session = request.getSession(false);
+		String status = null;
+		
+		if (session != null) {
+			status = "exist";
+		}
+		return ResponseEntity.status(HttpStatus.OK).body(status);
+	}
+	
+	@RequestMapping(value = "/signin/error/{condition}", method = RequestMethod.GET)
+	public ModelAndView user_signin_fail(@PathVariable String condition) {
+		ModelAndView model = new ModelAndView();
+		if (condition.equals("lock")) {
+			model.addObject("exceptionMsg", "Hit attempt limit. Please proceed with \"Forgot Password\"");
+		} 
+		else if (condition.equals("timeout")) {
+			model.addObject("exceptionMsg", "Session timeout");
+		}
+		else {
+			model.addObject("exceptionMsg", "Invalid access");
+		}
+		
+		model.setViewName("/login");
+
+		return model;
+	}
+	
+	// Brand
+	@RequestMapping(value = { "/views/store" }, method = RequestMethod.GET)
+	public ModelAndView viewBrand() {
+		ModelAndView model = new ModelAndView();
+		model.setViewName("/user/views/store");
+		return model;
+	}
+	
+	// Profile
+	@RequestMapping(value = { "/views/profile" }, method = RequestMethod.GET)
+	public ModelAndView viewProfile() {
+		ModelAndView model = new ModelAndView();
+		model.setViewName("/user/views/profile");
+		return model;
+	}
+	
+	// Master Menu
+	@RequestMapping(value = { "/views/menu" }, method = RequestMethod.GET)
+	public ModelAndView viewMenu() {
+		ModelAndView model = new ModelAndView();
+		model.setViewName("/user/views/menu");
+		return model;
+	}
+	
+	// Add Menu
+	@RequestMapping(value = { "/views/addMenu" }, method = RequestMethod.GET)
+	public ModelAndView addMenu() {
+		ModelAndView model = new ModelAndView();
+		model.setViewName("/user/views/add_menu");
+		return model;
+	}
+	
+	// Menu Dashboard
+	@RequestMapping(value = { "/views/menuDashboard" }, method = RequestMethod.GET)
+	public ModelAndView viewMenuDashboard() {
+		ModelAndView model = new ModelAndView();
+		model.setViewName("/user/views/menu_dashboard");
+		return model;
+	}
+}
