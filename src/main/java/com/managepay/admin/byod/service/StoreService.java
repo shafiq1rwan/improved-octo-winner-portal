@@ -1,72 +1,19 @@
 package com.managepay.admin.byod.service;
 
-import java.util.Collections;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.managepay.admin.byod.entity.Store;
-import com.managepay.admin.byod.repository.StoreRepository;
 
-@Service
-public class StoreService implements StoreServiceImp {
+public interface StoreService {
 
-	private StoreRepository storeRepo;
-	
-	@Autowired
-	public StoreService(StoreRepository storeRepo) {
-		this.storeRepo = storeRepo;
-	}
+	public Store findStoreById(Long id);
 
-	@Override
-	public Store findStoreById(Long id) {
-		try {
-			return storeRepo.findStoreById(id);	
-		} catch(Exception ex) {
-			ex.printStackTrace();
-			return new Store();
-		}
-	}
+	public List<Store> findAllStore();
 
-	@Override
-	public List<Store> findAllStore() {
-		try {
-			return storeRepo.findAllStore();
-		} catch(Exception ex) {
-			ex.printStackTrace();
-			return Collections.emptyList();
-		}
-	}
+	public int createStore(Store store);
 
-	@Override
-	public int createStore(Store store) {
-		try {
-			return storeRepo.createStore(store);
-		} catch(Exception ex) {
-			ex.printStackTrace();
-			return 0;
-		}
-	}
+	public int editStore(Long id, Store store);
 
-	@Override
-	public int editStore(Long id, Store store) {
-		try {
-			return storeRepo.editStore(id, store);
-		} catch(Exception ex) {
-			ex.printStackTrace();
-			return 0;
-		}
-	}
-
-	@Override
-	public int removeStore(Long id) {
-		try {
-			return storeRepo.removeStore(id);
-		} catch(Exception ex) {
-			ex.printStackTrace();
-			return 0;
-		}
-	}
+	public int removeStore(Long id);
 
 }

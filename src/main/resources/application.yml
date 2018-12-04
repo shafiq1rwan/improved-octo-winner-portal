@@ -5,7 +5,7 @@ spring:
       suffix: .jsp
   datasource:
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
-    url: jdbc:sqlserver://localhost:1433;databaseName=byod
+    url: jdbc:sqlserver://localhost:49605;databaseName=byod
     username: sa
     password: MPay@1234
   jpa:

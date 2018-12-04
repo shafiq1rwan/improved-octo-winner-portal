@@ -1,20 +1,78 @@
 package com.managepay.admin.byod.service;
 
+import java.util.Collections;
 import java.util.List;
 
-import com.managepay.admin.byod.entity.ItemGroup;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.managepay.admin.byod.entity.ModifierGroup;
+import com.managepay.admin.byod.repository.ItemRepository;
+import com.managepay.admin.byod.repository.ModifierGroupRepository;
 
-public interface ModifierGroupServiceImp {
+@Service
+public class ModifierGroupServiceImp implements ModifierGroupService {
+
+	private ModifierGroupRepository modifierGroupRepo;
+	private ItemRepository itemRepo;
 	
-	public List<ModifierGroup> findModifierGroups();
+	@Autowired
+	public ModifierGroupServiceImp(ModifierGroupRepository modifierGroupRepo,ItemRepository itemRepo) {
+		this.modifierGroupRepo = modifierGroupRepo;
+		this.itemRepo = itemRepo;
+	}
 
-	public ModifierGroup findModifierGroupById(Long id);
+	@Override
+	public List<ModifierGroup> findModifierGroups() {
+		try {
+			return modifierGroupRepo.findModifierGroups();
+		} catch(Exception ex) {
+			ex.printStackTrace();
+			return Collections.emptyList();
+		}
+	}
 
-	public int createModifierGroup(ModifierGroup modifierGroup);
+	@Override
+	public ModifierGroup findModifierGroupById(Long id) {
+		try {
+			return modifierGroupRepo.findModifierGroupById(id);
+		} catch(Exception ex) {
+			ex.printStackTrace();
+			return new ModifierGroup();
+		}
+	}
 
-	public int editModifierGroup(Long id, ModifierGroup modifierGroup);
+	@Override
+	public int createModifierGroup(ModifierGroup modifierGroup) {
+		try {
+			return modifierGroupRepo.createModifierGroup(modifierGroup);			
+		} catch(Exception ex) {
+			ex.printStackTrace();
+			return 0;
+		}
+		
+	}
 
-	public int removeModifierGroup(Long id);
+	@Override
+	public int editModifierGroup(Long id, ModifierGroup modifierGroup) {
+		try {
+			return modifierGroupRepo.editModifierGroup(id, modifierGroup);			
+		} catch(Exception ex) {
+			ex.printStackTrace();
+			return 0;
+		}
+	}
+
+	@Override
+	public int removeModifierGroup(Long id) {
+		try {
+			int affectedRow = modifierGroupRepo.removeModifierGroup(id);
+			itemRepo.removeItemModifierGroupId(id);
+			return affectedRow;
+		} catch(Exception ex) {
+			ex.printStackTrace();
+			return 0;
+		}
+	}
 
 }

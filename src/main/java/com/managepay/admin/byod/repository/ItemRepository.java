@@ -155,7 +155,7 @@ public class ItemRepository {
 	}
 
 	// Item Set
-	public List<ItemGroup> findItemGroupFromItemSet(Long id) {
+	public List<ItemGroup> findItemGroupByItemSetItemId(Long id) {
 		return jdbcTemplate.query(
 				"SELECT * FROM item_group WHERE id IN (SELECT item_group_id FROM item_set WHERE item_id = ?)",
 				new Object[] { id }, (rs, rowNum) -> {
@@ -194,6 +194,10 @@ public class ItemRepository {
 
 	public int removeItemSetByItemGroupId(Long itemGroupId) {
 		return jdbcTemplate.update("DELETE FROM item_set WHERE item_group_id = ?", new Object[] { itemGroupId });
+	}
+	
+	public void removeItemModifierGroupId(Long modifierGroupId) {
+		jdbcTemplate.update("UPDATE item SET modifier_group_id = NULL WHERE modifier_group_id = ?", new Object[] {modifierGroupId});
 	}
 
 }
