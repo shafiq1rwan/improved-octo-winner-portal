@@ -201,7 +201,7 @@ public class MenuRestController {
 		return new ResponseEntity<List<Item>>(itemList, HttpStatus.OK);
 	}
 
-	@GetMapping("/item")
+	@GetMapping("/item2")
 	public ResponseEntity<Item> findItemById(@RequestParam("itemId") Long id) {
 		Item existingItem = itemService.findItemById(id);
 		if (existingItem.getName() == null)
@@ -318,7 +318,7 @@ public class MenuRestController {
 		return new ResponseEntity<ModifierGroup>(existingModifierGroup, HttpStatus.OK);
 	}
 
-	@GetMapping("/modifiergroup/")
+	/*@GetMapping("/modifiergroup/")
 	public ResponseEntity<List<ModifierGroup>> findAllModifierGroup() {
 		List<ModifierGroup> modifierGroupList = modifierGroupService.findModifierGroups();
 		if (modifierGroupList.isEmpty())
@@ -331,7 +331,7 @@ public class MenuRestController {
 		}
 
 		return new ResponseEntity<List<ModifierGroup>>(modifierGroupList, HttpStatus.OK);
-	}
+	}*/
 
 	@PostMapping("/modifiergroup/create")
 	public ResponseEntity<Void> createModifierGroup(@RequestBody ModifierGroup modifierGroup) {

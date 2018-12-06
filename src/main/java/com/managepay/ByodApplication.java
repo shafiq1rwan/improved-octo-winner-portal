@@ -1,4 +1,4 @@
-package com.managepay.admin.byod;
+package com.managepay;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
