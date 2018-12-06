@@ -1,77 +1,19 @@
 package com.managepay.admin.byod.service;
 
-import java.util.Collections;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.managepay.admin.byod.entity.Category;
-import com.managepay.admin.byod.repository.CategoryRepository;
-import com.managepay.admin.byod.repository.ItemGroupRepository;
 
-@Service
-public class CategoryService implements CategoryServiceImp {
+public interface CategoryService {
 
-	private CategoryRepository categoryRepo;
-	private ItemGroupRepository itemGroupRepo;
+	public List<Category> findAllCategory();
 
-	@Autowired
-	public CategoryService(CategoryRepository categoryRepo, ItemGroupRepository itemGroupRepo) {
-		this.categoryRepo = categoryRepo;
-		this.itemGroupRepo = itemGroupRepo;
-	}
+	public Category findCategoryById(Long id);
 
-	@Override
-	public List<Category> findAllCategory() {
-		try {
-			return categoryRepo.findAllCategory();
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			return Collections.emptyList();
-		}
-	}
+	public int addCategory(Category category);
 
-	@Override
-	public Category findCategoryById(Long id) {
-		try {
-			return categoryRepo.findCategoryById(id);
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			return new Category();
-		}
-	}
+	public int editCategory(Long id, Category category);
 
-	@Override
-	public int addCategory(Category category) {
-		try {
-			return categoryRepo.createCategory(category);
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			return 0;
-		}
-	}
-
-	@Override
-	public int removeCategory(Long categoryId) {
-		try {
-			int affectedRow = categoryRepo.removeCategory(categoryId);
-			itemGroupRepo.removeCategoryItemGroupByCategoryId(categoryId);
-			return affectedRow;
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			return 0;
-		}
-	}
-
-	@Override
-	public int editCategory(Long id, Category category) {
-		try {
-			return categoryRepo.editCategory(id, category);
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			return 0;
-		}
-	}
+	public int removeCategory(Long id);
 
 }

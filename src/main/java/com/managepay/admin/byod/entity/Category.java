@@ -9,6 +9,7 @@ public class Category {
 	public String name;
 	public String description;
 	public String imagePath;
+	public int itemCount;
 	public boolean isPublished;
 
 	public List<ItemGroup> itemGroups;
@@ -54,6 +55,14 @@ public class Category {
 
 	public void setImagePath(String imagePath) {
 		this.imagePath = imagePath;
+	}
+
+	public int getItemCount() {
+		return itemCount;
+	}
+
+	public void setItemCount(int itemCount) {
+		this.itemCount = itemCount;
 	}
 
 	public boolean isPublished() {

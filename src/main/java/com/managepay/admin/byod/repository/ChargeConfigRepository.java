@@ -1,11 +1,15 @@
 package com.managepay.admin.byod.repository;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Repository;
 
 import com.managepay.admin.byod.entity.ChargeConfig;
 
+@Repository
 public class ChargeConfigRepository {
 
 	private JdbcTemplate jdbcTemplate;
@@ -20,12 +24,16 @@ public class ChargeConfigRepository {
 		chargeConfig.setId(rs.getLong("id"));
 		chargeConfig.setName(rs.getString("charge_config_name"));
 		chargeConfig.setTaxRate(rs.getInt("tax_rate"));
-		chargeConfig.setServiceChargeRate(rs.getInt("servive_charge_rate"));
+		chargeConfig.setServiceChargeRate(rs.getInt("service_charge_rate"));
 		return chargeConfig;
 	};
-
-	public ChargeConfig findChargeConfig() {
-		return jdbcTemplate.queryForObject("SELECT * FROM charge_config", rowMapper);
+	
+	public List<ChargeConfig> findAllChargeConfig(){
+		return jdbcTemplate.query("SELECT * FROM charge_config", rowMapper);
+	}
+	
+	public ChargeConfig findChargeConfigById(Long id) {
+		return jdbcTemplate.queryForObject("SELECT * FROM charge_config WHERE id = ?", new Object[] {id}, rowMapper);
 	}
 
 	public int createChargeConfig(ChargeConfig chargeConfig) {

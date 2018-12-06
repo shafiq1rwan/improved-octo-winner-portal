@@ -38,7 +38,7 @@ public class ItemGroupRepository {
 
 	public List<ItemGroup> findItemGroupByCategoryId(Long categoryId) {
 		return jdbcTemplate.query(
-				"SELECT * FROM item_group ig INNER JOIN category_item_group cig ON cig.item_group_id = ig.id WHERE cig.category_id = ? ORDER_BY cig.category_item_group_sequence",
+				"SELECT * FROM item_group ig INNER JOIN category_item_group cig ON cig.item_group_id = ig.id WHERE cig.category_id = ? ORDER BY cig.category_item_group_sequence",
 				new Object[] { categoryId },rowMapper);
 	}
 	

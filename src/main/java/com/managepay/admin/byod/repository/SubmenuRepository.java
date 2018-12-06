@@ -46,5 +46,13 @@ public class SubmenuRepository {
 	public int removeSubmenu(Long id) {
 		return jdbcTemplate.update("DELETE FROM submenu WHERE id = ?", new Object[] { id });
 	}
+	
+	public int removeSubmenuBySubmenuCreatorId(Long submenuCreatorId) {
+		return jdbcTemplate.update("DELETE FROM submenu WHERE submenu_creator_id = ?", new Object[] { submenuCreatorId });
+	}
+	
+	public int removeSubmenuByStoreId(Long storeId) {
+		return jdbcTemplate.update("DELETE FROM submenu WHERE store_id = ?", new Object[] { storeId });
+	}
 
 }
