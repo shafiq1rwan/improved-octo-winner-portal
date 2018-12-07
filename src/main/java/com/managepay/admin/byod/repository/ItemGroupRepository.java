@@ -13,8 +13,8 @@ import org.springframework.stereotype.Repository;
 
 import com.managepay.admin.byod.entity.Category;
 import com.managepay.admin.byod.entity.CategoryItemGroup;
-import com.managepay.admin.byod.entity.ChargeConfig;
-import com.managepay.admin.byod.entity.Item;
+import com.managepay.admin.byod.entity.TaxCharge;
+import com.managepay.admin.byod.entity.MenuItem;
 import com.managepay.admin.byod.entity.ItemGroup;
 import com.managepay.admin.byod.entity.ModifierGroup;
 

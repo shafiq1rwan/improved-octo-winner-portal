@@ -4,21 +4,23 @@ import java.util.List;
 import java.util.Set;
 
 import com.managepay.admin.byod.entity.Category;
-import com.managepay.admin.byod.entity.Item;
+import com.managepay.admin.byod.entity.MenuItem;
 import com.managepay.admin.byod.entity.ItemGroup;
 import com.managepay.admin.byod.entity.Tag;
 
-public interface ItemService {
+public interface MenuItemService {
 
-	public List<Item> findAllItem();
+/*	public List<MenuItem> findAllMeItem();
 
-	public Item findItemById(Long id);
+	public MenuItem findItemById(Long id);
+	
+	public List<MenuItem> findItemByModifierGroupId(Long modifiergroupId);
 
-	public List<Item> findItemByItemGroupId(Long itemGroupId);
+	public List<MenuItem> findItemByItemGroupId(Long itemGroupId);
 
-	public int createItem(Item item);
+	public int createItem(MenuItem item);
 
-	public int editItem(Long id, Item item, Item existingItem);
+	public int editItem(Long id, MenuItem item, MenuItem existingItem);
 
 	public int removeItem(Long id);
 
@@ -49,5 +51,10 @@ public interface ItemService {
 	public int editItemGroupItem(String data);
 
 	public int removeItemGroupItem(Long id);
+	
+	//Add ModifierGroup(s) to item
+	public int addModifierGroupIntoItem();
+	
+	public int removeModifierGroupFromItem();*/
 
 }

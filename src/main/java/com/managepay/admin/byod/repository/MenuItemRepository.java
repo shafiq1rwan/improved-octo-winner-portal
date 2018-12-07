@@ -10,80 +10,82 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
-import com.managepay.admin.byod.entity.Item;
+import com.managepay.admin.byod.entity.MenuItem;
 import com.managepay.admin.byod.entity.ItemGroup;
-import com.managepay.admin.byod.entity.ItemSet;
 import com.managepay.admin.byod.entity.Tag;
 
 @Repository
-public class ItemRepository {
+public class MenuItemRepository {
 
 	private JdbcTemplate jdbcTemplate;
 
 	@Autowired
-	public ItemRepository(JdbcTemplate jdbcTemplate) {
+	public MenuItemRepository(JdbcTemplate jdbcTemplate) {
 		this.jdbcTemplate = jdbcTemplate;
 	}
 
-	private RowMapper<Item> rowMapper = (rs, rowNum) -> {
-		Item item = new Item();
-		item.setId(rs.getLong("id"));
-		item.setBackendId(rs.getString("backend_id"));
-		item.setModifierGroupId(rs.getLong("modifier_group_id"));
-		item.setName(rs.getString("item_name"));
-		item.setDescription(rs.getString("item_description"));
-		item.setImagePath(rs.getString("item_image_path"));
-		item.setBasePrice(rs.getBigDecimal("item_base_price"));
-		item.setTaxable(rs.getBoolean("taxable"));
-		item.setModifiable(rs.getBoolean("modifiable"));
-		item.setDiscountable(rs.getBoolean("discountable"));
-		item.setPublished(rs.getBoolean("published"));
-		return item;
+	private RowMapper<MenuItem> menuItemRowMapper = (rs, rowNum) -> {
+		MenuItem menuItem = new MenuItem();
+		menuItem.setId(rs.getLong("id"));
+		menuItem.setBackendId(rs.getString("backend_id"));
+		menuItem.setModifierGroupId(rs.getLong("modifier_group_id"));
+		menuItem.setName(rs.getString("menu_item_name"));
+		menuItem.setDescription(rs.getString("menu_item_description"));
+		menuItem.setImagePath(rs.getString("menu_item_image_path"));
+		menuItem.setBasePrice(rs.getBigDecimal("menu_item_base_price"));
+		menuItem.setType(rs.getInt("menu_item_type"));
+		menuItem.setTaxable(rs.getBoolean("is_taxable"));
+		menuItem.setDiscountable(rs.getBoolean("is_discountable"));
+		return menuItem;
 	};
 
-	public List<Item> findItemByItemGroupId(Long itemGroupId) {
-		return jdbcTemplate.query(
-				"SELECT i.* FROM item i INNER JOIN item_group_item igi ON i.id = igi.item_id WHERE igi.item_group_id = ? AND igi.item_group_id IS NOT NULL AND igi.item_id IS NOT NULL",
-				new Object[] { itemGroupId }, rowMapper);
+	public List<MenuItem> findAllMenuItem() {
+		return jdbcTemplate.query("SELECT * FROM menu_item", menuItemRowMapper);
 	}
 
-	public List<Item> findItemByModifierGroupId(Long modifierGroupId) {
-		return jdbcTemplate.query("SELECT * FROM item WHERE modifier_group_id = ?", rowMapper);
+	public MenuItem findMenuItemById(Long id) {
+		return jdbcTemplate.queryForObject("SELECT * FROM menu_item WHERE id = ?", new Object[] { id }, menuItemRowMapper);
 	}
 
-	public List<Item> findAllItem() {
-		return jdbcTemplate.query("SELECT * FROM item", rowMapper);
-	}
-
-	public Item findItemById(Long id) {
-		return jdbcTemplate.queryForObject("SELECT * FROM item WHERE id = ?", new Object[] { id }, rowMapper);
-	}
-
-	public Long createItem(Item item) {
+	public Long createMenuItem(MenuItem menuItem) {
 
 		KeyHolder keyHolder = new GeneratedKeyHolder();
 
 		jdbcTemplate.update(connection -> {
 			PreparedStatement ps = connection.prepareStatement(
-					"INSERT INTO item(backend_id, modifier_group_id, item_name, item_description, item_image_path, item_base_price, taxable, modifiable,discountable, published) VALUES(?,?,?,?,?,?,?,?,?,?)",
+					"INSERT INTO menu_item(backend_id, modifier_group_id, menu_item_name, menu_item_description, menu_item_image_path, menu_item_base_price, menu_item_type,is_taxable, is_discountable) VALUES(?,?,?,?,?,?,?,?,?)",
 					PreparedStatement.RETURN_GENERATED_KEYS);
-			ps.setString(1, item.getBackendId());
-			ps.setLong(2, item.getModifierGroupId());
-			ps.setString(3, item.getName());
-			ps.setString(4, item.getDescription());
-			ps.setString(5, item.getImagePath());
-			ps.setBigDecimal(6, item.getBasePrice());
-			ps.setBoolean(7, item.isTaxable());
-			ps.setBoolean(8, item.isModifiable());
-			ps.setBoolean(9, item.isDiscountable());
-			ps.setBoolean(10, item.isPublished());
+			ps.setString(1, menuItem.getBackendId());
+			ps.setLong(2, menuItem.getModifierGroupId());
+			ps.setString(3, menuItem.getName());
+			ps.setString(4, menuItem.getDescription());
+			ps.setString(5, menuItem.getImagePath());
+			ps.setBigDecimal(6, menuItem.getBasePrice());
+			ps.setInt(7, menuItem.getType());
+			ps.setBoolean(8, menuItem.isTaxable());
+			ps.setBoolean(9, menuItem.isDiscountable());
 			return ps;
 		}, keyHolder);
 
 		return (Long) keyHolder.getKey();
 	}
 
-	public int editItem(Long id, Item item) {
+	public int removeMenuItem(Long id) {
+		return jdbcTemplate.update("DELETE FROM menu_item WHERE id = ?", new Object[] { id });
+	}
+
+	public List<MenuItem> findItemByItemGroupId(Long itemGroupId) {
+		return jdbcTemplate.query(
+				"SELECT i.* FROM item i INNER JOIN item_group_item igi ON i.id = igi.item_id WHERE igi.item_group_id = ? AND igi.item_group_id IS NOT NULL AND igi.item_id IS NOT NULL",
+				new Object[] { itemGroupId }, menuItemRowMapper);
+	}
+
+	/*public List<MenuItem> findItemByModifierGroupId(Long modifierGroupId) {
+		return jdbcTemplate.query("SELECT * FROM item WHERE modifier_group_id = ?", new Object[] { modifierGroupId },
+				rowMapper);
+	}
+
+	public int editItem(Long id, MenuItem item) {
 		return jdbcTemplate.update(
 				"UPDATE item SET backend_id = ?, modifier_group_id = ?, item_name = ?, item_description = ?, item_image_path = ?, item_base_price = ?, taxable = ?, modifiable = ?,discountable = ?, published = ? WHERE id = ?",
 				new Object[] { item.getBackendId(), item.getModifierGroupId(), item.getName(), item.getDescription(),
@@ -91,16 +93,12 @@ public class ItemRepository {
 						item.isDiscountable(), item.isPublished(), id });
 	}
 
-	public int removeItem(Long id) {
-		return jdbcTemplate.update("DELETE FROM item WHERE id = ?", new Object[] { id });
-	}
-
 	// ItemGroupItem
 	public int addItemIntoItemGroup(Long itemId, Long itemGroupId, int sequenceNumber) {
 		return jdbcTemplate.update(
 				"INSERT INTO item_group_item(item_id, item_group_id, item_group_item_sequence) VALUES(?,?,?)",
 				new Object[] { itemId, itemGroupId, sequenceNumber });
-	}
+	}*/
 
 	// settle
 	public int editItemIntoItemGroup(Long id, int sequenceNumber) {
@@ -136,10 +134,12 @@ public class ItemRepository {
 				new Object[] { itemId, modifierGroupId });
 	}
 
-	public int editItemModifierGroup(Long id, Long modifierGroupId) {
-		return jdbcTemplate.update("UPDATE item_modifier_group SET modifier_group_id = ? WHERE id = ?",
-				new Object[] { modifierGroupId, id });
-	}
+	/*
+	 * public int editItemModifierGroup(Long id, Long modifierGroupId) { return
+	 * jdbcTemplate.
+	 * update("UPDATE item_modifier_group SET modifier_group_id = ? WHERE id = ?",
+	 * new Object[] { modifierGroupId, id }); }
+	 */
 
 	public int removeItemModifierGroup(Long id) {
 		return jdbcTemplate.update("DELETE FROM item_modifier_group WHERE id = ?", new Object[] { id });
@@ -195,9 +195,10 @@ public class ItemRepository {
 	public int removeItemSetByItemGroupId(Long itemGroupId) {
 		return jdbcTemplate.update("DELETE FROM item_set WHERE item_group_id = ?", new Object[] { itemGroupId });
 	}
-	
+
 	public void removeItemModifierGroupId(Long modifierGroupId) {
-		jdbcTemplate.update("UPDATE item SET modifier_group_id = NULL WHERE modifier_group_id = ?", new Object[] {modifierGroupId});
+		jdbcTemplate.update("UPDATE item SET modifier_group_id = NULL WHERE modifier_group_id = ?",
+				new Object[] { modifierGroupId });
 	}
 
 }

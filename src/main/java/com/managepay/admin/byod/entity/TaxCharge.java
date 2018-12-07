@@ -1,16 +1,16 @@
 package com.managepay.admin.byod.entity;
 
-public class ChargeConfig {
+public class TaxCharge {
 
 	public Long id;
 	public String name;
 	public int taxRate;
 	public int serviceChargeRate;
 
-	public ChargeConfig() {
+	public TaxCharge() {
 	}
 
-	public ChargeConfig(int taxRate, int serviceChargeRate) {
+	public TaxCharge(int taxRate, int serviceChargeRate) {
 		this.taxRate = taxRate;
 		this.serviceChargeRate = serviceChargeRate;
 	}

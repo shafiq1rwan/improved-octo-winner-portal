@@ -7,7 +7,7 @@ public class ModifierGroup {
 	public Long id;
 	public String backendId;
 	public String name;
-	public List<Item> items;
+	public List<MenuItem> items;
 
 	public ModifierGroup() {
 
@@ -37,11 +37,11 @@ public class ModifierGroup {
 		this.name = name;
 	}
 
-	public List<Item> getItems() {
+	public List<MenuItem> getItems() {
 		return items;
 	}
 
-	public void setItems(List<Item> items) {
+	public void setItems(List<MenuItem> items) {
 		this.items = items;
 	}
 

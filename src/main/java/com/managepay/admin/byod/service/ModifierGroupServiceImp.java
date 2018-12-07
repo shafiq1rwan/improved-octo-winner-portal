@@ -7,17 +7,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.managepay.admin.byod.entity.ModifierGroup;
-import com.managepay.admin.byod.repository.ItemRepository;
+import com.managepay.admin.byod.repository.MenuItemRepository;
 import com.managepay.admin.byod.repository.ModifierGroupRepository;
 
 @Service
 public class ModifierGroupServiceImp implements ModifierGroupService {
 
 	private ModifierGroupRepository modifierGroupRepo;
-	private ItemRepository itemRepo;
+	private MenuItemRepository itemRepo;
 	
 	@Autowired
-	public ModifierGroupServiceImp(ModifierGroupRepository modifierGroupRepo,ItemRepository itemRepo) {
+	public ModifierGroupServiceImp(ModifierGroupRepository modifierGroupRepo,MenuItemRepository itemRepo) {
 		this.modifierGroupRepo = modifierGroupRepo;
 		this.itemRepo = itemRepo;
 	}
@@ -68,6 +68,7 @@ public class ModifierGroupServiceImp implements ModifierGroupService {
 		try {
 			int affectedRow = modifierGroupRepo.removeModifierGroup(id);
 			itemRepo.removeItemModifierGroupId(id);
+			//Remember to remove the item modifier group
 			return affectedRow;
 		} catch(Exception ex) {
 			ex.printStackTrace();

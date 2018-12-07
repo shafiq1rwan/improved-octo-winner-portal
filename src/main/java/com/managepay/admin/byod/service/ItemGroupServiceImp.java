@@ -9,19 +9,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.managepay.admin.byod.entity.CategoryItemGroup;
-import com.managepay.admin.byod.entity.Item;
+import com.managepay.admin.byod.entity.MenuItem;
 import com.managepay.admin.byod.entity.ItemGroup;
 import com.managepay.admin.byod.repository.ItemGroupRepository;
-import com.managepay.admin.byod.repository.ItemRepository;
+import com.managepay.admin.byod.repository.MenuItemRepository;
 
 @Service
 public class ItemGroupServiceImp implements ItemGroupService {
 
 	private ItemGroupRepository itemGroupRepo;
-	private ItemRepository itemRepo;
+	private MenuItemRepository itemRepo;
 
 	@Autowired
-	public ItemGroupServiceImp(ItemGroupRepository itemGroupRepo, ItemRepository itemRepo) {
+	public ItemGroupServiceImp(ItemGroupRepository itemGroupRepo, MenuItemRepository itemRepo) {
 		this.itemGroupRepo = itemGroupRepo;
 		this.itemRepo = itemRepo;
 	}
@@ -31,7 +31,7 @@ public class ItemGroupServiceImp implements ItemGroupService {
 		try {
 			List<ItemGroup> itemGroupList = itemGroupRepo.findItemGroupByCategoryId(categoryId);
 			for (ItemGroup itemGroup : itemGroupList) {
-				List<Item> itemList = findItemByItemGroupId(itemGroup.getId());
+				List<MenuItem> itemList = findItemByItemGroupId(itemGroup.getId());
 				if (!itemList.isEmpty())
 					itemGroup.setItems(itemList);
 			}
@@ -47,7 +47,7 @@ public class ItemGroupServiceImp implements ItemGroupService {
 		try {
 			List<ItemGroup> itemGroupList = itemGroupRepo.findAllItemGroup();
 			for (ItemGroup itemGroup : itemGroupList) {
-				List<Item> itemList = findItemByItemGroupId(itemGroup.getId());
+				List<MenuItem> itemList = findItemByItemGroupId(itemGroup.getId());
 				if (!itemList.isEmpty())
 					itemGroup.setItems(itemList);
 			}
@@ -63,7 +63,7 @@ public class ItemGroupServiceImp implements ItemGroupService {
 		try {
 			ItemGroup existingItemGroup = itemGroupRepo.findItemGroupById(id);
 
-			List<Item> itemList = findItemByItemGroupId(existingItemGroup.getId());
+			List<MenuItem> itemList = findItemByItemGroupId(existingItemGroup.getId());
 
 			if (!itemList.isEmpty())
 				existingItemGroup.setItems(itemList);
@@ -190,7 +190,7 @@ public class ItemGroupServiceImp implements ItemGroupService {
 		}
 	}
 
-	private List<Item> findItemByItemGroupId(Long itemGroupId) {
+	private List<MenuItem> findItemByItemGroupId(Long itemGroupId) {
 		try {
 			return itemRepo.findItemByItemGroupId(itemGroupId);
 		} catch (Exception ex) {

@@ -5,14 +5,16 @@ import java.util.List;
 public class Category {
 
 	public Long id;
+	public Long groupCategoryId;
+	public Long taxChargeId;
 	public String backendId;
 	public String name;
 	public String description;
 	public String imagePath;
-	public int itemCount;
-	public boolean isPublished;
+	public int sequence;
+	public boolean isActive;
 
-	public List<ItemGroup> itemGroups;
+	public List<MenuItem> menuItems;
 
 	public Category() {
 	}
@@ -57,28 +59,44 @@ public class Category {
 		this.imagePath = imagePath;
 	}
 
-	public int getItemCount() {
-		return itemCount;
+	public Long getGroupCategoryId() {
+		return groupCategoryId;
 	}
 
-	public void setItemCount(int itemCount) {
-		this.itemCount = itemCount;
+	public void setGroupCategoryId(Long groupCategoryId) {
+		this.groupCategoryId = groupCategoryId;
 	}
 
-	public boolean isPublished() {
-		return isPublished;
+	public Long getTaxChargeId() {
+		return taxChargeId;
 	}
 
-	public void setPublished(boolean isPublished) {
-		this.isPublished = isPublished;
+	public void setTaxChargeId(Long taxChargeId) {
+		this.taxChargeId = taxChargeId;
 	}
 
-	public List<ItemGroup> getItemGroups() {
-		return itemGroups;
+	public int getSequence() {
+		return sequence;
 	}
 
-	public void setItemGroups(List<ItemGroup> itemGroups) {
-		this.itemGroups = itemGroups;
+	public void setSequence(int sequence) {
+		this.sequence = sequence;
+	}
+
+	public boolean isActive() {
+		return isActive;
+	}
+
+	public void setActive(boolean isActive) {
+		this.isActive = isActive;
+	}
+
+	public List<MenuItem> getMenuItems() {
+		return menuItems;
+	}
+
+	public void setMenuItems(List<MenuItem> menuItems) {
+		this.menuItems = menuItems;
 	}
 
 }

@@ -2,7 +2,7 @@ package com.managepay.admin.byod.service;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -10,33 +10,53 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.managepay.admin.byod.entity.Category;
-import com.managepay.admin.byod.entity.Item;
+import com.managepay.admin.byod.entity.MenuItem;
 import com.managepay.admin.byod.entity.ItemGroup;
+import com.managepay.admin.byod.entity.ModifierGroup;
 import com.managepay.admin.byod.entity.Tag;
 import com.managepay.admin.byod.repository.CategoryRepository;
 import com.managepay.admin.byod.repository.ItemGroupRepository;
-import com.managepay.admin.byod.repository.ItemRepository;
+import com.managepay.admin.byod.repository.MenuItemRepository;
+import com.managepay.admin.byod.repository.ModifierGroupRepository;
 import com.managepay.admin.byod.repository.TagRepository;
 
 @Service
-public class ItemServiceImp implements ItemService {
+public class MenuItemServiceImp implements MenuItemService {
 
-	private CategoryRepository categoryRepo;
-	private ItemGroupRepository itemGroupRepo;
-	private ItemRepository itemRepo;
-	private TagRepository tagRepo;
+	private MenuItemRepository menuItemRepo;
 
-	@Autowired
-	public ItemServiceImp(CategoryRepository categoryRepo, ItemGroupRepository itemGroupRepo, ItemRepository itemRepo,
-			TagRepository tagRepo) {
-		this.categoryRepo = categoryRepo;
-		this.itemGroupRepo = itemGroupRepo;
-		this.itemRepo = itemRepo;
-		this.tagRepo = tagRepo;
+	public MenuItemServiceImp(MenuItemRepository menuItemRepo) {
+		this.menuItemRepo = menuItemRepo;
 	}
+	
+	public List<MenuItem> findAllMenuItem(){
+		try {
+			return menuItemRepo.findAllMenuItem();
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return Collections.emptyList();
+		}
+	}
+	
+	public MenuItem findMenuItemById(Long id) {
+		try {
+			return menuItemRepo.findMenuItemById(id);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return new MenuItem();
+		}
+	}
+	
+/*	public List<MenuItem> findMenuItemByCategoryId(){
+		
+	}*/
 
+
+	
+	
+/*
 	@Override
-	public List<Item> findAllItem() {
+	public List<MenuItem> findAllItem() {
 		try {
 			return itemRepo.findAllItem();
 		} catch (Exception ex) {
@@ -46,17 +66,17 @@ public class ItemServiceImp implements ItemService {
 	}
 
 	@Override
-	public Item findItemById(Long id) {
+	public MenuItem findItemById(Long id) {
 		try {
 			return itemRepo.findItemById(id);
 		} catch (Exception ex) {
 			ex.printStackTrace();
-			return new Item();
+			return new MenuItem();
 		}
 	}
 
 	@Override
-	public List<Item> findItemByItemGroupId(Long itemGroupId) {
+	public List<MenuItem> findItemByItemGroupId(Long itemGroupId) {
 		try {
 			return itemRepo.findItemByItemGroupId(itemGroupId);
 		} catch (Exception ex) {
@@ -66,14 +86,31 @@ public class ItemServiceImp implements ItemService {
 	}
 
 	@Override
-	public int createItem(Item item) {
+	public List<MenuItem> findItemByModifierGroupId(Long modifiergroupId) {
+		try {
+			return itemRepo.findItemByModifierGroupId(modifiergroupId);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return Collections.emptyList();
+		}
+	}
+
+	@Override
+	public int createItem(MenuItem item) {
 		try {
 			Long generatedItemId = itemRepo.createItem(item);
 			// add Tags if available
-			/*
-			 * if (!item.getTags().isEmpty()) { for (Tag tag : item.getTags()) {
-			 * tagRepo.addTagToItem(generatedItemId, tag.getId()); } }
-			 */
+			if (!item.getTags().isEmpty()) {
+				for (Tag tag : item.getTags()) {
+					tagRepo.addTagToItem(generatedItemId, tag.getId());
+				}
+			}
+			// add ModifierGroup(s) into Item
+			if (!item.getModifierGroups().isEmpty()) {
+				for (ModifierGroup modifierGroup : item.getModifierGroups()) {
+					itemRepo.addModifierItemIntoModifierGroup(generatedItemId, modifierGroup.getId());
+				}
+			}
 			return 1;
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -82,9 +119,43 @@ public class ItemServiceImp implements ItemService {
 	}
 
 	@Override
-	public int editItem(Long id, Item item, Item existingItem) {
+	public int editItem(Long id, MenuItem item, MenuItem existingItem) {
 		try {
-			return itemRepo.editItem(id, existingItem);
+			int affectedRow = itemRepo.editItem(id, existingItem);
+
+			if (affectedRow != 0) {
+
+			}
+
+			// query the tag repo
+
+			// query item category group
+			if (!existingItem.getModifierGroups().isEmpty()) {
+				for (ModifierGroup modifierGroup : existingItem.getModifierGroups()) {
+					Map<String, Object> modifierGroupMap = modifierGroupRepo
+							.findModifierGroupByItemId(existingItem.getId(), modifierGroup.getId());
+					if(!modifierGroupMap.isEmpty()) {
+						
+						//Deletion
+						
+						
+					} else {
+						//Insert into Group
+						itemRepo.addModifierItemIntoModifierGroup(existingItem.getId(), modifierGroup.getId());
+					}
+
+				}
+
+			}
+
+			List<Map<String, Object>> itemModifierGroupMaps = findModifierGroupByItemId(existingItem.getId());
+			if (!itemModifierGroupMaps.isEmpty()) {
+				for (Map<String, Object> itemModifierGroupMap : itemModifierGroupMaps) {
+					int modifierGroupId = (int) itemModifierGroupMap.get("modifier_group_id");
+
+				}
+			}
+
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			return 0;
@@ -163,14 +234,14 @@ public class ItemServiceImp implements ItemService {
 	public List<ItemGroup> findItemGroupByItemSetItemId(Long itemId) {
 		try {
 			List<ItemGroup> itemGroupList = itemRepo.findItemGroupByItemSetItemId(itemId);
-			//add item
-			if(itemGroupList!=null) {
-				for(ItemGroup itemGroup:itemGroupList) {
-					 List<Item> itemList = findItemByItemGroupId(itemGroup.getId());
-					 if(!itemList.isEmpty())
-						 itemGroup.setItems(itemList);
+			// add item
+			if (itemGroupList != null) {
+				for (ItemGroup itemGroup : itemGroupList) {
+					List<MenuItem> itemList = findItemByItemGroupId(itemGroup.getId());
+					if (!itemList.isEmpty())
+						itemGroup.setItems(itemList);
 				}
-			}			
+			}
 			return itemGroupList;
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -237,8 +308,8 @@ public class ItemServiceImp implements ItemService {
 			for (Category category : categoryList) {
 				List<ItemGroup> itemGroupList = itemGroupRepo.findItemGroupByCategoryId(category.getId());
 				for (ItemGroup itemGroup : itemGroupList) {
-					List<Item> itemList = itemRepo.findItemByItemGroupId(itemGroup.getId());
-					for (Item item : itemList) {
+					List<MenuItem> itemList = itemRepo.findItemByItemGroupId(itemGroup.getId());
+					for (MenuItem item : itemList) {
 						List<ItemGroup> itemSets = itemRepo.findItemGroupByItemSetItemId(item.getId());
 						if (itemSets != null)
 							item.setItemSets(itemSets);
@@ -323,5 +394,13 @@ public class ItemServiceImp implements ItemService {
 			return 0;
 		}
 	}
+
+	private Map<String, Object> findModifierGroupByItemId(Long itemId, Long modifierGroupId) {
+		try {
+			return modifierGroupRepo.findModifierGroupByItemId(itemId, modifierGroupId);
+		} catch (Exception ex) {
+			return Collections.emptyMap();
+		}
+	}*/
 
 }

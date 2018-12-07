@@ -8,18 +8,15 @@ import org.springframework.stereotype.Service;
 
 import com.managepay.admin.byod.entity.Store;
 import com.managepay.admin.byod.repository.StoreRepository;
-import com.managepay.admin.byod.repository.SubmenuRepository;
 
 @Service
 public class StoreServiceImp implements StoreService {
 
 	private StoreRepository storeRepo;
-	private SubmenuRepository submenuRepo;
 
 	@Autowired
-	public StoreServiceImp(StoreRepository storeRepo,SubmenuRepository submenuRepo) {
+	public StoreServiceImp(StoreRepository storeRepo) {
 		this.storeRepo = storeRepo;
-		this.submenuRepo = submenuRepo;
 	}
 
 	@Override
@@ -65,13 +62,30 @@ public class StoreServiceImp implements StoreService {
 	@Override
 	public int removeStore(Long id) {
 		try {
-			int affectedRow = storeRepo.removeStore(id);
-			if(affectedRow !=0)
-				submenuRepo.removeSubmenuByStoreId(id);
-			return affectedRow;
+			return storeRepo.removeStore(id);
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			return 0;
+		}
+	}
+
+	@Override
+	public int editStoreGroupCategoryId(Long groupCategoryId, Long id) {
+		try {
+			return storeRepo.editStoreGroupCategoryId(groupCategoryId, id);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return 0;
+		}
+	}
+
+	@Override
+	public List<Store> findStoresByGroupCategoryId(Long groupCategoryId) {
+		try {
+			return storeRepo.findStoresByGroupCategoryId(groupCategoryId);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return Collections.emptyList();
 		}
 	}
 

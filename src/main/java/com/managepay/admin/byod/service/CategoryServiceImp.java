@@ -14,18 +14,26 @@ import com.managepay.admin.byod.repository.ItemGroupRepository;
 public class CategoryServiceImp implements CategoryService {
 
 	private CategoryRepository categoryRepo;
-	private ItemGroupRepository itemGroupRepo;
 
 	@Autowired
-	public CategoryServiceImp(CategoryRepository categoryRepo, ItemGroupRepository itemGroupRepo) {
+	public CategoryServiceImp(CategoryRepository categoryRepo) {
 		this.categoryRepo = categoryRepo;
-		this.itemGroupRepo = itemGroupRepo;
 	}
 
 	@Override
 	public List<Category> findAllCategory() {
 		try {
 			return categoryRepo.findAllCategory();
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return Collections.emptyList();
+		}
+	}
+	
+	@Override
+	public List<Category> findCategoriesByGroupCategoryId(Long groupCategoryId) {
+		try {
+			return categoryRepo.findCategoriesByGroupCategoryId(groupCategoryId);
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			return Collections.emptyList();
@@ -65,13 +73,16 @@ public class CategoryServiceImp implements CategoryService {
 	@Override
 	public int removeCategory(Long categoryId) {
 		try {
+			
+			//TODO be careful
 			int affectedRow = categoryRepo.removeCategory(categoryId);
-			itemGroupRepo.removeCategoryItemGroupByCategoryId(categoryId);
 			return affectedRow;
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			return 0;
 		}
 	}
+
+
 
 }

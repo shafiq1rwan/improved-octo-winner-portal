@@ -2,9 +2,8 @@ package com.managepay.admin.byod.entity;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Set;
 
-public class Item {
+public class MenuItem {
 
 	public Long id;
 	public String backendId;
@@ -13,16 +12,15 @@ public class Item {
 	public String description;
 	public String imagePath;
 	public BigDecimal basePrice;
+	public int type;
 	public boolean isTaxable;
-	public boolean isModifiable;
 	public boolean isDiscountable;
-	public boolean isPublished;
 
-	public List<ItemGroup> itemSets;
-	public List<Tag> tags;
+	public List<MenuItem> items;
+	public List<ItemGroup> itemGroups;
 	public List<ModifierGroup> modifierGroups;
 
-	public Item() {
+	public MenuItem() {
 	}
 
 	public Long getId() {
@@ -81,20 +79,20 @@ public class Item {
 		this.basePrice = basePrice;
 	}
 
+	public int getType() {
+		return type;
+	}
+
+	public void setType(int type) {
+		this.type = type;
+	}
+
 	public boolean isTaxable() {
 		return isTaxable;
 	}
 
 	public void setTaxable(boolean isTaxable) {
 		this.isTaxable = isTaxable;
-	}
-
-	public boolean isModifiable() {
-		return isModifiable;
-	}
-
-	public void setModifiable(boolean isModifiable) {
-		this.isModifiable = isModifiable;
 	}
 
 	public boolean isDiscountable() {
@@ -105,28 +103,20 @@ public class Item {
 		this.isDiscountable = isDiscountable;
 	}
 
-	public boolean isPublished() {
-		return isPublished;
+	public List<MenuItem> getItems() {
+		return items;
 	}
 
-	public void setPublished(boolean isPublished) {
-		this.isPublished = isPublished;
-	}
-	
-	public List<ItemGroup> getItemSets() {
-		return itemSets;
+	public void setItems(List<MenuItem> items) {
+		this.items = items;
 	}
 
-	public void setItemSets(List<ItemGroup> itemSets) {
-		this.itemSets = itemSets;
+	public List<ItemGroup> getItemGroups() {
+		return itemGroups;
 	}
 
-	public List<Tag> getTags() {
-		return tags;
-	}
-
-	public void setTags(List<Tag> tags) {
-		this.tags = tags;
+	public void setItemGroups(List<ItemGroup> itemGroups) {
+		this.itemGroups = itemGroups;
 	}
 
 	public List<ModifierGroup> getModifierGroups() {

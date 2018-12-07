@@ -17,17 +17,18 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.managepay.admin.byod.entity.Category;
-import com.managepay.admin.byod.entity.ChargeConfig;
-import com.managepay.admin.byod.entity.Item;
+import com.managepay.admin.byod.entity.GroupCategory;
+import com.managepay.admin.byod.entity.TaxCharge;
+import com.managepay.admin.byod.entity.MenuItem;
 import com.managepay.admin.byod.entity.ItemGroup;
-import com.managepay.admin.byod.entity.ItemSet;
 import com.managepay.admin.byod.entity.ModifierGroup;
 import com.managepay.admin.byod.entity.Store;
 import com.managepay.admin.byod.entity.Tag;
 import com.managepay.admin.byod.service.CategoryService;
 import com.managepay.admin.byod.service.ChargeConfigService;
+import com.managepay.admin.byod.service.GroupCategoryService;
 import com.managepay.admin.byod.service.ItemGroupService;
-import com.managepay.admin.byod.service.ItemService;
+import com.managepay.admin.byod.service.MenuItemService;
 import com.managepay.admin.byod.service.ModifierGroupService;
 import com.managepay.admin.byod.service.StoreServiceImp;
 import com.managepay.admin.byod.service.StoreService;
@@ -36,24 +37,128 @@ import com.managepay.admin.byod.service.StoreService;
 @RequestMapping("/menu")
 public class MenuRestController {
 
-	private CategoryService categoryService;
-	private ItemGroupService itemGroupService;
-	private ItemService itemService;
-	private ModifierGroupService modifierGroupService;
+	private GroupCategoryService groupCategoryService;
 	private StoreService storeService;
-	private ChargeConfigService chargeConfigService;
-
+	private CategoryService categoryService;
+	private MenuItemService menuItemService;
+	
 	@Autowired
-	public MenuRestController(CategoryService categoryService, ItemGroupService itemGroupService,
-			ItemService itemService, ModifierGroupService modifierGroupService, StoreService storeService,
-			ChargeConfigService chargeConfigService) {
-		this.categoryService = categoryService;
-		this.itemGroupService = itemGroupService;
-		this.itemService = itemService;
-		this.modifierGroupService = modifierGroupService;
+	public MenuRestController(GroupCategoryService groupCategoryService, StoreService storeService,
+			CategoryService categoryService, MenuItemService menuItemService) {
+		this.groupCategoryService = groupCategoryService;
 		this.storeService = storeService;
-		this.chargeConfigService = chargeConfigService;
+		this.categoryService = categoryService;
+		this.menuItemService = menuItemService;
 	}
+
+	//Group Category
+	@GetMapping("/groupcategory")
+	public ResponseEntity<List<GroupCategory>> findAllGroupCategory(){
+		List<GroupCategory> groupCategories = groupCategoryService.findAllGroupCategory();
+		if (groupCategories.isEmpty())
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+		return new ResponseEntity<List<GroupCategory>>(groupCategories, HttpStatus.OK);
+	}
+	
+	@GetMapping("/groupcategorybyid")
+	public ResponseEntity<GroupCategory> findGroupCategoryById(@RequestParam("id") Long id){
+		GroupCategory groupCategory = groupCategoryService.findGroupCategory(id);
+		if(groupCategory.getId()==0)
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		
+		List<Store> stores = storeService.findStoresByGroupCategoryId(groupCategory.getId());
+		if(!stores.isEmpty())
+			groupCategory.setStores(stores);
+		
+		List<Category> categories = categoryService.findCategoriesByGroupCategoryId(groupCategory.getId());
+		if(!categories.isEmpty())
+			groupCategory.setCategories(categories);
+		
+		return new ResponseEntity<GroupCategory>(groupCategory, HttpStatus.OK);
+	}
+	
+	@PostMapping("/groupcategory/create")
+	public ResponseEntity<Void> createGroupCategory(@RequestBody GroupCategory groupCategory){
+		int rowAffected = groupCategoryService.createGroupCategory(groupCategory);
+		if (rowAffected == 0)
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+		return new ResponseEntity<>(HttpStatus.OK);
+	}
+	
+	@PostMapping("/groupcategory/edit")
+	public ResponseEntity<Void> editGroupCategory(@RequestBody GroupCategory groupCategory){
+		GroupCategory existingGroupCategory = groupCategoryService.findGroupCategory(groupCategory.getId());
+		if(existingGroupCategory.getId()==0) 
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+		int rowAffected = groupCategoryService.editGroupCategory(existingGroupCategory.getId(), groupCategory);
+		if (rowAffected == 0)
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+		return new ResponseEntity<>(HttpStatus.OK);
+	}
+	
+	@DeleteMapping("/groupcategory/delete")
+	public ResponseEntity<Void> removeGroupCategory(@RequestParam("id") Long id){
+		int rowAffected = groupCategoryService.removeGroupCategory(id);
+		if (rowAffected == 0)
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+		return new ResponseEntity<>(HttpStatus.OK);
+	}
+	
+	//Store
+	@GetMapping("/store/")
+	public ResponseEntity<List<Store>> findAllStore(){
+		List<Store> stores = storeService.findAllStore();
+		if (stores.isEmpty())
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+		return new ResponseEntity<List<Store>>(stores, HttpStatus.OK);
+	}
+	
+	@GetMapping("/storebyid")
+	public ResponseEntity<Store> findStoreById(@RequestParam("id") Long id) {
+		Store existingStore = storeService.findStoreById(id);
+		if (existingStore.getId() == 0)
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+		return new ResponseEntity<Store>(existingStore, HttpStatus.OK);
+	}
+
+	@PostMapping("/store/create")
+	public ResponseEntity<Void> createStore(@RequestBody Store store) {
+		int rowAffected = storeService.createStore(store);
+		if (rowAffected == 0)
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+		return new ResponseEntity<>(HttpStatus.OK);
+	}
+
+	@PostMapping("/store/edit")
+	public ResponseEntity<Void> editStore(@RequestBody Store store) {
+		Store existingStore = storeService.findStoreById(store.getId());
+		if (existingStore.getId() == 0)
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+		int rowAffected = storeService.editStore(store.getId(), store);
+		if (rowAffected == 0)
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+		return new ResponseEntity<>(HttpStatus.OK);
+	}
+
+	@DeleteMapping("/store/delete")
+	public ResponseEntity<Void> removeStore(@RequestParam("id") Long id) {
+		int rowAffected = storeService.removeStore(id);
+		if (rowAffected == 0)
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+		return new ResponseEntity<>(HttpStatus.OK);
+	}
+	
 
 	// Category - All Working No Worry
 	@GetMapping("/category/")
@@ -65,14 +170,16 @@ public class MenuRestController {
 		return new ResponseEntity<List<Category>>(categoryList, HttpStatus.OK);
 	}
 
-	@GetMapping("/categorybyid")
-	public ResponseEntity<Category> findCategoryById(@RequestParam("categoryId") Long id) {
+/*	@GetMapping("/categorybyid")
+	public ResponseEntity<Category> findCategoryById(@RequestParam("id") Long id) {
 		Category existingCategory = categoryService.findCategoryById(id);
 		if (existingCategory.getId() == 0)
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		
+		List<MenuItem> menuItems = menuItemService.findItemByItemGroupId(itemGroupId)
 
 		return new ResponseEntity<Category>(existingCategory, HttpStatus.OK);
-	}
+	}*/
 
 	@PostMapping("/category/create")
 	public ResponseEntity<Void> createCategory(@RequestBody Category category) {
@@ -98,10 +205,6 @@ public class MenuRestController {
 
 	@DeleteMapping("/category/delete")
 	public ResponseEntity<Void> deleteCategory(@RequestParam("categoryId") Long id) {
-		Category existingCategory = categoryService.findCategoryById(id);
-		if (existingCategory.getId() == 0)
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-
 		int rowAffected = categoryService.removeCategory(id);
 		if (rowAffected == 0)
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -109,27 +212,27 @@ public class MenuRestController {
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
-	// Charge Config - All Working No Worry
+	/*// Charge Config - All Working No Worry
 	@GetMapping("/chargeconfig/")
-	public ResponseEntity<List<ChargeConfig>> findAllChargeConfig() {
-		List<ChargeConfig> chargeConfigList = chargeConfigService.findAllChargeConfig();
+	public ResponseEntity<List<TaxCharge>> findAllChargeConfig() {
+		List<TaxCharge> chargeConfigList = chargeConfigService.findAllChargeConfig();
 		if (chargeConfigList.isEmpty())
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
-		return new ResponseEntity<List<ChargeConfig>>(chargeConfigList, HttpStatus.OK);
+		return new ResponseEntity<List<TaxCharge>>(chargeConfigList, HttpStatus.OK);
 	}
 	
 	@GetMapping("/chargeconfigbyid")
-	public ResponseEntity<ChargeConfig> findChargeConfigById(@RequestParam("chargeconfigId") Long chargeconfigId) {
-		ChargeConfig existingChargeConfig = chargeConfigService.findChargeConfigById(chargeconfigId);
+	public ResponseEntity<TaxCharge> findChargeConfigById(@RequestParam("chargeconfigId") Long chargeconfigId) {
+		TaxCharge existingChargeConfig = chargeConfigService.findChargeConfigById(chargeconfigId);
 		if (existingChargeConfig.getId() == 0)
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
-		return new ResponseEntity<ChargeConfig>(existingChargeConfig, HttpStatus.OK);
+		return new ResponseEntity<TaxCharge>(existingChargeConfig, HttpStatus.OK);
 	}
 	
 	@PostMapping("/chargeconfig/create")
-	public ResponseEntity<Void> createChargeConfig(@RequestBody ChargeConfig chargeConfig) {
+	public ResponseEntity<Void> createChargeConfig(@RequestBody TaxCharge chargeConfig) {
 		int rowAffected = chargeConfigService.createChargeConfig(chargeConfig);
 		if (rowAffected == 0)
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -138,7 +241,7 @@ public class MenuRestController {
 	}
 	
 	@PostMapping("/chargeconfig/edit")
-	public ResponseEntity<Void> editChargeConfig(@RequestBody ChargeConfig chargeConfig) {
+	public ResponseEntity<Void> editChargeConfig(@RequestBody TaxCharge chargeConfig) {
 		int rowAffected = chargeConfigService.editChargeConfig(chargeConfig.getId(), chargeConfig);
 		if (rowAffected == 0)
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -246,34 +349,37 @@ public class MenuRestController {
 	
 	// Item
 	@GetMapping("/item/")
-	public ResponseEntity<List<Item>> findAllItem() {
-		List<Item> itemList = itemService.findAllItem();
+	public ResponseEntity<List<MenuItem>> findAllItem() {
+		List<MenuItem> itemList = itemService.findAllItem();
 		if (itemList.isEmpty())
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
-		return new ResponseEntity<List<Item>>(itemList, HttpStatus.OK);
+		return new ResponseEntity<List<MenuItem>>(itemList, HttpStatus.OK);
 	}
 
 	@GetMapping("/itembyid")
-	public ResponseEntity<Item> findItemById(@RequestParam("itemId") Long id) {
-		Item existingItem = itemService.findItemById(id);
+	public ResponseEntity<MenuItem> findItemById(@RequestParam("itemId") Long id) {
+		MenuItem existingItem = itemService.findItemById(id);
+		
+		
+		
 		if (existingItem.getName() == null)
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
-		return new ResponseEntity<Item>(existingItem, HttpStatus.OK);
+		return new ResponseEntity<MenuItem>(existingItem, HttpStatus.OK);
 	}
 
-	@GetMapping("/item")
-	public ResponseEntity<List<Item>> findItemByItemGroupId(@RequestParam("itemGroupId") Long itemGroupId) {
-		List<Item> itemList = itemService.findItemByItemGroupId(itemGroupId);
+	@GetMapping("/itembyitemgroupid")
+	public ResponseEntity<List<MenuItem>> findItemByItemGroupId(@RequestParam("itemGroupId") Long itemGroupId) {
+		List<MenuItem> itemList = itemService.findItemByItemGroupId(itemGroupId);
 		if (itemList.isEmpty())
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
-		return new ResponseEntity<List<Item>>(itemList, HttpStatus.OK);
+		return new ResponseEntity<List<MenuItem>>(itemList, HttpStatus.OK);
 	}
 
 	@PostMapping("/item/create")
-	public ResponseEntity<Void> createItem(@RequestBody Item item) {
+	public ResponseEntity<Void> createItem(@RequestBody MenuItem item) {
 		int rowAffected = itemService.createItem(item);
 		if (rowAffected == 0)
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -282,8 +388,8 @@ public class MenuRestController {
 	}
 
 	@PostMapping("/item/edit")
-	public ResponseEntity<Void> editItem(@RequestBody Item item) {
-		Item existingItem = itemService.findItemById(item.getId());
+	public ResponseEntity<Void> editItem(@RequestBody MenuItem item) {
+		MenuItem existingItem = itemService.findItemById(item.getId());
 		if (existingItem.getName() == null)
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
@@ -296,7 +402,7 @@ public class MenuRestController {
 
 	@DeleteMapping("/item/delete")
 	public ResponseEntity<Void> deleteItem(@RequestParam("itemId") Long id) {
-		Item existingItem = itemService.findItemById(id);
+		MenuItem existingItem = itemService.findItemById(id);
 		if (existingItem.getName() == null)
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
@@ -361,12 +467,16 @@ public class MenuRestController {
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
-	// ModifierGroup
-	@GetMapping("/modifiergroup")
+	// ModifierGroup - No Worry but delete not yet complete
+	@GetMapping("/modifiergroupbyid")
 	public ResponseEntity<ModifierGroup> findModifierGroupById(@RequestParam("modifiergroupId") Long modifiergroupId) {
 		ModifierGroup existingModifierGroup = modifierGroupService.findModifierGroupById(modifiergroupId);
 		if (existingModifierGroup.getId() == 0)
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		
+		List<MenuItem> itemList = itemService.findItemByModifierGroupId(existingModifierGroup.getId());
+		if(!itemList.isEmpty())
+			existingModifierGroup.setItems(itemList);
 
 		return new ResponseEntity<ModifierGroup>(existingModifierGroup, HttpStatus.OK);
 	}
@@ -378,9 +488,10 @@ public class MenuRestController {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
 		for (ModifierGroup modifierGroup : modifierGroupList) {
-
+			List<MenuItem> itemList = itemService.findItemByModifierGroupId(modifierGroup.getId());
+			if(!itemList.isEmpty())
+				modifierGroup.setItems(itemList);
 		}
-
 		return new ResponseEntity<List<ModifierGroup>>(modifierGroupList, HttpStatus.OK);
 	}
 
@@ -408,10 +519,6 @@ public class MenuRestController {
 
 	@DeleteMapping("/modifiergroup/delete")
 	public ResponseEntity<Void> removeModifierGroup(@RequestParam("modifiergroupId") Long modifiergroupId) {
-		ModifierGroup existingModifierGroup = modifierGroupService.findModifierGroupById(modifiergroupId);
-		if (existingModifierGroup.getId() == 0)
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-
 		int rowAffected = modifierGroupService.removeModifierGroup(modifiergroupId);
 		if (rowAffected == 0)
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -547,5 +654,5 @@ public class MenuRestController {
 
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
-
+*/
 }

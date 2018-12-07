@@ -8,7 +8,7 @@ public class ItemGroup {
 	public String backendId;
 	public String name;
 
-	public List<Item> items;
+	public List<MenuItem> items;
 
 	public ItemGroup() {
 	}
@@ -37,11 +37,11 @@ public class ItemGroup {
 		this.name = name;
 	}
 
-	public List<Item> getItems() {
+	public List<MenuItem> getItems() {
 		return items;
 	}
 
-	public void setItems(List<Item> items) {
+	public void setItems(List<MenuItem> items) {
 		this.items = items;
 	}
 
