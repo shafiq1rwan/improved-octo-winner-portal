@@ -11,7 +11,7 @@ import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
-import com.managepay.admin.byod.entity.Item;
+import com.managepay.admin.byod.entity.MenuItem;
 import com.managepay.admin.byod.entity.ModifierGroup;
 
 @Repository
@@ -71,6 +71,12 @@ public class ModifierGroupRepository {
 		return jdbcTemplate.query("SELECT * FROM modifier_group", rowMapper);
 	}
 
+	public Map<String,Object> findModifierGroupByItemId(Long itemId, Long modifierGroupId) {
+		return jdbcTemplate.queryForMap(
+				"SELECT img.* FROM item i INNER JOIN item_modifier_group img ON i.id = img.item_id WHERE img.item_id = ? AND img.modifier_group_id = ?",
+				new Object[] { itemId, modifierGroupId });
+	}
+
 	public ModifierGroup findModifierGroupById(Long id) {
 		return jdbcTemplate.queryForObject("SELECT * FROM modifier_group WHERE id = ?", new Object[] { id }, rowMapper);
 	}
@@ -86,7 +92,7 @@ public class ModifierGroupRepository {
 	}
 
 	public int removeModifierGroup(Long id) {
-		return jdbcTemplate.update("DELETE FROM modifier_group WHERE id = ?");
+		return jdbcTemplate.update("DELETE FROM modifier_group WHERE id = ?", new Object[] { id });
 	}
 
 }

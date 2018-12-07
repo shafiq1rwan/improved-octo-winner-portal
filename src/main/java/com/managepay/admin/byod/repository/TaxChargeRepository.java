@@ -7,20 +7,20 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
-import com.managepay.admin.byod.entity.ChargeConfig;
+import com.managepay.admin.byod.entity.TaxCharge;
 
 @Repository
-public class ChargeConfigRepository {
+public class TaxChargeRepository {
 
 	private JdbcTemplate jdbcTemplate;
 
 	@Autowired
-	public ChargeConfigRepository(JdbcTemplate jdbcTemplate) {
+	public TaxChargeRepository(JdbcTemplate jdbcTemplate) {
 		this.jdbcTemplate = jdbcTemplate;
 	}
 
-	private RowMapper<ChargeConfig> rowMapper = (rs, rowNum) -> {
-		ChargeConfig chargeConfig = new ChargeConfig();
+	private RowMapper<TaxCharge> rowMapper = (rs, rowNum) -> {
+		TaxCharge chargeConfig = new TaxCharge();
 		chargeConfig.setId(rs.getLong("id"));
 		chargeConfig.setName(rs.getString("charge_config_name"));
 		chargeConfig.setTaxRate(rs.getInt("tax_rate"));
@@ -28,22 +28,22 @@ public class ChargeConfigRepository {
 		return chargeConfig;
 	};
 	
-	public List<ChargeConfig> findAllChargeConfig(){
+	public List<TaxCharge> findAllChargeConfig(){
 		return jdbcTemplate.query("SELECT * FROM charge_config", rowMapper);
 	}
 	
-	public ChargeConfig findChargeConfigById(Long id) {
+	public TaxCharge findChargeConfigById(Long id) {
 		return jdbcTemplate.queryForObject("SELECT * FROM charge_config WHERE id = ?", new Object[] {id}, rowMapper);
 	}
 
-	public int createChargeConfig(ChargeConfig chargeConfig) {
+	public int createChargeConfig(TaxCharge chargeConfig) {
 		return jdbcTemplate.update(
 				"INSERT INTO charge_config(charge_config_name, tax_rate, service_charge_rate) VALUES(?,?,?)",
 				new Object[] { chargeConfig.getName(), chargeConfig.getTaxRate(),
 						chargeConfig.getServiceChargeRate() });
 	}
 
-	public int editChargeConfig(Long id, ChargeConfig chargeConfig) {
+	public int editChargeConfig(Long id, TaxCharge chargeConfig) {
 		return jdbcTemplate.update(
 				"UPDATE charge_config SET charge_config_name=?, tax_rate = ?, service_charge_rate = ? WHERE id = ?",
 				new Object[] { chargeConfig.getName(), chargeConfig.getTaxRate(), chargeConfig.getServiceChargeRate(),

@@ -2,17 +2,17 @@ package com.managepay.admin.byod.service;
 
 import java.util.List;
 
-import com.managepay.admin.byod.entity.ChargeConfig;
+import com.managepay.admin.byod.entity.TaxCharge;
 
 public interface ChargeConfigService {
 
-	public List<ChargeConfig> findAllChargeConfig();
+	public List<TaxCharge> findAllChargeConfig();
 	
-	public ChargeConfig findChargeConfigById(Long id);
+	public TaxCharge findChargeConfigById(Long id);
 	
-	public int createChargeConfig(ChargeConfig chargeConfig);
+	public int createChargeConfig(TaxCharge chargeConfig);
 	
-	public int editChargeConfig(Long id, ChargeConfig chargeConfig);
+	public int editChargeConfig(Long id, TaxCharge chargeConfig);
 	
 	public int removeChargeConfig(Long id);
 	

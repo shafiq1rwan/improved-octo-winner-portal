@@ -6,21 +6,21 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.managepay.admin.byod.entity.ChargeConfig;
-import com.managepay.admin.byod.repository.ChargeConfigRepository;
+import com.managepay.admin.byod.entity.TaxCharge;
+import com.managepay.admin.byod.repository.TaxChargeRepository;
 
 @Service
 public class ChargeConfigServiceImp implements ChargeConfigService {
 
-	private ChargeConfigRepository chargeConfigRepo;
+	private TaxChargeRepository chargeConfigRepo;
 
 	@Autowired
-	public ChargeConfigServiceImp(ChargeConfigRepository chargeConfigRepo) {
+	public ChargeConfigServiceImp(TaxChargeRepository chargeConfigRepo) {
 		this.chargeConfigRepo = chargeConfigRepo;
 	}
 
 	@Override
-	public List<ChargeConfig> findAllChargeConfig() {
+	public List<TaxCharge> findAllChargeConfig() {
 		try {
 			return chargeConfigRepo.findAllChargeConfig();
 		} catch(Exception ex) {
@@ -30,17 +30,17 @@ public class ChargeConfigServiceImp implements ChargeConfigService {
 	}
 
 	@Override
-	public ChargeConfig findChargeConfigById(Long id) {
+	public TaxCharge findChargeConfigById(Long id) {
 		try {
 			return chargeConfigRepo.findChargeConfigById(id);
 		} catch(Exception ex) {
 			ex.printStackTrace();
-			return new ChargeConfig();
+			return new TaxCharge();
 		}
 	}
 
 	@Override
-	public int createChargeConfig(ChargeConfig chargeConfig) {
+	public int createChargeConfig(TaxCharge chargeConfig) {
 		try {
 			return chargeConfigRepo.createChargeConfig(chargeConfig);
 		} catch(Exception ex) {
@@ -50,7 +50,7 @@ public class ChargeConfigServiceImp implements ChargeConfigService {
 	}
 
 	@Override
-	public int editChargeConfig(Long id, ChargeConfig chargeConfig) {
+	public int editChargeConfig(Long id, TaxCharge chargeConfig) {
 		try {
 			return chargeConfigRepo.editChargeConfig(id, chargeConfig);
 		} catch(Exception ex) {

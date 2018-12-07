@@ -1,16 +1,15 @@
 package com.managepay.admin.byod.entity;
 
-import java.util.Date;
-
 public class Store {
 
 	private Long id;
+	private Long groupCategoryId;
 	private String backendId;
 	private String name;
 	private String logoPath;
-	private String backgroundImagePath;
 	private Location location;
 	private String currency;
+	private int tableCount;
 	private boolean isPublished;
 
 	public Store() {
@@ -22,6 +21,14 @@ public class Store {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public Long getGroupCategoryId() {
+		return groupCategoryId;
+	}
+
+	public void setGroupCategoryId(Long groupCategoryId) {
+		this.groupCategoryId = groupCategoryId;
 	}
 
 	public String getBackendId() {
@@ -48,14 +55,6 @@ public class Store {
 		this.logoPath = logoPath;
 	}
 
-	public String getBackgroundImagePath() {
-		return backgroundImagePath;
-	}
-
-	public void setBackgroundImagePath(String backgroundImagePath) {
-		this.backgroundImagePath = backgroundImagePath;
-	}
-
 	public Location getLocation() {
 		return location;
 	}
@@ -70,6 +69,14 @@ public class Store {
 
 	public void setCurrency(String currency) {
 		this.currency = currency;
+	}
+
+	public int getTableCount() {
+		return tableCount;
+	}
+
+	public void setTableCount(int tableCount) {
+		this.tableCount = tableCount;
 	}
 
 	public boolean isPublished() {
