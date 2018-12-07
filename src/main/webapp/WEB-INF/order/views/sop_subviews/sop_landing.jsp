@@ -7,9 +7,13 @@
 					type="button" id="languageDropDown" data-toggle="dropdown"
 					aria-haspopup="false" aria-expanded="false">{{currentLocale}}</button>
 				<div class="dropdown-menu" aria-labelledby="languageDropDown">
-					<a class="dropdown-item md-resp-font"
-						ng-repeat="localeObj in localeData"
-						ng-click="changeLocale(localeObj.shortName)">{{localeObj.name}}
+					<a class="language-dropdown-item dropdown-item md-resp-font lang-selected"
+						ng-repeat-start="localeObj in localeData" ng-if="$first"
+						ng-click="changeLocale($event, localeObj.shortName)">{{localeObj.name}}
+						({{localeObj.shortName}})</a> <a
+						class="language-dropdown-item dropdown-item md-resp-font"
+						ng-repeat-end="localeObj in localeData" ng-if="!$first"
+						ng-click="changeLocale($event, localeObj.shortName)">{{localeObj.name}}
 						({{localeObj.shortName}})</a>
 				</div>
 			</div>
@@ -21,7 +25,7 @@
 			</div>
 		</div>
 		<div class="body-content">
-			<div id="main-content"
+			<div id="landing-main-content"
 				class="d-flex flex-column justify-content-center">
 				<img class="align-self-center"
 					style="max-height: 30%; max-width: 30%;"
@@ -45,7 +49,7 @@
 						onclick="window.location.href='#!/startOrder'">{{currentLanguageData.landing_orderNow}}</button>
 				</div>
 			</div>
-			<div id="footer-content"
+			<div id="landing-footer-content"
 				class="d-flex flex-row justify-content-center">
 				<span class="align-self-center xs-resp-font">Powered By&nbsp;</span>
 				<img class="align-self-center xs-resp-img"

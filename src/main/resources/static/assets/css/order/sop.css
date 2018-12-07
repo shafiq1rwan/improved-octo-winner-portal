@@ -5,12 +5,31 @@ div.body-content {
 	height: 90%;
 }
 
+/*sop_loading*/
+div#loading-main-content {
+	height: 100%;
+	width: 100%;
+	background: white;
+}
+div#loading-progress {
+	width: 90%;
+}
+div#loading-refresh {
+	width: 10%;
+}
+
 /*sop_landing*/
-div#main-content {
+div#landing-main-content {
 	height: 90%;
 }
-div#footer-content {
+div#landing-footer-content {
 	height: 10%;
+}
+a.language-dropdown-item.lang-selected::after {
+	content: ' \2713';
+	white-space: pre;
+  	display: inline-block;
+  	color: green;
 }
 
 /*Page Overlay Setting*/
@@ -22,6 +41,9 @@ div.page-overlay {
 	padding: 0;
 	width: 100%;
 	height: 100%;
+}
+div#loading-overlay {
+	z-index: 100;
 }
 div#landing-overlay {
 	z-index: 1;

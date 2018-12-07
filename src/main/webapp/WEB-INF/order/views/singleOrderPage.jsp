@@ -2,6 +2,10 @@
 <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/order/sop.css">
 </head>
 <body>
+	<!-- Loading Display[START] -->
+	<jsp:include page="/WEB-INF/order/views/sop_subviews/sop_loading.jsp" />
+	<!-- Loading Display[END] -->
+	
 	<!-- Landing Display[START] -->
 	<jsp:include page="/WEB-INF/order/views/sop_subviews/sop_landing.jsp" />
 	<!-- Landing Display[END] -->
@@ -25,8 +29,4 @@
 	<!--  Item Checkout Display[START] -->
 	<jsp:include page="/WEB-INF/order/views/sop_subviews/sop_checkout.jsp" />
 	<!--  Item Checkout Display[END] -->
-	
-	<!-- Loading Modal[START] -->
-	<jsp:include page="/WEB-INF/order/views/sop_subviews/sop_loading.jsp" />
-	<!-- Loading Modal[END] -->
 </body>

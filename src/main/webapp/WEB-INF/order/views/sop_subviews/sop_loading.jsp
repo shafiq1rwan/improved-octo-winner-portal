@@ -1,11 +1,18 @@
 <body>
-	<div id="loading-modal-overlay" class="page-overlay flex-container"
-		ng-show="isShowLoading" style="background: rgba(0, 0, 0, 0.7);">
-		<div class="flex-content" style="background: white;">
-			<div class="flex-content" style="margin: 5vh 3vh 5vh 3vh;">
-				<img src="${pageContext.request.contextPath}/images/gif/loader.gif"
-					style="width: 15vh; height: 15vh;" />
-				<h4>Processing Order...</h4>
+	<div id="loading-overlay" class="page-overlay">
+		<div id="loading-main-content"
+			class="d-flex flex-column justify-content-center">
+			<span class="align-self-center md-resp-font">{{loadingText}}</span>
+			<div id="loading-progress" class="progress align-self-center">
+				<div class="progress-bar progress-bar-striped progress-bar-animated lg-resp-img"
+					style="width: {{loadingPercentage}}%" role="progressbar"></div>
+			</div>
+			<span class="align-self-center md-resp-font"
+				ng-hide="isLoadingFailed">{{loadingPercentage}}%</span>
+			<div id="loading-refresh" class="align-self-center">
+				<input type="image"
+					src="${pageContext.request.contextPath}/assets/images/order/icon/refresh_icon.svg"
+					alt="Refresh" ng-show="isLoadingFailed" ng-click="beginLoading()">
 			</div>
 		</div>
 	</div>
