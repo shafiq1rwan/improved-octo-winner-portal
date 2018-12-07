@@ -1,0 +1,9 @@
+spring:
+  profiles: language-pack-en
+language-pack-en:
+  packName: "English"
+  packShortName: EN
+  landing_storeName: "Store Name"
+  landing_table: "Table"
+  landing_orderNow: "Order Now"
+  landing_poweredBy: "Powered By"

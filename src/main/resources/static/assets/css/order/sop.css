@@ -1,0 +1,28 @@
+div.header-content {
+	height: 10%;
+}
+div.body-content {
+	height: 90%;
+}
+
+/*sop_landing*/
+div#main-content {
+	height: 90%;
+}
+div#footer-content {
+	height: 10%;
+}
+
+/*Page Overlay Setting*/
+div.page-overlay {
+	position: absolute;
+	top: 0;
+	left: 0;
+	margin: 0;
+	padding: 0;
+	width: 100%;
+	height: 100%;
+}
+div#landing-overlay {
+	z-index: 1;
+}

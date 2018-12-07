@@ -1,13 +1,14 @@
 spring:
+  profiles:
+    active:
+    - development-data
+    - application-data
+    - language-pack-en
+    - language-pack-cn
   mvc:
     view:
       prefix: /WEB-INF/
       suffix: .jsp
-  datasource:
-    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
-    url: jdbc:sqlserver://localhost:1433;databaseName=byod
-    username: sa
-    password: MPay@1234
   jpa:
     show-sql: true
     hibernate:
@@ -16,3 +17,43 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.SQLServer2012Dialect
         show_sql: true
+
+---
+
+spring:
+  profiles: development-data
+  datasource:
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    url: jdbc:sqlserver://localhost:1433;databaseName=byod
+    username: sa
+    password: MPay@1234
+
+---
+
+spring:
+  profiles: production-data
+  datasource:
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    url: jdbc:sqlserver://localhost:1433;databaseName=byod
+    username: sa
+    password: MPay@1234
+    
+---
+
+spring:
+  profiles: application-data
+application-data:
+  appName: "KFC"
+  mainLogoPath: "/assets/images/order/logo/main_logo.png"
+  shortcutLogoPath: "/assets/images/order/logo/shortcut_logo.png"
+  mainBackgroundPath: "/assets/images/order/background/main_background.png"
+  landingLogoPath: "/assets/images/order/logo/shortcut_logo.png"
+  mainColor: "#C41230"
+  subColor: "#000000"
+  mainTextColor: "#000000"
+  subTextColor: "#FFFFFF"
+  localeButtonColor: "#FFFFFF"
+  mainButtonTextColor: "#FFFFFF"
+  mainButtonBackgroundColor: "#C41230"
+  mainButtonBackgroundHoverColor: "#C41230"
+  mainButtonBackgroundFocusColor: "#C41230"

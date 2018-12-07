@@ -1,0 +1,9 @@
+spring:
+  profiles: language-pack-cn
+language-pack-cn:
+  packName: "简体中文"
+  packShortName: CN
+  landing_storeName: "商店"
+  landing_table: "座号"
+  landing_orderNow: "开始下单"
+  landing_poweredBy: "Powered By"
