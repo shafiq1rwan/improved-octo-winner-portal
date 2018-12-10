@@ -79,9 +79,11 @@ public class GroupCategoryServiceImp implements GroupCategoryService {
 	public int removeGroupCategory(Long id) {
 		// TODO Not yet done
 		try {
-			return groupCategoryRepo.removeGroupCategory(id);
-			//set store group c id = 0;
+			int affectedRow = groupCategoryRepo.removeGroupCategory(id);
+			storeService.editStoreGroupCategoryIdInBatch(id);
+			
 			//set category group c id = 0;
+			return affectedRow;
 		} catch(Exception ex) {
 			ex.printStackTrace();
 			return 0;

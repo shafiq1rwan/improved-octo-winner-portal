@@ -149,6 +149,12 @@ public class MenuRestController {
 
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
+	
+	@PostMapping("/store/edit/groupcategory")
+	public ResponseEntity<Void> editStoreGroupCategoryId(@RequestParam("storeId") Long storeId, @RequestParam("groupCategoryId") Long groupCategoryId){
+		storeService.editStoreGroupCategoryId(groupCategoryId, storeId);
+		return new ResponseEntity<>(HttpStatus.OK);
+	}
 
 	@DeleteMapping("/store/delete")
 	public ResponseEntity<Void> removeStore(@RequestParam("id") Long id) {

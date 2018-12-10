@@ -76,6 +76,11 @@ public class StoreRepository {
 		return jdbcTemplate.update("UPDATE store SET group_category_id = ? WHERE id = ?",
 				new Object[] { groupCategoryId, id });
 	}
+	
+	public int editStoreGroupCategoryIdInBatch(Long groupCategoryId) {
+		return jdbcTemplate.update("UPDATE store SET group_category_id = 0 WHERE group_category_id = ?",
+				new Object[] { groupCategoryId});
+	}
 
 	public int removeStore(Long id) {
 		return jdbcTemplate.update("DELETE FROM store WHERE id = ?", new Object[] { id });

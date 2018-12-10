@@ -1,11 +1,13 @@
 package com.managepay.admin.byod.entity;
 
+import java.util.Date;
 import java.util.List;
 
 public class GroupCategory {
 
 	private Long id;
 	private String name;
+	private Date createdDate;
 	private List<Category> categories;
 	private List<Store> stores;
 
@@ -27,6 +29,14 @@ public class GroupCategory {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+	
+	public Date getCreatedDate() {
+		return createdDate;
+	}
+
+	public void setCreatedDate(Date createdDate) {
+		this.createdDate = createdDate;
 	}
 
 	public List<Category> getCategories() {

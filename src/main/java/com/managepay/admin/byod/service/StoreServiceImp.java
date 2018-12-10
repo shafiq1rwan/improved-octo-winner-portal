@@ -78,6 +78,17 @@ public class StoreServiceImp implements StoreService {
 			return 0;
 		}
 	}
+	
+
+	@Override
+	public int editStoreGroupCategoryIdInBatch(Long groupCategoryId) {
+		try {
+			return storeRepo.editStoreGroupCategoryIdInBatch(groupCategoryId);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return 0;
+		}
+	}
 
 	@Override
 	public List<Store> findStoresByGroupCategoryId(Long groupCategoryId) {
@@ -88,5 +99,6 @@ public class StoreServiceImp implements StoreService {
 			return Collections.emptyList();
 		}
 	}
+
 
 }

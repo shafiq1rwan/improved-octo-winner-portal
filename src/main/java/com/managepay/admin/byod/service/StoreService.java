@@ -17,6 +17,8 @@ public interface StoreService {
 	public int editStore(Long id, Store store);
 	
 	public int editStoreGroupCategoryId(Long groupCategoryId, Long id);
+	
+	public int editStoreGroupCategoryIdInBatch(Long groupCategoryId);
 
 	public int removeStore(Long id);
 
