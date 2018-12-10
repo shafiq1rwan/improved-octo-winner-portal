@@ -13,8 +13,6 @@
 <!-- ****BASE FOLDER DEFINE**** -->
 <base href="/assets/">
 
-<link rel="shortcut icon" type="image/ico" href="${pageContext.request.contextPath}/assets/favicon.png" />
-
 <style>
 /* Paste this css to your style sheet file or under head tag */
 /* This only works with JavaScript, 
@@ -39,36 +37,39 @@ if it's not present, don't show loader */
 	z-index: 9999;
 	background: url(images/loader-64x/Preloader_2.gif) center no-repeat #fff;
 }
+
+.main {
+	margin-top: 50px;
+}
 </style>
 	<!-- Favicon -->
 	<link rel="shortcut icon" href="${pageContext.request.contextPath}/assets/images/favicon.ico">
 
 	<!-- Bootstrap CSS -->
-	<link href="${pageContext.request.contextPath}/assets/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+	<link href="${pageContext.request.contextPath}/assets/plugins/bootstrap-4.1.3/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
 	
 	<!-- Font Awesome CSS -->
-	<link href="${pageContext.request.contextPath}/assets/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+	<link href="${pageContext.request.contextPath}/assets/plugins/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
 	
 	<!-- Custom CSS -->
-	<link href="${pageContext.request.contextPath}/assets/css/style.css" rel="stylesheet" type="text/css" />
+	<link href="${pageContext.request.contextPath}/assets/css/byodadmin/style.css" rel="stylesheet" type="text/css" />
 	
 	<!-- BEGIN CSS for this page -->
-	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.16/css/dataTables.bootstrap4.min.css"/>
+	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/assets/plugins/datatable-1.10.16/css/dataTables.bootstrap4.min.css"/>
 	<!-- END CSS for this page -->
 	
-	<link href="${pageContext.request.contextPath}/assets/plugins/jquery.filer/css/jquery.filer.css" rel="stylesheet" />
-	<link href="${pageContext.request.contextPath}/assets/plugins/jquery.filer/css/themes/jquery.filer-dragdropbox-theme.css" rel="stylesheet" />		
+	<link href="${pageContext.request.contextPath}/assets/plugins/jQuery.filer-1.3.0/css/jquery.filer.css" rel="stylesheet" />
+	<link href="${pageContext.request.contextPath}/assets/plugins/jQuery.filer-1.3.0/css/themes/jquery.filer-dragdropbox-theme.css" rel="stylesheet" />		
 	
-<!-- ANGULAR JS IMPORT - Version 1.5 above -->
-<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.7/angular.min.js"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.7/angular-route.js"></script>
-
-<style>
-.main {
-	margin-top: 50px;
-}
-</style>
-
+	<!-- ANGULAR JS IMPORT - Version 1.5 above -->
+	<script src="${pageContext.request.contextPath}/assets/plugins/angular-1.7.4/js/angular.min.js"></script>
+	<script src="${pageContext.request.contextPath}/assets/plugins/angular-1.7.4/js/angular-route.min.js"></script>
+	
+	<script src="${pageContext.request.contextPath}/assets/plugins/jquery-3.3.1/js/jquery-3.3.1.min.js"></script>
+	<%-- <script src="${pageContext.request.contextPath}/assets2/js/jquery.min.js"></script> --%>
+	<script src="${pageContext.request.contextPath}/assets/plugins/datatable-1.10.16/js/jquery.dataTables.min.js"></script>
+	<script src="${pageContext.request.contextPath}/assets/plugins/datatable-1.10.16/js/dataTables.bootstrap4.min.js"></script>
+	
 <%-- <link rel="import" href="${pageContext.request.contextPath}/assets/component.html"> --%>
 </head>
 
@@ -102,6 +103,13 @@ if it's not present, don't show loader */
 		.when("/Router_store", {
 			templateUrl : "${pageContext.request.contextPath}/user/views/store",
 			controller : "ctl_store",
+			resolve : {
+		       	checkSession:checkSession
+		       }
+		})
+		.when("/Router_group_category", {
+			templateUrl : "${pageContext.request.contextPath}/user/views/groupCategory",
+			controller : "ctl_group_category",
 			resolve : {
 		       	checkSession:checkSession
 		       }
@@ -154,34 +162,34 @@ if it's not present, don't show loader */
 		})
 	};
 </script>
-
-<script src="${pageContext.request.contextPath}/assets/js/modernizr.min.js"></script>
-	<script src="${pageContext.request.contextPath}/assets/js/jquery.min.js"></script>
-	<script src="${pageContext.request.contextPath}/assets/js/moment.min.js"></script>
-			
-	<script src="${pageContext.request.contextPath}/assets/js/popper.min.js"></script>
-	<script src="${pageContext.request.contextPath}/assets/js/bootstrap.min.js"></script>
 	
-	<script src="${pageContext.request.contextPath}/assets/js/detect.js"></script>
-	<script src="${pageContext.request.contextPath}/assets/js/fastclick.js"></script>
-	<script src="${pageContext.request.contextPath}/assets/js/jquery.blockUI.js"></script>
-	<script src="${pageContext.request.contextPath}/assets/js/jquery.nicescroll.js"></script>
+<script src="${pageContext.request.contextPath}/assets/plugins/pikeadmin/js/popper.min.js"></script>
+<script src="${pageContext.request.contextPath}/assets/plugins/bootstrap-4.1.3/js/bootstrap.bundle.min.js"></script>
+<script src="${pageContext.request.contextPath}/assets/plugins/pikeadmin/js/fastclick.js"></script>
+<script src="${pageContext.request.contextPath}/assets/plugins/pikeadmin/js/jquery.nicescroll.js"></script>
+<script src="${pageContext.request.contextPath}/assets/plugins/pikeadmin/js/modernizr.min.js"></script>
+<script src="${pageContext.request.contextPath}/assets/plugins/pikeadmin/js/moment.min.js"></script>	
+<script src="${pageContext.request.contextPath}/assets/plugins/pikeadmin/js/detect.js"></script>
+<script src="${pageContext.request.contextPath}/assets/plugins/pikeadmin/js/jquery.nicescroll.js"></script>
+<script src="${pageContext.request.contextPath}/assets/plugins/pikeadmin/js/jquery.blockUI.js"></script>
+<script src="${pageContext.request.contextPath}/assets/plugins/parsleyjs/parsley.min.js"></script>
+<script src="${pageContext.request.contextPath}/assets/plugins/jQuery.filer-1.3.0/js/jquery.filer.min.js"></script>
+<script src="${pageContext.request.contextPath}/assets/plugins/pikeadmin/js/pikeadmin.js"></script>
 	
 	<!-- App js -->
-	<script src="${pageContext.request.contextPath}/assets/js/pikeadmin.js"></script>
+
+	<%--
 
 	<!-- BEGIN Java Script for this page -->
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
-	<script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
-	<script src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap4.min.js"></script>
-	<script src="${pageContext.request.contextPath}/assets/plugins/jquery.filer/js/jquery.filer.min.js"></script>
 
 	<!-- Counter-Up-->
 	<script src="${pageContext.request.contextPath}/assets/plugins/waypoints/lib/jquery.waypoints.min.js"></script>
-	<script src="${pageContext.request.contextPath}/assets/plugins/counterup/jquery.counterup.min.js"></script>	
+	<script src="${pageContext.request.contextPath}/assets/plugins/counterup/jquery.counterup.min.js"></script> --%>
 
 <!-- *****************************ANGULAR JS CONTROLLER***************************** -->
 <jsp:include page="/WEB-INF/user/controller/ctl_store.jsp" />
+<jsp:include page="/WEB-INF/user/controller/ctl_group_category.jsp" />
 <jsp:include page="/WEB-INF/user/controller/ctl_profile.jsp" />
 <jsp:include page="/WEB-INF/user/controller/ctl_menu.jsp" />
 <jsp:include page="/WEB-INF/user/controller/ctl_add_menu.jsp" />
