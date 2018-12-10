@@ -1,5 +1,7 @@
 package com.managepay.admin.byod.entity;
 
+import java.util.Date;
+
 public class Store {
 
 	private Long id;
@@ -11,6 +13,7 @@ public class Store {
 	private String currency;
 	private int tableCount;
 	private boolean isPublished;
+	private Date createdDate;
 
 	public Store() {
 	}
@@ -85,6 +88,14 @@ public class Store {
 
 	public void setPublished(boolean isPublished) {
 		this.isPublished = isPublished;
+	}
+
+	public Date getCreatedDate() {
+		return createdDate;
+	}
+
+	public void setCreatedDate(Date createdDate) {
+		this.createdDate = createdDate;
 	}
 
 }

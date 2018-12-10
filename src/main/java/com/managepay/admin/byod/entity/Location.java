@@ -4,7 +4,7 @@ public class Location {
 
 	private String address;
 	private String country;
-	private double longtitude;
+	private double longitude;
 	private double latitude;
 
 	public Location() {
@@ -26,12 +26,12 @@ public class Location {
 		this.country = country;
 	}
 
-	public double getLongtitude() {
-		return longtitude;
+	public double getLongitude() {
+		return longitude;
 	}
 
-	public void setLongtitude(double longtitude) {
-		this.longtitude = longtitude;
+	public void setLongitude(double longitude) {
+		this.longitude = longitude;
 	}
 
 	public double getLatitude() {

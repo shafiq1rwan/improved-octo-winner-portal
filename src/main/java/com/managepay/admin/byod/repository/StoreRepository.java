@@ -28,8 +28,8 @@ public class StoreRepository {
 		store.setName(rs.getString("store_name"));
 		store.setLogoPath(rs.getString("store_logo_path"));
 		Location location = new Location();
-		location.setAddress(rs.getString(rs.getString("store_address")));
-		location.setLongtitude(rs.getDouble("store_longtitude"));
+		location.setAddress(rs.getString("store_address"));
+		location.setLongitude(rs.getDouble("store_longitude"));
 		location.setLatitude(rs.getDouble("store_latitude"));
 		location.setCountry(rs.getString("store_country"));
 		store.setLocation(location);
@@ -40,7 +40,7 @@ public class StoreRepository {
 	};
 
 	public List<Store> findAllStore() {
-		return jdbcTemplate.query("SELECT * FROM store WHERE group_category_id = NULL OR group_category_id = 0",
+		return jdbcTemplate.query("SELECT * FROM store WHERE group_category_id = 0 OR group_category_id IS NULL",
 				rowMapper);
 	}
 	
@@ -54,20 +54,21 @@ public class StoreRepository {
 	}
 	
 	public int createStore(Store store) {
+		
 		return jdbcTemplate.update(
-				"INSERT INTO store(group_category_id, backend_id,store_name,store_logo_path,store_address,store_longtitude,stote_latitude,store_country,store_currency, store_table_count, is_published) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
-				new Object[] { store.getGroupCategoryId(), store.getBackendId(), store.getName(), store.getLogoPath(), store.getLocation().getAddress(),
-						store.getLocation().getLongtitude(), store.getLocation().getLatitude(),
+				"INSERT INTO store(backend_id,store_name,store_logo_path,store_address,store_longitude,store_latitude,store_country,store_currency, store_table_count, is_publish) VALUES (?,?,?,?,?,?,?,?,?,?)",
+				new Object[] {store.getBackendId(), store.getName(), store.getLogoPath(), store.getLocation().getAddress(),
+						store.getLocation().getLongitude(), store.getLocation().getLatitude(),
 						store.getLocation().getCountry(), store.getCurrency(), store.getTableCount(),
 						store.isPublished() });
 	}
 
 	public int editStore(Long id, Store store) {
 		return jdbcTemplate.update(
-				"UPDATE store SET group_category_id = ?, backend_id = ?,store_name = ?,store_logo_path = ?,store_address = ?,store_longtitude = ?,stote_latitude = ?,store_country = ?,store_currency = ?, store_table_count = ?, is_published = ? WHERE id = ?",
-				new Object[] { store.getGroupCategoryId(), store.getBackendId(), store.getName(), store.getLogoPath(),
+				"UPDATE store SET store_name = ?,store_logo_path = ?,store_address = ?,store_longitude = ?,store_latitude = ?,store_country = ?,store_currency = ?, store_table_count = ?, is_publish = ? WHERE id = ?",
+				new Object[] {store.getName(), store.getLogoPath(),
 						 store.getLocation().getAddress(),
-						store.getLocation().getLongtitude(), store.getLocation().getLatitude(),
+						store.getLocation().getLongitude(), store.getLocation().getLatitude(),
 						store.getLocation().getCountry(), store.getCurrency(), store.getTableCount(),
 						store.isPublished(), id });
 	}

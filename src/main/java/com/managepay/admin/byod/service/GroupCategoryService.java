@@ -10,7 +10,7 @@ public interface GroupCategoryService {
 	
 	public GroupCategory findGroupCategory(Long id);
 	
-	public int createGroupCategory(GroupCategory groupCategory);
+	public String createGroupCategory(GroupCategory groupCategory);
 	
 	public int editGroupCategory(Long id, GroupCategory groupCategory);
 	

@@ -3,7 +3,10 @@ package com.managepay.admin.byod.service;
 import java.util.Collections;
 import java.util.List;
 
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.managepay.admin.byod.entity.GroupCategory;
@@ -48,26 +51,54 @@ public class GroupCategoryServiceImp implements GroupCategoryService {
 	}
 
 	@Override
-	public int createGroupCategory(GroupCategory groupCategory) {
+	public String createGroupCategory(GroupCategory groupCategory) {
+		
+		JSONObject jsonObj = new JSONObject();
 		try {
-			List<Store> stores = groupCategory.getStores();
-			if(!stores.isEmpty() || stores != null) {
-				for(Store store: stores) {
-					storeService.editStoreGroupCategoryId(groupCategory.getId(), store.getId());
+			
+			int duplicateNameCount = checkDuplicationGroupCategoryName(groupCategory.getName());
+			if(duplicateNameCount == 1) {
+				jsonObj.put("responseCode", "01");
+				jsonObj.put("responseMessage", "Duplication Found");
+			}
+			else {
+				Long generatedId = groupCategoryRepo.createGroupCategory(groupCategory);
+				System.out.println("generated Id :" + generatedId);
+				
+				
+				if(generatedId != 0) {
+					List<Store> stores = groupCategory.getStores();
+					if(!stores.isEmpty() || stores != null) {
+						for(Store store: stores) {
+							System.out.println("store: " + store.getId());
+							storeService.editStoreGroupCategoryId(generatedId, store.getId());
+						}
+					}
+					
+					jsonObj.put("responseCode", "00");
+					jsonObj.put("responseMessage", "Success");
+				} else {
+					jsonObj.put("responseCode", "02");
+					jsonObj.put("responseMessage", "Fail to Create Group");
 				}
 			}
-			return groupCategoryRepo.createGroupCategory(groupCategory);
 		}
 		catch(Exception ex) {
 			ex.printStackTrace();
-			return 0;
+			return null;
 		}
+		return jsonObj.toString();	
 	}
-
+	
 	@Override
 	public int editGroupCategory(Long id, GroupCategory groupCategory) {
+
 		try {
 			return groupCategoryRepo.editGroupCategory(id, groupCategory);
+		}
+		catch(DataIntegrityViolationException ex) {
+			ex.printStackTrace();
+			throw new DataIntegrityViolationException("Duplication Found");
 		}
 		catch(Exception ex) {
 			ex.printStackTrace();
@@ -89,5 +120,16 @@ public class GroupCategoryServiceImp implements GroupCategoryService {
 			return 0;
 		}
 	}
+	
+	private int checkDuplicationGroupCategoryName(String name) {
+		try {
+			return groupCategoryRepo.checkGroupCategoryNameDuplication(name);
+		}
+		catch(DataAccessException ex) {
+			ex.printStackTrace();
+			return 0;
+		}
+	}
+	
 
 }
