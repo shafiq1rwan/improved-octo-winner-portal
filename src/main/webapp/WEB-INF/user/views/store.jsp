@@ -45,6 +45,8 @@
 												<th>Name</th>
 												<th>Image</th>
 												<th>Country</th>
+												<th>Active Status</th>
+												<th>Action</th>
 											</tr>
 										</thead>										
 										<tbody>									
@@ -67,23 +69,17 @@
 	<div class="modal fade" id="createStoreModal" tabindex="-1" role="dialog" aria-labelledby="createStoreModal" aria-hidden="true">
 		<div class="modal-dialog modal-lg">
 		    <div class="modal-content">
+		    <form id="createStoreForm" method="POST" accept-charset="UTF-8" role="form" class="form-signin">
 		      <div class="modal-header">
 		        <h5 class="modal-title">Store Detail</h5>
-		        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+		        <button type="button" class="close" data-dismiss="modal" ng-click="resetModal()" aria-label="Close">
 		          <span aria-hidden="true">&times;</span>
 		        </button>
 		      </div>
-		      <div class="modal-body">		       						
-				  <form id="createStoreForm" method="POST" accept-charset="UTF-8" role="form" class="form-signin">
+		      <div class="modal-body">		       									  
 					<div class="form-section">
 						<div class="row">
-							<div class="col-4 col-sm-4 col-md-4 col-lg-4 col-xl-4">
-								<div class="form-group">
-									<label class="login-label">Backend ID</label>
-									<input class="form-control" name="storeBackendID" placeholder="Backend ID" ng-model="store.backendID" type="text" required > 
-								</div>
-							</div>
-							<div class="col-4 col-sm-4 col-md-4 col-lg-4 col-xl-4">
+							<div class="col-8 col-sm-8 col-md-8 col-lg-8 col-xl-8">
 								<div class="form-group">
 									<label class="login-label">Name</label>
 									<input class="form-control" name="storeName" placeholder="Name" ng-model="store.name" type="text" required> 
@@ -113,22 +109,22 @@
 						<div class="row">
 							<div class="col-4 col-sm-4 col-md-4 col-lg-4 col-xl-4">
 								<div class="form-group">
-									<label class="login-label">Country</label>
-									<input class="form-control" name="storeCountry" placeholder="Country" ng-model="store.country" type="text" required> 
-								</div>
-							</div>
-							<div class="col-4 col-sm-4 col-md-4 col-lg-4 col-xl-4">
-								<div class="form-group">
 									<label class="login-label">Longitude</label>
-									<input class="form-control" name="storeLongitude" placeholder="Longitude" ng-model="store.longitude" type="number" step=".000001" required> 
+									<input class="form-control" name="storeLongitude" ng-blur="setPrecision(event, store.longitude)" ng-click="event = $event" placeholder="Longitude" ng-model="store.longitude" type="number" step=".000001" required> 
 								</div>
 							</div>
 							<div class="col-4 col-sm-4 col-md-4 col-lg-4 col-xl-4">
 								<div class="form-group">
 									<label class="login-label">Latitude</label>
-									<input class="form-control" name="storeLatitude" placeholder="Latitude" ng-model="store.latitude" type="number" step=".000001" required> 
+									<input class="form-control" name="storeLatitude" ng-blur="setPrecision(event, store.latitude)" ng-click="event = $event" placeholder="Latitude" ng-model="store.latitude" type="number" step=".000001" required> 
 								</div>
 							</div>
+							<div class="col-4 col-sm-4 col-md-4 col-lg-4 col-xl-4">
+								<div class="form-group">
+									<label class="login-label">Country</label>
+									<input class="form-control" name="storeCountry" placeholder="Country" ng-model="store.country" type="text" required> 
+								</div>
+							</div>						
 						</div>
 						<div class="row">
 							<div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
@@ -138,12 +134,13 @@
 								</div>
 							</div>
 						</div>	
-					</div>		
-				  </form>									
+					</div>				 									
 		      </div>
 		      <div class="modal-footer">
-		      	<button class="btn btn-primary" ng-click="createStore()"> Create</button>
+		      	<button class="btn btn-primary" type="submit" ng-click="createStore()"> Submit</button>
+		      	<button class="btn btn-success" type="submit" ng-click="publishStore()"> Submit & Publish</button>
 		      </div>
+		       </form>		      
 		    </div>
 		</div>
 	</div>

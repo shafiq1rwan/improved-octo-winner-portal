@@ -1,15 +1,68 @@
 <html>
 <script>
 	app.controller('ctl_store', function($scope, $http) {
-		
+		$scope.action = '';
 		$scope.store = {};
 		
-		$scope.createStore = function(){
-			alert(JSON.stringify($scope.store));
+		$scope.publishStore = function(){
+			var confirmation = confirm("Some of the store detail cannot be modified after publish. Kindly confirm.");
+			if(confirmation){
+				$scope.store.isPublish = true;
+				$scope.createStore();
+			}
 		}
 		
-		$(document).ready(function() {
-			$('#store_dtable').DataTable({
+		$scope.createStore = function(){					
+			var postdata = {
+				store_name : $scope.store.name,
+				store_logo_path : $scope.store.imagePath,
+				location : {
+					store_address : $scope.store.address,
+					store_country : $scope.store.country,
+					store_longitude : parseFloat($scope.store.longitude).toFixed(6),
+					store_latitude : parseFloat($scope.store.latitude).toFixed(6)
+				},
+				store_currency : $scope.store.currency,
+				store_table_count: $scope.store.tableCount, 
+				is_publish: $scope.store.isPublish==null?false:$scope.store.isPublish
+			}
+			
+			console.log(postdata);
+			
+			$http({
+				method : 'POST',
+				headers : {'Content-Type' : 'application/json'},
+				url : '${pageContext.request.contextPath}/menu/store/create',
+				data : postdata
+			})
+			.then(function(response) {
+
+				if (response.status == "403") {
+					alert("Session TIME OUT");
+					$(location).attr('href','${pageContext.request.contextPath}/admin');			
+				} else if(response.status == "200") {
+					// ok
+					alert("Store is created successfully")
+					$scope.resetModal();
+					$('#createStoreModal').modal('toggle');
+					$scope.refreshTable();
+				}
+			});
+		}
+		
+		$scope.setPrecision = function($event, value){
+			$event.target.value = parseFloat($event.target.value).toFixed(6);
+			value =  $event.target.value;
+			console.log(value);
+		}
+		
+		// reset modal
+		$scope.resetModal = function(){
+			$scope.store = {};
+		}
+		
+		$scope.refreshTable = function(){
+			var table = $('#store_dtable').DataTable({
 				"ajax" : {
 					"url" : "${pageContext.request.contextPath}/menu/store/",
 					"dataSrc": function ( json ) {
@@ -26,13 +79,52 @@
 				"order" : [ [ 0, "asc" ] ] ,
 				"columns" : [ 
 					{"data" : "id", "width": "5%"}, 
-					{"data" : "backendId", "width": "15%"},
-					{"data" : "name"},
-					{"data" : "logoPath"},
-					{"data" : "location.country"}
+					{"data" : "backend_id", "width": "15%"},
+					{"data" : "store_name"},
+					{"data" : "store_logo_path"},
+					{"data" : "location.store_country"},
+					{"data" : "is_publish", "width": "13%"},
+					{"data": "id", "width": "25%",
+						 "render": function ( data, type, full, meta ) {
+							 	var groupid = full.id;
+							    return '<div class="btn-toolbar justify-content-between"><button type="button" class="btn btn-outline-info border-0 p-0 custom-fontsize"><b><i class="fa fa-edit"></i> ECPOS</b></button>&nbsp;&nbsp;&nbsp;&nbsp;<button type="button" class="btn btn-outline-info border-0 p-0 custom-fontsize"><b><i class="fa fa-edit"></i> BYOD</b></button>&nbsp;&nbsp;&nbsp;&nbsp;<button type="button" class="btn btn-outline-info border-0 p-0 custom-fontsize"><b><i class="fa fa-edit"></i> KIOSK</b></button></div>'
+		  						
+						 }
+					}
 					],
 				
 			});
+			
+			$('#store_dtable tbody').off('click', 'tr');
+			$('#store_dtable tbody').on('click', 'tr', function() {
+				$http({
+					method : 'GET',
+					headers : {'Content-Type' : 'application/json'},
+					url : '${pageContext.request.contextPath}/menu/storebyid?id='+table.row(this).data().id			
+				})
+				.then(function(response) {
+					if (response.status == "404") {
+						alert("Unable to find store detail");
+					} else if(response.status == "200") {
+						alert(JSON.stringify(response));
+						$scope.store.name = response.data.store_name;
+						$scope.store.imagePath = response.data.store_logo_path;
+						$scope.store.address = response.data.location.store_address;
+						$scope.store.country = response.data.location.store_country;
+						$scope.store.longitude = response.data.location.store_longitude;
+						$scope.store.latitude = response.data.location.store_latitude;
+						$scope.store.currency = response.data.store_currency;
+						$scope.store.tableCount = response.data.store_table_count;
+						$scope.store.isPublish = response.data.is_publish;
+
+						$('#createStoreModal').modal('toggle');
+					}
+				});
+			});
+		}
+		
+		$(document).ready(function() {
+			$scope.refreshTable();
 			/* $('#createStoreForm').parsley(); */
 			
 			$('input[type=file]').change(function(event) {
@@ -44,7 +136,7 @@
 				reader.readAsDataURL(file);
 				reader.onload = function() {
 					if (element === "storeImage")
-						console.log(reader.result);
+						$scope.store.imagePath = reader.result;
 				}
 				reader.onerror = function(error) {
 				}
@@ -126,5 +218,6 @@
 		} );
 
 	});
+	
 </script>
 </html>

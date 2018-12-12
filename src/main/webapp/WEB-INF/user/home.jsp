@@ -175,6 +175,7 @@ if it's not present, don't show loader */
 <script src="${pageContext.request.contextPath}/assets/plugins/parsleyjs/parsley.min.js"></script>
 <script src="${pageContext.request.contextPath}/assets/plugins/jQuery.filer-1.3.0/js/jquery.filer.min.js"></script>
 <script src="${pageContext.request.contextPath}/assets/plugins/pikeadmin/js/pikeadmin.js"></script>
+<script src="${pageContext.request.contextPath}/assets/plugins/sweetalert/js/sweetalert.min.js"></script>
 	
 	<!-- App js -->
 
