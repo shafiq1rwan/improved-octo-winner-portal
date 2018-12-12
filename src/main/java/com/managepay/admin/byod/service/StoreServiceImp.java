@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
@@ -43,10 +44,8 @@ public class StoreServiceImp implements StoreService {
 
 	@Override
 	public int createStore(Store store) {
-		try {	
-			store.setBackendId(ByodUtil.createRandomBackendId("S", 8));
-			
-			
+		try {
+			store.setBackendId(ByodUtil.createBackendId("S", 8));
 			return storeRepo.createStore(store);
 		} catch (DuplicateKeyException ex) {
 			throw new DuplicateKeyException("Duplication Found");
@@ -60,11 +59,12 @@ public class StoreServiceImp implements StoreService {
 	public int editStore(Long id, Store store) {
 		try {
 			return storeRepo.editStore(id, store);
-		}
-		catch (DuplicateKeyException ex) {
+		} catch (DuplicateKeyException ex) {
 			throw new DuplicateKeyException("Duplication Found");
-		} 
-		catch (Exception ex) {
+		} catch (DataAccessException ex) {
+			ex.printStackTrace();
+			return 0;
+		} catch (Exception ex) {
 			ex.printStackTrace();
 			return 0;
 		}
@@ -109,5 +109,5 @@ public class StoreServiceImp implements StoreService {
 			return Collections.emptyList();
 		}
 	}
-
+	
 }

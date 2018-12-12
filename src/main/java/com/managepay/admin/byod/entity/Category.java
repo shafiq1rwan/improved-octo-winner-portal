@@ -1,18 +1,40 @@
 package com.managepay.admin.byod.entity;
 
+import java.util.Date;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Category {
 
 	public Long id;
+	
+	@JsonProperty("group_category_id")
 	public Long groupCategoryId;
+	
+	@JsonProperty("tax_charge_id")
 	public Long taxChargeId;
+	
+	@JsonProperty("backend_id")
 	public String backendId;
+	
+	@JsonProperty("category_name")
 	public String name;
+	
+	@JsonProperty("category_description")
 	public String description;
+	
+	@JsonProperty("category_image_path")
 	public String imagePath;
+	
+	@JsonProperty("category_sequence")
 	public int sequence;
+	
+	@JsonProperty("is_active")
 	public boolean isActive;
+	
+	@JsonProperty("created_date")
+	public Date createdDate;
 
 	public List<MenuItem> menuItems;
 
@@ -89,6 +111,14 @@ public class Category {
 
 	public void setActive(boolean isActive) {
 		this.isActive = isActive;
+	}
+	
+	public Date getCreatedDate() {
+		return createdDate;
+	}
+
+	public void setCreatedDate(Date createdDate) {
+		this.createdDate = createdDate;
 	}
 
 	public List<MenuItem> getMenuItems() {

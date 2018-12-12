@@ -8,6 +8,8 @@ public interface CategoryService {
 
 	public List<Category> findAllCategory();
 	
+	public List<Category> findAllActiveCategory();
+	
 	public List<Category> findCategoriesByGroupCategoryId(Long groupCategoryId);
 
 	public Category findCategoryById(Long id);
@@ -17,5 +19,9 @@ public interface CategoryService {
 	public int editCategory(Long id, Category category);
 
 	public int removeCategory(Long id);
+	
+	public void updateCategoryStatus(Long categoryId, boolean activeFlag);
+	
+	public int updateCategorySequence(Long categoryId, int sequence);
 
 }

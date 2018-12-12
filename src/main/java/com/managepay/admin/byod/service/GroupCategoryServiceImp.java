@@ -7,6 +7,7 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
 import com.managepay.admin.byod.entity.GroupCategory;
@@ -96,9 +97,9 @@ public class GroupCategoryServiceImp implements GroupCategoryService {
 		try {
 			return groupCategoryRepo.editGroupCategory(id, groupCategory);
 		}
-		catch(DataIntegrityViolationException ex) {
+		catch(DuplicateKeyException ex) {
 			ex.printStackTrace();
-			throw new DataIntegrityViolationException("Duplication Found");
+			throw new DuplicateKeyException("Duplication Found");
 		}
 		catch(Exception ex) {
 			ex.printStackTrace();

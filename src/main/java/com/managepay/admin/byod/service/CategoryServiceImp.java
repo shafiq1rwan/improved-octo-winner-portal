@@ -31,6 +31,16 @@ public class CategoryServiceImp implements CategoryService {
 	}
 	
 	@Override
+	public List<Category> findAllActiveCategory() {
+		try {
+			return categoryRepo.findAllActiveCategory();
+		} catch(Exception ex) {
+			ex.printStackTrace();
+			return Collections.emptyList();
+		}
+	}
+	
+	@Override
 	public List<Category> findCategoriesByGroupCategoryId(Long groupCategoryId) {
 		try {
 			return categoryRepo.findCategoriesByGroupCategoryId(groupCategoryId);
@@ -83,6 +93,24 @@ public class CategoryServiceImp implements CategoryService {
 		}
 	}
 
+	@Override
+	public void updateCategoryStatus(Long categoryId, boolean activeFlag) {
+		try {
+			categoryRepo.updateCategoryStatus(categoryId, activeFlag);
+		} catch(Exception ex) {
+			ex.printStackTrace();
+		}
+		
+	}
 
+	@Override
+	public int updateCategorySequence(Long categoryId, int sequence) {
+		try {
+			return categoryRepo.updateCategorySequence(categoryId, sequence);
+		} catch(Exception ex) {
+			ex.printStackTrace();
+			return 0;
+		}
+	}
 
 }

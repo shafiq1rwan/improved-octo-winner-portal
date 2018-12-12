@@ -55,11 +55,6 @@ public class StoreRepository {
 	}
 
 	public int createStore(Store store) {
-		
-		System.out.println(store.getLocation().getCountry());
-		
-		System.out.println(store.isPublish());
-		
 		return jdbcTemplate.update(
 				"INSERT INTO store(backend_id,store_name,store_logo_path,store_address,store_longitude,store_latitude,store_country,store_currency, "
 				+ "store_table_count, is_publish) VALUES (?,?,?,?,?,?,?,?,?,?)",

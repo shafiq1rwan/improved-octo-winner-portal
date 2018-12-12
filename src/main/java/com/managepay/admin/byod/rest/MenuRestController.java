@@ -3,9 +3,11 @@ package com.managepay.admin.byod.rest;
 import java.util.List;
 import java.util.Set;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -54,7 +56,7 @@ public class MenuRestController {
 	}
 
 	// Group Category
-	@GetMapping("/groupcategory")
+	@GetMapping("/groupcategory/")
 	public ResponseEntity<List<GroupCategory>> findAllGroupCategory() {
 		List<GroupCategory> groupCategories = groupCategoryService.findAllGroupCategory();
 		return new ResponseEntity<List<GroupCategory>>(groupCategories, HttpStatus.OK);
@@ -100,14 +102,18 @@ public class MenuRestController {
 
 	@PostMapping("/groupcategory/edit")
 	public ResponseEntity<?> editGroupCategory(@RequestBody GroupCategory groupCategory) {
-
 		try {
+			GroupCategory existingGroupCategory = groupCategoryService.findGroupCategory(groupCategory.getId());
+			if (existingGroupCategory.getId() == 0)
+				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
 			int rowAffected = groupCategoryService.editGroupCategory(groupCategory.getId(), groupCategory);
 			if (rowAffected == 0)
 				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
 			return new ResponseEntity<>(HttpStatus.OK);
-		} catch (DataIntegrityViolationException ex) {
-			return new ResponseEntity<String>(ex.toString(), HttpStatus.BAD_REQUEST);
+		} catch (DuplicateKeyException ex) {
+			return new ResponseEntity<String>(ex.toString(), HttpStatus.CONFLICT);
 		}
 
 	}
@@ -138,25 +144,33 @@ public class MenuRestController {
 	}
 
 	@PostMapping("/store/create")
-	public ResponseEntity<Void> createStore(@RequestBody Store store) {
-		int rowAffected = storeService.createStore(store);
-		if (rowAffected == 0)
-			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+	public ResponseEntity<?> createStore(@RequestBody Store store) {
+		try {
+			int rowAffected = storeService.createStore(store);
+			if (rowAffected == 0)
+				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-		return new ResponseEntity<>(HttpStatus.OK);
+			return new ResponseEntity<>(HttpStatus.OK);
+		} catch (DuplicateKeyException ex) {
+			return new ResponseEntity<String>(ex.getMessage(), HttpStatus.CONFLICT);
+		}
 	}
 
 	@PostMapping("/store/edit")
-	public ResponseEntity<Void> editStore(@RequestBody Store store) {
-		Store existingStore = storeService.findStoreById(store.getId());
-		if (existingStore.getId() == 0)
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+	public ResponseEntity<?> editStore(@RequestBody Store store) {
+		try {
+			Store existingStore = storeService.findStoreById(store.getId());
+			if (existingStore.getId() == 0)
+				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
-		int rowAffected = storeService.editStore(store.getId(), store);
-		if (rowAffected == 0)
-			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+			int rowAffected = storeService.editStore(store.getId(), store);
+			if (rowAffected == 0)
+				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-		return new ResponseEntity<>(HttpStatus.OK);
+			return new ResponseEntity<>(HttpStatus.OK);
+		} catch (DuplicateKeyException ex) {
+			return new ResponseEntity<String>(ex.getMessage(), HttpStatus.CONFLICT);
+		}
 	}
 
 	@PostMapping("/store/edit/groupcategory")
@@ -179,11 +193,15 @@ public class MenuRestController {
 	@GetMapping("/category/")
 	public ResponseEntity<List<Category>> findAllCategory() {
 		List<Category> categoryList = categoryService.findAllCategory();
-		if (categoryList.isEmpty())
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-
 		return new ResponseEntity<List<Category>>(categoryList, HttpStatus.OK);
 	}
+	
+	@GetMapping("/category/active/")
+	public ResponseEntity<List<Category>> findAllActiveCategory(){
+		List<Category> categoryList = categoryService.findAllActiveCategory();
+		return new ResponseEntity<List<Category>>(categoryList, HttpStatus.OK);
+	}
+	
 
 	/*
 	 * @GetMapping("/categorybyid") public ResponseEntity<Category>
@@ -225,6 +243,40 @@ public class MenuRestController {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
 		return new ResponseEntity<>(HttpStatus.OK);
+	}
+
+	@PostMapping("/category/status")
+	public ResponseEntity<?> updateCategoryStatus(@RequestParam("categoryId") Long categoryId, @RequestParam("activeFlag") boolean activeFlag){
+		Category existingCategory = categoryService.findCategoryById(categoryId);
+		if (existingCategory.getName() == null)
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		
+		categoryService.updateCategoryStatus(categoryId, activeFlag);
+		return new ResponseEntity<>(HttpStatus.OK);
+	}
+	
+	@PostMapping("/category/reordersequence")
+	public ResponseEntity<?> reorderCategorySequence(@RequestBody String data){
+		try {
+			JSONObject jsonResult = new JSONObject();
+			JSONObject jsonData = new JSONObject(data);
+			JSONArray jArray = jsonData.getJSONArray("category_sequences");
+			
+			for(int i=0;i<jArray.length();i++) {
+				JSONObject jsonObj = jArray.getJSONObject(i);
+				Long categoryId = jsonObj.getLong("id");
+				int sequenceNumber = jsonObj.getInt("sequence");
+				categoryService.updateCategorySequence(categoryId, sequenceNumber);
+			}
+			
+			jsonResult.put("response_code", "00");
+			jsonResult.put("response_message", "Success");
+			
+			return new ResponseEntity<String>(jsonResult.toString(),HttpStatus.OK); 
+		}catch(Exception ex) {
+			ex.printStackTrace();
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST); 
+		}
 	}
 
 	/*

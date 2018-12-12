@@ -27,6 +27,8 @@ spring:
     url: jdbc:sqlserver://localhost:1433;databaseName=byod
     username: sa
     password: MPay@1234
+    
+upload-path: C:\\byodImages\\
 
 ---
 

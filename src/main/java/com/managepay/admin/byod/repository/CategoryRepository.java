@@ -30,6 +30,7 @@ public class CategoryRepository {
 		category.setImagePath(rs.getString("category_image_path"));
 		category.setSequence(rs.getInt("category_sequence"));
 		category.setActive(rs.getBoolean("is_active"));
+		category.setCreatedDate(rs.getDate("created_date"));
 		return category;
 	};
 
@@ -53,21 +54,24 @@ public class CategoryRepository {
 		return jdbcTemplate.update("UPDATE category SET is_active = ? WHERE id = ?", new Object[] { activeFlag, id },
 				rowMapper);
 	}
+	
+	public int updateCategorySequence(Long id, int sequence) {
+		return jdbcTemplate.update("UPDATE category SET category_sequence = ? WHERE id = ?", new Object[] {sequence, id});
+	}
 
 	public int createCategory(Category category) {
 		return jdbcTemplate.update(
-				"INSERT into category(group_category_id, tax_charge_id, backend_id, category_name, category_description, category_image_path, category_sequence, is_active) VALUES (?,?,?,?,?,?,?,?)",
+				"INSERT into category(group_category_id, tax_charge_id, backend_id, category_name, category_description, category_image_path, category_sequence) VALUES (?,?,?,?,?,?,?)",
 				new Object[] { category.getGroupCategoryId(), category.getTaxChargeId(), category.getBackendId(),
-						category.getName(), category.getDescription(), category.getImagePath(), category.getSequence(),
-						category.isActive() });
+						category.getName(), category.getDescription(), category.getImagePath(), category.getSequence()});
 	}
 
 	public int editCategory(Long id, Category category) {
 		return jdbcTemplate.update(
-				"UPDATE category SET group_category_id =? , tax_charge_id =?, backend_id = ? , category_name = ?, category_description = ?, category_image_path =?, category_sequence = ?,is_active = ? WHERE id = ?",
-				new Object[] { category.getGroupCategoryId(), category.getTaxChargeId(), category.getBackendId(),
+				"UPDATE category SET group_category_id =? , tax_charge_id =? , category_name = ?, category_description = ?, category_image_path =?, category_sequence = ? WHERE id = ?",
+				new Object[] { category.getGroupCategoryId(), category.getTaxChargeId(),
 						category.getName(), category.getDescription(), category.getImagePath(), category.getSequence(),
-						category.isActive(), id });
+						id });
 	}
 
 	public int removeCategory(Long id) {

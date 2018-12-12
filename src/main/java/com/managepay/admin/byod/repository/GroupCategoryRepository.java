@@ -26,6 +26,7 @@ public class GroupCategoryRepository {
 		GroupCategory groupCategory = new GroupCategory();
 		groupCategory.setId(rs.getLong("id"));
 		groupCategory.setName(rs.getString("group_category_name"));
+		groupCategory.setCreatedDate(rs.getDate("created_date"));
 		return groupCategory;
 	};
 
