@@ -1,11 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <style>
-.btn-primary-outline {
-  background-color: transparent;
-  border-color: #ccc;
-  border: 0;
-}
 
 .list-group-item {
   padding: .5rem 1.25rem;
@@ -60,28 +55,28 @@
 								<button type="button" class="btn btn-primary pull-right"><i class="fa fa-edit"></i> Item Groups</button>
 								<button type="button" class="btn btn-primary pull-right"><i class="fa fa-edit"></i> Category</button>
 								<div class="btn-group pull-right" role="group" aria-label="First group">
-									<button type="button" class="btn btn-primary-outline"><i class="fa fa-plus-square"></i> SubMenu</button>	
-								    <button type="button" class="btn btn-primary-outline"><i class="fa fa-edit"></i> Edit Stores</button>
-								    <button type="button" class="btn btn-primary-outline"><i class="fa fa-cog"></i> Settings</button>						    				
+									<button type="button" class="btn btn-outline-dark border-0"><i class="fa fa-plus-square"></i> SubMenu</button>	
+								    <button type="button" class="btn btn-outline-dark border-0"><i class="fa fa-edit"></i> Edit Stores</button>
+								    <button type="button" class="btn btn-outline-dark border-0"><i class="fa fa-cog"></i> Settings</button>						    				
 								</div>							
 							</div>
 							<div ng-repeat="child in children">							
 								<div class="card-header d-flex justify-content-between align-items-center subItem">
 									<span><b>SubMenu {{child.name}}</b></span>
 									<div class="btn-group" role="group" aria-label="First group">
-										<button type="button" class="btn btn-primary-outline"><i class="fa fa-edit"></i> Edit SubMenu</button>	
-									    <button type="button" class="btn btn-primary-outline"><i class="fa fa-edit"></i> Edit Stores</button>
-									    <button type="button" class="btn btn-primary-outline"><i class="fa fa-cog"></i> Settings</button>						    				
+										<button type="button" class="btn btn-outline-dark border-0"><i class="fa fa-edit"></i> Edit SubMenu</button>	
+									    <button type="button" class="btn btn-outline-dark border-0"><i class="fa fa-edit"></i> Edit Stores</button>
+									    <button type="button" class="btn btn-outline-dark border-0"><i class="fa fa-cog"></i> Settings</button>						    				
 									</div>
 								</div>
 								<div ng-repeat="grandChild in child.grandChildren" class="card-body d-flex justify-content-between align-items-center innerItem">
 									<span><i class="fa fa-building-o"></i> {{grandChild.name}}</span>
 								    <div class="btn-group" role="group" aria-label="First group">
-									    <button type="button" class="btn btn-primary-outline"><i class="fa fa-signal"></i> PING POS</button>
-									    <button type="button" class="btn btn-primary-outline"><i class="fa fa-mobile"></i> MOBILE</button>
-									    <button type="button" class="btn btn-primary-outline"><i class="fa fa-tablet"></i> KIOSK</button>
-									    <button type="button" class="btn btn-primary-outline"><i class="fa fa-clock-o"></i> PERIOD</button>
-										<button type="button" class="btn btn-primary-outline"><i class="fa fa-database"></i> INVENTORY</button>
+									    <button type="button" class="btn btn-outline-dark border-0"><i class="fa fa-signal"></i> PING POS</button>
+									    <button type="button" class="btn btn-outline-dark border-0"><i class="fa fa-mobile"></i> MOBILE</button>
+									    <button type="button" class="btn btn-outline-dark border-0"><i class="fa fa-tablet"></i> KIOSK</button>
+									    <button type="button" class="btn btn-outline-dark border-0"><i class="fa fa-clock-o"></i> PERIOD</button>
+										<button type="button" class="btn btn-outline-dark border-0"><i class="fa fa-database"></i> INVENTORY</button>
 									</div>
 								</div>
 							</div>																								

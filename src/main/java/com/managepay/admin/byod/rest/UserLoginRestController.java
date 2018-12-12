@@ -77,11 +77,19 @@ public class UserLoginRestController {
 		return model;
 	}
 	
-	// Brand
+	// Store
 	@RequestMapping(value = { "/views/store" }, method = RequestMethod.GET)
 	public ModelAndView viewBrand() {
 		ModelAndView model = new ModelAndView();
 		model.setViewName("/user/views/store");
+		return model;
+	}
+	
+	// Group Category
+	@RequestMapping(value = { "/views/groupCategory" }, method = RequestMethod.GET)
+	public ModelAndView viewGroupCategory() {
+		ModelAndView model = new ModelAndView();
+		model.setViewName("/user/views/group_category");
 		return model;
 	}
 	

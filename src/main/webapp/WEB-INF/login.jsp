@@ -8,7 +8,7 @@
 <title>Managepay | BYOD ADMIN</title>
 
 <!-- Bootstrap CSS -->
-<link href="${pageContext.request.contextPath}/assets/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+<link href="${pageContext.request.contextPath}/assets/plugins/bootstrap-4.1.3/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
 <%-- <script src="${pageContext.request.contextPath}/assets/plugins/jQuery/jquery-2.2.3.min.js"></script> --%>
 
 
@@ -62,14 +62,14 @@
 </style>
 </head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<body style="background: url(${pageContext.request.contextPath}/assets/images/wallpaper/admin_login_background.jpg) no-repeat; background-size: cover; min-height: 100vh;">
+<body style="background: url(${pageContext.request.contextPath}/assets/images/byodadmin/wallpaper/admin_login_background.jpg) no-repeat; background-size: cover; min-height: 100vh;">
  	<div class="container">
-		<div class="row justify-content-center" style="padding-top: 100px;">	
+		<div class="row justify-content-center" style="padding-top:100px;">	
 			<div class="col-md-4 col-md-offset-4">
 				<div class="card">
 					<div class="card-heading">
 						<div class="row-fluid user-row">
-							<img src="${pageContext.request.contextPath}/assets/images/logo/mpay-crm.png"
+							<img src="${pageContext.request.contextPath}/assets/images/byodadmin/logo/mpay.png"
 								class="img-responsive" alt="Console Admin" />
 						</div>
 					</div>
@@ -98,7 +98,6 @@
 		</div>
 	</div>
 </body>
-<script src="${pageContext.request.contextPath}/assets/js/bootstrap.min.js"></script>
 <script>
 
 <% if (!(resetExceptionMsg.equals(null) || resetExceptionMsg.equals(""))) { %>

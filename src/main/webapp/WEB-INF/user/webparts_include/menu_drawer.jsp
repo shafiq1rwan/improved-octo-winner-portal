@@ -13,19 +13,27 @@
                    </li>
                 
                 <li class="submenu">
-                       <a href="${pageContext.request.contextPath}/user/#!Router_store"><i class="fa fa-fw fa-shopping-cart"></i><span> Store </span> </a>
+                       <a href="${pageContext.request.contextPath}/user/#!Router_store"><i class="fa fa-fw fa-building"></i><span> Store</span> </a>
+                </li>
+                
+                <li class="submenu">
+                       <a href="${pageContext.request.contextPath}/user/#!Router_group_category"><i class="fa fa-fw fa-sitemap"></i><span> Category</span> </a>
+                </li>
+                
+                <li class="submenu">
+                       <a href="${pageContext.request.contextPath}/user/#!Router_store"><i class="fa fa-fw fa-shopping-cart"></i><span> Item</span> </a>
                 </li>			
 									
                  <li class="submenu">
                      <a href="#" ng-click="$event.preventDefault()"><i class="fa fa-fw fa-tv"></i> <span> Management </span> <span class="menu-arrow"></span></a>
                          <ul class="list-unstyled">
-                             <li><a href="${pageContext.request.contextPath}/user/#!Router_menu">Menu</a></li>
-                             <li><a href="${pageContext.request.contextPath}/user/#!Router_menu_dashboard">Inventory</a></li>
+                             <li><a href="${pageContext.request.contextPath}/user/#!Router_menu_dashboard">Item Group</a></li>
+                             <li><a href="${pageContext.request.contextPath}/user/#!Router_menu_dashboard">Modifier Group</a></li>
                          </ul>
                  </li>
                  
                  <li class="submenu">
-                       <a href="#"><i class="fa fa-fw fa-area-chart"></i><span> Report </span> </a>
+                       <a href="#"><i class="fa fa-fw fa-area-chart"></i><span> Setting </span> </a>
                 </li>	
            </ul>
 
