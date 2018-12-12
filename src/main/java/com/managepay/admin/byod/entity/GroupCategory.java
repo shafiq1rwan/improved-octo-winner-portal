@@ -3,11 +3,18 @@ package com.managepay.admin.byod.entity;
 import java.util.Date;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class GroupCategory {
 
 	private Long id;
+
+	@JsonProperty("group_category_name")
 	private String name;
+
+	@JsonProperty("created_date")
 	private Date createdDate;
+
 	private List<Category> categories;
 	private List<Store> stores;
 
@@ -30,7 +37,7 @@ public class GroupCategory {
 	public void setName(String name) {
 		this.name = name;
 	}
-	
+
 	public Date getCreatedDate() {
 		return createdDate;
 	}

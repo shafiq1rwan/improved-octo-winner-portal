@@ -35,7 +35,8 @@ public class StoreRepository {
 		store.setLocation(location);
 		store.setCurrency(rs.getString("store_currency"));
 		store.setTableCount(rs.getInt("store_table_count"));
-		store.setPublished(rs.getBoolean("is_publish"));
+		store.setPublish(rs.getBoolean("is_publish"));
+		store.setCreatedDate(rs.getDate("created_date"));
 		return store;
 	};
 
@@ -43,44 +44,48 @@ public class StoreRepository {
 		return jdbcTemplate.query("SELECT * FROM store WHERE group_category_id = 0 OR group_category_id IS NULL",
 				rowMapper);
 	}
-	
-	public List<Store> findStoresByGroupCategoryId(Long groupCategoryId){
-		return jdbcTemplate.query("SELECT * FROM store WHERE group_category_id = ?", new Object[] {groupCategoryId},
+
+	public List<Store> findStoresByGroupCategoryId(Long groupCategoryId) {
+		return jdbcTemplate.query("SELECT * FROM store WHERE group_category_id = ?", new Object[] { groupCategoryId },
 				rowMapper);
 	}
 
 	public Store findStoreById(Long id) {
 		return jdbcTemplate.queryForObject("SELECT * FROM store WHERE id = ?", new Object[] { id }, rowMapper);
 	}
-	
+
 	public int createStore(Store store) {
 		
+		System.out.println(store.getLocation().getCountry());
+		
+		System.out.println(store.isPublish());
+		
 		return jdbcTemplate.update(
-				"INSERT INTO store(backend_id,store_name,store_logo_path,store_address,store_longitude,store_latitude,store_country,store_currency, store_table_count, is_publish) VALUES (?,?,?,?,?,?,?,?,?,?)",
-				new Object[] {store.getBackendId(), store.getName(), store.getLogoPath(), store.getLocation().getAddress(),
-						store.getLocation().getLongitude(), store.getLocation().getLatitude(),
-						store.getLocation().getCountry(), store.getCurrency(), store.getTableCount(),
-						store.isPublished() });
+				"INSERT INTO store(backend_id,store_name,store_logo_path,store_address,store_longitude,store_latitude,store_country,store_currency, "
+				+ "store_table_count, is_publish) VALUES (?,?,?,?,?,?,?,?,?,?)",
+				new Object[] { store.getBackendId(), store.getName(), store.getLogoPath(),
+						store.getLocation().getAddress(), store.getLocation().getLongitude(),
+						store.getLocation().getLatitude(), store.getLocation().getCountry(), store.getCurrency(),
+						store.getTableCount(), store.isPublish() });
 	}
 
 	public int editStore(Long id, Store store) {
 		return jdbcTemplate.update(
 				"UPDATE store SET store_name = ?,store_logo_path = ?,store_address = ?,store_longitude = ?,store_latitude = ?,store_country = ?,store_currency = ?, store_table_count = ?, is_publish = ? WHERE id = ?",
-				new Object[] {store.getName(), store.getLogoPath(),
-						 store.getLocation().getAddress(),
+				new Object[] { store.getName(), store.getLogoPath(), store.getLocation().getAddress(),
 						store.getLocation().getLongitude(), store.getLocation().getLatitude(),
 						store.getLocation().getCountry(), store.getCurrency(), store.getTableCount(),
-						store.isPublished(), id });
+						store.isPublish(), id });
 	}
 
 	public int editStoreGroupCategoryId(Long groupCategoryId, Long id) {
 		return jdbcTemplate.update("UPDATE store SET group_category_id = ? WHERE id = ?",
 				new Object[] { groupCategoryId, id });
 	}
-	
+
 	public int editStoreGroupCategoryIdInBatch(Long groupCategoryId) {
 		return jdbcTemplate.update("UPDATE store SET group_category_id = 0 WHERE group_category_id = ?",
-				new Object[] { groupCategoryId});
+				new Object[] { groupCategoryId });
 	}
 
 	public int removeStore(Long id) {

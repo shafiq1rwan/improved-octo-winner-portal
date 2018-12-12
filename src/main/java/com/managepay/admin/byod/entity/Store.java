@@ -2,17 +2,37 @@ package com.managepay.admin.byod.entity;
 
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class Store {
 
+	
 	private Long id;
+	
+	@JsonProperty("group_category_id")
 	private Long groupCategoryId;
+	
+	@JsonProperty("backend_id")
 	private String backendId;
+	
+	@JsonProperty("store_name")
 	private String name;
+	
+	@JsonProperty("store_logo_path")
 	private String logoPath;
+	
 	private Location location;
+	
+	@JsonProperty("store_currency")
 	private String currency;
+	
+	@JsonProperty("store_table_count")
 	private int tableCount;
-	private boolean isPublished;
+
+	@JsonProperty("is_publish")
+	private boolean isPublish;
+
+	@JsonProperty("created_date")
 	private Date createdDate;
 
 	public Store() {
@@ -82,12 +102,12 @@ public class Store {
 		this.tableCount = tableCount;
 	}
 
-	public boolean isPublished() {
-		return isPublished;
+	public boolean isPublish() {
+		return isPublish;
 	}
 
-	public void setPublished(boolean isPublished) {
-		this.isPublished = isPublished;
+	public void setPublish(boolean isPublish) {
+		this.isPublish = isPublish;
 	}
 
 	public Date getCreatedDate() {

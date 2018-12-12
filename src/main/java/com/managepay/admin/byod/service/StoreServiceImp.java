@@ -4,10 +4,12 @@ import java.util.Collections;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
 import com.managepay.admin.byod.entity.Store;
 import com.managepay.admin.byod.repository.StoreRepository;
+import com.managepay.admin.byod.util.ByodUtil;
 
 @Service
 public class StoreServiceImp implements StoreService {
@@ -41,8 +43,13 @@ public class StoreServiceImp implements StoreService {
 
 	@Override
 	public int createStore(Store store) {
-		try {
+		try {	
+			store.setBackendId(ByodUtil.createRandomBackendId("S", 8));
+			
+			
 			return storeRepo.createStore(store);
+		} catch (DuplicateKeyException ex) {
+			throw new DuplicateKeyException("Duplication Found");
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			return 0;
@@ -53,7 +60,11 @@ public class StoreServiceImp implements StoreService {
 	public int editStore(Long id, Store store) {
 		try {
 			return storeRepo.editStore(id, store);
-		} catch (Exception ex) {
+		}
+		catch (DuplicateKeyException ex) {
+			throw new DuplicateKeyException("Duplication Found");
+		} 
+		catch (Exception ex) {
 			ex.printStackTrace();
 			return 0;
 		}
@@ -78,7 +89,6 @@ public class StoreServiceImp implements StoreService {
 			return 0;
 		}
 	}
-	
 
 	@Override
 	public int editStoreGroupCategoryIdInBatch(Long groupCategoryId) {
@@ -99,6 +109,5 @@ public class StoreServiceImp implements StoreService {
 			return Collections.emptyList();
 		}
 	}
-
 
 }

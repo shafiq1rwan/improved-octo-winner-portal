@@ -1,10 +1,19 @@
 package com.managepay.admin.byod.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class Location {
 
+	@JsonProperty("store_address")
 	private String address;
+	
+	@JsonProperty("store_country")
 	private String country;
+	
+	@JsonProperty("store_longitude")
 	private double longitude;
+	
+	@JsonProperty("store_latitude")
 	private double latitude;
 
 	public Location() {
