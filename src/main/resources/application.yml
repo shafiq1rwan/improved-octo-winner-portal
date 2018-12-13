@@ -28,7 +28,7 @@ spring:
     username: sa
     password: MPay@1234
     
-upload-path: C:\\byodImages\\
+upload-path: /jakarta-tomcat/webapps/byod-img/
 
 ---
 

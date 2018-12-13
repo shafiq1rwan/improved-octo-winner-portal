@@ -93,8 +93,8 @@ if it's not present, don't show loader */
 
 <script>
 	var app = angular.module("myApp", [ "ngRoute" ]);
-
-	app.config(function($routeProvider) {
+	
+	app.config(function($routeProvider) {	
 		$routeProvider
 		/* .when("/", {
 			templateUrl : "${pageContext.request.contextPath}/admin/views/profile",
@@ -142,6 +142,16 @@ if it's not present, don't show loader */
 		       	checkSession:checkSession
 		       }
 		})
+		.when('/Router_store_ecpos/:id', {                            
+	        templateUrl: function(params){
+	        	return '${pageContext.request.contextPath}/user/views/store/'+params.id+'/ecpos'
+	        }
+	        ,
+	        controller: 'ctl_ecpos',
+	        resolve : {
+		       	checkSession:checkSession
+		       }
+	    });
 	});
 	
 	var checkSession = function ($location,$q) {
@@ -195,5 +205,6 @@ if it's not present, don't show loader */
 <jsp:include page="/WEB-INF/user/controller/ctl_menu.jsp" />
 <jsp:include page="/WEB-INF/user/controller/ctl_add_menu.jsp" />
 <jsp:include page="/WEB-INF/user/controller/ctl_menu_dashboard.jsp" />
+<jsp:include page="/WEB-INF/user/controller/ctl_ecpos.jsp" />
 <!-- *****************************ANGULAR JS CONTROLLER***************************** -->
 </html>

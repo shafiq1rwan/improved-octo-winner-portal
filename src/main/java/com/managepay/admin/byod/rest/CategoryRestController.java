@@ -32,6 +32,9 @@ public class CategoryRestController {
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
 	
+	@Autowired
+	private ByodUtil byodUtil;
+	
 	@GetMapping("/get_all_category")
 	public String createCategory(HttpServletRequest request, HttpServletResponse response) {
 		JSONArray jsonArray = new JSONArray();
@@ -147,7 +150,7 @@ public class CategoryRestController {
 					stmt = connection.prepareStatement("INSERT into category(group_category_id, tax_charge_id, backend_id, category_name, category_description, category_image_path, category_sequence) VALUES (?,?,?,?,?,?,?)");
 					stmt.setLong(1, jsonCategoryData.getLong("group_category_id"));
 					stmt.setLong(2, jsonCategoryData.getLong("tax_charge_id"));
-					stmt.setString(3, ByodUtil.createBackendId("C", 8));			
+					stmt.setString(3, byodUtil.createBackendId("C", 8));			
 					stmt.setString(4, jsonCategoryData.getString("category_name"));
 					stmt.setString(5, jsonCategoryData.getString("category_description"));
 					stmt.setString(6, jsonCategoryData.getString("category_image_path"));

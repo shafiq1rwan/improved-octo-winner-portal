@@ -16,7 +16,10 @@ import com.managepay.admin.byod.util.ByodUtil;
 public class StoreServiceImp implements StoreService {
 
 	private StoreRepository storeRepo;
-
+	
+	@Autowired 
+	private ByodUtil byodUtil;
+	
 	@Autowired
 	public StoreServiceImp(StoreRepository storeRepo) {
 		this.storeRepo = storeRepo;
@@ -45,7 +48,8 @@ public class StoreServiceImp implements StoreService {
 	@Override
 	public int createStore(Store store) {
 		try {
-			store.setBackendId(ByodUtil.createBackendId("S", 8));
+			store.setBackendId(byodUtil.createBackendId("S", 8));
+			store.setLogoPath(byodUtil.saveImageFile(store.getLogoPath(), null));
 			return storeRepo.createStore(store);
 		} catch (DuplicateKeyException ex) {
 			throw new DuplicateKeyException("Duplication Found");
@@ -58,6 +62,7 @@ public class StoreServiceImp implements StoreService {
 	@Override
 	public int editStore(Long id, Store store) {
 		try {
+			store.setLogoPath(byodUtil.saveImageFile(store.getLogoPath(), null));
 			return storeRepo.editStore(id, store);
 		} catch (DuplicateKeyException ex) {
 			throw new DuplicateKeyException("Duplication Found");
