@@ -17,7 +17,7 @@
                 </li>
                 
                 <li class="submenu">
-                       <a href="${pageContext.request.contextPath}/user/#!Router_group_category"><i class="fa fa-fw fa-sitemap"></i><span> Category</span> </a>
+                       <a href="${pageContext.request.contextPath}/user/#!Router_group_category"><i class="fa fa-fw fa-sitemap"></i><span>Group Category</span> </a>
                 </li>
                 
                 <li class="submenu">

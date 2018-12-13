@@ -142,6 +142,13 @@ if it's not present, don't show loader */
 		       	checkSession:checkSession
 		       }
 		})
+		.when("/Router_category", {
+			templateUrl : "${pageContext.request.contextPath}/user/views/category",
+			controller : "ctl_category",
+			resolve : {
+		       	checkSession:checkSession
+		       }
+		})
 	});
 	
 	var checkSession = function ($location,$q) {
@@ -195,5 +202,6 @@ if it's not present, don't show loader */
 <jsp:include page="/WEB-INF/user/controller/ctl_menu.jsp" />
 <jsp:include page="/WEB-INF/user/controller/ctl_add_menu.jsp" />
 <jsp:include page="/WEB-INF/user/controller/ctl_menu_dashboard.jsp" />
+<jsp:include page="/WEB-INF/user/controller/ctl_category.jsp" />
 <!-- *****************************ANGULAR JS CONTROLLER***************************** -->
 </html>

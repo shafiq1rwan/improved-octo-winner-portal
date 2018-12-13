@@ -124,4 +124,12 @@ public class UserLoginRestController {
 		model.setViewName("/user/views/menu_dashboard");
 		return model;
 	}
+	
+	// Category
+	@RequestMapping(value = {"/views/category"}, method = RequestMethod.GET)
+	public ModelAndView viewCategory() {
+		ModelAndView model = new ModelAndView();
+		model.setViewName("/user/views/category");
+		return model;
+	}
 }
