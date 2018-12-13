@@ -32,6 +32,9 @@ public class MenuItemRestController {
 
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
+	
+	@Autowired
+	private ByodUtil byodUtil;
 
 	@GetMapping(value = "/get_menu_item_type", produces = "application/json")
 	public String getMenuItemType(HttpServletRequest request, HttpServletResponse response) {
@@ -172,7 +175,7 @@ public class MenuItemRestController {
 					connection = dataSource.getConnection();
 					stmt = connection.prepareStatement(
 							"INSERT INTO menu_item(backend_id, modifier_group_id, menu_item_name, menu_item_description, menu_item_image_path, menu_item_base_price, menu_item_type,is_taxable, is_discountable) VALUES(?,?,?,?,?,?,?,?,?)");
-					stmt.setString(1, ByodUtil.createBackendId("MI", 8));
+					stmt.setString(1, byodUtil.createBackendId("MI", 8));
 					stmt.setLong(2, jsonMenuItemData.getLong("modifier_group_id"));
 					stmt.setString(3, jsonMenuItemData.getString("menu_item_name"));
 					stmt.setString(4, jsonMenuItemData.getString("menu_item_description"));
