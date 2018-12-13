@@ -10,13 +10,15 @@ import java.util.Date;
 import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
+@Component
 public class ByodUtil {
 
 	@Value("${upload-path}")
-	private static String filePath;
+	private String filePath;
 
-	public static String createBackendId(String typePrefix, int length) {
+	public String createBackendId(String typePrefix, int length) {
 		String generatedString = createRandomString(length);
 
 		Date date = new Date();
@@ -38,7 +40,7 @@ public class ByodUtil {
 		return builder.toString();
 	}
 
-	public static String saveImageFile(String base64_img, String existing) {
+	public String saveImageFile(String base64_img, String existing) {
 		boolean checker = false;
 		String uploadPath = filePath;
 		String imageName = createRandomString(10);

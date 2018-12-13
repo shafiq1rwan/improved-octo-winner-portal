@@ -6,6 +6,7 @@ import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
@@ -45,7 +46,10 @@ public class MenuRestController {
 	private StoreService storeService;
 	private CategoryService categoryService;
 	private MenuItemService menuItemService;
-
+	
+	@Value("${upload-path}")
+	private String filePath;
+	
 	@Autowired
 	public MenuRestController(GroupCategoryService groupCategoryService, StoreService storeService,
 			CategoryService categoryService, MenuItemService menuItemService) {
@@ -139,7 +143,7 @@ public class MenuRestController {
 		Store existingStore = storeService.findStoreById(id);
 		if (existingStore.getId() == 0)
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-
+		existingStore.setLogoPath(filePath + existingStore.getLogoPath());
 		return new ResponseEntity<Store>(existingStore, HttpStatus.OK);
 	}
 

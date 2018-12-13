@@ -85,6 +85,14 @@ public class UserLoginRestController {
 		return model;
 	}
 	
+	// Store - ECPOS
+	@RequestMapping(value = { "/views/store/{id}/ecpos" }, method = RequestMethod.GET)
+	public ModelAndView viewECPos(@PathVariable(value = "id") long id) {
+		ModelAndView model = new ModelAndView();
+		model.setViewName("/user/views/ecpos");
+		return model;
+	}
+	
 	// Group Category
 	@RequestMapping(value = { "/views/groupCategory" }, method = RequestMethod.GET)
 	public ModelAndView viewGroupCategory() {

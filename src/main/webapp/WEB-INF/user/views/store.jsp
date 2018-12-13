@@ -7,7 +7,6 @@
 }
 </style>
 <body class="adminbody">
-
 <div id="main">
     <div class="content-page">
 		<!-- Start content -->
@@ -31,9 +30,9 @@
 						<div class="card mb-3">
 							<div class="card-header d-flex flex-row justify-content-between">
 								<h3>Store List</h3>								
-								<button type="button" class="btn btn-social pull-right btn-primary bg-aqua" data-toggle="modal" data-target="#createStoreModal">
+								<button type="button" class="btn btn-social pull-right btn-primary bg-aqua" data-toggle="modal" data-target="#storeModal" ng-click="modalType('create')">
 									<span class="btn-label"><i class="fa fa-plus"></i></span> Create Store
-								</button>								
+								</button>									
 							</div>						
 							<div class="card-body">							
 								<div class="table-responsive">
@@ -45,7 +44,7 @@
 												<th>Name</th>
 												<th>Image</th>
 												<th>Country</th>
-												<th>Active Status</th>
+												<th>Publish Status</th>
 												<th>Action</th>
 											</tr>
 										</thead>										
@@ -65,13 +64,14 @@
 	<!-- END content-page -->
 	
 	
-	<!-- Modal -->
-	<div class="modal fade" id="createStoreModal" tabindex="-1" role="dialog" aria-labelledby="createStoreModal" aria-hidden="true">
+	<!-- Store Modal -->
+	<div class="modal fade" id="storeModal" tabindex="-1" role="dialog" aria-labelledby="storeModal" aria-hidden="true">
 		<div class="modal-dialog modal-lg">
 		    <div class="modal-content">
-		    <form id="createStoreForm" method="POST" accept-charset="UTF-8" role="form" class="form-signin">
+		    <form id="storeForm" method="POST" accept-charset="UTF-8" role="form" class="form-signin">
 		      <div class="modal-header">
-		        <h5 class="modal-title">Store Detail</h5>
+		        <h5 ng-show="action=='create'" class="modal-title">Create Store</h5>
+		        <h5 ng-show="action=='update'" class="modal-title">Edit Store</h5>
 		        <button type="button" class="close" data-dismiss="modal" ng-click="resetModal()" aria-label="Close">
 		          <span aria-hidden="true">&times;</span>
 		        </button>
@@ -137,10 +137,92 @@
 					</div>				 									
 		      </div>
 		      <div class="modal-footer">
-		      	<button class="btn btn-primary" type="submit" ng-click="createStore()"> Submit</button>
-		      	<button class="btn btn-success" type="submit" ng-click="publishStore()"> Submit & Publish</button>
+		      	<button class="btn btn-primary" ng-show="action=='create'" type="submit" ng-click="submitStore()"> Submit</button>
+		      	<button class="btn btn-success" ng-show="action=='create'" type="submit" ng-click="submitStore(1)"> Submit & Publish</button>
+		      	<button class="btn btn-primary" ng-show="action=='update'" type="submit" ng-click="submitStore()"> Update</button>
+		      	<button class="btn btn-success" ng-show="action=='update'" type="submit" ng-click="submitStore(1)"> Update & Publish</button>
 		      </div>
 		       </form>		      
+		    </div>
+		</div>
+	</div>
+	
+	<!-- ECPOS Modal -->
+	<div class="modal fade" id="ecposModal" tabindex="-1" role="dialog" aria-labelledby="ecposModal" aria-hidden="true">
+		<div class="modal-dialog modal-lg">
+		    <div class="modal-content">
+		    <form id="ecposForm" method="POST" accept-charset="UTF-8" role="form" class="form-signin">
+		      <div class="modal-header">
+		        <h5 class="modal-title">ECPOS Detail</h5>
+		        <button type="button" class="close" data-dismiss="modal" ng-click="resetModal()" aria-label="Close">
+		          <span aria-hidden="true">&times;</span>
+		        </button>
+		      </div>
+		      <div class="modal-body">		       									  
+					<div class="form-section">
+						<div class="row">
+							<div class="col-8 col-sm-8 col-md-8 col-lg-8 col-xl-8">
+								<div class="form-group">
+									<label class="login-label">Name</label>
+									<input class="form-control" name="storeName" placeholder="Name" ng-model="store.name" type="text" required> 
+								</div>
+							</div>
+							<div class="col-4 col-sm-4 col-md-4 col-lg-4 col-xl-4">
+								<div class="form-group">
+									<label class="login-label">Currency</label>
+									<input class="form-control" name="storeCurrency" placeholder="MYR" ng-model="store.currency" type="text" required> 
+								</div>
+							</div>
+						</div>	
+						<div class="row">
+							<div class="col-8 col-sm-8 col-md-8 col-lg-8 col-xl-8">
+								<div class="form-group">
+									<label class="login-label">Address</label>
+									<input class="form-control" name="storeAddress" placeholder="Address" ng-model="store.address" type="text" required> 
+								</div>
+							</div>
+							<div class="col-4 col-sm-4 col-md-4 col-lg-4 col-xl-4">
+								<div class="form-group">
+									<label class="login-label">Table Count</label>
+									<input class="form-control" name="storeTableCount" placeholder="50" ng-model="store.tableCount" type="number" required> 
+								</div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-4 col-sm-4 col-md-4 col-lg-4 col-xl-4">
+								<div class="form-group">
+									<label class="login-label">Longitude</label>
+									<input class="form-control" name="storeLongitude" ng-blur="setPrecision(event, store.longitude)" ng-click="event = $event" placeholder="Longitude" ng-model="store.longitude" type="number" step=".000001" required> 
+								</div>
+							</div>
+							<div class="col-4 col-sm-4 col-md-4 col-lg-4 col-xl-4">
+								<div class="form-group">
+									<label class="login-label">Latitude</label>
+									<input class="form-control" name="storeLatitude" ng-blur="setPrecision(event, store.latitude)" ng-click="event = $event" placeholder="Latitude" ng-model="store.latitude" type="number" step=".000001" required> 
+								</div>
+							</div>
+							<div class="col-4 col-sm-4 col-md-4 col-lg-4 col-xl-4">
+								<div class="form-group">
+									<label class="login-label">Country</label>
+									<input class="form-control" name="storeCountry" placeholder="Country" ng-model="store.country" type="text" required> 
+								</div>
+							</div>						
+						</div>
+						<div class="row">
+							<div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
+								<div class="form-group">
+									<label class="login-label">Image</label>
+									<input class="form-control" type="file" name="files[]" id="storeImage" multiple="multiple"> 
+								</div>
+							</div>
+						</div>	
+					</div>				 									
+		      </div>
+		      <div class="modal-footer">
+		      	<button class="btn btn-primary" ng-show="action=='create'" type="submit" ng-click="submitStore()"> Submit</button>
+		      	<button class="btn btn-success" ng-show="action=='create'" type="submit" ng-click="submitStore(1)"> Submit & Publish</button>
+		      </div>
+		       </form>		          			      
 		    </div>
 		</div>
 	</div>

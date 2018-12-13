@@ -1,53 +1,91 @@
 <html>
 <script>
-	app.controller('ctl_store', function($scope, $http) {
+	app.controller('ctl_store', function($scope, $http, $compile) {
+	
+		
 		$scope.action = '';
 		$scope.store = {};
 		
-		$scope.publishStore = function(){
-			var confirmation = confirm("Some of the store detail cannot be modified after publish. Kindly confirm.");
-			if(confirmation){
-				$scope.store.isPublish = true;
-				$scope.createStore();
-			}
+		$scope.modalType = function(action){
+			$scope.action = action;		
 		}
 		
-		$scope.createStore = function(){					
-			var postdata = {
-				store_name : $scope.store.name,
-				store_logo_path : $scope.store.imagePath,
-				location : {
-					store_address : $scope.store.address,
-					store_country : $scope.store.country,
-					store_longitude : parseFloat($scope.store.longitude).toFixed(6),
-					store_latitude : parseFloat($scope.store.latitude).toFixed(6)
-				},
-				store_currency : $scope.store.currency,
-				store_table_count: $scope.store.tableCount, 
-				is_publish: $scope.store.isPublish==null?false:$scope.store.isPublish
+		$scope.submitStore = function(publish){	
+			if($scope.store.name == null || $scope.store.name=='' ||
+				$scope.store.currency == null || $scope.store.currency=='' ||
+					$scope.store.address == null || $scope.store.address=='' ||
+						$scope.store.tableCount == null || $scope.store.tableCount=='' ||
+							$scope.store.longitude == null || $scope.store.longitude=='' ||
+								$scope.store.latitude == null || $scope.store.latitude=='' ||
+									$scope.store.country == null || $scope.store.country==''){
+			}
+			else if($scope.store.imagePath == null || $scope.store.imagePath==''){
+				swal({
+					  title: "Error",
+					  text: "Please upload an image",
+					  icon: "warning",
+					  dangerMode: true,
+					});
+				focus($('#storeImage'));
+			}
+			else{	
+				if(publish==1){
+					// click publish button
+					swal({
+						  title: "Are you sure?",
+						  text: "Once publish, you will not be able to modify some of the store detail",
+						  icon: "warning",
+						  buttons: true,
+						  dangerMode: true,
+						})
+						.then((willDelete) => {
+						  if (willDelete) {
+								$scope.store.isPublish = true;
+						}
+					});
+				}
+						
+				var postdata = {
+					id: $scope.action=='create' ? undefined: $scope.store.id ,
+					store_name : $scope.store.name,
+					store_logo_path : $scope.store.imagePath,
+					location : {
+						store_address : $scope.store.address,
+						store_country : $scope.store.country,
+						store_longitude : parseFloat($scope.store.longitude).toFixed(6),
+						store_latitude : parseFloat($scope.store.latitude).toFixed(6)
+					},
+					store_currency : $scope.store.currency,
+					store_table_count: $scope.store.tableCount, 
+					is_publish: $scope.store.isPublish==null?false:$scope.store.isPublish,
+					store_logo_path: $scope.store.imagePath
+				}
+				
+				console.log(postdata);
+				
+				$http({
+					method : 'POST',
+					headers : {'Content-Type' : 'application/json'},
+					url : $scope.action=='create'?'${pageContext.request.contextPath}/menu/store/create':'${pageContext.request.contextPath}/menu/store/edit',
+					data : postdata
+				})
+				.then(function(response) {
+	
+					if (response.status == "403") {
+						alert("Session TIME OUT");
+						$(location).attr('href','${pageContext.request.contextPath}/admin');			
+					} else if(response.status == "200") {
+						// ok
+						swal("The store has been published", {
+							icon: "success",
+						});
+						$scope.resetModal();
+						$('#storeModal').modal('toggle');
+						$scope.refreshTable();
+					}
+				});
 			}
 			
-			console.log(postdata);
-			
-			$http({
-				method : 'POST',
-				headers : {'Content-Type' : 'application/json'},
-				url : '${pageContext.request.contextPath}/menu/store/create',
-				data : postdata
-			})
-			.then(function(response) {
-
-				if (response.status == "403") {
-					alert("Session TIME OUT");
-					$(location).attr('href','${pageContext.request.contextPath}/admin');			
-				} else if(response.status == "200") {
-					// ok
-					alert("Store is created successfully")
-					$scope.resetModal();
-					$('#createStoreModal').modal('toggle');
-					$scope.refreshTable();
-				}
-			});
 		}
 		
 		$scope.setPrecision = function($event, value){
@@ -58,8 +96,30 @@
 		
 		// reset modal
 		$scope.resetModal = function(){
+			$scope.action = '';
 			$scope.store = {};
+			// reset image
+			var filerKit = $("#storeImage").prop("jFiler");
+			filerKit.reset();
 		}
+		
+		/* Start ECPOS handling */
+		$scope.openECPOS = function(id){
+			alert("im at ecpos " + id);
+		}
+		/* End ECPOS handling */
+		
+		/* Start BYOD handling */
+		$scope.openBYOD = function(id){
+			alert("im at BYOD " + id);
+		}
+		/* End BYOD handling */
+		
+		/* Start KIOSK handling */
+		$scope.openKIOSK = function(id){
+			alert("im at KIOSK " + id);
+		}
+		/* End KIOSK handling */
 		
 		$scope.refreshTable = function(){
 			var table = $('#store_dtable').DataTable({
@@ -81,32 +141,41 @@
 					{"data" : "id", "width": "5%"}, 
 					{"data" : "backend_id", "width": "15%"},
 					{"data" : "store_name"},
-					{"data" : "store_logo_path"},
+					{"data" : "store_logo_path", "width": "15%"},
 					{"data" : "location.store_country"},
 					{"data" : "is_publish", "width": "13%"},
 					{"data": "id", "width": "25%",
 						 "render": function ( data, type, full, meta ) {
-							 	var groupid = full.id;
-							    return '<div class="btn-toolbar justify-content-between"><button type="button" class="btn btn-outline-info border-0 p-0 custom-fontsize"><b><i class="fa fa-edit"></i> ECPOS</b></button>&nbsp;&nbsp;&nbsp;&nbsp;<button type="button" class="btn btn-outline-info border-0 p-0 custom-fontsize"><b><i class="fa fa-edit"></i> BYOD</b></button>&nbsp;&nbsp;&nbsp;&nbsp;<button type="button" class="btn btn-outline-info border-0 p-0 custom-fontsize"><b><i class="fa fa-edit"></i> KIOSK</b></button></div>'
+							 	var id = full.id;
+							    return '<div class="btn-toolbar justify-content-between"><a ng-href="${pageContext.request.contextPath}/user/#!Router_store_ecpos/'+id+'" class="btn btn-outline-info border-0 p-0 custom-fontsize"><i class="fa fa-edit"></i> ECPOS</a>&nbsp;&nbsp;&nbsp;&nbsp;<a ng-click="openBYOD('+id+')" class="btn btn-outline-info border-0 p-0 custom-fontsize"><i class="fa fa-edit"></i> BYOD</a>&nbsp;&nbsp;&nbsp;&nbsp;<a ng-click="openKIOSK('+id+')" class="btn btn-outline-info border-0 p-0 custom-fontsize"><i class="fa fa-edit"></i> KIOSK</a></div>'
 		  						
 						 }
 					}
-					],
+				],			
+				"createdRow": function ( row, data, index ) {
+			        $compile(row)($scope);  //add this to compile the DOM
+			    }
 				
-			});
+			});	
 			
 			$('#store_dtable tbody').off('click', 'tr');
-			$('#store_dtable tbody').on('click', 'tr', function() {
+			$('#store_dtable tbody').on('click', 'tr', function(evt) {			
+				if ( $(evt.target).is("a") ) {
+					// skip action column
+			        return;
+			    }
+				
+				$scope.action = 'update';	
+				$scope.store.id = table.row(this).data().id;
 				$http({
 					method : 'GET',
 					headers : {'Content-Type' : 'application/json'},
-					url : '${pageContext.request.contextPath}/menu/storebyid?id='+table.row(this).data().id			
+					url : '${pageContext.request.contextPath}/menu/storebyid?id='+$scope.store.id		
 				})
 				.then(function(response) {
 					if (response.status == "404") {
 						alert("Unable to find store detail");
 					} else if(response.status == "200") {
-						alert(JSON.stringify(response));
 						$scope.store.name = response.data.store_name;
 						$scope.store.imagePath = response.data.store_logo_path;
 						$scope.store.address = response.data.location.store_address;
@@ -117,16 +186,15 @@
 						$scope.store.tableCount = response.data.store_table_count;
 						$scope.store.isPublish = response.data.is_publish;
 
-						$('#createStoreModal').modal('toggle');
+						$('#storeModal').modal('toggle');
 					}
 				});
 			});
 		}
 		
-		$(document).ready(function() {
+		$(document).ready(function() {				
 			$scope.refreshTable();
-			/* $('#createStoreForm').parsley(); */
-			
+
 			$('input[type=file]').change(function(event) {
 				var element = event.target.id;
 				var reader = new FileReader();
