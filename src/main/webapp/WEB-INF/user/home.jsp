@@ -152,8 +152,10 @@ if it's not present, don't show loader */
 		       	checkSession:checkSession
 		       }
 	    })
-		.when("/Router_category", {
-			templateUrl : "${pageContext.request.contextPath}/user/views/category",
+		.when('/Router_group_category_category/:id', {
+			templateUrl : function(params) {
+				return '${pageContext.request.contextPath}/user/views/groupCategory/'+ params.id + '/category'
+			},	
 			controller : "ctl_category",
 			resolve : {
 		       	checkSession:checkSession

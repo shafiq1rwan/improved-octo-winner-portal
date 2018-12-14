@@ -10,7 +10,7 @@
 				<div class="row">
 						<div class="col-xl-12">
 								<div class="breadcrumb-holder">
-	                                    <h1 class="main-title float-left">Category</h1>
+	                                    <h1 class="main-title float-left"><a ng-href="${pageContext.request.contextPath}/user/#!Router_group_category"><i class="fa fa-chevron-left"></i></a> &nbsp;Category</h1>
 	                                    <ol class="breadcrumb float-right">
 											<li class="breadcrumb-item">Home</li>
 											<li class="breadcrumb-item active">Category</li>
@@ -24,8 +24,8 @@
                     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">						
 						<div class="card mb-3">
 							<div class="card-header d-flex flex-row justify-content-between">
-								<h3>Store List</h3>								
-								<button type="button" class="btn btn-social pull-right btn-primary bg-aqua" data-toggle="modal" data-target="#createCategoryModal" ng-click="category.is_active = true">
+								<h3>Category List</h3>								
+								<button type="button" class="btn btn-social pull-right btn-primary bg-aqua" data-toggle="modal" data-target="#createCategoryModal" ng-click="category.is_active = true; setModalType('create')">
 									<span class="btn-label"><i class="fa fa-plus"></i></span> Create Category
 								</button>								
 							</div>	
@@ -105,7 +105,8 @@
 					</div>				 									
 		      </div>
 		      <div class="modal-footer">
-		      	<button class="btn btn-primary" type="submit" ng-click="createCategory()"> Submit</button>
+		      	<button class="btn btn-primary" ng-show="action=='create'" type="submit" ng-click="createCategory()">Submit</button>
+		      	<button class="btn btn-primary" ng-show="action=='update'" type="submit" ng-click="updateCategory()">Update</button>
 		      </div>
 		       </form>		      
 		    </div>

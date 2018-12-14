@@ -134,8 +134,8 @@ public class UserLoginRestController {
 	}
 	
 	// Category
-	@RequestMapping(value = {"/views/category"}, method = RequestMethod.GET)
-	public ModelAndView viewCategory() {
+	@RequestMapping(value = {"/views/groupCategory/{id}/category"}, method = RequestMethod.GET)
+	public ModelAndView viewCategory(@PathVariable(value = "id") long id) {
 		ModelAndView model = new ModelAndView();
 		model.setViewName("/user/views/category");
 		return model;
