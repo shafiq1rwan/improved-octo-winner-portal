@@ -140,4 +140,11 @@ public class UserLoginRestController {
 		model.setViewName("/user/views/category");
 		return model;
 	}
+	
+	@RequestMapping(value = {"/views/modifierGroup"}, method = RequestMethod.GET)
+	public ModelAndView viewModifierGroup() {
+		ModelAndView model = new ModelAndView();
+		model.setViewName("/user/views/modifier_group");
+		return model;
+	}
 }

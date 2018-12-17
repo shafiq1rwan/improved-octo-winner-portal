@@ -160,6 +160,13 @@ if it's not present, don't show loader */
 			resolve : {
 		       	checkSession:checkSession
 		       }
+		})
+		.when('/Router_modifier_group', {
+			templateUrl : '${pageContext.request.contextPath}/user/views/modifierGroup',	
+			controller : "ctl_modifier_group",
+			resolve : {
+		       	checkSession:checkSession
+		       }
 		});
 	});
 	
@@ -216,5 +223,6 @@ if it's not present, don't show loader */
 <jsp:include page="/WEB-INF/user/controller/ctl_menu_dashboard.jsp" />
 <jsp:include page="/WEB-INF/user/controller/ctl_ecpos.jsp" />
 <jsp:include page="/WEB-INF/user/controller/ctl_category.jsp" />
+<jsp:include page="/WEB-INF/user/controller/ctl_modifier_group.jsp" />
 <!-- *****************************ANGULAR JS CONTROLLER***************************** -->
 </html>

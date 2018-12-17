@@ -28,7 +28,7 @@
                      <a href="#" ng-click="$event.preventDefault()"><i class="fa fa-fw fa-tv"></i> <span> Management </span> <span class="menu-arrow"></span></a>
                          <ul class="list-unstyled">
                              <li><a href="${pageContext.request.contextPath}/user/#!Router_menu_dashboard">Item Group</a></li>
-                             <li><a href="${pageContext.request.contextPath}/user/#!Router_menu_dashboard">Modifier Group</a></li>
+                             <li><a href="${pageContext.request.contextPath}/user/#!Router_modifier_group">Modifier Group</a></li>
                          </ul>
                  </li>
                  
