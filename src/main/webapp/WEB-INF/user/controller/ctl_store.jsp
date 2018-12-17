@@ -1,15 +1,23 @@
 <html>
 <script>
 	app.controller('ctl_store', function($scope, $http, $compile) {
-	
 		
 		$scope.action = '';
 		$scope.store = {};
 		
 		$scope.modalType = function(action){
-			$scope.action = action;		
+			$scope.action = action;	
+			
+			$('#operatingStartTime').datetimepicker({
+                format: 'LT'
+            });
+			
+			$('#operatingEndTime').datetimepicker({
+                format: 'LT'
+            });
 		}
 		
+		// validation
 		$scope.submitStore = function(publish){	
 			if($scope.store.name == null || $scope.store.name=='' ||
 				$scope.store.currency == null || $scope.store.currency=='' ||
@@ -17,7 +25,10 @@
 						$scope.store.tableCount == null || $scope.store.tableCount=='' ||
 							$scope.store.longitude == null || $scope.store.longitude=='' ||
 								$scope.store.latitude == null || $scope.store.latitude=='' ||
-									$scope.store.country == null || $scope.store.country==''){
+									$scope.store.country == null || $scope.store.country=='' || 
+										$scope.store.operatingStartTime == null || $scope.store.operatingStartTime=='' || 
+											$scope.store.operatingEndTime == null || $scope.store.operatingEndTime==''){
+				alert('hihi');
 			}
 			else if($scope.store.imagePath == null || $scope.store.imagePath==''){
 				swal({
@@ -28,7 +39,7 @@
 					});
 				focus($('#storeImage'));
 			}
-			else{	
+			else{
 				if(publish==1){
 					// click publish button
 					swal({
@@ -38,14 +49,23 @@
 						  buttons: true,
 						  dangerMode: true,
 						})
-						.then((willDelete) => {
-						  if (willDelete) {
+						.then((willCreate) => {
+						  if (willCreate) {
 								$scope.store.isPublish = true;
-						}
+								$scope.postRequest();
+						}					 
 					});
 				}
-						
-				var postdata = {
+				else{
+					$scope.postRequest();
+				}
+			}
+			
+		}
+		
+		// submit request
+		$scope.postRequest = function(){
+			var postdata = {
 					id: $scope.action=='create' ? undefined: $scope.store.id ,
 					store_name : $scope.store.name,
 					store_logo_path : $scope.store.imagePath,
@@ -58,34 +78,34 @@
 					store_currency : $scope.store.currency,
 					store_table_count: $scope.store.tableCount, 
 					is_publish: $scope.store.isPublish==null?false:$scope.store.isPublish,
-					store_logo_path: $scope.store.imagePath
+					store_logo_path: $scope.store.imagePath,
+					store_start_operating_time: $scope.store.operatingStartTime,
+					store_end_operating_time: $scope.store.operatingEndTime					
 				}
 				
-				console.log(postdata);
-				
-				$http({
-					method : 'POST',
-					headers : {'Content-Type' : 'application/json'},
-					url : $scope.action=='create'?'${pageContext.request.contextPath}/menu/store/create':'${pageContext.request.contextPath}/menu/store/edit',
-					data : postdata
-				})
-				.then(function(response) {
-	
-					if (response.status == "403") {
-						alert("Session TIME OUT");
-						$(location).attr('href','${pageContext.request.contextPath}/admin');			
-					} else if(response.status == "200") {
-						// ok
-						swal("The store has been published", {
-							icon: "success",
-						});
-						$scope.resetModal();
-						$('#storeModal').modal('toggle');
-						$scope.refreshTable();
-					}
-				});
-			}
+			console.log(postdata);
 			
+			$http({
+				method : 'POST',
+				headers : {'Content-Type' : 'application/json'},
+				url : $scope.action=='create'?'${pageContext.request.contextPath}/menu/store/create':'${pageContext.request.contextPath}/menu/store/edit',
+				data : postdata
+			})
+			.then(function(response) {
+
+				if (response.status == "403") {
+					alert("Session TIME OUT");
+					$(location).attr('href','${pageContext.request.contextPath}/admin');			
+				} else if(response.status == "200") {
+					// ok
+					swal("The store has been published", {
+						icon: "success",
+					});
+					$scope.resetModal();
+					$('#storeModal').modal('toggle');
+					$scope.refreshTable();
+				}
+			});
 		}
 		
 		$scope.setPrecision = function($event, value){
@@ -101,30 +121,18 @@
 			// reset image
 			var filerKit = $("#storeImage").prop("jFiler");
 			filerKit.reset();
-		}
-		
-		/* Start ECPOS handling */
-		$scope.openECPOS = function(id){
-			alert("im at ecpos " + id);
-		}
-		/* End ECPOS handling */
-		
-		/* Start BYOD handling */
-		$scope.openBYOD = function(id){
-			alert("im at BYOD " + id);
-		}
-		/* End BYOD handling */
-		
-		/* Start KIOSK handling */
-		$scope.openKIOSK = function(id){
-			alert("im at KIOSK " + id);
-		}
-		/* End KIOSK handling */
+			
+			$('#operatingStartTime').datetimepicker('clear');
+			$('#operatingStartTime').datetimepicker('destroy');
+			
+			$('#operatingEndTime').datetimepicker('clear');
+			$('#operatingEndTime').datetimepicker('destroy') ;
+		}	
 		
 		$scope.refreshTable = function(){
 			var table = $('#store_dtable').DataTable({
 				"ajax" : {
-					"url" : "${pageContext.request.contextPath}/menu/store/",
+					"url" : "${pageContext.request.contextPath}/menu/store",
 					"dataSrc": function ( json ) {
 		                return json;
 		            },  
@@ -147,7 +155,7 @@
 					{"data": "id", "width": "25%",
 						 "render": function ( data, type, full, meta ) {
 							 	var id = full.id;
-							    return '<div class="btn-toolbar justify-content-between"><a ng-href="${pageContext.request.contextPath}/user/#!Router_store_ecpos/'+id+'" class="btn btn-outline-info border-0 p-0 custom-fontsize"><i class="fa fa-edit"></i> ECPOS</a>&nbsp;&nbsp;&nbsp;&nbsp;<a ng-click="openBYOD('+id+')" class="btn btn-outline-info border-0 p-0 custom-fontsize"><i class="fa fa-edit"></i> BYOD</a>&nbsp;&nbsp;&nbsp;&nbsp;<a ng-click="openKIOSK('+id+')" class="btn btn-outline-info border-0 p-0 custom-fontsize"><i class="fa fa-edit"></i> KIOSK</a></div>'
+							    return '<div class="btn-toolbar justify-content-between"><a ng-href="${pageContext.request.contextPath}/user/#!Router_store_ecpos/'+id+'" class="btn btn-outline-info border-0 p-0 custom-fontsize"><i class="fa fa-edit"></i> ECPOS</a>&nbsp;&nbsp;&nbsp;&nbsp;<a ng-href="${pageContext.request.contextPath}/user/#!Router_store_byod/'+id+'" class="btn btn-outline-info border-0 p-0 custom-fontsize"><i class="fa fa-edit"></i> BYOD</a>&nbsp;&nbsp;&nbsp;&nbsp;<a ng-href="${pageContext.request.contextPath}/user/#!Router_store_kiosk/'+id+'" class="btn btn-outline-info border-0 p-0 custom-fontsize"><i class="fa fa-edit"></i> KIOSK</a></div>'
 		  						
 						 }
 					}
@@ -170,12 +178,13 @@
 				$http({
 					method : 'GET',
 					headers : {'Content-Type' : 'application/json'},
-					url : '${pageContext.request.contextPath}/menu/storebyid?id='+$scope.store.id		
+					url : '${pageContext.request.contextPath}/menu/store/storebyid?id='+$scope.store.id		
 				})
 				.then(function(response) {
 					if (response.status == "404") {
 						alert("Unable to find store detail");
 					} else if(response.status == "200") {
+						console.log(response.data);
 						$scope.store.name = response.data.store_name;
 						$scope.store.imagePath = response.data.store_logo_path;
 						$scope.store.address = response.data.location.store_address;
@@ -185,16 +194,37 @@
 						$scope.store.currency = response.data.store_currency;
 						$scope.store.tableCount = response.data.store_table_count;
 						$scope.store.isPublish = response.data.is_publish;
-
+						$scope.store.operatingStartTime = response.data.store_start_operating_time;
+						$scope.store.operatingEndTime = response.data.store_end_operating_time;
+						console.log(moment($scope.store.operatingStartTime, "HH:mm:ss").format('HH:mm'));
+						 $('#operatingStartTime').datetimepicker({
+							    defaultDate: moment($scope.store.operatingStartTime, "HH:mm:ss"),
+							    format: 'LT'
+							  });
+						 $('#operatingEndTime').datetimepicker({
+							    defaultDate: moment($scope.store.operatingEndTime, "HH:mm:ss"),
+							    format: 'LT'
+							  });
 						$('#storeModal').modal('toggle');
 					}
 				});
 			});
 		}
 		
+		$('#operatingStartTime').on("change.datetimepicker", function (e) {			
+			$scope.store.operatingStartTime = moment(e.date);
+			//$scope.store.operatingStartTime = moment(e.date).format('HH:mm');
+		});
+		
+		$('#operatingEndTime').on("change.datetimepicker", function (e) {		
+			$scope.store.operatingEndTime = moment(e.date);
+			//$scope.store.operatingEndTime = moment(e.date).format('HH:mm');
+		}); 
+		
 		$(document).ready(function() {				
-			$scope.refreshTable();
+			$scope.refreshTable();		
 
+			
 			$('input[type=file]').change(function(event) {
 				var element = event.target.id;
 				var reader = new FileReader();

@@ -127,6 +127,30 @@
 							</div>						
 						</div>
 						<div class="row">
+					        <div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
+					            <div class="form-group">
+					            	<label class="login-label">Operating Start Time</label>
+					                <div class="input-group date" id="operatingStartTime" data-target-input="nearest">
+					                    <input type="text" class="form-control datetimepicker-input" data-target="#operatingStartTime"/>
+					                    <div class="input-group-append" data-target="#operatingStartTime" data-toggle="datetimepicker">
+					                        <div class="input-group-text"><i class="fa fa-clock-o"></i></div>
+					                    </div>
+					                </div>
+					            </div>
+					        </div>
+					        <div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
+					            <div class="form-group">
+					            	<label class="login-label">Operating End Time</label>
+					                <div class="input-group date" id="operatingEndTime" data-target-input="nearest">
+					                    <input type="text" class="form-control datetimepicker-input" data-target="#operatingEndTime"/>
+					                    <div class="input-group-append" data-target="#operatingEndTime" data-toggle="datetimepicker">
+					                        <div class="input-group-text"><i class="fa fa-clock-o"></i></div>
+					                    </div>
+					                </div>
+					            </div>
+					        </div>
+					    </div>
+						<div class="row">
 							<div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
 								<div class="form-group">
 									<label class="login-label">Image</label>
@@ -143,86 +167,6 @@
 		      	<button class="btn btn-success" ng-show="action=='update'" type="submit" ng-click="submitStore(1)"> Update & Publish</button>
 		      </div>
 		       </form>		      
-		    </div>
-		</div>
-	</div>
-	
-	<!-- ECPOS Modal -->
-	<div class="modal fade" id="ecposModal" tabindex="-1" role="dialog" aria-labelledby="ecposModal" aria-hidden="true">
-		<div class="modal-dialog modal-lg">
-		    <div class="modal-content">
-		    <form id="ecposForm" method="POST" accept-charset="UTF-8" role="form" class="form-signin">
-		      <div class="modal-header">
-		        <h5 class="modal-title">ECPOS Detail</h5>
-		        <button type="button" class="close" data-dismiss="modal" ng-click="resetModal()" aria-label="Close">
-		          <span aria-hidden="true">&times;</span>
-		        </button>
-		      </div>
-		      <div class="modal-body">		       									  
-					<div class="form-section">
-						<div class="row">
-							<div class="col-8 col-sm-8 col-md-8 col-lg-8 col-xl-8">
-								<div class="form-group">
-									<label class="login-label">Name</label>
-									<input class="form-control" name="storeName" placeholder="Name" ng-model="store.name" type="text" required> 
-								</div>
-							</div>
-							<div class="col-4 col-sm-4 col-md-4 col-lg-4 col-xl-4">
-								<div class="form-group">
-									<label class="login-label">Currency</label>
-									<input class="form-control" name="storeCurrency" placeholder="MYR" ng-model="store.currency" type="text" required> 
-								</div>
-							</div>
-						</div>	
-						<div class="row">
-							<div class="col-8 col-sm-8 col-md-8 col-lg-8 col-xl-8">
-								<div class="form-group">
-									<label class="login-label">Address</label>
-									<input class="form-control" name="storeAddress" placeholder="Address" ng-model="store.address" type="text" required> 
-								</div>
-							</div>
-							<div class="col-4 col-sm-4 col-md-4 col-lg-4 col-xl-4">
-								<div class="form-group">
-									<label class="login-label">Table Count</label>
-									<input class="form-control" name="storeTableCount" placeholder="50" ng-model="store.tableCount" type="number" required> 
-								</div>
-							</div>
-						</div>
-						<div class="row">
-							<div class="col-4 col-sm-4 col-md-4 col-lg-4 col-xl-4">
-								<div class="form-group">
-									<label class="login-label">Longitude</label>
-									<input class="form-control" name="storeLongitude" ng-blur="setPrecision(event, store.longitude)" ng-click="event = $event" placeholder="Longitude" ng-model="store.longitude" type="number" step=".000001" required> 
-								</div>
-							</div>
-							<div class="col-4 col-sm-4 col-md-4 col-lg-4 col-xl-4">
-								<div class="form-group">
-									<label class="login-label">Latitude</label>
-									<input class="form-control" name="storeLatitude" ng-blur="setPrecision(event, store.latitude)" ng-click="event = $event" placeholder="Latitude" ng-model="store.latitude" type="number" step=".000001" required> 
-								</div>
-							</div>
-							<div class="col-4 col-sm-4 col-md-4 col-lg-4 col-xl-4">
-								<div class="form-group">
-									<label class="login-label">Country</label>
-									<input class="form-control" name="storeCountry" placeholder="Country" ng-model="store.country" type="text" required> 
-								</div>
-							</div>						
-						</div>
-						<div class="row">
-							<div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
-								<div class="form-group">
-									<label class="login-label">Image</label>
-									<input class="form-control" type="file" name="files[]" id="storeImage" multiple="multiple"> 
-								</div>
-							</div>
-						</div>	
-					</div>				 									
-		      </div>
-		      <div class="modal-footer">
-		      	<button class="btn btn-primary" ng-show="action=='create'" type="submit" ng-click="submitStore()"> Submit</button>
-		      	<button class="btn btn-success" ng-show="action=='create'" type="submit" ng-click="submitStore(1)"> Submit & Publish</button>
-		      </div>
-		       </form>		          			      
 		    </div>
 		</div>
 	</div>
