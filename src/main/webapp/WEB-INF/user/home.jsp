@@ -69,6 +69,7 @@ if it's not present, don't show loader */
 	<%-- <script src="${pageContext.request.contextPath}/assets2/js/jquery.min.js"></script> --%>
 	<script src="${pageContext.request.contextPath}/assets/plugins/datatable-1.10.16/js/jquery.dataTables.min.js"></script>
 	<script src="${pageContext.request.contextPath}/assets/plugins/datatable-1.10.16/js/dataTables.bootstrap4.min.js"></script>
+	<link rel="stylesheet" href="${pageContext.request.contextPath}/assets/plugins/datetimepicker/css/tempusdominus-bootstrap-4.min.css" />
 	
 <%-- <link rel="import" href="${pageContext.request.contextPath}/assets/component.html"> --%>
 </head>
@@ -152,6 +153,26 @@ if it's not present, don't show loader */
 		       	checkSession:checkSession
 		       }
 	    })
+		.when('/Router_store_byod/:id', {                            
+	        templateUrl: function(params){
+	        	return '${pageContext.request.contextPath}/user/views/store/'+params.id+'/byod'
+	        }
+	        ,
+	        controller: 'ctl_byod',
+	        resolve : {
+		       	checkSession:checkSession
+		       }
+	    })
+	    .when('/Router_store_kiosk/:id', {                            
+	        templateUrl: function(params){
+	        	return '${pageContext.request.contextPath}/user/views/store/'+params.id+'/kiosk'
+	        }
+	        ,
+	        controller: 'ctl_kiosk',
+	        resolve : {
+		       	checkSession:checkSession
+		       }
+	    })
 		.when('/Router_group_category_category/:id', {
 			templateUrl : function(params) {
 				return '${pageContext.request.contextPath}/user/views/groupCategory/'+ params.id + '/category'
@@ -202,6 +223,8 @@ if it's not present, don't show loader */
 <script src="${pageContext.request.contextPath}/assets/plugins/jQuery.filer-1.3.0/js/jquery.filer.min.js"></script>
 <script src="${pageContext.request.contextPath}/assets/plugins/pikeadmin/js/pikeadmin.js"></script>
 <script src="${pageContext.request.contextPath}/assets/plugins/sweetalert/js/sweetalert.min.js"></script>
+<!-- Bootstrap DatetimePicker* -->
+<script type="text/javascript" src="${pageContext.request.contextPath}/assets/plugins/datetimepicker/js/tempusdominus-bootstrap-4.min.js"></script>
 	
 	<!-- App js -->
 
@@ -222,6 +245,8 @@ if it's not present, don't show loader */
 <jsp:include page="/WEB-INF/user/controller/ctl_add_menu.jsp" />
 <jsp:include page="/WEB-INF/user/controller/ctl_menu_dashboard.jsp" />
 <jsp:include page="/WEB-INF/user/controller/ctl_ecpos.jsp" />
+<jsp:include page="/WEB-INF/user/controller/ctl_byod.jsp" />
+<jsp:include page="/WEB-INF/user/controller/ctl_kiosk.jsp" />
 <jsp:include page="/WEB-INF/user/controller/ctl_category.jsp" />
 <jsp:include page="/WEB-INF/user/controller/ctl_modifier_group.jsp" />
 <!-- *****************************ANGULAR JS CONTROLLER***************************** -->

@@ -93,6 +93,22 @@ public class UserLoginRestController {
 		return model;
 	}
 	
+	// Store - BYOD
+	@RequestMapping(value = { "/views/store/{id}/byod" }, method = RequestMethod.GET)
+	public ModelAndView viewBYOD(@PathVariable(value = "id") long id) {
+		ModelAndView model = new ModelAndView();
+		model.setViewName("/user/views/byod");
+		return model;
+	}		
+		
+	// Store - KIOSK
+	@RequestMapping(value = { "/views/store/{id}/kiosk" }, method = RequestMethod.GET)
+	public ModelAndView viewKIOSK(@PathVariable(value = "id") long id) {
+		ModelAndView model = new ModelAndView();
+		model.setViewName("/user/views/kiosk");
+		return model;
+	}		
+	
 	// Group Category
 	@RequestMapping(value = { "/views/groupCategory" }, method = RequestMethod.GET)
 	public ModelAndView viewGroupCategory() {
