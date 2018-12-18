@@ -163,4 +163,11 @@ public class UserLoginRestController {
 		model.setViewName("/user/views/modifier_group");
 		return model;
 	}
+	
+	@RequestMapping(value = {"/views/menuItem"}, method = RequestMethod.GET)
+	public ModelAndView viewMenuItem() {
+		ModelAndView model = new ModelAndView();
+		model.setViewName("/user/views/menu_item");
+		return model;
+	}
 }

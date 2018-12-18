@@ -21,7 +21,7 @@
                 </li>
                 
                 <li class="submenu">
-                       <a href="${pageContext.request.contextPath}/user/#!Router_store"><i class="fa fa-fw fa-shopping-cart"></i><span> Item</span> </a>
+                       <a href="${pageContext.request.contextPath}/user/#!Router_menu_item"><i class="fa fa-fw fa-shopping-cart"></i><span> Item</span> </a>
                 </li>			
 									
                  <li class="submenu">
