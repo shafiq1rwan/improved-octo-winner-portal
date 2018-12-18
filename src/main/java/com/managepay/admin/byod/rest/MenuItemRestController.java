@@ -117,6 +117,51 @@ public class MenuItemRestController {
 		}
 		return jsonMenuItemArray.toString();
 	}
+	
+	@GetMapping(value = "/getAllMenuItemByType", produces = "application/json")
+	public ResponseEntity<?> getAllMenuItemByType(HttpServletRequest request, HttpServletResponse response, @RequestParam("menuItemType") int menuItemType) {
+		JSONArray jsonMenuItemArray = new JSONArray();
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+
+		try {
+			connection = dataSource.getConnection();
+			stmt = connection.prepareStatement("SELECT * FROM menu_item WHERE menu_item_type = ?");
+			stmt.setInt(1, menuItemType);
+			rs = (ResultSet) stmt.executeQuery();
+
+			while (rs.next()) {
+				JSONObject jsonMenuItemObj = new JSONObject();
+				jsonMenuItemObj.put("id", rs.getLong("id"));
+				jsonMenuItemObj.put("backend_id", rs.getString("backend_id"));
+				jsonMenuItemObj.put("modifier_group_id", rs.getLong("modifier_group_id"));
+				jsonMenuItemObj.put("menu_item_name", rs.getString("menu_item_name"));
+				jsonMenuItemObj.put("menu_item_description", rs.getString("menu_item_description"));
+				jsonMenuItemObj.put("menu_item_image_path", rs.getString("menu_item_image_path"));
+				jsonMenuItemObj.put("menu_item_base_price", rs.getBigDecimal("menu_item_base_price"));
+				jsonMenuItemObj.put("menu_item_type", rs.getInt("menu_item_type"));
+				jsonMenuItemObj.put("is_taxable", rs.getBoolean("is_taxable"));
+				jsonMenuItemObj.put("is_discountable", rs.getBoolean("is_discountable"));
+				jsonMenuItemObj.put("is_active", rs.getBoolean("is_active"));
+				jsonMenuItemObj.put("created_date", rs.getDate("created_date"));
+
+				jsonMenuItemArray.put(jsonMenuItemObj);
+			}		
+			return ResponseEntity.ok().body(jsonMenuItemArray.toString());
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return ResponseEntity.badRequest().body(null);
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
 
 	@GetMapping(value = "/getMenuItemById", produces = "application/json")
 	public String getMenuItemById(HttpServletRequest request, HttpServletResponse response,
@@ -306,6 +351,42 @@ public class MenuItemRestController {
 			ex.printStackTrace();
 			return 0;
 		}
+	}
+	
+	@PostMapping(value = "/updateMenuItemActiveStatus", produces = "application/json")
+	public ResponseEntity<?> updateMenuItemActiveStatus(HttpServletRequest request, HttpServletResponse response,
+			@RequestBody String data){
+		
+		Connection connection = null;
+		PreparedStatement stmt = null;
+
+		try {
+			JSONObject jsonMenuItemData = new JSONObject(data);
+			if(jsonMenuItemData.has("id") && jsonMenuItemData.has("is_active")) {
+				connection = dataSource.getConnection();
+				stmt = connection.prepareStatement("UPDATE menu_item SET is_active = ? WHERE id = ?");
+				stmt.setBoolean(1, jsonMenuItemData.getBoolean("is_active"));
+				stmt.setLong(2, jsonMenuItemData.getLong("id"));
+				stmt.executeUpdate();	
+				
+				return ResponseEntity.ok(null);	
+			}
+			else {
+				return ResponseEntity.notFound().build();
+			}
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return ResponseEntity.badRequest().body(ex.getMessage());
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
 	}
 
 }
