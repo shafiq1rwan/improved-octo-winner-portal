@@ -17,7 +17,6 @@
 								<div class="breadcrumb-holder">
 	                                    <h1 class="main-title float-left"><a ng-href="${pageContext.request.contextPath}/user/#!Router_store"><i class="fa fa-chevron-left"></i></a> &nbsp;KIOSK</h1>
 	                                    <ol class="breadcrumb float-right">
-											<li class="breadcrumb-item">Home</li>
 											<li class="breadcrumb-item"><a ng-href="${pageContext.request.contextPath}/user/#!Router_store">Store</a></li>
 											<li class="breadcrumb-item active">KIOSK</li>
 	                                    </ol>
@@ -89,12 +88,6 @@
 										</div>
 										<div class="col-3 col-sm-3 col-md-3 col-lg-3 col-xl-3">
 											<div class="form-group">
-												<label class="login-label">Public IP</label>
-												<input class="form-control"  type="text" disabled>
-											</div>
-										</div>
-										<div class="col-3 col-sm-3 col-md-3 col-lg-3 col-xl-3">
-											<div class="form-group">
 												<label class="login-label">Platform</label>
 												<input class="form-control"  type="text" disabled>
 											</div>
@@ -126,44 +119,6 @@
 		<!-- END content -->	
     </div>
 	<!-- END content-page -->
-	
-	
-	<!-- Store Modal -->
-	<div class="modal fade" id="employeeModal" tabindex="-1" role="dialog" aria-labelledby="employeeModal" aria-hidden="true">
-		<div class="modal-dialog modal-lg">
-		    <div class="modal-content">
-		    <form id="employeeForm" method="POST" accept-charset="UTF-8" role="form" class="form-signin">
-		      <div class="modal-header">
-		        <h5>Employee List</h5>	
-		        <button type="button" class="close" data-dismiss="modal" ng-click="resetModal()" aria-label="Close">
-		          <span aria-hidden="true">&times;</span>
-		        </button>
-		      </div>
-		      <div class="modal-body">
-		      		<div class="table-responsive">
-									<table id="employee_dtable" class="table table-bordered table-hover display" style="width:100%">
-										<thead>
-											<tr>
-												<th>ID</th>
-												<th>Name</th>
-												<th>Employee Number</th>
-												<th>Status</th>
-											</tr>
-										</thead>										
-										<tbody>									
-										</tbody>
-									</table>
-								</div>			       									  				 									
-		      </div>
-		      <div class="modal-footer">
-		      	<button type="button" class="btn btn-social pull-right btn-primary bg-aqua" data-toggle="modal" data-target="#storeModal" ng-click="modalType('create')">
-									<span class="btn-label"><i class="fa fa-plus"></i></span> Add Employee
-								</button>
-		      </div>
-		       </form>		      
-		    </div>
-		</div>
-	</div>
 </div>
 </body>
 </html>

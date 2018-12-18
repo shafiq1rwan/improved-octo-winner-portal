@@ -182,6 +182,13 @@ if it's not present, don't show loader */
 		       	checkSession:checkSession
 		       }
 		})
+.when('/Router_item_group', {
+			templateUrl : '${pageContext.request.contextPath}/user/views/itemGroup',	
+			controller : "ctl_item_group",
+			resolve : {
+		       	checkSession:checkSession
+		       }
+		})
 		.when('/Router_modifier_group', {
 			templateUrl : '${pageContext.request.contextPath}/user/views/modifierGroup',	
 			controller : "ctl_modifier_group",
@@ -256,6 +263,7 @@ if it's not present, don't show loader */
 <jsp:include page="/WEB-INF/user/controller/ctl_kiosk.jsp" />
 <jsp:include page="/WEB-INF/user/controller/ctl_category.jsp" />
 <jsp:include page="/WEB-INF/user/controller/ctl_modifier_group.jsp" />
+<jsp:include page="/WEB-INF/user/controller/ctl_item_group.jsp" />
 <jsp:include page="/WEB-INF/user/controller/ctl_menu_item.jsp" />
 <!-- *****************************ANGULAR JS CONTROLLER***************************** -->
 </html>

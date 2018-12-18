@@ -1,6 +1,6 @@
 <html>
 <script>
-	app.controller('ctl_ecpos', function($scope, $http, $compile, $routeParams) {
+	app.controller('ctl_item_group', function($scope, $http, $compile, $routeParams) {
 		
 		$scope.action = '';
 		$scope.store = {id : $routeParams.id};
@@ -30,7 +30,7 @@
 		$http({
 			method : 'GET',
 			headers : {'Content-Type' : 'application/json'},
-			url : '${pageContext.request.contextPath}/menu/store/ecpos/getStaffRole'	
+			url : '${pageContext.request.contextPath}/menu/store/ecpos/getstaffrole'	
 		})
 		.then(function(response) {
 			$scope.roleList = response.data;
@@ -86,7 +86,7 @@
 			$http({
 				method : 'POST',
 				headers : {'Content-Type' : 'application/json'},
-				url : $scope.action=='create'?'${pageContext.request.contextPath}/menu/store/ecpos/createStaff':'${pageContext.request.contextPath}/menu/store/ecpos/updateStaff',
+				url : $scope.action=='create'?'${pageContext.request.contextPath}/menu/store/ecpos/createstaff':'${pageContext.request.contextPath}/menu/store/ecpos/updatestaff',
 				data : postdata
 			})
 			.then(function(response) {
@@ -121,9 +121,9 @@
 		}
 		
 		$scope.refreshTable = function(){
-			var table = $('#staffList_dtable').DataTable({
+			var table = $('#itemGroupList_dtable').DataTable({
 				"ajax" : {
-					"url" : "${pageContext.request.contextPath}/menu/store/ecpos/getAllStaff?store_id="+$scope.store.id,
+					"url" : "${pageContext.request.contextPath}/menu/item_group/get_all_item_group",
 					"dataSrc": function ( json ) {
 		                return json.data;
 		            },
@@ -138,20 +138,9 @@
 				"order" : [ [ 0, "asc" ] ] ,
 				"columns" : [ 
 					{"data" : "id", "width": "5%"}, 
+					{"data" : "backend_id"},
 					{"data" : "name"},
-					{"data" : "username"},
-					{"data" : "isActive", "width": "10%",
-						"render": function ( data, type, full, meta ) {
-						 	var isActive = full.isActive;
-						 	var status;
-						 	if(isActive==1){
-						 		status = 'Active';
-						 	}
-						 	else if(isActive==0){
-						 		status = 'Inactive';
-						 	}
-						    return status;	  						
-					 }}
+					{"data" : "created_date", "width" : "20%"}
 				]
 				
 			});
@@ -166,7 +155,7 @@
 				$http({
 					method : 'GET',
 					headers : {'Content-Type' : 'application/json'},
-					url : '${pageContext.request.contextPath}/menu/store/ecpos/staffById?store_id='+$scope.store.id + '&id=' + $scope.staff.id		
+					url : '${pageContext.request.contextPath}/menu/store/ecpos/staffbyid?store_id='+$scope.store.id + '&&id=' + $scope.staff.id		
 				})
 				.then(function(response) {
 					if (response.status == "404") {

@@ -4,6 +4,8 @@
 		
 		$scope.store = {};
 		
+		$scope.byod = [{id:1}, {id:2}];
+		
 		$http({
 			method : 'GET',
 			headers : {'Content-Type' : 'application/json'},

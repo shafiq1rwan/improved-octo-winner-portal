@@ -17,7 +17,6 @@
 								<div class="breadcrumb-holder">
 	                                    <h1 class="main-title float-left">Store List</h1>
 	                                    <ol class="breadcrumb float-right">
-											<li class="breadcrumb-item">Home</li>
 											<li class="breadcrumb-item active">Store</li>
 	                                    </ol>
 	                                    <div class="clearfix"></div>
@@ -36,7 +35,7 @@
 							</div>						
 							<div class="card-body">							
 								<div class="table-responsive">
-									<table id="store_dtable" class="table table-bordered table-hover display" style="width:100%">
+									<table id="store_dtable" class="table table-bordered table-hover display nowrap" style="width:100%">
 										<thead>
 											<tr>
 												<th>ID</th>
@@ -150,11 +149,26 @@
 					            </div>
 					        </div>
 					    </div>
-						<div class="row">
+						<!-- <div class="row">
 							<div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
 								<div class="form-group">
 									<label class="login-label">Image</label>
 									<input class="form-control" type="file" name="files[]" id="storeImage" multiple="multiple"> 
+								</div>
+								<div style="text-align: center">
+											<img id="updateDbImg" />
+								</div>
+							</div>
+						</div> -->
+						
+						<div class="row">
+							 <div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
+							 	<div class="form-group">
+							 		<img style="max-width:100%;max-height:100%;" id="previewImage" />	
+							 	</div>									
+								<div class="form-group">																							
+									<label class="login-label">Image</label> 
+									<input id="storeImage" type="file" accept="image/*" required /> 
 								</div>
 							</div>
 						</div>	

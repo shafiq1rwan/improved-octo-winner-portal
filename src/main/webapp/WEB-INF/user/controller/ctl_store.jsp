@@ -28,7 +28,6 @@
 									$scope.store.country == null || $scope.store.country=='' || 
 										$scope.store.operatingStartTime == null || $scope.store.operatingStartTime=='' || 
 											$scope.store.operatingEndTime == null || $scope.store.operatingEndTime==''){
-				alert('hihi');
 			}
 			else if($scope.store.imagePath == null || $scope.store.imagePath==''){
 				swal({
@@ -119,8 +118,8 @@
 			$scope.action = '';
 			$scope.store = {};
 			// reset image
-			var filerKit = $("#storeImage").prop("jFiler");
-			filerKit.reset();
+			$('#previewImage').attr('src', "");
+			$('#storeImage').val('');
 			
 			$('#operatingStartTime').datetimepicker('clear');
 			$('#operatingStartTime').datetimepicker('destroy');
@@ -144,12 +143,18 @@
 					}
 				},
 				destroy : true,
+				"scrollX": true,
 				"order" : [ [ 0, "asc" ] ] ,
 				"columns" : [ 
 					{"data" : "id", "width": "5%"}, 
 					{"data" : "backend_id", "width": "15%"},
 					{"data" : "store_name"},
-					{"data" : "store_logo_path", "width": "15%"},
+					{"data" : "store_logo_path",
+						 "render": function ( data, type, full, meta ) {
+							 	var image = full.store_logo_path;
+							    return '<img class="border border-warning rounded" style="min-width:100%;width:90px;height:90px;" src="${pageContext.request.contextPath}'+image+'" />'
+						 }
+					},
 					{"data" : "location.store_country"},
 					{"data" : "is_publish", "width": "13%"},
 					{"data": "id", "width": "25%",
@@ -178,7 +183,7 @@
 				$http({
 					method : 'GET',
 					headers : {'Content-Type' : 'application/json'},
-					url : '${pageContext.request.contextPath}/menu/store/storebyid?id='+$scope.store.id		
+					url : '${pageContext.request.contextPath}/menu/store/storeById?id='+$scope.store.id		
 				})
 				.then(function(response) {
 					if (response.status == "404") {
@@ -196,7 +201,9 @@
 						$scope.store.isPublish = response.data.is_publish;
 						$scope.store.operatingStartTime = response.data.store_start_operating_time;
 						$scope.store.operatingEndTime = response.data.store_end_operating_time;
-						console.log(moment($scope.store.operatingStartTime, "HH:mm:ss").format('HH:mm'));
+						
+						$('#previewImage').attr('src', "${pageContext.request.contextPath}" + response.data.store_logo_path);
+						
 						 $('#operatingStartTime').datetimepicker({
 							    defaultDate: moment($scope.store.operatingStartTime, "HH:mm:ss"),
 							    format: 'LT'
@@ -226,22 +233,58 @@
 
 			
 			$('input[type=file]').change(function(event) {
-				var element = event.target.id;
+				var element = event.target.id;			
 				var reader = new FileReader();
 				var _URL = window.URL || window.webkitURL;
 				var file = this.files[0];
-
+				var check = fileCheck(file, element);
+				if (check == false) {
+					return false;
+				}
+				
 				reader.readAsDataURL(file);
 				reader.onload = function() {
 					if (element === "storeImage")
 						$scope.store.imagePath = reader.result;
+					console.log($scope.store.imagePath);
+					$('#previewImage').attr('src', reader.result);
 				}
 				reader.onerror = function(error) {
 				}
 			});
 			
+			function fileCheck(file, elementName) {
+				var img;
+				if (file.type.indexOf("image") == -1) {
+					alert("Invalid image file.");
+					$('#' + elementName).wrap('<form>').closest('form').get(0).reset();
+					$('#' + elementName).unwrap();
+					return false;
+				}
+
+				if (file) {
+					img = new Image();
+					img.onload = function() {
+						if (this.width > 400 || this.height > 200) {
+							alert("Please make sure that the image is in 400 x 200.");
+							$('#' + elementName).wrap('<form>').closest('form').get(0).reset();
+							$('#' + elementName).unwrap();
+							return false;
+						}
+					}
+					img.src = URL.createObjectURL(file);
+				}
+
+				if (file.size > 50000) {
+					alert("Image file must not exceed 50kb.");
+					$('#' + elementName).wrap('<form>').closest('form').get(0).reset();
+					$('#' + elementName).unwrap();
+					return false;
+				}
+			};
+			
 			//Example 2
-		    $('#storeImage').filer({
+		   /*  $('#storeImage').filer({
 		        limit: 1,
 		        maxSize: 1,
 		        extensions: ['jpg', 'png'],
@@ -312,8 +355,8 @@
 				},
 		        changeInput: true,
 		        showThumbs: true
-		    });
-		} );
+		    }); */
+		} ); 
 
 	});
 	

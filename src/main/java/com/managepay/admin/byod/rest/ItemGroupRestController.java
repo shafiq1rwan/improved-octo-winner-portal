@@ -31,87 +31,51 @@ import com.managepay.admin.byod.entity.Store;
 import com.managepay.admin.byod.service.StoreService;
 
 @RestController
-@RequestMapping("/menu/store")
-public class StoreRestController {
-	
-	@Value("${upload-path}")
-	private String filePath;
-	
-	@Autowired
-	private StoreService storeService;
-	
-	@Autowired
-	private DataSource dataSource;
-	
-	@Autowired
-	private JdbcTemplate jdbcTemplate;	
-	
-	// Store
-	@GetMapping("")
-	public ResponseEntity<List<Store>> findAllStore() {
-		List<Store> stores = storeService.findAllStore();
-		for(Store store: stores) {
-			store.setLogoPath(filePath + store.getLogoPath());
-		}
-		return new ResponseEntity<List<Store>>(stores, HttpStatus.OK);
-	}
+@RequestMapping("/menu/item_group")
+public class ItemGroupRestController {
 
-	@GetMapping("/storeById")
-	public ResponseEntity<Store> findStoreById(@RequestParam("id") Long id) {
-		Store existingStore = storeService.findStoreById(id);
-		if (existingStore.getId() == 0)
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		existingStore.setLogoPath(filePath + existingStore.getLogoPath());
-		return new ResponseEntity<Store>(existingStore, HttpStatus.OK);
-	}
-
-	@PostMapping("/create")
-	public ResponseEntity<?> createStore(@RequestBody Store store) {
+	@Autowired
+	private DataSource dataSource;	
+	
+	@GetMapping(value = {"/get_all_item_group"}, produces = "application/json")
+	public String getAllStaff(HttpServletRequest request, HttpServletResponse response) {
+		JSONArray jsonArray = new JSONArray();
+		JSONObject jsonObj = null;
+		JSONObject jsonObjResult = null;
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		
 		try {
-			int rowAffected = storeService.createStore(store);
-			if (rowAffected == 0)
-				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-
-			return new ResponseEntity<>(HttpStatus.OK);
-		} catch (DuplicateKeyException ex) {
-			return new ResponseEntity<String>(ex.getMessage(), HttpStatus.CONFLICT);
+			connection = dataSource.getConnection();
+			 stmt = connection.prepareStatement("SELECT * FROM menu_item_group");
+			 rs = (ResultSet) stmt.executeQuery();
+			 
+			while(rs.next()) {
+				jsonObj = new JSONObject();
+				jsonObj.put("id", rs.getLong("id"));
+				jsonObj.put("name", rs.getString("staff_name"));
+				jsonObj.put("backend_id", rs.getString("backend_id"));	
+				jsonObj.put("created_date", rs.getString("created_date"));	
+				jsonArray.put(jsonObj);
+			}
+			
+			jsonObjResult = new JSONObject();
+			jsonObjResult.put("data", jsonArray);
+			
+		}catch(Exception ex) {
+			ex.printStackTrace();
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
 		}
+		return jsonObjResult.toString();
 	}
-
-	@PostMapping("/edit")
-	public ResponseEntity<?> editStore(@RequestBody Store store) {
-		try {
-			Store existingStore = storeService.findStoreById(store.getId());
-			if (existingStore.getId() == 0)
-				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-
-			int rowAffected = storeService.editStore(store.getId(), store);
-			if (rowAffected == 0)
-				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-
-			return new ResponseEntity<>(HttpStatus.OK);
-		} catch (DuplicateKeyException ex) {
-			return new ResponseEntity<String>(ex.getMessage(), HttpStatus.CONFLICT);
-		}
-	}
-
-	@PostMapping("/edit/groupCategory")
-	public ResponseEntity<Void> editStoreGroupCategoryId(@RequestParam("storeId") Long storeId,
-			@RequestParam("groupCategoryId") Long groupCategoryId) {
-		storeService.editStoreGroupCategoryId(groupCategoryId, storeId);
-		return new ResponseEntity<>(HttpStatus.OK);
-	}
-
-	@DeleteMapping("/delete")
-	public ResponseEntity<Void> removeStore(@RequestParam("id") Long id) {
-		int rowAffected = storeService.removeStore(id);
-		if (rowAffected == 0)
-			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-
-		return new ResponseEntity<>(HttpStatus.OK);
-	}
-	
-	/*Start ECPOS API*/
 	
 	@GetMapping(value = {"/{id}/ecpos"}, produces = "application/json")
 	public String getAllCategory(@PathVariable(value = "id") Long id, HttpServletRequest request, HttpServletResponse response) {
@@ -151,7 +115,7 @@ public class StoreRestController {
 		return jsonObj.toString();
 	}
 	
-	@GetMapping(value = {"/ecpos/getStaffRole"}, produces = "application/json")
+	@GetMapping(value = {"/ecpos/getstaffrole"}, produces = "application/json")
 	public String getStaffRole(HttpServletRequest request, HttpServletResponse response) {
 		JSONArray jsonArray = new JSONArray();
 		JSONObject jsonObj = null;
@@ -184,55 +148,9 @@ public class StoreRestController {
 			}
 		}
 		return jsonArray.toString();
-	}
+	}	
 	
-	@GetMapping(value = {"/ecpos/getAllStaff"}, produces = "application/json")
-	public String getAllStaff(@RequestParam("store_id") Long store_id, HttpServletRequest request, HttpServletResponse response) {
-		JSONArray jsonArray = new JSONArray();
-		JSONObject jsonObj = null;
-		JSONObject jsonObjResult = null;
-		Connection connection = null;
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-		
-		try {
-			connection = dataSource.getConnection();
-			 stmt = connection.prepareStatement("SELECT * FROM staff WHERE store_id = ? ");
-			 stmt.setLong(1, store_id);
-			 rs = (ResultSet) stmt.executeQuery();
-			 
-			while(rs.next()) {
-				jsonObj = new JSONObject();
-				jsonObj.put("id", rs.getLong("id"));
-				jsonObj.put("name", rs.getString("staff_name"));
-				jsonObj.put("username", rs.getString("staff_username"));	
-				jsonObj.put("password", rs.getString("staff_password"));	
-				jsonObj.put("role_id", rs.getLong("staff_role"));	
-				jsonObj.put("mobilePhone", rs.getString("staff_contact_hp_number"));	
-				jsonObj.put("email", rs.getString("staff_contact_email"));
-				jsonObj.put("isActive", rs.getString("is_active"));
-				jsonObj.put("createdDate", rs.getString("created_date"));
-				jsonArray.put(jsonObj);
-			}
-			
-			jsonObjResult = new JSONObject();
-			jsonObjResult.put("data", jsonArray);
-			
-		}catch(Exception ex) {
-			ex.printStackTrace();
-		} finally {
-			if (connection != null) {
-				try {
-					connection.close();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}
-		return jsonObjResult.toString();
-	}
-	
-	@GetMapping(value = {"/ecpos/staffById"}, produces = "application/json")
+	@GetMapping(value = {"/ecpos/staffbyid"}, produces = "application/json")
 	public String getStaffById(@RequestParam("store_id") Long store_id, @RequestParam("id") Long id, HttpServletRequest request, HttpServletResponse response) {
 		//JSONArray jsonArray = new JSONArray();
 		JSONObject jsonObj = null;
@@ -275,7 +193,7 @@ public class StoreRestController {
 		return jsonObj.toString();
 	}
 	
-	@PostMapping(value = {"/ecpos/createStaff"}, produces = "application/json")
+	@PostMapping(value = {"/ecpos/createstaff"}, produces = "application/json")
 	public ResponseEntity<JSONObject> createStaff(@RequestBody String formfield, HttpServletRequest request, HttpServletResponse response) {
 		//JSONArray jsonArray = new JSONArray();
 		JSONObject jsonObj = null;
@@ -350,7 +268,7 @@ public class StoreRestController {
 		return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.OK);
 	}
 	
-	@PostMapping(value = {"/ecpos/updateStaff"}, produces = "application/json")
+	@PostMapping(value = {"/ecpos/updatestaff"}, produces = "application/json")
 	public ResponseEntity<JSONObject> updateStaff(@RequestBody String formfield, HttpServletRequest request, HttpServletResponse response) {
 		//JSONArray jsonArray = new JSONArray();
 		JSONObject jsonObj = null;
@@ -430,7 +348,5 @@ public class StoreRestController {
 		}
 		return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.OK);
 	}
-	
-	/*End ECPOS API*/
-	
+
 }

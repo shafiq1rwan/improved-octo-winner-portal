@@ -17,7 +17,6 @@
 								<div class="breadcrumb-holder">
 	                                    <h1 class="main-title float-left"><a ng-href="${pageContext.request.contextPath}/user/#!Router_store"><i class="fa fa-chevron-left"></i></a> &nbsp;ECPOS</h1>
 	                                    <ol class="breadcrumb float-right">
-											<li class="breadcrumb-item">Home</li>
 											<li class="breadcrumb-item"><a ng-href="${pageContext.request.contextPath}/user/#!Router_store">Store</a></li>
 											<li class="breadcrumb-item active">ECPOS</li>
 	                                    </ol>
@@ -79,12 +78,6 @@
 										<div class="col-3 col-sm-3 col-md-3 col-lg-3 col-xl-3">
 											<div class="form-group">
 												<label class="login-label">MAC Address</label>
-												<input class="form-control"  type="text" disabled>
-											</div>
-										</div>
-										<div class="col-3 col-sm-3 col-md-3 col-lg-3 col-xl-3">
-											<div class="form-group">
-												<label class="login-label">Public IP</label>
 												<input class="form-control"  type="text" disabled>
 											</div>
 										</div>
