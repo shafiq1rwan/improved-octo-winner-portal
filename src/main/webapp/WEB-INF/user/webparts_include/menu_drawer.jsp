@@ -17,11 +17,11 @@
                 </li>
                 
                 <li class="submenu">
-                       <a href="${pageContext.request.contextPath}/user/#!Router_group_category"><i class="fa fa-fw fa-sitemap"></i><span>Group Category</span> </a>
+                       <a href="${pageContext.request.contextPath}/user/#!Router_group_category"><i class="fa fa-fw fa-sitemap"></i><span> Group Category</span> </a>
                 </li>
                 
                 <li class="submenu">
-                       <a href="${pageContext.request.contextPath}/user/#!Router_menu_item"><i class="fa fa-fw fa-shopping-cart"></i><span> Item</span> </a>
+                       <a href="${pageContext.request.contextPath}/user/#!Router_menu_item"><i class="fa fa-fw fa-shopping-cart"></i><span> Menu Item</span> </a>
                 </li>			
 									
                  <li class="submenu">
@@ -33,7 +33,7 @@
                  </li>
                  
                  <li class="submenu">
-                       <a href="#"><i class="fa fa-fw fa-area-chart"></i><span> Setting </span> </a>
+                       <a href="${pageContext.request.contextPath}/user/#!Router_combo/1"><i class="fa fa-fw fa-area-chart"></i><span> Setting </span> </a>
                 </li>	
            </ul>
 

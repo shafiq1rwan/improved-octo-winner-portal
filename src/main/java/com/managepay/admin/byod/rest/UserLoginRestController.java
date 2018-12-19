@@ -179,4 +179,12 @@ public class UserLoginRestController {
 		model.setViewName("/user/views/menu_item");
 		return model;
 	}
+	
+	//Combo
+	@RequestMapping(value = {"/views/combo/{id}"}, method = RequestMethod.GET)
+	public ModelAndView viewCombo(@PathVariable("id") long id) {
+		ModelAndView model = new ModelAndView();
+		model.setViewName("/user/views/combo");
+		return model;
+	}
 }

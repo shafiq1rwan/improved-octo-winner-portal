@@ -182,7 +182,7 @@ if it's not present, don't show loader */
 		       	checkSession:checkSession
 		       }
 		})
-.when('/Router_item_group', {
+		.when('/Router_item_group', {
 			templateUrl : '${pageContext.request.contextPath}/user/views/itemGroup',	
 			controller : "ctl_item_group",
 			resolve : {
@@ -199,6 +199,15 @@ if it's not present, don't show loader */
 		.when('/Router_menu_item', {
 			templateUrl : '${pageContext.request.contextPath}/user/views/menuItem',	
 			controller : "ctl_menu_item",
+			resolve : {
+		       	checkSession:checkSession
+		       }
+		})
+		.when('/Router_combo/:id', {
+			templateUrl : function(params){
+				return '${pageContext.request.contextPath}/user/views/combo/'+ params.id
+			},
+			controller : "ctl_combo",
 			resolve : {
 		       	checkSession:checkSession
 		       }
@@ -265,5 +274,6 @@ if it's not present, don't show loader */
 <jsp:include page="/WEB-INF/user/controller/ctl_modifier_group.jsp" />
 <jsp:include page="/WEB-INF/user/controller/ctl_item_group.jsp" />
 <jsp:include page="/WEB-INF/user/controller/ctl_menu_item.jsp" />
+<jsp:include page="/WEB-INF/user/controller/ctl_combo.jsp" />
 <!-- *****************************ANGULAR JS CONTROLLER***************************** -->
 </html>

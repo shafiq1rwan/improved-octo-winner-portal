@@ -3,12 +3,17 @@ package com.managepay.admin.byod.rest;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -313,6 +318,99 @@ public class ComboRestController {
 				}
 			}
 		}
+	}
+	
+	@GetMapping(value="/getMenuItemAndItemGroupInCombo", produces = "application/json")
+	public ResponseEntity<?> getMenuItemAndItemGroupInCombo(HttpServletRequest request, HttpServletResponse response, @RequestParam("comboDetailId") Long comboDetailId){
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		ResultSet rs2 = null;
+		ResultSet rs3 = null;
+		
+		try {
+			List<JSONObject> menuItemAndGroupJsonList = new ArrayList<>();
+			
+			connection = dataSource.getConnection();
+			stmt = connection.prepareStatement("SELECT mi.*, cid.id AS combo_item_detail_id, cid.combo_item_detail_sequence FROM menu_item mi INNER JOIN combo_item_detail cid ON mi.id = cid.menu_item_id WHERE cid.combo_detail_id = ? AND mi.menu_item_type = 0");
+			stmt.setLong(1, comboDetailId);
+			rs = (ResultSet)stmt.executeQuery();
+			
+			while(rs.next()) {
+				JSONObject jsonMenuItemObj = new JSONObject();
+				jsonMenuItemObj.put("combo_item_detail_id", rs.getLong("combo_item_detail_id"));
+				jsonMenuItemObj.put("id", rs.getLong("id"));
+				jsonMenuItemObj.put("name", rs.getString("menu_item_name"));
+				jsonMenuItemObj.put("type", "item");
+				jsonMenuItemObj.put("price", rs.getBigDecimal("menu_item_base_price"));
+				jsonMenuItemObj.put("sequence", rs.getInt("combo_item_detail_sequence"));
+				
+				menuItemAndGroupJsonList.add(jsonMenuItemObj);
+			}
+			
+			stmt = connection.prepareStatement("SELECT mig.*, cid.id AS combo_item_detail_id, cid.combo_item_detail_sequence FROM menu_item_group mig INNER JOIN combo_item_detail cid ON mig.id = cid.menu_item_group_id WHERE cid.combo_detail_id = ?");
+			stmt.setLong(1, comboDetailId);
+			rs2 = (ResultSet)stmt.executeQuery();
+			
+			while(rs2.next()) {
+				JSONObject jsonMenuItemGroupObj = new JSONObject();
+				jsonMenuItemGroupObj.put("combo_item_detail_id", rs2.getLong("combo_item_detail_id"));
+				jsonMenuItemGroupObj.put("id", rs2.getLong("id"));
+				jsonMenuItemGroupObj.put("name", rs2.getString("menu_item_group_name"));
+				jsonMenuItemGroupObj.put("type", "group");
+				jsonMenuItemGroupObj.put("price", null);
+				jsonMenuItemGroupObj.put("sequence", rs2.getInt("combo_item_detail_sequence"));
+				
+				
+				stmt = connection.prepareStatement("SELECT mi.* FROM menu_item mi INNER JOIN menu_item_group_menu_item migmi ON mi.id = migmi.menu_item_id WHERE migmi.menu_item_group_id = ? ORDER BY migmi.menu_item_group_menu_item_sequence");
+				stmt.setLong(1, rs2.getLong("id"));
+				rs3 = (ResultSet)stmt.executeQuery();
+				
+				JSONArray jsonItemGroupMenuItemArray = new JSONArray();
+				
+				while(rs3.next()) {
+					JSONObject jsonMenuItemObj = new JSONObject();
+					jsonMenuItemObj.put("id", rs3.getLong("id"));
+					jsonMenuItemObj.put("name", rs3.getString("menu_item_name"));
+					jsonMenuItemObj.put("price", rs3.getBigDecimal("menu_item_base_price"));
+				
+					jsonItemGroupMenuItemArray.put(jsonMenuItemObj);
+				}
+				
+				jsonMenuItemGroupObj.put("menu_items", jsonItemGroupMenuItemArray);
+
+				menuItemAndGroupJsonList.add(jsonMenuItemGroupObj);
+			}
+			
+			Collections.sort(menuItemAndGroupJsonList, (jsonObjectA,jsonObjectB)-> {
+				 int compare = 0;
+			        try
+			        {
+			            int keyA = jsonObjectA.getInt("sequence");
+			            int keyB = jsonObjectB.getInt("sequence");
+			            compare = Integer.compare(keyA, keyB);
+			        }
+			        catch(JSONException ex)
+			        {
+			            ex.printStackTrace();
+			        }
+			        return compare;
+			});
+			JSONArray jsonMenuItemAndGroupArray = new JSONArray(menuItemAndGroupJsonList);
+			return ResponseEntity.ok(jsonMenuItemAndGroupArray.toString());
+		} catch(Exception ex) {
+			ex.printStackTrace();
+			return ResponseEntity.badRequest().body(ex.getMessage());
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+
 	}
 
 }
