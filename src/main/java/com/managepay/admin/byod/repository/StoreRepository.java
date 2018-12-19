@@ -37,11 +37,13 @@ public class StoreRepository {
 		store.setTableCount(rs.getInt("store_table_count"));
 		store.setPublish(rs.getBoolean("is_publish"));
 		store.setCreatedDate(rs.getDate("created_date"));
+		store.setOperatingStartTime(rs.getTime("store_start_operating_time"));
+		store.setOperatingEndTime(rs.getTime("store_end_operating_time"));
 		return store;
 	};
 
 	public List<Store> findAllStore() {
-		return jdbcTemplate.query("SELECT * FROM store WHERE group_category_id = 0 OR group_category_id IS NULL",
+		return jdbcTemplate.query("SELECT * FROM store",
 				rowMapper);
 	}
 
@@ -57,20 +59,20 @@ public class StoreRepository {
 	public int createStore(Store store) {
 		return jdbcTemplate.update(
 				"INSERT INTO store(backend_id,store_name,store_logo_path,store_address,store_longitude,store_latitude,store_country,store_currency, "
-				+ "store_table_count, is_publish) VALUES (?,?,?,?,?,?,?,?,?,?)",
+				+ "store_table_count, is_publish, store_start_operating_time, store_end_operating_time) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
 				new Object[] { store.getBackendId(), store.getName(), store.getLogoPath(),
 						store.getLocation().getAddress(), store.getLocation().getLongitude(),
 						store.getLocation().getLatitude(), store.getLocation().getCountry(), store.getCurrency(),
-						store.getTableCount(), store.isPublish() });
+						store.getTableCount(), store.isPublish(), store.getOperatingStartTime(), store.getOperatingEndTime() });
 	}
 
 	public int editStore(Long id, Store store) {
 		return jdbcTemplate.update(
-				"UPDATE store SET store_name = ?,store_logo_path = ?,store_address = ?,store_longitude = ?,store_latitude = ?,store_country = ?,store_currency = ?, store_table_count = ?, is_publish = ? WHERE id = ?",
+				"UPDATE store SET store_name = ?,store_logo_path = ?,store_address = ?,store_longitude = ?,store_latitude = ?,store_country = ?,store_currency = ?, store_table_count = ?, is_publish = ?, store_start_operating_time = ?, store_end_operating_time = ?, last_update_date = GETDATE() WHERE id = ?",
 				new Object[] { store.getName(), store.getLogoPath(), store.getLocation().getAddress(),
 						store.getLocation().getLongitude(), store.getLocation().getLatitude(),
 						store.getLocation().getCountry(), store.getCurrency(), store.getTableCount(),
-						store.isPublish(), id });
+						store.isPublish(), store.getOperatingStartTime(), store.getOperatingEndTime(), id });
 	}
 
 	public int editStoreGroupCategoryId(Long groupCategoryId, Long id) {

@@ -93,6 +93,22 @@ public class UserLoginRestController {
 		return model;
 	}
 	
+	// Store - BYOD
+	@RequestMapping(value = { "/views/store/{id}/byod" }, method = RequestMethod.GET)
+	public ModelAndView viewBYOD(@PathVariable(value = "id") long id) {
+		ModelAndView model = new ModelAndView();
+		model.setViewName("/user/views/byod");
+		return model;
+	}		
+		
+	// Store - KIOSK
+	@RequestMapping(value = { "/views/store/{id}/kiosk" }, method = RequestMethod.GET)
+	public ModelAndView viewKIOSK(@PathVariable(value = "id") long id) {
+		ModelAndView model = new ModelAndView();
+		model.setViewName("/user/views/kiosk");
+		return model;
+	}		
+	
 	// Group Category
 	@RequestMapping(value = { "/views/groupCategory" }, method = RequestMethod.GET)
 	public ModelAndView viewGroupCategory() {
@@ -138,6 +154,37 @@ public class UserLoginRestController {
 	public ModelAndView viewCategory(@PathVariable(value = "id") long id) {
 		ModelAndView model = new ModelAndView();
 		model.setViewName("/user/views/category");
+		return model;
+	}
+
+	// Item Group
+	@RequestMapping(value = {"/views/itemGroup"}, method = RequestMethod.GET)
+	public ModelAndView viewItemGroup() {
+		ModelAndView model = new ModelAndView();
+		model.setViewName("/user/views/item_group");
+		return model;
+	}
+
+	// Modifier Group
+	@RequestMapping(value = {"/views/modifierGroup"}, method = RequestMethod.GET)
+	public ModelAndView viewModifierGroup() {
+		ModelAndView model = new ModelAndView();
+		model.setViewName("/user/views/modifier_group");
+		return model;
+	}
+	
+	@RequestMapping(value = {"/views/menuItem"}, method = RequestMethod.GET)
+	public ModelAndView viewMenuItem() {
+		ModelAndView model = new ModelAndView();
+		model.setViewName("/user/views/menu_item");
+		return model;
+	}
+	
+	//Combo
+	@RequestMapping(value = {"/views/combo/{id}"}, method = RequestMethod.GET)
+	public ModelAndView viewCombo(@PathVariable("id") long id) {
+		ModelAndView model = new ModelAndView();
+		model.setViewName("/user/views/combo");
 		return model;
 	}
 }

@@ -131,7 +131,7 @@ public class MenuRestController {
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
-	// Store
+	/*// Store
 	@GetMapping("/store/")
 	public ResponseEntity<List<Store>> findAllStore() {
 		List<Store> stores = storeService.findAllStore();
@@ -191,7 +191,7 @@ public class MenuRestController {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
 		return new ResponseEntity<>(HttpStatus.OK);
-	}
+	}*/
 
 	// Category - All Working No Worry
 	@GetMapping("/category/")

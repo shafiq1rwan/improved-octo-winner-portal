@@ -17,23 +17,23 @@
                 </li>
                 
                 <li class="submenu">
-                       <a href="${pageContext.request.contextPath}/user/#!Router_group_category"><i class="fa fa-fw fa-sitemap"></i><span>Group Category</span> </a>
+                       <a href="${pageContext.request.contextPath}/user/#!Router_group_category"><i class="fa fa-fw fa-sitemap"></i><span> Group Category</span> </a>
                 </li>
                 
                 <li class="submenu">
-                       <a href="${pageContext.request.contextPath}/user/#!Router_store"><i class="fa fa-fw fa-shopping-cart"></i><span> Item</span> </a>
+                       <a href="${pageContext.request.contextPath}/user/#!Router_menu_item"><i class="fa fa-fw fa-shopping-cart"></i><span> Menu Item</span> </a>
                 </li>			
 									
                  <li class="submenu">
                      <a href="#" ng-click="$event.preventDefault()"><i class="fa fa-fw fa-tv"></i> <span> Management </span> <span class="menu-arrow"></span></a>
                          <ul class="list-unstyled">
-                             <li><a href="${pageContext.request.contextPath}/user/#!Router_menu_dashboard">Item Group</a></li>
-                             <li><a href="${pageContext.request.contextPath}/user/#!Router_menu_dashboard">Modifier Group</a></li>
+                             <li><a href="${pageContext.request.contextPath}/user/#!Router_item_group">Item Group</a></li>
+                             <li><a href="${pageContext.request.contextPath}/user/#!Router_modifier_group">Modifier Group</a></li>
                          </ul>
                  </li>
                  
                  <li class="submenu">
-                       <a href="#"><i class="fa fa-fw fa-area-chart"></i><span> Setting </span> </a>
+                       <a href="${pageContext.request.contextPath}/user/#!Router_combo/1"><i class="fa fa-fw fa-area-chart"></i><span> Setting </span> </a>
                 </li>	
            </ul>
 

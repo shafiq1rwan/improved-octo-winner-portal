@@ -1,5 +1,6 @@
 package com.managepay.admin.byod.entity;
 
+import java.sql.Time;
 import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -34,6 +35,12 @@ public class Store {
 
 	@JsonProperty("created_date")
 	private Date createdDate;
+	
+	@JsonProperty("store_start_operating_time")
+	private Date operatingStartTime;
+	
+	@JsonProperty("store_end_operating_time")
+	private Date operatingEndTime;
 
 	public Store() {
 	}
@@ -116,6 +123,22 @@ public class Store {
 
 	public void setCreatedDate(Date createdDate) {
 		this.createdDate = createdDate;
+	}
+	
+	public Date getOperatingStartTime() {
+		return operatingStartTime;
+	}
+
+	public void setOperatingStartTime(Date operatingStartTime) {
+		this.operatingStartTime = operatingStartTime;
+	}
+	
+	public Date getOperatingEndTime() {
+		return operatingEndTime;
+	}
+
+	public void setOperatingEndTime(Date operatingEndTime) {
+		this.operatingEndTime = operatingEndTime;
 	}
 
 }
