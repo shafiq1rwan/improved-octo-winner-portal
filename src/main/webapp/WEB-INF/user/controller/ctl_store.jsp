@@ -171,8 +171,8 @@
 				
 			});	
 			
-			$('#store_dtable tbody').off('click', 'tr');
-			$('#store_dtable tbody').on('click', 'tr', function(evt) {			
+			$('#store_dtable tbody').off('click', 'tr td:nth-child(-n+6)');
+			$('#store_dtable tbody').on('click', 'tr td:nth-child(-n+6)', function(evt) {			
 				if ( $(evt.target).is("a") ) {
 					// skip action column
 			        return;
