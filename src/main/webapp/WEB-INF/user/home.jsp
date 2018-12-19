@@ -8,7 +8,7 @@
 <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
 
 <!-- Page title set in pageTitle directive -->
-<title page-title>ManagePay CRM CORPORATE DISTRIBUTOR PORTAL</title>
+<title page-title>ManagePay BYOD Cloud</title>
 
 <!-- ****BASE FOLDER DEFINE**** -->
 <base href="/assets/">
@@ -239,7 +239,7 @@ if it's not present, don't show loader */
 <script src="${pageContext.request.contextPath}/assets/plugins/sweetalert/js/sweetalert.min.js"></script>
 <!-- Bootstrap DatetimePicker* -->
 <script type="text/javascript" src="${pageContext.request.contextPath}/assets/plugins/datetimepicker/js/tempusdominus-bootstrap-4.min.js"></script>
-	
+<script src="${pageContext.request.contextPath}/assets/plugins/jquery-sortable/js/jquery-sortable.js"></script>	
 	<!-- App js -->
 
 	<%--

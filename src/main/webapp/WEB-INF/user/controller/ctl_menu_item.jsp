@@ -6,8 +6,107 @@
 		$scope.action = '';
 		$scope.menu_item_types = [];
 		$scope.modifier_groups = [];
+		$scope.tierNumber;
+		$scope.tierItems = [];
 		
-		$(document).ready(function() {
+		$scope.updateTier = function() {
+			if($scope.tierNumber==0 || $scope.tierNumber=='' || $scope.tierNumber==null){
+				alert('Tier Number cannot be zero');
+			}
+			else{
+				$scope.tierItems = [];
+				
+				$('#switch').show();
+				$("#switchToggle").prop('checked', false);
+				
+		      for(var a=0; a< $scope.tierNumber; a++){
+		    	  var item = {
+		    			  name:"test"+a,
+		    			  order: a
+		    	  }
+		    	  $scope.tierItems.push(item);
+		      }
+		      
+		      console.log($scope.tierItems);
+			
+		      // drag and drop list
+		      var oldContainer;
+		      $("#sortableList").sortable({
+		        group: 'nested',
+		        handle: 'i.fa-reorder',
+		        pullPlaceholder: false,
+		        // animation on drop
+		        onDrop: function  ($item, container, _super) {
+		        	container.el.removeClass("active");	         
+		        	
+		          var $clonedItem = $('<li/>').css({height: 0});
+		          $item.before($clonedItem);
+		          $clonedItem.animate({'height': $item.height()});
+	
+		          $item.animate($clonedItem.position(), function  () {
+		            $clonedItem.detach();
+		            _super($item, container);
+		          });     	
+		        },
+	
+		        // set $item relative to cursor position
+		        onDragStart: function ($item, container, _super) {
+		          var offset = $item.offset(),
+		              pointer = container.rootGroup.pointer;
+	
+		          adjustment = {
+		            left: pointer.left - offset.left,
+		            top: pointer.top - offset.top
+		          };
+	
+		          _super($item, container);
+		        },
+		        afterMove: function (placeholder, container) {
+			          if(oldContainer != container){
+			            if(oldContainer)
+			              oldContainer.el.removeClass("active");
+			            container.el.addClass("active");
+	
+			            oldContainer = container;
+			          }        
+			        },
+		        onDrag: function ($item, position) {	        	
+		          $item.css({
+		            left: position.left - adjustment.left,
+		            top: position.top - adjustment.top
+		          });
+		        }
+		      });      
+		   		// end drag and drop list	
+			}
+	      
+	    };
+		
+	    $scope.submitTier = function(){
+	    	var listItems = $("#sortableList li");
+	    	listItems.each(function(idx, li) {
+	    	    var product = $(li);
+				console.log(product.attr('id'));
+	    	    // and the rest of your code
+	    	});
+	    }
+	    
+		$(document).ready(function() {				
+			
+			$("#switchToggle").on("click", function  (e) { 
+		    	  var method;
+		    	  if($(this).prop( "checked" )){
+		    		  method = "enable";
+		    		  $( "#sortableList").find( "i.fa-reorder" ).show("fast");
+		    	  }
+		    	  else{
+		    		  method = "disable";
+		    		  $( "#sortableList").find( "i.fa-reorder" ).hide("fast");
+		    	  }
+		    	  
+		    	  $("#sortableList").sortable(method);
+		      });
+			
 			$scope.refreshItemMenuGroupTable();
 		});
 		
@@ -48,6 +147,10 @@
 				alert("Cannot Retrive Modifier Group!");
 		});
 		
+		// open combo setting modal
+		$scope.openComboSetting = function(){
+			$('#comboSettingModal').modal('toggle');
+		}
 				
 		$scope.refreshItemMenuGroupTable = function(){
 			
@@ -78,23 +181,12 @@
 						 var result = $scope.menu_item_types.find(obj => obj.menu_item_type_id === menu_item_type);
 						 return result.menu_item_type_name;
 					 }
+					},
+					{"data" : null, "width" : "5%", 
+					 "render": function(data, type, full, meta){
+						 return '<div class="input-group"><label class="switch "><input type="checkbox" class="info"><span class="slider round"></span></label></div>';
+					 }
 					},		
-					{"data" : "is_taxable", 
-					 "render": function(data, type, full, meta){
-						 	var is_taxable = full.is_taxable;
-						 	if(is_taxable == 1)
-						 		return 'Yes';
-						 	else if(is_taxable == 0)
-						 		return 'No';  
-					 }},
-					{"data" : "is_discountable", 
-					 "render": function(data, type, full, meta){
-						 	var is_discountable = full.is_discountable;
-						 	if(is_discountable == 1)
-						 		return 'Yes';
-						 	else if(is_discountable == 0)
-						 		return 'No';  
-					 }},		
 					{"data": "id", "width": "20%",
 					 "render": function ( data, type, full, meta ) {
 						 	var id = full.id;
@@ -102,10 +194,10 @@
 						 	switch(menu_item_type){
 							 	case 0:
 							 	case 2:
-							 	 	return '<div class="btn-toolbar justify-content-between"><button ng-click="removeMenuItem('+ id +')" class="btn btn-danger custom-fontsize"><b><i class="fa fa-trash"></i>Remove</b></button></div>';	 
+							 	 	return '';	 
 							 		break;
 							 	case 1:
-							 		return '<div class="btn-toolbar justify-content-between"><button ng-click="removeMenuItem('+ id +')" class="btn btn-danger custom-fontsize"><b><i class="fa fa-trash"></i>Remove</b></button><button ng-click="" class="btn btn-primary custom-fontsize"><b><i class="fa fa-bars"></i>Combo</b></button></div>';	
+							 		return '<div class="btn-group"><button ng-click="openComboSetting()" class="btn btn-info p-1 custom-fontsize"><b><i class="fa fa-edit"></i> Combo Setting</b></button><button ng-click="" class="btn btn-danger p-1 custom-fontsize"><b><i class="fa fa-bars"></i> Manage Tier</b></button></div>';	
 						 	}
 					 }
 					}
@@ -115,8 +207,8 @@
 				    }			
 			});
 			
-			$('#menuItem_dtable tbody').off('click', 'tr td:nth-child(-n+8)');
-			$('#menuItem_dtable tbody').on('click', 'tr td:nth-child(-n+8)', function() {
+			$('#menuItem_dtable tbody').off('click', 'tr td:nth-child(-n+6)');
+			$('#menuItem_dtable tbody').on('click', 'tr td:nth-child(-n+6)', function() {
 				$http({
 					method : 'GET',
 					headers : {'Content-Type' : 'application/json'},
