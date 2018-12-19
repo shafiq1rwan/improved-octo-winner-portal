@@ -198,6 +198,8 @@
     										<input type="number" placeholder="0" class="form-control" id="menuItemName" min="0" step="1" ng-model="tierNumber" required/>  								
     										<div class="input-group-append">
 											    <button class="btn btn-outline-info" ng-click="updateTier()" type="button"><i class="fa fa-edit"></i></button>
+<!-- 											    <button class="btn btn-outline-info" ng-show="tier_action === 'update'" ng-click="editTier(0)" type="button"><i class="fa fa-minus"></i></button>
+											    <button class="btn btn-outline-info" ng-show="tier_action === 'update'" ng-click="editTier(1)" type="button"><i class="fa fa-plus"></i></button>	 -->									    
 											  </div>
 											</div>
 										</div>
@@ -213,9 +215,17 @@
 									<div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
 										<ul class="list-group no-bullets" id="sortableList">
 										  <li class="list-group-item" id="{{x.order}}" ng-repeat="x in tierItems">										  	
-										  	<h5>Tier <i class="fa fa-reorder pull-right" style="display:none"></i></h5>
-										  	<label for="menuItemName">Name</label>
-										  	<input type="text" class="form-control" placeholder="Name" required/>
+										  	<h5>Tier <i class="fa fa-reorder pull-right" style="display:none"></i></h5>								  	
+										  	<div class="form-row">
+											  	<div class="form-group col-6 col-md-6">
+													  	<label for="">Name</label>
+													  	<input type="text" class="form-control" placeholder="Name" ng-model="x.name" required/>
+												</div>
+												<div class="form-group col-6 col-md-6">	
+													  	<label for="">Quantity</label>
+													  	<input type="number" class="form-control" ng-model="x.quantity" min=0 max=99 required/>
+												</div>
+											</div> 
 										  </li>
 										</ul>
 									</div>
@@ -225,7 +235,8 @@
 						</div>
 
 						<div class="modal-footer">
-							<button class="btn btn-primary" type="submit" ng-click="submitTier()">Submit</button>					
+							<button class="btn btn-primary" type="submit" ng-show="tier_action ==='create'" ng-click="createNewTier()">Submit</button>
+							<button class="btn btn-primary" type="submit" ng-show="tier_action ==='update'" ng-click="editExistingTier()">Submit</button>				
 						</div>
 					</form>
 

@@ -7,28 +7,53 @@
 		$scope.menu_item_types = [];
 		$scope.modifier_groups = [];
 		$scope.tierNumber;
+		$scope.oldTierNumber=0;
 		$scope.tierItems = [];
-		
+		$scope.menu_item_id;
+		$scope.tier_action = '';
+			
 		$scope.updateTier = function() {
+	/* 		console.log('old: ' + $scope.oldTierNumber);
+			console.log('new: ' + $scope.tierNumber); */
+			
 			if($scope.tierNumber==0 || $scope.tierNumber=='' || $scope.tierNumber==null){
 				alert('Tier Number cannot be zero');
-			}
-			else{
 				$scope.tierItems = [];
-				
-				$('#switch').show();
-				$("#switchToggle").prop('checked', false);
-				
-		      for(var a=0; a< $scope.tierNumber; a++){
-		    	  var item = {
-		    			  name:"test"+a,
-		    			  order: a
-		    	  }
-		    	  $scope.tierItems.push(item);
-		      }
-		      
-		      console.log($scope.tierItems);
-			
+				$scope.oldTierNumber = 0;
+			}
+			else{	
+				var count = 0;
+				if($scope.tierNumber>$scope.oldTierNumber){
+					count= $scope.tierNumber - $scope.oldTierNumber;
+					for(var a=$scope.oldTierNumber; a< $scope.oldTierNumber+count; a++){
+				    	  var item = {
+				    			  name:"test"+a,
+				    			  order: a,
+				    			  quantity :0
+				    	  }
+				    	  $scope.tierItems.push(item);
+				    }
+				}
+				else if($scope.tierNumber < $scope.oldTierNumber){
+					count = $scope.oldTierNumber - $scope.tierNumber;
+					for(var a=0; a< count; a++){
+				    	  $scope.tierItems.splice($scope.tierNumber, count);
+				    }
+				}
+					//$scope.tierItems = [];
+					
+					$('#switch').show();
+					$("#switchToggle").prop('checked', false);
+					
+			     /*  for(var a=0; a< count; a++){
+			    	  var item = {
+			    			  name:"test"+a,
+			    			  order: a
+			    	  }
+			    	  $scope.tierItems.push(item);
+			      } */
+			      console.log($scope.tierItems);
+
 		      // drag and drop list
 		      var oldContainer;
 		      $("#sortableList").sortable({
@@ -79,16 +104,56 @@
 		      });      
 		   		// end drag and drop list	
 			}
-	      
+	      	
+			$scope.oldTierNumber = $scope.tierNumber;
+			
 	    };
-		
-	    $scope.submitTier = function(){
+	    
+	    $scope.createNewTier = function(){
 	    	var listItems = $("#sortableList li");
+	    	var tierItemList = [];
 	    	listItems.each(function(idx, li) {
 	    	    var product = $(li);
 				console.log(product.attr('id'));
+			
 	    	    // and the rest of your code
-	    	});
+	    	    var tierItem = {
+	    	    		"menu_item_id":$scope.menu_item_id,
+	    	    		"combo_detail_name": $scope.tierItems[idx].name,
+	    	    		"combo_detail_quantity": $scope.tierItems[idx].quantity,
+						"combo_detail_sequence": product.attr('id')
+	    	    }; 	    
+	    	    console.log(tierItem);    	    
+	    	    tierItemList.push(tierItem);  
+	    	});    	
+	    	createTierData(tierItemList);
+	    }
+	    
+	    
+	    function createTierData(tierItemList){	    	
+	    	var json_data = JSON.stringify(
+	    			tierItemList
+			);
+			
+			console.log(json_data);
+							
+		 	$http
+			.post(
+				'${pageContext.request.contextPath}/menu/combo/createComboDetail', json_data)
+			.then(
+					function(response) {			
+						$scope.resetModal();	
+						$('#comboSettingModal').modal('toggle');
+
+				/* 		if(response.status == 400)
+							alert(response.data); */
+					},
+					function(response) {
+						alert("Session TIME OUT");
+						$(location)
+								.attr('href',
+										'${pageContext.request.contextPath}/user');
+					}); 
 	    }
 	    
 		$(document).ready(function() {				
@@ -116,7 +181,13 @@
 		
 		$scope.resetModal = function(){
 			$scope.menu_item = {};
+			$scope.tierNumber = undefined;
+			$scope.oldTierNumber = 0;
+			$scope.tierItems = [];
+			$scope.menu_item_id = undefined;
 			$scope.action = '';
+			console.log($scope.tierNumber);
+			//$scope.tier_action = '';
 		}
 		
 		//get menu item type
@@ -148,7 +219,31 @@
 		});
 		
 		// open combo setting modal
-		$scope.openComboSetting = function(){
+		$scope.openComboSetting = function(menu_item_id){
+			$scope.menu_item_id = menu_item_id;
+			
+			$http
+			.get(
+				'${pageContext.request.contextPath}/menu/combo/getComboDetailByMenuItemId?menuItemId='+ menu_item_id)
+			.then(
+				function(response) {			
+					if(response.data.length>0){
+						$scope.tier_action = 'update',
+						$scope.tierNumber = response.data.length;
+						$scope.oldTierNumber = $scope.tierNumber;
+						$scope.tierItems = response.data;
+						
+/* 						$('#switch').show();
+						$("#switchToggle").prop('checked', false); */
+					} else {
+						$scope.tier_action = 'create';	
+						//$scope.oldTierNumber = $scope.tierNumber;
+					}
+				},
+				function(response) {
+					alert("Cannot Retrive Combo Detail!");
+			});
+
 			$('#comboSettingModal').modal('toggle');
 		}
 				
@@ -197,7 +292,7 @@
 							 	 	return '';	 
 							 		break;
 							 	case 1:
-							 		return '<div class="btn-group"><button ng-click="openComboSetting()" class="btn btn-info p-1 custom-fontsize"><b><i class="fa fa-edit"></i> Combo Setting</b></button><button ng-click="" class="btn btn-danger p-1 custom-fontsize"><b><i class="fa fa-bars"></i> Manage Tier</b></button></div>';	
+							 		return '<div class="btn-group"><button ng-click="openComboSetting('+ id +')" class="btn btn-info p-1 custom-fontsize"><b><i class="fa fa-edit"></i> Combo Setting</b></button><button ng-click="" class="btn btn-danger p-1 custom-fontsize"><b><i class="fa fa-bars"></i> Manage Tier</b></button></div>';	
 						 	}
 					 }
 					}

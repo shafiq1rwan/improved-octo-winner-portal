@@ -48,10 +48,11 @@ public class ComboRestController {
 			
 			for(int i=0;i<jsonComboDetailArray.length();i++) {
 				JSONObject jsonComboDetailObj = jsonComboDetailArray.getJSONObject(i);
-				stmt = connection.prepareStatement("INSERT INTO combo_detail(menu_item_id, combo_detail_name, combo_detail_sequence) VALUES (?,?,?)");
+				stmt = connection.prepareStatement("INSERT INTO combo_detail(menu_item_id, combo_detail_name, combo_detail_quantity, combo_detail_sequence) VALUES (?,?,?,?)");
 				stmt.setLong(1, jsonComboDetailObj.getLong("menu_item_id"));
 				stmt.setString(2, jsonComboDetailObj.getString("combo_detail_name"));
-				stmt.setInt(3, jsonComboDetailObj.getInt("combo_detail_sequence"));
+				stmt.setInt(3, jsonComboDetailObj.getInt("combo_detail_quantity"));
+				stmt.setInt(4, jsonComboDetailObj.getInt("combo_detail_sequence"));
 				stmt.executeUpdate();			
 			}
 			return ResponseEntity.ok(null);
@@ -78,7 +79,7 @@ public class ComboRestController {
 		
 		try {
 			connection = dataSource.getConnection();
-			stmt = connection.prepareStatement("SELECT * FROM combo_detail WHERE menu_item_id = ?");
+			stmt = connection.prepareStatement("SELECT * FROM combo_detail WHERE menu_item_id = ? ORDER BY combo_detail_sequence");
 			stmt.setLong(1, menuItemId);
 			rs = (ResultSet) stmt.executeQuery();
 			
@@ -86,8 +87,9 @@ public class ComboRestController {
 				JSONObject jsonComboDetailObj = new JSONObject();
 				jsonComboDetailObj.put("id", rs.getLong("id"));				
 				jsonComboDetailObj.put("menu_item_id", rs.getLong("menu_item_id"));
-				jsonComboDetailObj.put("combo_detail_name", rs.getString("combo_detail_name"));
-				jsonComboDetailObj.put("combo_detail_sequence", rs.getInt("combo_detail_sequence"));
+				jsonComboDetailObj.put("name", rs.getString("combo_detail_name"));
+				jsonComboDetailObj.put("quantity", rs.getInt("combo_detail_quantity"));
+				jsonComboDetailObj.put("order", rs.getInt("combo_detail_sequence"));
 								
 				jsonComboDetailArray.put(jsonComboDetailObj);
 			}
