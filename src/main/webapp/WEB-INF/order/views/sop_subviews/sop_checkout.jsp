@@ -1,6 +1,5 @@
 <body>
-	<div id="item-checkout-overlay" ng-show="isItemCheck"
-		class="page-overlay scrollable-content">
+	<div id="item-checkout-overlay" class="page-overlay">
 		<div id="header-content">
 			<nav id="back-nav"
 				class="navbar navbar-expand-lg navbar-light bg-light"></nav>

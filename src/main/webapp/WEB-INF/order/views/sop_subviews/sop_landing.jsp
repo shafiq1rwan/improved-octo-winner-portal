@@ -1,19 +1,20 @@
-<body>
-	<div id="landing-overlay" class="page-overlay">
+<body class="main-bg">
+	<div id="landing-overlay" class="page-overlay main-bg">
 		<div
 			class="header-content main-color d-flex flex-row justify-content-between">
-			<div class="dropdown align-self-center">
+			<div class="dropdown align-self-center ml-2">
 				<button class="btn btn-secondary btn-locale md-resp-font"
 					type="button" id="languageDropDown" data-toggle="dropdown"
-					aria-haspopup="false" aria-expanded="false">{{currentLocale}}</button>
+					aria-haspopup="false" aria-expanded="false">{{currentLocale.shortName}}</button>
 				<div class="dropdown-menu" aria-labelledby="languageDropDown">
-					<a class="language-dropdown-item dropdown-item md-resp-font lang-selected"
-						ng-repeat-start="localeObj in localeData" ng-if="$first"
-						ng-click="changeLocale($event, localeObj.shortName)">{{localeObj.name}}
+					<a
+						class="language-dropdown-item dropdown-item md-resp-font lang-selected"
+						ng-repeat-start="localeObj in localeData" ng-if="localeObj == currentLocale"
+						ng-click="changeLocale(localeObj)">{{localeObj.name}}
 						({{localeObj.shortName}})</a> <a
 						class="language-dropdown-item dropdown-item md-resp-font"
-						ng-repeat-end="localeObj in localeData" ng-if="!$first"
-						ng-click="changeLocale($event, localeObj.shortName)">{{localeObj.name}}
+						ng-repeat-end="localeObj in localeData" ng-if="localeObj != currentLocale"
+						ng-click="changeLocale(localeObj)">{{localeObj.name}}
 						({{localeObj.shortName}})</a>
 				</div>
 			</div>
@@ -45,8 +46,8 @@
 				</div>
 				<span class="align-self-center md-resp-font font-weight-bold">{{tableID}}</span>
 				<div class="align-self-center">
-					<button class="btn btn-primary btn-main md-resp-font" type="submit"
-						onclick="window.location.href='#!/startOrder'">{{currentLanguageData.landing_orderNow}}</button>
+					<button class="btn btn-primary btn-main md-resp-font" type="button"
+						ng-click="switchToView('itemCategory')">{{currentLanguageData.landing_orderNow}}</button>
 				</div>
 			</div>
 			<div id="landing-footer-content"

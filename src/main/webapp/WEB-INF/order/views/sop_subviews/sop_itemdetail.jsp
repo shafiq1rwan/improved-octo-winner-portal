@@ -1,67 +1,54 @@
 <body>
-	<div id="item-detail-overlay" ng-show="isItemDetail"
-		class="page-overlay scrollable-content">
-		<div id="header-content">
-			<nav id="back-nav"
-				class="navbar navbar-expand-lg navbar-light bg-light">
-				<button type="button" ng-click="backToItemListPage()"
-					class="btn btn-default navbar-btn navbar-custom borderless">
-					<span class="back-icon"></span>Back
+	<div id="item-detail-overlay" class="page-overlay">
+		<div class="header-content sub-color d-flex flex-row">
+			<div class="align-self-center">
+				<button type="button" ng-click="hideFromView('itemDetail')"
+					class="empty-btn">
+					<span class="md-resp-font back-icon"></span>
 				</button>
-			</nav>
+			</div>
 		</div>
-		<div id="fake-header-content"></div>
-		<div id="body-content" class="container item-display-container">
-
-			<div class="row">
-				<div class="col-md-12 col-sm-12 col-12"
-					style="padding-top: 30px; padding-bottom: 30px;">
-					<div class="item-background-image">
-						<img ng-src="{{itemDetail[0].path}}" alt="{{itemDetail[0].name}}" />
+		<div class="body-content scrollable-y">
+			<div class="w-100 d-flex flex-column">
+				<div class="w-100 d-flex flex-column align-self-center">
+					<img class="max-img-height align-self-center"
+						src="{{selectedItem.path}}" alt="{{selectedItem.name}}">
+				</div>
+				<div class="w-100 card d-flex flex-column align-self-center pb-2">
+					<span class="align-self-center text-limiter lg-resp-font"><b>{{selectedItem.name}}</b></span>
+					<span
+						class="align-self-center text-center text-limiter three-liner xs-resp-font">{{selectedItem.description}}</span>
+					<hr class="ml-1 mr-1">
+					<div class="row ml-0 mr-0">
+						<div
+							class="col-8 col-sm-8 col-md-8 col-lg-9 col-xl-9 d-flex flex-row pr-0">
+							<div
+								class="w-100 align-self-center text-limiter two-liner sm-resp-font">
+								<b ng-show="selectedItem.type == 0">Combo Price</b>
+								<b ng-show="selectedItem.type == 1">À la carte Price</b>
+							</div>
+						</div>
+						<div
+							class="col-4 col-sm-4 col-md-4 col-lg-3 col-xl-3 d-flex flex-row pl-0">
+							<div class="w-100 align-self-center flex-fill d-flex flex-column">
+								<div class="text-right text-nowrap sm-resp-font">{{selectedItem.price}}</div>
+							</div>
+						</div>
 					</div>
-
-					<div class="col-md-12 col-sm-12 col-12 main-content">
-						<div class="item-info-box">
-							<span class="title-text">{{itemDetail[0].name}}</span>
-						</div>
-						<div class="content" ng-show="itemDetail[0].additionalItem">
-							<div class="row">
-								<div class="col-md-6 col-sm-12 col-12">
-									<ul>
-										<li ng-repeat="additionalItem in itemDetail[0].additionalItem">
-											{{additionalItem}}</li>
-									</ul>
-
-								</div>
+					<hr class="ml-3 mr-3">
+					<div class="row ml-0 mr-0">
+						<div
+							class="col-8 col-sm-8 col-md-8 col-lg-9 col-xl-9 d-flex flex-row pr-0">
+							<div
+								class="w-100 align-self-center text-limiter two-liner sm-resp-font">
+								<b>Total Price</b>
 							</div>
 						</div>
-
-						<div class="text-center">
-							<h5>{{itemDetail[0].price | currency: "RM"}} / Item</h5>
-							<h6
-								ng-class="{'hidden': itemQuantity === 0, 'unhidden': itemQuantity >0}">Total:
-								{{itemTotal | currency: "RM"}}</h6>
-							<div class="quantity-counter">
-								<button class="btn btn-danger"
-									ng-click="decreaseItemCount(itemDetail[0].price)"
-									style="display: inline-block;">-</button>
-								<p
-									style="display: inline-block; margin-left: 8px; margin-right: 8px;">{{itemQuantity}}</p>
-								<button class="btn btn-info"
-									ng-click="increaseItemCount(itemDetail[0].price)"
-									style="display: inline-block;">+</button>
+						<div
+							class="col-4 col-sm-4 col-md-4 col-lg-3 col-xl-3 d-flex flex-row pl-0">
+							<div class="w-100 align-self-center flex-fill d-flex flex-column">
+								<div class="text-right text-nowrap sm-resp-font">{{totalItemPrice}}</div>
 							</div>
-
-							<button class="btn add-cart" ng-if="isAddOrModifiedCart"
-								ng-click="addItemIntoCart(itemDetail[0].id, itemQuantity)">Update
-								Cart</button>
-							<button class="btn add-cart" ng-if="!isAddOrModifiedCart"
-								ng-click="addItemIntoCart(itemDetail[0].id, itemQuantity)">Add
-								to Cart</button>
-							<br>
-							<button class="btn remove-cart" ng-if="isAddOrModifiedCart"
-								ng-click="removeCartItem(itemDetail[0].id)"
-								style="margin-top: 5px;">Remove</button>
 						</div>
 					</div>
 				</div>

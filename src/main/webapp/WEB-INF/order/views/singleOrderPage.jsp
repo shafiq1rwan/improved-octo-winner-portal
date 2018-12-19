@@ -11,11 +11,15 @@
 	<!-- Landing Display[END] -->
 	
 	<!-- Main Display[START] -->
-	<jsp:include page="/WEB-INF/order/views/sop_subviews/sop_main.jsp" />
+	<jsp:include page="/WEB-INF/order/views/sop_subviews/sop_category.jsp" />
 	<!-- Main Display[END] -->
 
 	<!-- Item List Display[START] -->
 	<jsp:include page="/WEB-INF/order/views/sop_subviews/sop_itemlist.jsp" />
+	<!-- Item List Display[END] -->
+	
+	<!-- Item List Display[START] -->
+	<jsp:include page="/WEB-INF/order/views/sop_subviews/sop_categoryselection.jsp" />
 	<!-- Item List Display[END] -->
 
 	<!-- Item Detail Display[START] -->

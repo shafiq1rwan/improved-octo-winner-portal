@@ -1,36 +1,40 @@
 <body>
-	<div id="item-list-overlay" ng-show="isItemList"
-		class="page-overlay scrollable-content">
-		<div id="header-content">
-			<nav id="back-nav"
-				class="navbar navbar-expand-lg navbar-light bg-light">
-				<button type="button" ng-click="backToCategoryPage()"
-					class="btn btn-default navbar-btn navbar-custom borderless">
-					<span class="back-icon"></span>Back
+	<div id="item-list-overlay" class="page-overlay">
+		<div
+			class="header-content sub-color d-flex flex-row justify-content-between">
+			<div class="align-self-center">
+				<button type="button" ng-click="hideFromView('itemList')"
+					class="empty-btn">
+					<span class="md-resp-font back-icon"></span>
 				</button>
-			</nav>
+			</div>
+			<span
+				class="text-center text-truncate sub-text-color align-self-center flex-fill md-resp-font dropdown-selector mr-2"
+				ng-click="switchToView('categorySelection')"><b>{{selectedCategory.name}}</b></span>
 		</div>
-		<div id="fake-header-content"></div>
-		<div id="body-content" class="container item-display-container"
-			style="margin-top: 25px;">
-
-			<div class="row">
-				<div class="col-md-6 col-sm-6 col-6" style="padding: 0; margin: 0;"
-					ng-repeat="item in itemList">
-					<a class="card" ng-click="displayItemDetail(item.id)">
-						<div class="item-image" style="background: white">
-							<img ng-src="{{item.path}}" alt="{{item.name}}" />
+		<div class="body-content scrollable-y">
+			<div class="row card-container" style="margin: 0;">
+				<div
+					class="col-6 col-sm-6 col-md-4 col-lg-4 col-xl-3 sub-card-container"
+					ng-repeat="data in selectedCategory.itemList">
+					<div class="card" ng-click="switchToView('itemDetail', data)">
+						<img class="max-img-height card-img-top" src="{{data.path}}" alt="{{data.name}}">
+						<div class="main-color main-text-color text-center sm-resp-font">
+							<b>{{data.price}}</b>
 						</div>
-						<div class="item-info">
-							<div class="item-price">
-								<span>{{item.price | currency: "RM"}}</span>
+						<div class="card-body d-flex flex-row">
+							<div
+								class="sub-card-body text-center d-flex flex-column">
+								<span
+									class="w-100 text-limiter two-liner card-title align-self-center xs-resp-font">
+									<b>{{data.name}}</b>
+								</span> <span class="w-100 text-limiter three-liner card-title align-self-center xs-resp-font">{{data.description}}
+								</span>
 							</div>
-							<div class="item-title">{{item.name}}</div>
 						</div>
-					</a>
+					</div>
 				</div>
 			</div>
-
 		</div>
 	</div>
 </body>

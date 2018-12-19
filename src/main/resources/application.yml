@@ -45,6 +45,7 @@ spring:
 spring:
   profiles: application-data
 application-data:
+  priceTag: "RM"
   appName: "KFC"
   mainLogoPath: "/assets/images/order/logo/main_logo.png"
   shortcutLogoPath: "/assets/images/order/logo/shortcut_logo.png"
@@ -52,7 +53,7 @@ application-data:
   landingLogoPath: "/assets/images/order/logo/shortcut_logo.png"
   mainColor: "#C41230"
   subColor: "#000000"
-  mainTextColor: "#000000"
+  mainTextColor: "#FFFFFF"
   subTextColor: "#FFFFFF"
   localeButtonColor: "#FFFFFF"
   mainButtonTextColor: "#FFFFFF"

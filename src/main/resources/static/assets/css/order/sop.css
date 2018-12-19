@@ -4,6 +4,22 @@ div.header-content {
 div.body-content {
 	height: 90%;
 }
+.text-limiter {
+	overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+}
+.text-limiter.two-liner {
+    -webkit-line-clamp: 2;
+}
+.text-limiter.three-liner {
+    -webkit-line-clamp: 3;
+}
+.max-img-height {
+	max-height: 30vh;
+}
 
 /*sop_loading*/
 div#loading-main-content {
@@ -32,9 +48,31 @@ a.language-dropdown-item.lang-selected::after {
   	color: green;
 }
 
+/*sop_category*/
+div.card-container {
+	padding: 5px 0 0 5px;
+}
+div.card-container div.sub-card-container {
+	padding: 0 5px 5px 0;
+}
+div.card-container .card {
+	cursor: pointer;
+	height: 100%;
+}
+div.card-container .card-body {
+	padding: 0rem 0.6rem 0.6rem 0.6rem;
+}
+div.card-container .card-title {
+	margin: 0;
+}
+div.card-container .sub-card-body {
+	width: 100%;
+}
+
 /*Page Overlay Setting*/
 div.page-overlay {
 	position: absolute;
+	background: #FFFFFF;
 	top: 0;
 	left: 0;
 	margin: 0;
@@ -47,4 +85,17 @@ div#loading-overlay {
 }
 div#landing-overlay {
 	z-index: 1;
+}
+div#item-category-overlay {
+	z-index: 2;
+}
+div#item-list-overlay {
+	z-index: 3;
+}
+div#category-selection-overlay {
+	background: #00000077;
+	z-index: 4;
+}
+div#item-detail-overlay {
+	z-index: 5;
 }

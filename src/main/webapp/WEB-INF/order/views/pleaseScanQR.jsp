@@ -5,7 +5,7 @@
 			<img class="col-12"
 				src="${pageContext.request.contextPath}/assets/images/order/icon/scan_qr_icon.svg" />
 		</div>
-		<p class="text-center md-resp-font main-text-color">Scan a QR to begin your BYOD
+		<p class="text-center md-resp-font">Scan a QR to begin your BYOD
 			Experience</p>
 	</div>
 </body>

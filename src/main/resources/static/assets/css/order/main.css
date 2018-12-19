@@ -4,6 +4,16 @@ html, body {
 	padding: 0;
 	margin: 0;
 }
+.empty-btn {
+	background: none;
+	border: none;
+}
+.scrollable-x {
+	overflow-x: auto;
+}
+.scrollable-y {
+	overflow-y: auto;
+}
 
 /*Font Size Settings*/
 .xs-resp-font {

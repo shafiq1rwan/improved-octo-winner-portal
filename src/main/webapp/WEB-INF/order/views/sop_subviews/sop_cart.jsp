@@ -1,6 +1,5 @@
 <body>
-	<div id="item-cart-overlay" ng-show="isItemCart"
-		class="page-overlay scrollable-content">
+	<div id="item-cart-overlay" class="page-overlay scrollable-y">
 		<div id="header-content">
 			<nav id="back-nav"
 				class="navbar navbar-expand-lg navbar-light bg-light">
