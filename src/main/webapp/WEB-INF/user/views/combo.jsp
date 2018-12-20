@@ -36,9 +36,10 @@
 																		
 									<button type="button"
 										class="btn btn-social pull-right btn-primary bg-aqua"
-										ng-click="setModalType('create')">
+										data-toggle="modal" data-target="#comboItemSelectionModal" 
+										ng-click="changeComboItemType('MI')">
 										<span class="btn-label"><i class="fa fa-plus"></i></span>
-										Add Item/Item Group
+										Assign Item/Item Group
 									</button>
 	
 								</div>
@@ -46,7 +47,7 @@
 											
 								  <ul class="nav nav-tabs" role="tablist">
 								    <li class="nav-item" ng-repeat="combo_detail in combo_details">
-								      <a class="nav-link" ng-class="{'active': $first}" data-toggle="tab" ng-click="changeTableData(combo_detail.id)">{{combo_detail.combo_detail_name}}</a>
+								      <a class="nav-link" ng-class="{'active': $first}" data-toggle="tab" ng-click="changeTableData(combo_detail.id)">{{combo_detail.name}}</a>
 								    </li>
 								  </ul>
 
@@ -80,7 +81,69 @@
 			<!-- END content -->
 		</div>
 		<!-- END content-page -->
+		
+		
+		
+			<!-- Combo Item Selection Modal -->
+		<div class="modal fade" id="comboItemSelectionModal" role="dialog"
+			aria-labelledby="comboItemSelectionModal" aria-hidden="true">
+			<div class="modal-dialog modal-lg">
+				<div class="modal-content">
+					<form id="comboItemSelectionForm" method="POST" accept-charset="UTF-8"
+						role="form" class="form-signin">
+						<div class="modal-header">
+							<h5 class="modal-title">Item Selection</h5>
+							<button type="button" class="close" data-dismiss="modal"
+								ng-click="resetModal()" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
 
+						<div class="modal-body">
+							<div class="form-section">
+
+							  <ul class="nav nav-pills" role="tablist">
+							    <li class="nav-item">
+							      <a class="nav-link active" data-toggle="pill" href="" ng-click="changeComboItemType('MI')">Menu Item</a>
+							    </li>
+							    <li class="nav-item">
+							      <a class="nav-link" data-toggle="pill" href="" ng-click="changeComboItemType('G')">Item Group</a>
+							    </li>
+							  </ul>
+		
+								<div class="row">
+									<div class="col-12 col-md-12 col-sm-12 col-xs-12">
+										<div class="">
+											<table class="table table-bordered table-hover display nowrap" 
+											 id="comboItem_dtable" style="width: 100%">
+												<thead>
+													<tr>
+														<th></th>
+														<th>Name</th>
+														<th>Price</th>
+													</tr>
+												</thead>
+												<tbody>
+												</tbody>	
+											</table>
+										</div>
+									</div>
+								</div>							
+
+								
+							</div>
+						</div>
+
+						<div class="modal-footer">
+							<button class="btn btn-primary" type="submit" ng-click="">Add</button>			
+						</div>
+					</form>
+
+				</div>
+			</div>
+		</div>
+		<!-- END Modal -->
+		
 	</div>
 </body>
 </html>
