@@ -9,6 +9,7 @@
 		$scope.tierNumber;
 		$scope.oldTierNumber=0;
 		$scope.tierItems = [];
+		$scope.oldTierItems = [];
 		$scope.menu_item_id;
 		$scope.tier_action = '';
 			
@@ -27,9 +28,10 @@
 					count= $scope.tierNumber - $scope.oldTierNumber;
 					for(var a=$scope.oldTierNumber; a< $scope.oldTierNumber+count; a++){
 				    	  var item = {
+				    			  id : null,
 				    			  name:"test"+a,
 				    			  order: a,
-				    			  quantity :0
+				    			  quantity: 0
 				    	  }
 				    	  $scope.tierItems.push(item);
 				    }
@@ -156,6 +158,36 @@
 					}); 
 	    }
 	    
+	    $scope.editExistingTier = function(){
+	    	
+	    	var json_data = JSON.stringify({
+	    		'menu_item_id': $scope.menu_item_id,
+	    		'newTierItems': $scope.tierItems,
+	    		'oldTierItems': $scope.oldTierItems
+	    	});
+	    	
+	    	console.log(json_data);
+	    	
+	      	$http
+			.post(
+				'${pageContext.request.contextPath}/menu/combo/editComboDetail', json_data)
+			.then(
+					function(response) {			
+						$scope.resetModal();	
+						$('#comboSettingModal').modal('toggle');
+
+				 		if(response.status == 400)
+							alert(response.data);
+					},
+					function(response) {
+						alert("Session TIME OUT");
+						$(location)
+								.attr('href',
+										'${pageContext.request.contextPath}/user');
+					}); 
+	    	
+	    }
+
 		$(document).ready(function() {				
 			
 			$("#switchToggle").on("click", function  (e) { 
@@ -181,11 +213,16 @@
 		
 		$scope.resetModal = function(){
 			$scope.menu_item = {};
+			
 			$scope.tierNumber = undefined;
 			$scope.oldTierNumber = 0;
+			
 			$scope.tierItems = [];
+			$scope.oldTierItems = [];
+			
 			$scope.menu_item_id = undefined;
 			$scope.action = '';
+			
 			console.log($scope.tierNumber);
 			//$scope.tier_action = '';
 		}
@@ -221,6 +258,7 @@
 		// open combo setting modal
 		$scope.openComboSetting = function(menu_item_id){
 			$scope.menu_item_id = menu_item_id;
+			var i =0;
 			
 			$http
 			.get(
@@ -232,6 +270,10 @@
 						$scope.tierNumber = response.data.length;
 						$scope.oldTierNumber = $scope.tierNumber;
 						$scope.tierItems = response.data;
+						
+						for(i=0;i<response.data.length;i++){
+							$scope.oldTierItems.push(response.data[i]);
+						}		
 						
 /* 						$('#switch').show();
 						$("#switchToggle").prop('checked', false); */
@@ -292,7 +334,7 @@
 							 	 	return '';	 
 							 		break;
 							 	case 1:
-							 		return '<div class="btn-group"><button ng-click="openComboSetting('+ id +')" class="btn btn-info p-1 custom-fontsize"><b><i class="fa fa-edit"></i> Combo Setting</b></button><button ng-click="" class="btn btn-danger p-1 custom-fontsize"><b><i class="fa fa-bars"></i> Manage Tier</b></button></div>';	
+							 		return '<div class="btn-group"><button ng-click="openComboSetting('+ id +')" class="btn btn-info p-1 custom-fontsize"><b><i class="fa fa-edit"></i> Combo Setting</b></button><a ng-href="${pageContext.request.contextPath}/user/#!Router_combo/'+ id +'" class="btn btn-danger p-1 custom-fontsize"><b><i class="fa fa-bars"></i> Manage Tier</b></a></div>';	
 						 	}
 					 }
 					}
@@ -416,12 +458,6 @@
 			});
 		}
 		
-		$scope.addComboDetail = function(){
-			
-			
-			
-			
-		}
 		
 	});
 </script>

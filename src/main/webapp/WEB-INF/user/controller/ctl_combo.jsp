@@ -4,23 +4,24 @@
 		var combo_id = $routeParams.id;
 		$scope.combo_details = [];
 		var table;
-		
-		console.log(combo_id);
-		
-		$http
-		.get(
-			'${pageContext.request.contextPath}/menu/combo/getComboDetailByMenuItemId?menuItemId='+ combo_id)
-		.then(
-			function(response) {
-				$scope.combo_details = response.data;
-			},
-			function(response) {
-				alert("Cannot Retrive Combo Item!");
-		}); 
-	
-		$scope.refreshComboDetailTable($scope.combo_details[0].id);
+		var combo_item_table;
 
-		
+		$(document).ready(function() {				
+			
+			$http
+			.get(
+				'${pageContext.request.contextPath}/menu/combo/getComboDetailByMenuItemId?menuItemId='+ combo_id)
+			.then(
+				function(response) {
+					$scope.combo_details = response.data;
+					console.log("Combo Details: " + $scope.combo_details[0].id);
+					$scope.refreshComboDetailTable($scope.combo_details[0].id);
+				},
+				function(response) {
+					alert("Cannot Retrive Combo Item!");
+			}); 
+		});
+
 		function format (menu_items) {
 			 var html = '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">';
 			 	html += '<tr><th>Name</th><th>Price</th></tr>'
@@ -93,14 +94,32 @@
 			    } );
 		}
 	
-
-
 	 	$scope.changeTableData = function(id) {
-			
+	 		$scope.refreshComboDetailTable(id);
 		}
 		
 		$scope.removeTableData = function(id) {
 			
+			
+			
+		}
+		
+		$scope.changeComboItemType = function(type){			
+			var combo_item_url = '';
+			
+			if(type === 'MI'){
+				
+			} else if(type === 'G'){
+				
+			}
+			
+			
+			
+			
+		}
+		
+		$scope.refreshComboItemTable = function(combo_items){
+			 
 			
 			
 		}
