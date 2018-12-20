@@ -4,7 +4,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix="application-data")
 public class ApplicationData {
-	private String priceTag;
 	private String appName;
 	private String mainLogoPath;
 	private String shortcutLogoPath;
@@ -20,12 +19,6 @@ public class ApplicationData {
 	private String mainButtonBackgroundFocusColor;
 	private String localeButtonColor;
 
-	public String getPriceTag() {
-		return priceTag;
-	}
-	public void setPriceTag(String priceTag) {
-		this.priceTag = priceTag;
-	}
 	public String getAppName() {
 		return appName;
 	}

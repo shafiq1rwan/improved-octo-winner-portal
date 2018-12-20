@@ -25,6 +25,10 @@
 	<!-- Item Detail Display[START] -->
 	<jsp:include page="/WEB-INF/order/views/sop_subviews/sop_itemdetail.jsp" />
 	<!-- Item Detail Display[END] -->
+	
+	<!-- Item List Display[START] -->
+	<jsp:include page="/WEB-INF/order/views/sop_subviews/sop_tierselection.jsp" />
+	<!-- Item List Display[END] -->
 
 	<!-- Item Cart Display[START] -->
 	<jsp:include page="/WEB-INF/order/views/sop_subviews/sop_cart.jsp" />

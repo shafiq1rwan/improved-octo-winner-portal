@@ -24,13 +24,22 @@ import com.managepay.order.byod.configuration.OrderConfiguration;
 public class Order_RestController {
 	
 	@Autowired
-	private OrderConfiguration orderConfiguration;
-
-	@Autowired
 	private LanguageConfiguration languageConfiguration;
 
 	@Autowired
 	DataSource dataSource;
+	
+	@RequestMapping(value = "/order/getSystemData", method = { RequestMethod.POST })
+	public String GetSystemData(HttpServletRequest request, HttpServletResponse response) {
+		JSONObject result = new JSONObject();
+		try {
+			result.put("priceTag", "RM");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return result.toString();
+	}
 
 	@RequestMapping(value = "/order/getLanguagePack", method = { RequestMethod.POST })
 	public String GetStoreName(HttpServletRequest request, HttpServletResponse response) {
@@ -180,7 +189,7 @@ public class Order_RestController {
 					menuItem.put("type", itemType);
 					menuItem.put("path", itemPath);
 					menuItem.put("comboList", comboList);
-					menuItem.put("price", orderConfiguration.applicationData().getPriceTag() + itemPrice);
+					menuItem.put("price", itemPrice);
 
 					itemList.put(menuItem);
 				}

@@ -45,7 +45,6 @@ spring:
 spring:
   profiles: application-data
 application-data:
-  priceTag: "RM"
   appName: "KFC"
   mainLogoPath: "/assets/images/order/logo/main_logo.png"
   shortcutLogoPath: "/assets/images/order/logo/shortcut_logo.png"

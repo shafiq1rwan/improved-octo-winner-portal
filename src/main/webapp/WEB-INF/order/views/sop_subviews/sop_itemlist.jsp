@@ -20,7 +20,7 @@
 					<div class="card" ng-click="switchToView('itemDetail', data)">
 						<img class="max-img-height card-img-top" src="{{data.path}}" alt="{{data.name}}">
 						<div class="main-color main-text-color text-center sm-resp-font">
-							<b>{{data.price}}</b>
+							<b>{{systemData.priceTag}}{{data.price}}</b>
 						</div>
 						<div class="card-body d-flex flex-row">
 							<div

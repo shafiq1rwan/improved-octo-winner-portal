@@ -27,9 +27,12 @@ jQuery.fn.extend({
 
 byodApp.controller('OrderController', function($scope, $http, $timeout) {
 	/*Config Data*/
-	$scope.localeData
+	$scope.systemData;
+	$scope.localeData;
 	$scope.languageData;
 	$scope.menuList;
+	$scope.itemComboTierList;
+	$scope.itemModifierList;
 	/*Variables*/
 	$scope.isLoadingFailed;
 	$scope.loadingPercentage;
@@ -40,7 +43,8 @@ byodApp.controller('OrderController', function($scope, $http, $timeout) {
 	$scope.tableID = "ID Y";
 	$scope.selectedCategory;
 	$scope.selectedItem;
-	$scope.isItemCompleted;
+	$scope.selectedTier;
+	$scope.selectedTierItemList;
 	$scope.totalItemPrice;
 	
 	$scope.changeLocale = function(data) {
@@ -54,6 +58,7 @@ byodApp.controller('OrderController', function($scope, $http, $timeout) {
 		$scope.hideFromView("itemList");
 		$scope.hideFromView("categorySelection");
 		$scope.hideFromView("itemDetail");
+		$scope.hideFromView("tierSelection");
 		$scope.hideFromView("itemCheckOut");
 		$scope.hideFromView("itemCart");
 	}
@@ -67,8 +72,12 @@ byodApp.controller('OrderController', function($scope, $http, $timeout) {
 			$("div#category-selection-overlay").fadeInFromTop();
 		} else if (viewName == "itemDetail") {
 			$scope.selectedItem = param1;
-			$scope.totalItemPrice = $scope.selectedItem.price;
+			$scope.generateItemDetails($scope.selectedItem);
+			console.log($scope.itemComboTierList);
 			$("div#item-detail-overlay").fadeInFromLeft();
+		} else if (viewName == "tierSelection") {
+			$scope.selectedTier = param1;
+			$("div#tier-selection-overlay").fadeInFromTop();
 		}
 	}
 	$scope.hideFromView = function(viewName) {
@@ -80,6 +89,8 @@ byodApp.controller('OrderController', function($scope, $http, $timeout) {
 			$("div#category-selection-overlay").fadeOutToTop();
 		} else if (viewName == "itemDetail") {
 			$("div#item-detail-overlay").fadeOutToLeft();
+		} else if (viewName == "tierSelection") {
+			$("div#tier-selection-overlay").fadeOutToTop();
 		} else if (viewName == "itemCart") {
 			$("div#item-checkout-overlay").fadeOutToLeft();
 		} else if (viewName == "itemCheckOut") {
@@ -93,6 +104,108 @@ byodApp.controller('OrderController', function($scope, $http, $timeout) {
 		$scope.hideFromView("categorySelection");
 	}
 	
+	/*Other Fn*/
+	$scope.generateItemDetails = function(data) {
+		$scope.itemComboTierList = null;
+		$scope.itemModifierList = null;
+		$scope.totalItemPrice = data.price;
+		
+		if (data.type == "0") {
+			$scope.itemComboTierList = [];
+			var tierStep = 1;
+			for (var x = 0; x < data.comboList.length; x++) {
+				var tierData = data.comboList[x];
+				
+				var tierObject = {};
+				tierObject.name = tierData.name;
+				tierObject.totalPrice = "0.00";
+				tierObject.isTierCompleted = false;
+				tierObject.quantity = 1;
+				tierObject.selectedQuantity = 0;
+				tierObject.tierNumber = tierStep++;
+				
+				var itemList = []
+				for (var y = 0; y < tierData.itemList.length; y++) {
+					var itemData = tierData.itemList[x];
+					
+					var itemObject = {};
+					itemObject.id = itemData.id;
+					itemObject.name = itemData.name;
+					itemObject.path = itemData.path;
+					itemObject.price = itemData.price;
+					itemObject.selectedQuantity = 0;
+					
+					itemList.push(itemObject);
+				}
+				tierObject.itemList = itemList;
+				
+				$scope.itemComboTierList.push(tierObject);
+			}
+			for (var x = 0; x < data.comboList.length; x++) {
+				var tierData = data.comboList[x];
+				
+				var tierObject = {};
+				tierObject.name = tierData.name;
+				tierObject.totalPrice = "0.00";
+				tierObject.isTierCompleted = false;
+				tierObject.quantity = 1;
+				tierObject.selectedQuantity = 0;
+				tierObject.tierNumber = tierStep++;
+				
+				var itemList = []
+				for (var y = 0; y < tierData.itemList.length; y++) {
+					var itemData = tierData.itemList[x];
+					
+					var itemObject = {};
+					itemObject.id = itemData.id;
+					itemObject.name = itemData.name;
+					itemObject.path = itemData.path;
+					itemObject.price = itemData.price;
+					itemObject.selectedQuantity = 0;
+					
+					itemList.push(itemObject);
+				}
+				tierObject.itemList = itemList;
+				
+				$scope.itemComboTierList.push(tierObject);
+			}
+		} else {
+			
+		}
+	}
+	$scope.addItemQuantity = function(itemData, tierData) {
+		itemData.selectedQuantity += 1;
+		tierData.selectedQuantity += 1;
+	}
+	$scope.minusItemQuantity = function(itemData, tierData) {
+		itemData.selectedQuantity -= 1;
+		tierData.selectedQuantity -= 1;
+	}
+	
+	/*System Loading*/
+	$scope.loadSystemData = function() {
+		$scope.loadingPercentage = 10;
+		$scope.loadingText = "Loading System Data...";
+		$http({
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			data: {
+			},
+			url: '${pageContext.request.contextPath}/order/getSystemData'
+		}).then(function (response) {
+			if (response != null && response.data != null) {
+				$scope.systemData = response.data;
+				
+				$scope.loadLanguageData();
+			} else {
+				$scope.loadFailed();
+			}
+		}, function (error) {
+			$scope.loadFailed();
+	    });
+	}
 	/*Language Loading*/
 	$scope.loadLanguageData = function() {
 		$scope.loadingPercentage = 30;
@@ -151,7 +264,7 @@ byodApp.controller('OrderController', function($scope, $http, $timeout) {
 		$scope.isLoadingFailed = false;
 		$scope.loadingPercentage = 0;
 		$scope.loadingText = "Loading...";
-		$scope.loadLanguageData();
+		$scope.loadSystemData();
 	}
 	$scope.loadSuccess = function() {
 		$scope.loadingPercentage = 100;
