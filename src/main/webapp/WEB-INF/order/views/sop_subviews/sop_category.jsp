@@ -13,9 +13,9 @@
 				<b>{{storeName}}</b>
 			</div>
 			<div class="align-self-center mr-2">
-				<button type="button" ng-click="goToCartPage()" class="empty-btn">
-					<span id="itemCount" ng-show="noOfCartListItem >= 1"></span> <span
-						class="md-resp-font cart-icon"></span>
+				<button type="button" ng-click="goToCartPage()" class="empty-btn badge-btn">
+					<span class="md-resp-font cart-icon"></span> <span
+						class="badge badge-pill badge-danger xxs-resp-font">{{cart.length}}</span>
 				</button>
 			</div>
 		</div>
@@ -25,11 +25,13 @@
 					class="col-6 col-sm-6 col-md-4 col-lg-4 col-xl-3 sub-card-container"
 					ng-repeat="data in menuList">
 					<div class="card" ng-click="switchToView('itemList', data)">
-						<img class="max-img-height card-img-top" src="{{data.path}}" alt="{{data.name}}">
+						<img class="max-img-height card-img-top" ng-src="{{data.path}}"
+							alt="{{data.name}}">
 						<div class="card-body d-flex flex-row">
 							<div
 								class="sub-card-body text-center align-self-center d-flex flex-column">
-								<p class="w-100 text-truncate card-title align-self-center xs-resp-font">
+								<p
+									class="w-100 text-truncate card-title align-self-center xs-resp-font">
 									<b>{{data.name}}</b>
 								</p>
 							</div>

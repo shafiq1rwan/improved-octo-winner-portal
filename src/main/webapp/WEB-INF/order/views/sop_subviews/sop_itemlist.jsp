@@ -18,7 +18,7 @@
 					class="col-6 col-sm-6 col-md-4 col-lg-4 col-xl-3 sub-card-container"
 					ng-repeat="data in selectedCategory.itemList">
 					<div class="card" ng-click="switchToView('itemDetail', data)">
-						<img class="max-img-height card-img-top" src="{{data.path}}" alt="{{data.name}}">
+						<img class="max-img-height card-img-top" ng-src="{{data.path}}" alt="{{data.name}}">
 						<div class="main-color main-text-color text-center sm-resp-font">
 							<b>{{systemData.priceTag}}{{data.price}}</b>
 						</div>
@@ -28,7 +28,7 @@
 								<span
 									class="w-100 text-limiter two-liner card-title align-self-center xs-resp-font">
 									<b>{{data.name}}</b>
-								</span> <span class="w-100 text-limiter three-liner card-title align-self-center xs-resp-font">{{data.description}}
+								</span> <span class="w-100 text-limiter three-liner card-title align-self-center resp-font">{{data.description}}
 								</span>
 							</div>
 						</div>

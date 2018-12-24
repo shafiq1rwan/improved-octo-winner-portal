@@ -12,6 +12,18 @@ public class LanguagePackEN {
 	public String landing_poweredBy;
 	public String landing_orderNow;
 	
+	public String item_detail_comboPrice;
+	public String item_detail_alacartePrice;
+	public String item_detail_totalPrice;
+	public String item_detail_select;
+	public String item_detail_addToCart;
+	
+	public String tier_selection_selection;
+	public String tier_selection_itemRemaining;
+	public String tier_selection_done;
+	
+	public String dialog_cart_add_success_title;
+	public String dialog_button_ok;
 	
 	public String getPackName() {
 		return packName;
@@ -48,5 +60,65 @@ public class LanguagePackEN {
 	}
 	public void setLanding_orderNow(String landing_orderNow) {
 		this.landing_orderNow = landing_orderNow;
+	}
+	public String getItem_detail_comboPrice() {
+		return item_detail_comboPrice;
+	}
+	public void setItem_detail_comboPrice(String item_detail_comboPrice) {
+		this.item_detail_comboPrice = item_detail_comboPrice;
+	}
+	public String getItem_detail_alacartePrice() {
+		return item_detail_alacartePrice;
+	}
+	public void setItem_detail_alacartePrice(String item_detail_alacartePrice) {
+		this.item_detail_alacartePrice = item_detail_alacartePrice;
+	}
+	public String getItem_detail_totalPrice() {
+		return item_detail_totalPrice;
+	}
+	public void setItem_detail_totalPrice(String item_detail_totalPrice) {
+		this.item_detail_totalPrice = item_detail_totalPrice;
+	}
+	public String getItem_detail_select() {
+		return item_detail_select;
+	}
+	public void setItem_detail_select(String item_detail_select) {
+		this.item_detail_select = item_detail_select;
+	}
+	public String getItem_detail_addToCart() {
+		return item_detail_addToCart;
+	}
+	public void setItem_detail_addToCart(String item_detail_addToCart) {
+		this.item_detail_addToCart = item_detail_addToCart;
+	}
+	public String getTier_selection_selection() {
+		return tier_selection_selection;
+	}
+	public void setTier_selection_selection(String tier_selection_selection) {
+		this.tier_selection_selection = tier_selection_selection;
+	}
+	public String getTier_selection_itemRemaining() {
+		return tier_selection_itemRemaining;
+	}
+	public void setTier_selection_itemRemaining(String tier_selection_itemRemaining) {
+		this.tier_selection_itemRemaining = tier_selection_itemRemaining;
+	}
+	public String getTier_selection_done() {
+		return tier_selection_done;
+	}
+	public void setTier_selection_done(String tier_selection_done) {
+		this.tier_selection_done = tier_selection_done;
+	}
+	public String getDialog_cart_add_success_title() {
+		return dialog_cart_add_success_title;
+	}
+	public void setDialog_cart_add_success_title(String dialog_cart_add_success_title) {
+		this.dialog_cart_add_success_title = dialog_cart_add_success_title;
+	}
+	public String getDialog_button_ok() {
+		return dialog_button_ok;
+	}
+	public void setDialog_button_ok(String dialog_button_ok) {
+		this.dialog_button_ok = dialog_button_ok;
 	}
 }

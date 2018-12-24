@@ -106,7 +106,7 @@ public class Order_RestController {
 					
 					JSONArray comboList = new JSONArray();
 					if (itemType.equals("0")) {
-						sqlStatement = "SELECT cd.combo_detail_name, cid.combo_detail_id, cid.menu_item_id, cid.menu_item_group_id FROM combo_detail cd, combo_item_detail cid WHERE cd.menu_item_id = ? AND cd.id = cid.combo_detail_id ORDER BY cd.combo_detail_sequence ASC, cid.combo_item_detail_sequence ASC";
+						sqlStatement = "SELECT cd.combo_detail_name, cd.combo_detail_quantity, cid.combo_detail_id, cid.menu_item_id, cid.menu_item_group_id FROM combo_detail cd, combo_item_detail cid WHERE cd.menu_item_id = ? AND cd.id = cid.combo_detail_id ORDER BY cd.combo_detail_sequence ASC, cid.combo_item_detail_sequence ASC";
 						PreparedStatement ps3 = connection.prepareStatement(sqlStatement);
 						ps3.setInt(1, Integer.parseInt(itemID));
 						ResultSet rs3 = ps3.executeQuery();
@@ -116,6 +116,7 @@ public class Order_RestController {
 						String lastComboDetailID = null;
 						while (rs3.next()) {
 							String tierName = rs3.getString("combo_detail_name");
+							String tierQuantity = rs3.getString("combo_detail_quantity");
 							String comboDetailID = rs3.getString("combo_detail_id");
 							String tierMenuItemID = rs3.getString("menu_item_id");
 							String tierItemGroupID = rs3.getString("menu_item_group_id");
@@ -123,13 +124,15 @@ public class Order_RestController {
 							if (tierData == null) {
 								tierData =  new JSONObject();
 								tierData.put("name", tierName);
+								tierData.put("quantity", tierQuantity);
 								tierItemList = new JSONArray();
 							}
 							
 							if (lastComboDetailID == null) {
 								lastComboDetailID = comboDetailID;
 							} else {
-								if (lastComboDetailID != comboDetailID) {
+								if (!lastComboDetailID.equalsIgnoreCase(comboDetailID)) {
+									lastComboDetailID = comboDetailID;
 									tierData.put("itemList", tierItemList);
 									comboList.put(tierData);
 									tierData = null;
