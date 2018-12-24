@@ -101,12 +101,15 @@ public class ItemGroupRestController {
 				response.setStatus(409);
 				return jObjectResult.put("response_message", "Menu Item not found.").toString();
 			}
-			//check for duplicate?
-			int existing = 0;
-			if(existing != 1) {
-				
+			//check for duplicate
+			connection = dataSource.getConnection();
+			int existing = checkExistingItemGroup(jObject.getString("backend_id"), connection);
+			if(existing > 0) {
+				response.setStatus(409);
+				return jObjectResult.put("response_message", "There is already an existing Item Group with Backend ID "+jObject.getString("backend_id"))
+						.toString();
 			}else {
-				connection = dataSource.getConnection();
+				
 				stmt = connection.prepareStatement("INSERT INTO menu_item_group(backend_id, menu_item_group_name, created_date) "
 						+ "VALUES (?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
 				stmt.setString(1, jObject.getString("backend_id"));
@@ -337,4 +340,32 @@ public class ItemGroupRestController {
 		return jObjectResult.toString();
 	}
 	
+	public int checkExistingItemGroup(String backend_id, Connection connection) {
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		int size = 0;
+		
+		try {
+			stmt = connection.prepareStatement("SELECT * FROM menu_item_group WHERE backend_id = ?");
+			stmt.setString(1, backend_id);
+			rs = stmt.executeQuery();
+			
+			while(rs.next()) {
+				size++;
+			}
+		}catch(Exception e) {
+			e.printStackTrace();
+		}finally {
+			if (connection != null) {
+				try {
+					stmt = null;
+					rs = null;
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
+		return size;
+	}
 }
