@@ -3,6 +3,7 @@ package com.managepay.admin.byod.rest;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.Calendar;
 import java.util.List;
 
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -37,226 +39,35 @@ public class ItemGroupRestController {
 	@Autowired
 	private DataSource dataSource;	
 	
-	@GetMapping(value = {"/get_all_item_group"}, produces = "application/json")
-	public String getAllStaff(HttpServletRequest request, HttpServletResponse response) {
-		JSONArray jsonArray = new JSONArray();
-		JSONObject jsonObj = null;
-		JSONObject jsonObjResult = null;
+	@RequestMapping(value = "/get_all_item_group", method = RequestMethod.GET)
+	public String getAllItemGroup() {
+		JSONArray JARY = new JSONArray();
+		JSONObject jObject = new JSONObject();
+		JSONObject jObjectResult = new JSONObject();
 		Connection connection = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		
 		try {
 			connection = dataSource.getConnection();
-			 stmt = connection.prepareStatement("SELECT * FROM menu_item_group");
-			 rs = (ResultSet) stmt.executeQuery();
-			 
-			while(rs.next()) {
-				jsonObj = new JSONObject();
-				jsonObj.put("id", rs.getLong("id"));
-				jsonObj.put("name", rs.getString("staff_name"));
-				jsonObj.put("backend_id", rs.getString("backend_id"));	
-				jsonObj.put("created_date", rs.getString("created_date"));	
-				jsonArray.put(jsonObj);
-			}
-			
-			jsonObjResult = new JSONObject();
-			jsonObjResult.put("data", jsonArray);
-			
-		}catch(Exception ex) {
-			ex.printStackTrace();
-		} finally {
-			if (connection != null) {
-				try {
-					connection.close();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}
-		return jsonObjResult.toString();
-	}
-	
-	@GetMapping(value = {"/{id}/ecpos"}, produces = "application/json")
-	public String getAllCategory(@PathVariable(value = "id") Long id, HttpServletRequest request, HttpServletResponse response) {
-		//JSONArray jsonArray = new JSONArray();
-		JSONObject jsonObj = null;
-		Connection connection = null;
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-		
-		try {
-			connection = dataSource.getConnection();
-
-			 stmt = connection.prepareStatement("SELECT * FROM store WHERE id = ?");
-			 stmt.setLong(1, id);
-			 rs = (ResultSet) stmt.executeQuery();
-			 
-			if(rs.next()) {
-				jsonObj = new JSONObject();
-				jsonObj.put("id", rs.getLong("id"));
-				jsonObj.put("group_category_id", rs.getLong("group_category_id"));			
-				jsonObj.put("backend_id", rs.getString("backend_id"));
-				jsonObj.put("store_name", rs.getString("store_name"));
-				//jsonArray.put(jsonObj);
-			}
-			
-		}catch(Exception ex) {
-			ex.printStackTrace();
-		} finally {
-			if (connection != null) {
-				try {
-					connection.close();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}
-		return jsonObj.toString();
-	}
-	
-	@GetMapping(value = {"/ecpos/getstaffrole"}, produces = "application/json")
-	public String getStaffRole(HttpServletRequest request, HttpServletResponse response) {
-		JSONArray jsonArray = new JSONArray();
-		JSONObject jsonObj = null;
-		Connection connection = null;
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-		
-		try {
-			connection = dataSource.getConnection();
-
-			 stmt = connection.prepareStatement("SELECT * FROM role_lookup");
-			 rs = (ResultSet) stmt.executeQuery();
-			 
-			while(rs.next()) {
-				jsonObj = new JSONObject();
-				jsonObj.put("id", rs.getLong("id"));
-				jsonObj.put("role_name", rs.getString("role_name"));			
-				jsonArray.put(jsonObj);
-			}
-			
-		}catch(Exception ex) {
-			ex.printStackTrace();
-		} finally {
-			if (connection != null) {
-				try {
-					connection.close();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}
-		return jsonArray.toString();
-	}	
-	
-	@GetMapping(value = {"/ecpos/staffbyid"}, produces = "application/json")
-	public String getStaffById(@RequestParam("store_id") Long store_id, @RequestParam("id") Long id, HttpServletRequest request, HttpServletResponse response) {
-		//JSONArray jsonArray = new JSONArray();
-		JSONObject jsonObj = null;
-		//JSONObject jsonObjResult = null;
-		Connection connection = null;
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-		
-		try {
-			connection = dataSource.getConnection();
-			 stmt = connection.prepareStatement("SELECT * FROM staff a WHERE store_id = ? AND id = ? ");
-			 stmt.setLong(1, store_id);
-			 stmt.setLong(2, id);
-			 rs = (ResultSet) stmt.executeQuery();
-			 
-			if(rs.next()) {
-				jsonObj = new JSONObject();
-				jsonObj.put("id", rs.getLong("id"));
-				jsonObj.put("name", rs.getString("staff_name"));
-				jsonObj.put("username", rs.getString("staff_username"));	
-				jsonObj.put("password", rs.getString("staff_password"));	
-				jsonObj.put("role_id", rs.getLong("staff_role"));	
-				jsonObj.put("mobilePhone", rs.getString("staff_contact_hp_number"));	
-				jsonObj.put("email", rs.getString("staff_contact_email"));
-				jsonObj.put("isActive", rs.getString("is_active"));
-				jsonObj.put("createdDate", rs.getString("created_date"));
-			}			
-			
-		}catch(Exception ex) {
-			ex.printStackTrace();
-		} finally {
-			if (connection != null) {
-				try {
-					connection.close();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}
-		return jsonObj.toString();
-	}
-	
-	@PostMapping(value = {"/ecpos/createstaff"}, produces = "application/json")
-	public ResponseEntity<JSONObject> createStaff(@RequestBody String formfield, HttpServletRequest request, HttpServletResponse response) {
-		//JSONArray jsonArray = new JSONArray();
-		JSONObject jsonObj = null;
-		Connection connection = null;
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-		int count = 1;
-		
-		try {
-			jsonObj  =  new JSONObject(formfield);
-			
-			if(!jsonObj.has("store_id")) {
-				jsonObj.put("error", "Unable to find store detail");
-				return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.NOT_FOUND);
-			}
-			if(jsonObj.getString("name")==null || jsonObj.getString("name").trim().equals("")) {
-				jsonObj.put("error", "Staff name cannot be empty");
-				return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.BAD_REQUEST);
-			}
-			if(jsonObj.getString("email")==null || jsonObj.getString("email").trim().equals("")) {
-				jsonObj.put("error", "Staff email cannot be empty");
-				return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.BAD_REQUEST);
-			}
-			if(jsonObj.getString("mobilePhone")==null || jsonObj.getString("mobilePhone").trim().equals("")) {
-				jsonObj.put("error", "Phone number cannot be empty");
-				return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.BAD_REQUEST);
-			}
-			if(jsonObj.getString("username")==null || jsonObj.getString("username").trim().equals("")) {
-				jsonObj.put("error", "Username cannot be empty");
-				return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.BAD_REQUEST);
-			}
-			if(jsonObj.getString("password")==null || jsonObj.getString("password").trim().equals("")) {
-				jsonObj.put("error", "Password cannot be empty");
-				return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.BAD_REQUEST);
-			}
-			if(!jsonObj.has("role_id") || jsonObj.getLong("role_id")==0) {
-				jsonObj.put("error", "Role cannot be empty");
-				return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.BAD_REQUEST);
-			}
-			
-			System.out.println(jsonObj.toString());
-			
-			connection = dataSource.getConnection();
-			stmt = connection.prepareStatement("INSERT INTO staff (store_id, staff_name, staff_username, staff_password, staff_role, staff_contact_hp_number,"
-			 		+ "staff_contact_email, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?); SELECT SCOPE_IDENTITY();");
-			stmt.setLong(count++, jsonObj.getLong("store_id"));
-			stmt.setString(count++, jsonObj.getString("name"));
-			stmt.setString(count++, jsonObj.getString("username"));
-			stmt.setString(count++, jsonObj.getString("password"));
-			stmt.setLong(count++, jsonObj.getLong("role_id"));
-			stmt.setString(count++, jsonObj.getString("mobilePhone"));
-			stmt.setString(count++, jsonObj.getString("email"));
-			stmt.setLong(count++, 1);
-			
+			stmt = connection.prepareStatement("SELECT * FROM menu_item_group");
 			rs = (ResultSet) stmt.executeQuery();
 			 
-			if(rs.next()) {
-				jsonObj.put("staff_id", rs.getInt(1));
+			while(rs.next()) {
+				jObject = new JSONObject();
+				jObject.put("id", rs.getLong("id"));
+				jObject.put("name", rs.getString("staff_name"));
+				jObject.put("backend_id", rs.getString("backend_id"));	
+				jObject.put("created_date", rs.getString("created_date"));	
+				JARY.put(jObject);
 			}
 			
-		}catch(Exception ex) {
-			ex.printStackTrace();
-		} finally {
+			jObjectResult = new JSONObject();
+			jObjectResult.put("data", JARY);
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		finally {
 			if (connection != null) {
 				try {
 					connection.close();
@@ -265,79 +76,73 @@ public class ItemGroupRestController {
 				}
 			}
 		}
-		return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.OK);
+		return jObjectResult.toString();
 	}
 	
-	@PostMapping(value = {"/ecpos/updatestaff"}, produces = "application/json")
-	public ResponseEntity<JSONObject> updateStaff(@RequestBody String formfield, HttpServletRequest request, HttpServletResponse response) {
-		//JSONArray jsonArray = new JSONArray();
-		JSONObject jsonObj = null;
+	@RequestMapping(value = "/save_menu_item_group", method = RequestMethod.POST)
+	public String saveItemGroup(@RequestBody String formfield, HttpServletRequest request, HttpServletResponse response) {
+		JSONObject jObject = null;
+		JSONObject jObjectResult = new JSONObject();
 		Connection connection = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
-		int count = 1;
 		
 		try {
-			jsonObj  =  new JSONObject(formfield);
-			
-			if(!jsonObj.has("store_id")) {
-				jsonObj.put("error", "Unable to find store detail");
-				return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.NOT_FOUND);
+			jObject = new JSONObject(formfield);
+			if(!jObject.has("backend_id")) {
+				response.setStatus(409);
+				return jObjectResult.put("response_message", "Backend ID not found.").toString();
 			}
-			if(!jsonObj.has("staff_id")) {
-				jsonObj.put("error", "Unable to find staff detail");
-				return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.NOT_FOUND);
+			if(!jObject.has("group_name")) {
+				response.setStatus(409);
+				return jObjectResult.put("response_message", "Group name not found.").toString();
 			}
-			if(jsonObj.getString("name")==null || jsonObj.getString("name").trim().equals("")) {
-				jsonObj.put("error", "Staff name cannot be empty");
-				return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.BAD_REQUEST);
+			if(!jObject.has("menu_items")) {
+				response.setStatus(409);
+				return jObjectResult.put("response_message", "Menu Item not found.").toString();
 			}
-			if(jsonObj.getString("email")==null || jsonObj.getString("email").trim().equals("")) {
-				jsonObj.put("error", "Staff email cannot be empty");
-				return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.BAD_REQUEST);
-			}
-			if(jsonObj.getString("mobilePhone")==null || jsonObj.getString("mobilePhone").trim().equals("")) {
-				jsonObj.put("error", "Phone number cannot be empty");
-				return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.BAD_REQUEST);
-			}
-			if(jsonObj.getString("username")==null || jsonObj.getString("username").trim().equals("")) {
-				jsonObj.put("error", "Username cannot be empty");
-				return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.BAD_REQUEST);
-			}
-			if(jsonObj.getString("password")==null || jsonObj.getString("password").trim().equals("")) {
-				jsonObj.put("error", "Password cannot be empty");
-				return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.BAD_REQUEST);
-			}
-			if(!jsonObj.has("role_id") || jsonObj.getLong("role_id")==0) {
-				jsonObj.put("error", "Role cannot be empty");
-				return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.BAD_REQUEST);
-			}		
-			
-			System.out.println(jsonObj.toString());
-			
-			connection = dataSource.getConnection();
-			stmt = connection.prepareStatement("UPDATE staff SET staff_name = ?, staff_username = ?, staff_password = ?, staff_role = ?, staff_contact_hp_number = ?,"
-			 		+ "staff_contact_email = ?, is_active = ?, last_update_date = GETDATE() WHERE store_id = ? AND id = ?; SELECT SCOPE_IDENTITY();");
-			
-			stmt.setString(count++, jsonObj.getString("name"));
-			stmt.setString(count++, jsonObj.getString("username"));
-			stmt.setString(count++, jsonObj.getString("password"));
-			stmt.setLong(count++, jsonObj.getLong("role_id"));
-			stmt.setString(count++, jsonObj.getString("mobilePhone"));
-			stmt.setString(count++, jsonObj.getString("email"));
-			stmt.setLong(count++, jsonObj.getLong("isActive"));
-			stmt.setLong(count++, jsonObj.getLong("store_id"));
-			stmt.setLong(count++, jsonObj.getLong("staff_id"));
-			
-			rs = (ResultSet) stmt.executeQuery();
-			 
-			if(rs.next()) {
-				jsonObj.put("staff_id", rs.getInt(1));
+			//check for duplicate?
+			int existing = 0;
+			if(existing != 1) {
+				
+			}else {
+				connection = dataSource.getConnection();
+				stmt = connection.prepareStatement("INSERT INTO menu_item_group(backend_id, menu_item_group_name, created_date) "
+						+ "VALUES (?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+				stmt.setString(1, jObject.getString("backend_id"));
+				stmt.setString(2, jObject.getString("group_name"));
+				stmt.setDate(3, new java.sql.Date(System.currentTimeMillis()));
+				stmt.executeUpdate();
+				
+				rs = stmt.getGeneratedKeys();
+				if(rs.next()) {
+					System.out.print("Key: " + rs.getLong(1));
+					JSONArray array = jObject.optJSONArray("menu_items");
+					
+					int[] items = new int[array.length()];
+					
+					for(int i = 0; i < array.length(); i++) {
+						items[i] = array.optInt(i);
+					}
+					
+					stmt = null;
+					int i = 1;
+					for(int item_id : items) {
+						stmt = connection.prepareStatement("INSERT INTO menu_item_group_menu_item(menu_item_group_id, menu_item_id, menu_item_group_menu_item_sequence) "
+								+ "VALUES(?, ?, ?)");
+						stmt.setLong(1, rs.getLong(1));
+						stmt.setLong(2, item_id);
+						stmt.setLong(3, i);
+						stmt.executeUpdate();
+						i++;
+					}
+				}
+				
 			}
 			
-		}catch(Exception ex) {
-			ex.printStackTrace();
-		} finally {
+		}catch(Exception e) {
+			e.printStackTrace();
+		}finally {
 			if (connection != null) {
 				try {
 					connection.close();
@@ -346,7 +151,190 @@ public class ItemGroupRestController {
 				}
 			}
 		}
-		return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.OK);
+		
+		return jObjectResult.toString();
 	}
-
+	
+	@RequestMapping(value = "/get_category", method = RequestMethod.GET)
+	public String getAllCategory() {
+		JSONObject jObject = null;
+		JSONArray JARY = new JSONArray();
+		JSONObject jObjectResult = new JSONObject();
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		
+		try {
+			connection = dataSource.getConnection();
+			stmt = connection.prepareStatement("SELECT * FROM category WHERE is_active = ?");
+			stmt.setBoolean(1, true);
+			rs = stmt.executeQuery();
+			
+			while(rs.next()) {
+				jObject = new JSONObject();
+				jObject.put("id", rs.getLong("id"));
+				jObject.put("name", rs.getString("category_name"));
+				jObject.put("backend_id", rs.getString("backend_id"));
+				JARY.put(jObject);
+			}
+			jObjectResult.put("data", JARY);
+			
+		}catch(Exception e) {
+			e.printStackTrace();
+		}finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
+		return jObjectResult.toString();
+	}
+	
+	@RequestMapping(value = "/items_by_category/{id}", method = RequestMethod.GET)
+	public String getItemGroupByCategory(@PathVariable long id, HttpServletRequest request, HttpServletResponse response) {
+		JSONObject jObject = null;
+		JSONObject jObjectResult = new JSONObject();
+		JSONArray JARY = new JSONArray();
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		
+		if(id <= 0) {
+			response.setStatus(409);
+			return jObjectResult.put("response_message", "Category ID not found").toString();
+		}
+		
+		try {
+			connection = dataSource.getConnection();
+			stmt = connection.prepareStatement("SELECT mi.* FROM menu_item mi INNER JOIN category_menu_item cmi ON mi.menu_item_id = cmi.id "
+					+ "WHERE category_id = ? AND mi.is_active = ?");
+			stmt.setLong(1, id);
+			stmt.setBoolean(2, true);
+			rs = stmt.executeQuery();
+			
+			while(rs.next()) {
+				jObject = new JSONObject();
+				jObject.put("id", rs.getLong("id"));
+				jObject.put("name", rs.getString("menu_item_name"));
+				jObject.put("image", rs.getString("menu_item_image_path"));
+				jObject.put("backend_id", rs.getString("backend_id"));
+				JARY.put(jObject);
+			}
+			jObjectResult.put("data", JARY);
+			
+		}catch(Exception e) {
+			e.printStackTrace();
+		}finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
+		return jObjectResult.toString();
+	}
+	
+	@RequestMapping(value = "/update_item_group", method = RequestMethod.POST)
+	public String updateItemGroup(@RequestBody String formfield, HttpServletRequest request, HttpServletResponse response) {
+		JSONObject jObject = new JSONObject();
+		JSONObject jObjectResult = new JSONObject();
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		
+		try {
+			jObject = new JSONObject(formfield);
+			if(!jObject.has("id")) {
+				response.setStatus(409);
+				return jObjectResult.put("response_message", "Menu Item Group ID not found.").toString();
+			}
+			if(!jObject.has("backend_id")) {
+				response.setStatus(409);
+				return jObjectResult.put("response_message", "Backend ID not found.").toString();
+			}
+			if(!jObject.has("group_name")) {
+				response.setStatus(409);
+				return jObjectResult.put("response_message", "Group name not found.").toString();
+			}
+			if(!jObject.has("item_sequence")) {
+				response.setStatus(408);
+				return jObjectResult.put("response_message", "Item Sequence not found.").toString();
+			}
+			if(!jObject.has("menu_items")) {
+				response.setStatus(409);
+				return jObjectResult.put("response_message", "Menu Item not found.").toString();
+			}
+			
+			connection = dataSource.getConnection();
+			stmt = connection.prepareStatement("UPDATE menu_item_group SET backend_id = ?, menu_item_group_name = ?, menu_item_group_menu_item_sequnce = ? "
+					+ "WHERE id = ?; SELECT SCOPE_IDENTITY();");
+			stmt.setLong(1, jObject.getLong("backend_id"));
+			stmt.setString(2, jObject.getString("group_name"));
+			stmt.setInt(3, jObject.getInt("item_sequence"));
+			stmt.setLong(4, jObject.getLong("id"));
+			rs = stmt.executeQuery();
+			
+			while(rs.next()) {
+				jObject.put("item_group_id", rs.getInt(1));
+			}
+		}catch(Exception e) {
+			e.printStackTrace();
+		}finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
+		return jObject.toString();
+	}
+	
+	@RequestMapping(value = "/remove_item_group/{id}", method = RequestMethod.POST)
+	public String removeItemGroup(@PathVariable long id, HttpServletRequest request, HttpServletResponse response) {
+		JSONObject jObjectResult = new JSONObject();
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		
+		try {
+			connection = dataSource.getConnection();
+			stmt = connection.prepareStatement("DELETE FROM menu_item_group_menu_item WHERE menu_item_group_id = ?");
+			stmt.setLong(1, id);
+			int affectedRow = stmt.executeUpdate();
+			
+			if(affectedRow != 0) {
+				stmt = null;
+				stmt = connection.prepareStatement("DELETE FROM menu_item_group WHERE id = ?");
+				stmt.setLong(1, id);
+				affectedRow = stmt.executeUpdate();
+				
+				if(affectedRow == 0) {
+					response.setStatus(409);
+					jObjectResult.put("response_message", "Fail to remove item group.").toString();
+				}
+			}
+		}catch(Exception e) {
+			e.printStackTrace();
+		}finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
+		return jObjectResult.toString();
+	}
+	
 }
