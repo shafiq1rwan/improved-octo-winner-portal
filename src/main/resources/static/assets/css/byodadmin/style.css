@@ -975,7 +975,7 @@ a.btn:focus {
   background-color: #f1b53d;
   border-color: #f1b53d; }
 
-.btn-outline-danger {
+/* .btn-outline-danger {
   color: #ff5d48;
   background-image: none;
   background-color: transparent;
@@ -986,7 +986,7 @@ a.btn:focus {
 .open > .dropdown-toggle.btn-outline-danger {
   color: #ffffff;
   background-color: #ff5d48;
-  border-color: #ff5d48; }
+  border-color: #ff5d48; } */
 
 .btn-outline-pink {
   color: #ff7aa3;
@@ -1209,6 +1209,10 @@ a.btn:focus {
 	max-width:650px;
 }
 
+.modal-xl{
+	max-width:900px;
+}
+
 .table td, .table th{
 	padding:0.6rem;
 }
@@ -1302,5 +1306,7 @@ ul.example li.placeholder:before {
 .no-bullets {
     list-style-type: none;
 }
+
+.modal { overflow: auto !important; }
 
 /* End Scrollable list */

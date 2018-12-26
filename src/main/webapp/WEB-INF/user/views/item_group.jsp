@@ -17,8 +17,6 @@
 								<div class="breadcrumb-holder">
 	                                    <h1 class="main-title float-left">Item Group List</h1>
 	                                    <ol class="breadcrumb float-right">
-											<li class="breadcrumb-item">Home</li>
-											<li class="breadcrumb-item">Management</li>
 											<li class="breadcrumb-item active">Item Group</li>
 	                                    </ol>
 	                                    <div class="clearfix"></div>

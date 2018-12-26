@@ -206,12 +206,12 @@ public class ItemGroupRestController {
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		
-		if(id <= 0) {
-			response.setStatus(409);
-			return jObjectResult.put("response_message", "Category ID not found").toString();
-		}
-		
 		try {
+			if(id <= 0) {
+				response.setStatus(409);
+				return jObjectResult.put("response_message", "Category ID not found").toString();
+			}
+			
 			connection = dataSource.getConnection();
 			stmt = connection.prepareStatement("SELECT mi.* FROM menu_item mi INNER JOIN category_menu_item cmi ON mi.menu_item_id = cmi.id "
 					+ "WHERE category_id = ? AND mi.is_active = ?");
