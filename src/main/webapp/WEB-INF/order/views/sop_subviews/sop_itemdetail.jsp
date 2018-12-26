@@ -55,7 +55,7 @@
 									class="col-4 col-sm-4 col-md-4 col-lg-3 col-xl-3 d-flex flex-row pl-0">
 									<div
 										class="w-100 align-self-center flex-fill d-flex flex-column">
-										<div class="tex0t-right text-nowrap sm-resp-font"
+										<div class="text-right text-nowrap sm-resp-font"
 											ng-show="comboTier.isTierCompleted">
 											<button class="btn btn-primary btn-main sm-resp-font"
 												type="button"

@@ -2,7 +2,10 @@ div.header-content {
 	height: 10%;
 }
 div.body-content {
-	height: 90%;
+	flex: 1 1 auto;
+}
+div.footer-content {
+	height: 10%;
 }
 .flex-limiter {
 	flex-wrap: nowrap;
@@ -110,8 +113,15 @@ a.nav-item.tier-completed::after {
   	color: green;
 }
 
+/*sop_cart*/
+div.cart-item {
+	background: #FFFFFF;
+}
+
 /*Page Overlay Setting*/
 div.page-overlay {
+	display: flex;
+	flex-direction: column;
 	position: absolute;
 	background: #FFFFFF;
 	top: 0;
@@ -143,6 +153,10 @@ div#item-detail-overlay {
 div#tier-selection-overlay {
 	background: #00000077;
 	z-index: 6;
+}
+div#item-cart-overlay {
+	background: #E2E2E2;
+	z-index: 7;
 }
 div#modal-dialog {
 	background: #00000077;

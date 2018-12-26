@@ -84,6 +84,8 @@ byodApp.controller('OrderController', function($scope, $http, $timeout) {
 		} else if (viewName == "tierSelection") {
 			$scope.selectedTier = param1;
 			$("div#tier-selection-overlay").fadeInFromTop();
+		} else if (viewName == "itemCart") {
+			$("div#item-cart-overlay").fadeInFromLeft();
 		}
 	}
 	$scope.hideFromView = function(viewName) {
@@ -98,8 +100,6 @@ byodApp.controller('OrderController', function($scope, $http, $timeout) {
 		} else if (viewName == "tierSelection") {
 			$("div#tier-selection-overlay").fadeOutToTop();
 		} else if (viewName == "itemCart") {
-			$("div#item-checkout-overlay").fadeOutToLeft();
-		} else if (viewName == "itemCheckOut") {
 			$("div#item-cart-overlay").fadeOutToLeft();
 		}
 	}
@@ -212,12 +212,14 @@ byodApp.controller('OrderController', function($scope, $http, $timeout) {
 	$scope.addToCart = function() {
 		if (!$scope.isProcessingCartData) {
 			$scope.isProcessingCartData = true;
-			var cartObj = $.extend(true, {}, $scope.selectedItem);
+			var cartObj = angular.copy($scope.selectedItem);
+			cartObj.totalPrice = $scope.totalItemPrice;
 			delete cartObj.comboList;
-			cartObj.comboData = $.extend(true, {}, $scope.itemComboTierList);
-			cartObj.modifierData = $.extend(true, {}, $scope.itemModifierList);
+			cartObj.comboData = angular.copy($scope.itemComboTierList);
+			cartObj.modifierData = angular.copy($scope.itemModifierList);
 			
 			$scope.cart.push(cartObj);
+			console.log($scope.cart);
 			
 			var dialogOption = {};
 			dialogOption.title = $scope.currentLanguageData.dialog_cart_add_success_title;

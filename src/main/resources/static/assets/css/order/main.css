@@ -3,6 +3,9 @@ html, body {
 	height: 100%;
 	padding: 0;
 	margin: 0;
+	/*Block IOS Bounce Effect*/
+	position: fixed;
+  	overflow: hidden;
 }
 .empty-btn {
 	background: none;
@@ -13,6 +16,12 @@ html, body {
 }
 .scrollable-y {
 	overflow-y: auto;
+}
+.non-scrollable-x {
+	overflow-x: hidden;
+}
+.non-scrollable-y {
+	overflow-y: hidden;
 }
 
 /*Font Size Settings*/

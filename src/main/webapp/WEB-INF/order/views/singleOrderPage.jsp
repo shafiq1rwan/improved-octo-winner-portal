@@ -33,10 +33,6 @@
 	<!-- Item Cart Display[START] -->
 	<jsp:include page="/WEB-INF/order/views/sop_subviews/sop_cart.jsp" />
 	<!-- Item Cart Display[END] -->
-
-	<!--  Item Checkout Display[START] -->
-	<jsp:include page="/WEB-INF/order/views/sop_subviews/sop_checkout.jsp" />
-	<!--  Item Checkout Display[END] -->
 	
 	<!--  Dialog Display[START] -->
 	<jsp:include page="/WEB-INF/order/views/sop_subviews/sop_dialog.jsp" />

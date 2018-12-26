@@ -13,7 +13,7 @@
 				<b>{{storeName}}</b>
 			</div>
 			<div class="align-self-center mr-2">
-				<button type="button" ng-click="goToCartPage()" class="empty-btn badge-btn">
+				<button type="button" ng-click="switchToView('itemCart')" class="empty-btn badge-btn">
 					<span class="md-resp-font cart-icon"></span> <span
 						class="badge badge-pill badge-danger xxs-resp-font">{{cart.length}}</span>
 				</button>

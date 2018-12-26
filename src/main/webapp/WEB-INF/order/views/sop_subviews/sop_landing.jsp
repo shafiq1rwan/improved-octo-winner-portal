@@ -25,9 +25,9 @@
 				<!-- Empty Content -->
 			</div>
 		</div>
-		<div class="body-content">
+		<div class="body-content d-flex flex-column">
 			<div id="landing-main-content"
-				class="d-flex flex-column justify-content-center">
+				class="flex-fill d-flex flex-column justify-content-center">
 				<img class="align-self-center"
 					style="max-height: 30%; max-width: 30%;"
 					src="${pageContext.request.contextPath}${applicationData.getLandingLogoPath()}">

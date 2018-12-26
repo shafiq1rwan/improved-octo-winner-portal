@@ -208,7 +208,11 @@ public class ItemGroupRestController {
 		
 		if(id <= 0) {
 			response.setStatus(409);
+			try {
 			return jObjectResult.put("response_message", "Category ID not found").toString();
+			} catch (Exception ex) {
+				
+			}
 		}
 		
 		try {
