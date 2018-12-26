@@ -19,7 +19,6 @@
 							<div class="breadcrumb-holder">
 								<h1 class="main-title float-left">Menu Item List</h1>
 								<ol class="breadcrumb float-right">
-									<li class="breadcrumb-item">Home</li>
 									<li class="breadcrumb-item active">Menu Item</li>
 								</ol>
 								<div class="clearfix"></div>
