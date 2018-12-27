@@ -311,7 +311,11 @@
 					{"data" : "backend_id"},
 					{"data" : "menu_item_name"},
 					{"data" : "menu_item_image_path", "defaultContent": "<i>Not set</i>"},
-					{"data" : "menu_item_base_price"},
+					{"data" : "menu_item_base_price", 
+						"render": function(data, type, full, meta){
+							return parseFloat(data).toFixed(2);
+						}
+					},
 					{"data" : "menu_item_type", 
 					 "render": function(data, type, full, meta){
 						 var menu_item_type = full.menu_item_type;

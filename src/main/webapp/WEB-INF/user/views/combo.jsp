@@ -33,7 +33,7 @@
 								<div class="card-header d-flex flex-row justify-content-between">
 									<h3>Combo List</h3>
 																		
-									<button type="button"
+									<button type="button" ng-show="combo_details.length > 0"
 										class="btn btn-social pull-right btn-primary bg-aqua"
 										data-toggle="modal" data-target="#comboItemSelectionModal" 
 										ng-click="changeComboItemType('MI')">
@@ -50,18 +50,19 @@
 								    </li>
 								  </ul>
 
-									<div class="table-responsive">
+									<div class="table-responsive" style="margin-top:10px;">
 										<table id="combo_dtable"
 											class="table table-bordered table-hover display"
 											style="width: 100%">
 											<thead>
 												<tr>
 													<th></th>
-													<th>ID</th>
+													<th></th>
 													<th>Name</th>
 													<th>Type</th>
 													<th>Price</th>
 													<th>Action</th>
+													<th></th>
 												</tr>
 											</thead>
 											<tbody>
@@ -118,8 +119,10 @@
 												<thead>
 													<tr>
 														<th></th>
-														<th>Name</th>
+														<th>Id</th>
+														<th>Name</th>	
 														<th>Price</th>
+														<th></th>
 													</tr>
 												</thead>
 												<tbody>
@@ -134,7 +137,7 @@
 						</div>
 
 						<div class="modal-footer">
-							<button class="btn btn-primary" type="submit" ng-click="">Add</button>			
+							<button class="btn btn-primary" type="submit" ng-click="addItemOrGroup()">Add</button>			
 						</div>
 					</form>
 
