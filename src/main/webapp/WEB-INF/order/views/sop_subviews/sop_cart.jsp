@@ -10,7 +10,7 @@
 			</div>
 			<div
 				class="text-truncate align-self-center main-text-color md-resp-font">
-				<b>Checkout</b>
+				<b>{{currentLanguageData.cart_summary}}</b>
 			</div>
 			<div>
 				<!-- Empty Content -->
@@ -20,19 +20,24 @@
 			<div
 				class="flex-fill pl-1 pr-1 d-flex flex-column justify-content-center"
 				ng-show="cart.length <= 0">
-				<span class="w-100 md-resp-font text-center"><b>The cart
-						is empty. Please proceed to order. </b></span>
+				<div class="w-100 align-self-center text-center">
+					<span class="md-resp-font"><b>{{currentLanguageData.cart_empty_message}}</b></span>
+				</div>
+				<div class="align-self-center">
+					<button class="btn btn-primary btn-main md-resp-font" type="button"
+						ng-click="hideFromView('itemCart')">{{currentLanguageData.landing_orderNow}}</button>
+				</div>
 			</div>
 			<div class="flex-fill scrollable-y" ng-show="cart.length > 0">
 				<div class="row ml-0 mr-0 pl-1 pr-1">
 					<div class="col-12 cart-item pl-1 pr-1 mb-2"
 						ng-repeat="cartItem in cart">
-						<div class="row ml-0 mr-0" ng-if="cartItem.value = '0'">
+						<div class="row ml-0 mr-0">
 							<div class="col-7 pl-0 pr-0 xs-resp-font text-truncate">
 								<b>{{cartItem.name}}</b>
 							</div>
 							<div class="col-2 pl-0 pr-0 xs-resp-font text-center">
-								<b>x1</b>
+								<b>x{{cartItem.quantity}}</b>
 							</div>
 							<div class="col-3 pl-0 pr-0 xs-resp-font text-right">
 								<b>{{systemData.priceTag}}{{cartItem.price}}</b>
@@ -49,27 +54,30 @@
 								</div>
 							</div>
 						</div>
-						<div class="row ml-0 mr-0" ng-if="cartItem.value != '0'">
-							<div class="col-7 pl-0 pr-0 xs-resp-font text-truncate">
-								<b>{{cartItem.name}}</b>
-							</div>
-							<div class="col-2 pl-0 pr-0 xs-resp-font text-center">
-								<b>x{{cartItem.quantity}}</b>
-							</div>
-							<div class="col-3 pl-0 pr-0 xs-resp-font text-right">
-								<b>{{systemData.priceTag}}{{cartItem.price}}</b>
-							</div>
-						</div>
 						<div class="row ml-0 mr-0">
 							<div class="col-7 pl-0 pr-0 xs-resp-font text-truncate">
-								<b>Total</b>
+								<b>{{currentLanguageData.cart_total}}</b>
 							</div>
 							<div class="col-5 pl-0 pr-0 xs-resp-font text-right">
 								<b>{{systemData.priceTag}}{{cartItem.totalPrice}}</b>
 							</div>
 						</div>
 					</div>
+					<div class="col-12 cart-item pl-1 pr-1 mb-2">
+						<div class="row ml-0 mr-0">
+							<div class="col-7 pl-0 pr-0 xs-resp-font text-truncate">
+								<b>{{currentLanguageData.cart_total}}</b>
+							</div>
+							<div class="col-5 pl-0 pr-0 xs-resp-font text-right">
+								<b>{{systemData.priceTag}}{{getCartTotal()}}</b>
+							</div>
+						</div>
+					</div>
 				</div>
+			</div>
+			<div class="pt-1 pb-1 align-self-center" ng-show="cart.length > 0">
+				<button class="btn btn-primary btn-main sm-resp-font" type="button"
+					ng-click="">{{currentLanguageData.cart_checkout}}&nbsp;({{systemData.priceTag}}{{getCartTotal()}})</button>
 			</div>
 		</div>
 	</div>

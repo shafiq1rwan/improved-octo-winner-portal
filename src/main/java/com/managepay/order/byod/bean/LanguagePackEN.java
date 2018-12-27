@@ -17,13 +17,23 @@ public class LanguagePackEN {
 	public String item_detail_totalPrice;
 	public String item_detail_select;
 	public String item_detail_addToCart;
+	public String item_detail_quantity;
 	
 	public String tier_selection_selection;
 	public String tier_selection_itemRemaining;
 	public String tier_selection_done;
 	
+	public String cart_empty_message;
+	public String cart_summary;
+	public String cart_total;
+	public String cart_subtotal;
+	public String cart_checkout;
+	
+	public String dialog_reset_cart_title;
 	public String dialog_cart_add_success_title;
 	public String dialog_button_ok;
+	public String dialog_button_yes;
+	public String dialog_button_no;
 	
 	public String getPackName() {
 		return packName;
@@ -91,6 +101,12 @@ public class LanguagePackEN {
 	public void setItem_detail_addToCart(String item_detail_addToCart) {
 		this.item_detail_addToCart = item_detail_addToCart;
 	}
+	public String getItem_detail_quantity() {
+		return item_detail_quantity;
+	}
+	public void setItem_detail_quantity(String item_detail_quantity) {
+		this.item_detail_quantity = item_detail_quantity;
+	}
 	public String getTier_selection_selection() {
 		return tier_selection_selection;
 	}
@@ -109,6 +125,42 @@ public class LanguagePackEN {
 	public void setTier_selection_done(String tier_selection_done) {
 		this.tier_selection_done = tier_selection_done;
 	}
+	public String getCart_empty_message() {
+		return cart_empty_message;
+	}
+	public void setCart_empty_message(String cart_empty_message) {
+		this.cart_empty_message = cart_empty_message;
+	}
+	public String getCart_summary() {
+		return cart_summary;
+	}
+	public void setCart_summary(String cart_summary) {
+		this.cart_summary = cart_summary;
+	}
+	public String getCart_total() {
+		return cart_total;
+	}
+	public void setCart_total(String cart_total) {
+		this.cart_total = cart_total;
+	}
+	public String getCart_subtotal() {
+		return cart_subtotal;
+	}
+	public void setCart_subtotal(String cart_subtotal) {
+		this.cart_subtotal = cart_subtotal;
+	}
+	public String getCart_checkout() {
+		return cart_checkout;
+	}
+	public void setCart_checkout(String cart_checkout) {
+		this.cart_checkout = cart_checkout;
+	}
+	public String getDialog_reset_cart_title() {
+		return dialog_reset_cart_title;
+	}
+	public void setDialog_reset_cart_title(String dialog_reset_cart_title) {
+		this.dialog_reset_cart_title = dialog_reset_cart_title;
+	}
 	public String getDialog_cart_add_success_title() {
 		return dialog_cart_add_success_title;
 	}
@@ -120,5 +172,17 @@ public class LanguagePackEN {
 	}
 	public void setDialog_button_ok(String dialog_button_ok) {
 		this.dialog_button_ok = dialog_button_ok;
+	}
+	public String getDialog_button_yes() {
+		return dialog_button_yes;
+	}
+	public void setDialog_button_yes(String dialog_button_yes) {
+		this.dialog_button_yes = dialog_button_yes;
+	}
+	public String getDialog_button_no() {
+		return dialog_button_no;
+	}
+	public void setDialog_button_no(String dialog_button_no) {
+		this.dialog_button_no = dialog_button_no;
 	}
 }

@@ -2,17 +2,14 @@ div.header-content {
 	height: 10%;
 }
 div.body-content {
-	flex: 1 1 auto;
-}
-div.footer-content {
-	height: 10%;
+	height: 90%;
 }
 .flex-limiter {
 	flex-wrap: nowrap;
 	overflow-y: auto;
 }
 .text-limiter {
-	overflow: hidden;
+	overflow-x: hidden;
     text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-line-clamp: 1;

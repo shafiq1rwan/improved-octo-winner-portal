@@ -48,11 +48,13 @@ byodApp.controller('OrderController', function($scope, $http, $timeout) {
 	$scope.selectedItem;
 	$scope.itemComboTierList;
 	$scope.itemModifierList;
+	$scope.alacarteQuantity;
 	$scope.selectedTier;
 	$scope.isReadyForCart;
 	$scope.isProcessingCartData;
 	$scope.totalItemPrice;
 	$scope.cart = [];
+	$scope.cartTotalPrice;
 	
 	$scope.changeLocale = function(data) {
 		$scope.currentLocale = data;
@@ -90,7 +92,27 @@ byodApp.controller('OrderController', function($scope, $http, $timeout) {
 	}
 	$scope.hideFromView = function(viewName) {
 		if (viewName == "itemCategory") {
-			$("div#item-category-overlay").fadeOutToLeft();
+			if ($scope.cart.length > 0) {
+				var dialogOption = {};
+				dialogOption.title = $scope.currentLanguageData.dialog_reset_cart_title;
+				dialogOption.message = "";
+				dialogOption.button1 = {
+						name: $scope.currentLanguageData.dialog_button_yes,
+						fn: function() {
+							$("div#item-category-overlay").fadeOutToLeft();
+							$("div#modal-dialog").modal("hide");
+						}
+				}
+				dialogOption.button2 = {
+						name: $scope.currentLanguageData.dialog_button_no,
+						fn: function() {
+							$("div#modal-dialog").modal("hide");
+						}
+				}
+				$scope.displayDialog(dialogOption);
+			} else {
+				$("div#item-category-overlay").fadeOutToLeft();
+			}
 		} else if (viewName == "itemList") {
 			$("div#item-list-overlay").fadeOutToLeft();
 		} else if (viewName == "categorySelection") {
@@ -115,9 +137,11 @@ byodApp.controller('OrderController', function($scope, $http, $timeout) {
 		$scope.isReadyForCart = false;
 		$scope.itemComboTierList = null;
 		$scope.itemModifierList = null;
-		$scope.totalItemPrice = data.price;
+		$scope.alacarteQuantity = 0;
+		$scope.totalItemPrice = "0.00";
 		
 		if (data.type == "0") {
+			$scope.totalItemPrice = data.price;
 			$scope.itemComboTierList = [];
 			var tierStep = 1;
 			for (var x = 0; x < data.comboList.length; x++) {
@@ -150,9 +174,6 @@ byodApp.controller('OrderController', function($scope, $http, $timeout) {
 				$scope.itemComboTierList.push(tierObject);
 			}
 		} else {
-			if (data.type == "1") {
-				$scope.selectedItem.quantity = 0;
-			}
 		}
 	}
 	$scope.generateItemString = function(tierData) {
@@ -169,6 +190,21 @@ byodApp.controller('OrderController', function($scope, $http, $timeout) {
 		}
 		
 		return itemString;
+	}
+	$scope.addAlacarteQuantity = function(data) {
+		$scope.alacarteQuantity += 1;
+		$scope.totalItemPrice = Number(parseFloat($scope.totalItemPrice) + parseFloat(data.price)).toFixed(2);
+		
+		$scope.isReadyForCart = true;
+	}
+	$scope.minusAlacarteQuantity = function(data) {
+		if ($scope.alacarteQuantity > 0) {
+			$scope.alacarteQuantity -= 1;
+			$scope.totalItemPrice = Number(parseFloat($scope.totalItemPrice) - parseFloat(data.price)).toFixed(2);
+		}
+		if ($scope.alacarteQuantity <= 0) {
+			$scope.isReadyForCart = false
+		}
 	}
 	$scope.addItemQuantity = function(itemData, tierData) {
 		if (tierData.selectedQuantity >= tierData.quantity) {
@@ -213,17 +249,21 @@ byodApp.controller('OrderController', function($scope, $http, $timeout) {
 		if (!$scope.isProcessingCartData) {
 			$scope.isProcessingCartData = true;
 			var cartObj = angular.copy($scope.selectedItem);
+			if (cartObj.type == '0') {
+				cartObj.quantity = 1;
+			} else {
+				cartObj.quantity = $scope.alacarteQuantity;
+			}
 			cartObj.totalPrice = $scope.totalItemPrice;
 			delete cartObj.comboList;
 			cartObj.comboData = angular.copy($scope.itemComboTierList);
 			cartObj.modifierData = angular.copy($scope.itemModifierList);
 			
 			$scope.cart.push(cartObj);
-			console.log($scope.cart);
 			
 			var dialogOption = {};
 			dialogOption.title = $scope.currentLanguageData.dialog_cart_add_success_title;
-			dialogOption.message = $scope.currentLanguageData.dialog_cart_add_success_title;
+			dialogOption.message = "";
 			dialogOption.button1 = {
 					name: $scope.currentLanguageData.dialog_button_ok,
 					fn: function() {
@@ -234,6 +274,13 @@ byodApp.controller('OrderController', function($scope, $http, $timeout) {
 			$scope.displayDialog(dialogOption);
 			$scope.isProcessingCartData = false;
 		}
+	}
+	$scope.getCartTotal = function() {
+		var total = 0;
+	    for (var i = 0; i < $scope.cart.length; i++){
+	    	total += parseFloat($scope.cart[i].totalPrice);
+	    }
+	    return total.toFixed(2);
 	}
 	
 	/*Dialog Fn*/

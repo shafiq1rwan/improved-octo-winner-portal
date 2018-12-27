@@ -9,18 +9,21 @@
 			</div>
 		</div>
 		<div class="body-content scrollable-y">
-			<div class="w-100 h-100 d-flex flex-column">
-				<div class="w-100 d-flex flex-column align-self-center">
-					<img class="max-img-height align-self-center"
-						src="{{selectedItem.path}}" alt="{{selectedItem.name}}">
+			<div class="h-100 d-flex flex-column">
+				<div class="align-self-center">
+					<img class="max-img-height" src="{{selectedItem.path}}"
+						alt="{{selectedItem.name}}">
 				</div>
 				<div
 					class="w-100 flex-fill card d-flex flex-column align-self-center">
-					<span class="align-self-center text-limiter lg-resp-font"><b>{{selectedItem.name}}</b></span>
-					<span
-						class="align-self-center text-center text-limiter three-liner xs-resp-font">{{selectedItem.description}}</span>
+					<div class="w-100 align-self-center text-center">
+						<span class="text-limiter lg-resp-font"><b>{{selectedItem.name}}</b></span>
+					</div>
+					<div class="w-100 align-self-center text-center">
+						<span class="text-limiter three-liner xs-resp-font">{{selectedItem.description}}</span>
+					</div>
 					<hr class="ml-1 mr-1">
-					<div class="scrollable-y pb-2">
+					<div class="flex-fill scrollable-y pb-2">
 						<div class="row ml-0 mr-0">
 							<div
 								class="col-8 col-sm-8 col-md-8 col-lg-9 col-xl-9 d-flex flex-row pr-0">
@@ -38,7 +41,41 @@
 								</div>
 							</div>
 						</div>
-						<div class="w-100" ng-repeat="comboTier in itemComboTierList">
+						<div class="w-100"
+							ng-show="selectedItem.type != '0' && itemModifierList == null">
+							<hr class="ml-3 mr-3">
+							<div class="row ml-0 mr-0">
+								<div
+									class="col-8 col-sm-8 col-md-8 col-lg-9 col-xl-9 d-flex flex-column pr-0">
+									<div class="text-limiter two-liner sm-resp-font">
+										<b>{{currentLanguageData.item_detail_quantity}}</b>
+									</div>
+								</div>
+								<div
+									class="col-4 col-sm-4 col-md-4 col-lg-3 col-xl-3 d-flex flex-row pl-0">
+									<div
+										class="w-100 align-self-center flex-fill d-flex flex-column">
+										<div class="row ml-0 mr-0">
+											<div class="col-4 pl-0 pr-0 text-center">
+												<img class="md-resp-img"
+													ng-click="minusAlacarteQuantity(selectedItem)"
+													src="${pageContext.request.contextPath}/assets/images/order/icon/minus_icon.svg" />
+											</div>
+											<div class="col-4 pl-0 pr-0 text-center">
+												<span class="sm-resp-font">{{alacarteQuantity}}</span>
+											</div>
+											<div class="col-4 pl-0 pr-0 text-center">
+												<img class="md-resp-img"
+													ng-click="addAlacarteQuantity(selectedItem)"
+													src="${pageContext.request.contextPath}/assets/images/order/icon/plus_icon.svg" />
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="w-100" ng-show="selectedItem.type = '0'"
+							ng-repeat="comboTier in itemComboTierList">
 							<hr class="ml-3 mr-3">
 							<div class="row ml-0 mr-0">
 								<div
@@ -72,30 +109,32 @@
 							</div>
 						</div>
 					</div>
-				</div>
-				<div class="mt-2 mb-2">
-					<div class="row ml-0 mr-0">
-						<div
-							class="col-8 col-sm-8 col-md-8 col-lg-9 col-xl-9 d-flex flex-row pr-0">
+					<hr class="ml-1 mr-1 mt-1 mb-1">
+					<div class="mt-2 mb-2">
+						<div class="row ml-0 mr-0">
 							<div
-								class="w-100 align-self-center text-limiter two-liner sm-resp-font">
-								<b>{{currentLanguageData.item_detail_totalPrice}}</b>
+								class="col-8 col-sm-8 col-md-8 col-lg-9 col-xl-9 d-flex flex-row pr-0">
+								<div
+									class="w-100 align-self-center text-limiter two-liner sm-resp-font">
+									<b>{{currentLanguageData.item_detail_totalPrice}}</b>
+								</div>
+							</div>
+							<div
+								class="col-4 col-sm-4 col-md-4 col-lg-3 col-xl-3 d-flex flex-row pl-0">
+								<div
+									class="w-100 align-self-center flex-fill d-flex flex-column">
+									<div class="text-right text-nowrap sm-resp-font">{{systemData.priceTag}}{{totalItemPrice}}</div>
+								</div>
 							</div>
 						</div>
-						<div
-							class="col-4 col-sm-4 col-md-4 col-lg-3 col-xl-3 d-flex flex-row pl-0">
-							<div class="w-100 align-self-center flex-fill d-flex flex-column">
-								<div class="text-right text-nowrap sm-resp-font">{{systemData.priceTag}}{{totalItemPrice}}</div>
-							</div>
+						<div class="row ml-1 mr-0 d-flex flex-column"
+							ng-show="isReadyForCart">
+							<button
+								class="btn btn-primary btn-main sm-resp-font align-self-center"
+								type="button" ng-click="addToCart()">
+								<span class="resp-font cart-icon"></span>&nbsp;{{currentLanguageData.item_detail_addToCart}}
+							</button>
 						</div>
-					</div>
-					<div class="row ml-1 mr-0 d-flex flex-column"
-						ng-show="isReadyForCart">
-						<button
-							class="btn btn-primary btn-main sm-resp-font align-self-center"
-							type="button" ng-click="addToCart()">
-							<span class="resp-font cart-icon"></span>&nbsp;{{currentLanguageData.item_detail_addToCart}}
-						</button>
 					</div>
 				</div>
 			</div>
