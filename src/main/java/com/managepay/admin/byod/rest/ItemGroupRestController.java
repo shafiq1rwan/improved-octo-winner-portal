@@ -368,4 +368,44 @@ public class ItemGroupRestController {
 		
 		return size;
 	}
+	
+	@RequestMapping(value = "/get_all_item_group_for_combo", method = RequestMethod.GET)
+	public String getAllItemGroupForCombo() {
+		JSONArray JARY = new JSONArray();
+		JSONObject jObject = new JSONObject();
+		JSONObject jObjectResult = new JSONObject();
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		
+		try {
+			connection = dataSource.getConnection();
+			stmt = connection.prepareStatement("SELECT * FROM menu_item_group");
+			rs = (ResultSet) stmt.executeQuery();
+			 
+			while(rs.next()) {
+				jObject = new JSONObject();
+				jObject.put("id", rs.getLong("id"));
+				jObject.put("backend_id", rs.getString("backend_id"));	
+				jObject.put("name", rs.getString("menu_item_group_name"));
+				jObject.put("type", "Group");
+				JARY.put(jObject);
+			}
+			
+			jObjectResult = new JSONObject();
+			jObjectResult.put("data", JARY);
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return jObjectResult.toString();
+	}
 }

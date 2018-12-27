@@ -55,9 +55,12 @@ if it's not present, don't show loader */
 	<link href="${pageContext.request.contextPath}/assets/css/byodadmin/style.css" rel="stylesheet" type="text/css" />
 	
 	<!-- BEGIN CSS for this page -->
-	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/assets/plugins/datatable-1.10.16/css/dataTables.bootstrap4.min.css"/>
+	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/assets/plugins/datatable-1.10.16/css/dataTables.bootstrap4.min.css"/>	
+	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/assets/plugins/datatable-1.10.16/extensions/Select/css/select.dataTables.min.css"/>
+	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/assets/plugins/datatable-1.10.16/extensions/Buttons/css/buttons.dataTables.min.css"/>
+	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/assets/plugins/datatable-1.10.16/extensions/RowReorder/css/rowReorder.dataTables.min.css"/>	
 	<!-- END CSS for this page -->
-	
+
 	<link href="${pageContext.request.contextPath}/assets/plugins/jQuery.filer-1.3.0/css/jquery.filer.css" rel="stylesheet" />
 	<link href="${pageContext.request.contextPath}/assets/plugins/jQuery.filer-1.3.0/css/themes/jquery.filer-dragdropbox-theme.css" rel="stylesheet" />		
 	
@@ -69,6 +72,10 @@ if it's not present, don't show loader */
 	<%-- <script src="${pageContext.request.contextPath}/assets2/js/jquery.min.js"></script> --%>
 	<script src="${pageContext.request.contextPath}/assets/plugins/datatable-1.10.16/js/jquery.dataTables.min.js"></script>
 	<script src="${pageContext.request.contextPath}/assets/plugins/datatable-1.10.16/js/dataTables.bootstrap4.min.js"></script>
+	<script src="${pageContext.request.contextPath}/assets/plugins/datatable-1.10.16/extensions/Select/js/dataTables.select.min.js"></script>
+	<script src="${pageContext.request.contextPath}/assets/plugins/datatable-1.10.16/extensions/Buttons/js/dataTables.buttons.min.js"></script>
+	<script src="${pageContext.request.contextPath}/assets/plugins/datatable-1.10.16/extensions/RowReorder/js/dataTables.rowReorder.min.js"></script>
+	
 	<link rel="stylesheet" href="${pageContext.request.contextPath}/assets/plugins/datetimepicker/css/tempusdominus-bootstrap-4.min.css" />
 	
 <%-- <link rel="import" href="${pageContext.request.contextPath}/assets/component.html"> --%>

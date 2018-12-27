@@ -365,5 +365,45 @@ public class CategoryRestController {
 			return 0;
 		}
 	}
+	
+/*	@PostMapping("/assign_menu_item_to_category")
+	public ResponseEntity<?> assignMenuItemToCategory(HttpServletRequest request, HttpServletResponse response,
+			@RequestBody String data) {
+		
+		JSONObject jsonResult = new JSONObject();
+		Connection connection = null;
+		PreparedStatement stmt = null;
+
+		try {
+			
+			JSONObject jsonObj = new JSONObject(data);
+			
+			connection = dataSource.getConnection();
+			stmt = connection.prepareStatement("DELETE FROM category WHERE id = ?");
+			stmt.setLong(1, id);
+			int categoryRowAffected = stmt.executeUpdate();
+
+			if (categoryRowAffected == 0) {
+				response.setStatus(400);
+				jsonResult.put("response_message", "Category Encountered Error While Perform Deletion!");
+				return jsonResult.toString();
+			} else {
+				stmt = connection.prepareStatement("DELETE FROM category_menu_item WHERE category_id = ?");
+				stmt.setLong(1, id);
+				stmt.executeUpdate();
+			}
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return jsonResult.toString();
+	}*/
 
 }

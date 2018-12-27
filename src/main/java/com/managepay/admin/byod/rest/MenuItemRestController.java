@@ -126,9 +126,13 @@ public class MenuItemRestController {
 		ResultSet rs = null;
 
 		try {
-			connection = dataSource.getConnection();
-			stmt = connection.prepareStatement("SELECT * FROM menu_item WHERE menu_item_type = ?");
-			stmt.setInt(1, menuItemType);
+			connection = dataSource.getConnection();		
+			if(menuItemType == 3) {
+				stmt = connection.prepareStatement("SELECT mi.*, mitl.menu_item_type_name FROM menu_item mi INNER JOIN menu_item_type_lookup mitl ON mi.menu_item_type = mitl.menu_item_type_number WHERE menu_item_type != 2 AND is_active = 1");
+			} else {
+				stmt = connection.prepareStatement("SELECT mi.*, mitl.menu_item_type_name FROM menu_item mi INNER JOIN menu_item_type_lookup mitl ON mi.menu_item_type = mitl.menu_item_type_number WHERE menu_item_type = ? AND is_active = 1");
+				stmt.setInt(1, menuItemType);
+			}			
 			rs = (ResultSet) stmt.executeQuery();
 
 			while (rs.next()) {
@@ -141,6 +145,7 @@ public class MenuItemRestController {
 				jsonMenuItemObj.put("menu_item_image_path", rs.getString("menu_item_image_path"));
 				jsonMenuItemObj.put("menu_item_base_price", rs.getBigDecimal("menu_item_base_price"));
 				jsonMenuItemObj.put("menu_item_type", rs.getInt("menu_item_type"));
+				jsonMenuItemObj.put("menu_item_type_name", rs.getString("menu_item_type_name"));
 				jsonMenuItemObj.put("is_taxable", rs.getBoolean("is_taxable"));
 				jsonMenuItemObj.put("is_discountable", rs.getBoolean("is_discountable"));
 				jsonMenuItemObj.put("is_active", rs.getBoolean("is_active"));
@@ -162,6 +167,47 @@ public class MenuItemRestController {
 			}
 		}
 	}
+	
+	@GetMapping(value = "/getAllAlaCartMenuItem", produces = "application/json")
+	public ResponseEntity<?> getAllAlaCartMenuItem(HttpServletRequest request, HttpServletResponse response) {
+		JSONObject jsonResult = new JSONObject();
+		JSONArray jsonMenuItemArray = new JSONArray();
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+
+		try {
+			connection = dataSource.getConnection();
+			stmt = connection.prepareStatement("SELECT * FROM menu_item WHERE menu_item_type = 0 AND is_active = 1");
+			rs = (ResultSet) stmt.executeQuery();
+
+			while (rs.next()) {
+				JSONObject jsonMenuItemObj = new JSONObject();
+				jsonMenuItemObj.put("id", rs.getLong("id"));
+				jsonMenuItemObj.put("backend_id", rs.getString("backend_id"));
+				jsonMenuItemObj.put("name", rs.getString("menu_item_name"));
+				jsonMenuItemObj.put("price", rs.getBigDecimal("menu_item_base_price"));
+				jsonMenuItemObj.put("type", "Item");
+
+				jsonMenuItemArray.put(jsonMenuItemObj);
+			}		
+			jsonResult.put("data", jsonMenuItemArray);
+			System.out.println(jsonResult.toString());
+			return ResponseEntity.ok().body(jsonResult.toString());
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return ResponseEntity.badRequest().body(null);
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
 
 	@GetMapping(value = "/getMenuItemById", produces = "application/json")
 	public String getMenuItemById(HttpServletRequest request, HttpServletResponse response,
@@ -388,5 +434,87 @@ public class MenuItemRestController {
 		}
 		
 	}
+	
+	@GetMapping(value = "/getMenuItemByCategory", produces = "application/json")
+	public ResponseEntity<?> getMenuItemByCategory(HttpServletRequest request, HttpServletResponse response, @RequestParam("categoryId") Long categoryId) {
+		JSONArray jsonMenuItemArray = new JSONArray();
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+
+		try {		
+			connection = dataSource.getConnection();
+			stmt = connection.prepareStatement("SELECT mi.*, mitl.menu_item_type_name FROM menu_item mi INNER JOIN menu_item_type_lookup mitl ON mi.menu_item_type = mitl.menu_item_type_number INNER JOIN category_menu_item cmi ON mi.id = cmi.menu_item_id WHERE cmi.category_id = ?");
+			stmt.setLong(1, categoryId);
+			rs = (ResultSet) stmt.executeQuery();
+
+			while (rs.next()) {
+				JSONObject jsonMenuItemObj = new JSONObject();
+				jsonMenuItemObj.put("id", rs.getLong("id"));
+				jsonMenuItemObj.put("backend_id", rs.getString("backend_id"));
+				jsonMenuItemObj.put("menu_item_name", rs.getString("menu_item_name"));
+				jsonMenuItemObj.put("menu_item_image_path", rs.getString("menu_item_image_path"));
+				jsonMenuItemObj.put("menu_item_base_price", rs.getBigDecimal("menu_item_base_price"));
+				jsonMenuItemObj.put("menu_item_type_name", rs.getString("menu_item_type_name"));			
+				jsonMenuItemArray.put(jsonMenuItemObj);
+			}
+			
+			System.out.println(jsonMenuItemArray.toString());
+			
+			return ResponseEntity.ok().body(jsonMenuItemArray.toString());
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return ResponseEntity.badRequest().body(null);
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
+	@GetMapping(value = "/getMenuItemWithoutDuplication", produces = "application/json")
+	public ResponseEntity<?> getMenuItemWithoutDuplication(HttpServletRequest request, HttpServletResponse response, @RequestParam("categoryId") Long categoryId) {
+		JSONArray jsonMenuItemArray = new JSONArray();
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+
+		try {
+			connection = dataSource.getConnection();
+			stmt = connection.prepareStatement("SELECT mi.*, mitl.menu_item_type_name FROM menu_item mi INNER JOIN menu_item_type_lookup mitl ON mi.menu_item_type = mitl.menu_item_type_number INNER JOIN category_menu_item cmi ON mi.id = cmi.menu_item_id WHERE cmi.category_id != ? AND mi.menu_item_type != 2");
+			stmt.setLong(1, categoryId);
+			rs = (ResultSet) stmt.executeQuery();
+
+			while (rs.next()) {
+				JSONObject jsonMenuItemObj = new JSONObject();
+				jsonMenuItemObj.put("id", rs.getLong("id"));
+				jsonMenuItemObj.put("backend_id", rs.getString("backend_id"));
+				jsonMenuItemObj.put("menu_item_name", rs.getString("menu_item_name"));
+				jsonMenuItemObj.put("menu_item_image_path", rs.getString("menu_item_image_path"));
+				jsonMenuItemObj.put("menu_item_base_price", rs.getBigDecimal("menu_item_base_price"));
+				jsonMenuItemObj.put("menu_item_type_name", rs.getString("menu_item_type_name"));			
+				jsonMenuItemArray.put(jsonMenuItemObj);
+			}
+			
+			return ResponseEntity.ok().body(jsonMenuItemArray.toString());
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return ResponseEntity.badRequest().body(null);
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
+
 
 }
