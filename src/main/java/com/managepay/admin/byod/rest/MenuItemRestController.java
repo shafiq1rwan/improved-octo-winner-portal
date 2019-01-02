@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.managepay.admin.byod.util.ByodUtil;
+import com.microsoft.sqlserver.jdbc.SQLServerException;
 
 @RestController
 @RequestMapping("/menu/menuItem")
@@ -260,15 +261,18 @@ public class MenuItemRestController {
 
 		try {
 			JSONObject jsonMenuItemData = new JSONObject(data);
+			
 			String imagePath = jsonMenuItemData.isNull("menu_item_image_path")?null:jsonMenuItemData.getString("menu_item_image_path");
-
+			String description = jsonMenuItemData.isNull("menu_item_description")?null: jsonMenuItemData.getString("menu_item_description");
+					
 					connection = dataSource.getConnection();
 					stmt = connection.prepareStatement(
 							"INSERT INTO menu_item(backend_id, modifier_group_id, menu_item_name, menu_item_description, menu_item_image_path, menu_item_base_price, menu_item_type,is_taxable, is_discountable) VALUES(?,?,?,?,?,?,?,?,?)");
-					stmt.setString(1, byodUtil.createBackendId("MI", 8));
+
+					stmt.setString(1, jsonMenuItemData.getString("menu_item_backend_id"));
 					stmt.setLong(2, jsonMenuItemData.getLong("modifier_group_id"));
 					stmt.setString(3, jsonMenuItemData.getString("menu_item_name"));
-					stmt.setString(4, jsonMenuItemData.getString("menu_item_description"));
+					stmt.setString(4, description);
 					stmt.setString(5, imagePath);
 					stmt.setBigDecimal(6, new BigDecimal(jsonMenuItemData.getDouble("menu_item_base_price")));
 					stmt.setInt(7, jsonMenuItemData.getInt("menu_item_type"));
@@ -281,8 +285,8 @@ public class MenuItemRestController {
 					}
 		
 					return ResponseEntity.ok(null);
-		} catch (DuplicateKeyException ex) {
-			ex.printStackTrace();
+		} catch (SQLServerException ex) {
+			ex.printStackTrace();	
 			return new ResponseEntity<>(HttpStatus.CONFLICT);
 		}
 		catch (Exception ex) {
@@ -306,20 +310,23 @@ public class MenuItemRestController {
 		try {
 			JSONObject jsonMenuItemData = new JSONObject(data);
 			if (jsonMenuItemData.has("menu_item_name") && jsonMenuItemData.has("id")) {
-				String imagePath = jsonMenuItemData.isNull("menu_item_image_path")?null:jsonMenuItemData.getString("menu_item_image_path");
 				
+				String imagePath = jsonMenuItemData.isNull("menu_item_image_path")?null:jsonMenuItemData.getString("menu_item_image_path");
+				String description = jsonMenuItemData.isNull("menu_item_description")?null: jsonMenuItemData.getString("menu_item_description");
+
 					connection = dataSource.getConnection();
 					stmt = connection.prepareStatement(
-							"UPDATE menu_item SET modifier_group_id = ?, menu_item_name = ?, menu_item_description =?, menu_item_image_path = ?, menu_item_base_price = ?, menu_item_type = ?, is_taxable = ? , is_discountable = ? WHERE id = ?");
+							"UPDATE menu_item SET modifier_group_id = ?, menu_item_name = ?, menu_item_description =?, menu_item_image_path = ?, menu_item_base_price = ?, menu_item_type = ?, is_taxable = ? , is_discountable = ?, backend_id = ? WHERE id = ?");
 					stmt.setLong(1, jsonMenuItemData.getLong("modifier_group_id"));
 					stmt.setString(2, jsonMenuItemData.getString("menu_item_name"));
-					stmt.setString(3, jsonMenuItemData.getString("menu_item_description"));
+					stmt.setString(3, description);
 					stmt.setString(4, imagePath);
 					stmt.setBigDecimal(5, new BigDecimal(jsonMenuItemData.getDouble("menu_item_base_price")));
 					stmt.setInt(6, jsonMenuItemData.getInt("menu_item_type"));
 					stmt.setBoolean(7, jsonMenuItemData.getBoolean("is_taxable"));
 					stmt.setBoolean(8, jsonMenuItemData.getBoolean("is_discountable"));
-					stmt.setLong(9, jsonMenuItemData.getLong("id"));
+					stmt.setString(9, jsonMenuItemData.getString("menu_item_backend_id"));
+					stmt.setLong(10, jsonMenuItemData.getLong("id"));
 					int rowAffected = stmt.executeUpdate();
 					
 					if(rowAffected == 0) {
@@ -459,7 +466,7 @@ public class MenuItemRestController {
 				jsonMenuItemArray.put(jsonMenuItemObj);
 			}
 			
-			System.out.println(jsonMenuItemArray.toString());
+			System.out.println("Existing Set " + jsonMenuItemArray.toString());
 			
 			return ResponseEntity.ok().body(jsonMenuItemArray.toString());
 		} catch (Exception ex) {

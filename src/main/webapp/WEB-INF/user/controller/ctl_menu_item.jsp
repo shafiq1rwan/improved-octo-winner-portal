@@ -382,9 +382,11 @@
 		}
 		
 	 	$scope.performMenuItemOperations = function(action_type){	
-			if($scope.menu_item.menu_item_name == '' || $scope.menu_item.menu_item_name == null || 
-					$scope.menu_item.menu_item_description == '' || $scope.menu_item.menu_item_description == null ||
-					$scope.menu_item.menu_item_base_price == '' || $scope.menu_item.menu_item_base_price == null){
+			if($scope.menu_item.menu_item_name == null || 
+					$scope.menu_item.menu_item_base_price == null ||
+					$scope.menu_item.backend_id == null ||
+					$scope.menu_item.menu_item_name == '' ||
+					$scope.menu_item.menu_item_base_price < 0 || $scope.menu_item.backend_id == ''){
 			} else{			
 				var menu_item_url = '${pageContext.request.contextPath}/menu/menuItem/';
 				
@@ -395,14 +397,15 @@
 				
 				if($scope.menu_item.menu_item_type === 2){
 					$scope.menu_item.is_taxable = false;
-					$scope.menu_item.is_discountable = false;
+					//$scope.menu_item.is_discountable = false;
 				}
 				
 				var json_data = JSON.stringify({
 					"id": $scope.menu_item.id || null,
 					"modifier_group_id" : $scope.menu_item.modifier_group_id || 0,
 					"menu_item_name": $scope.menu_item.menu_item_name,
-					"menu_item_description": $scope.menu_item.menu_item_description,
+					"menu_item_backend_id" : $scope.menu_item.backend_id,
+					"menu_item_description": $scope.menu_item.menu_item_description || null,
 					"menu_item_image_path": $scope.menu_item.menu_item_image_path || null,
 					"menu_item_base_price": $scope.menu_item.menu_item_base_price || 0.00,
 					"menu_item_type": $scope.menu_item.menu_item_type || 0,

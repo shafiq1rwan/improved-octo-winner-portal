@@ -116,16 +116,21 @@
 										<div class="form-group">
 											<label for="menuItemBasePrice">Price</label>
     										<input type="number" class="form-control" id="menuItemBasePrice" ng-model = "menu_item.menu_item_base_price" min="0" required/>
-										</div>										
-										<div class="form-row" ng-if="!disableInputs">																			 
+										</div>			
+										
+										<div class="form-group">
+											<label for="menuBackendId">Backend Id</label>
+    										<input type="text" class="form-control" id="menuBackendId" ng-model = "menu_item.backend_id" required/>
+										</div>	
+		
+										<div class="form-row">																			 
 											<div class="form-group col-4 col-sm-4 col-md-4 col-lg-4 col-xl-6">
 												<label for="taxable">Taxable</label>
-												<input type="checkbox" id="taxable" ng-model = "menu_item.is_taxable" ng-disabled="disableInputs" />
+												<input type="checkbox" id="taxable" ng-model = "menu_item.is_taxable" />
 											</div>
-				
-											<div class="form-group col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
+											<div class="form-group col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6" ng-if="!disableInputs">
 												<label for="discountable">Discountable</label>
-												<input type="checkbox" id="discountable" ng-model = "menu_item.is_discountable" ng-disabled ="disableInputs" />
+												<input type="checkbox" id="discountable" ng-model = "menu_item.is_discountable" ng-disabled ="disableInputs"/>
 											</div>
 
 										</div>																		
@@ -144,7 +149,7 @@
 									<div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
 										<div class="form-group">
 											<label for="menuItemDescription">Description</label>
-											<textarea style="resize:none;" rows="6" class="form-control" id="menuItemDescription" placeholder="Description" ng-model = "menu_item.menu_item_description" required>
+											<textarea style="resize:none;" rows="6" class="form-control" id="menuItemDescription" placeholder="Description" ng-model = "menu_item.menu_item_description">
 											</textarea>
 										</div>
 									</div>
