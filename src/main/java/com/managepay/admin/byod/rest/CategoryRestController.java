@@ -12,6 +12,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -366,34 +367,43 @@ public class CategoryRestController {
 		}
 	}
 	
-/*	@PostMapping("/assign_menu_item_to_category")
+	private int getCategoryMenuItemSequence(Long categoryId) {
+		try {
+			return jdbcTemplate.queryForObject("SELECT TOP 1 category_menu_item_sequence FROM category_menu_item WHERE category_id = ? ORDER BY category_menu_item_sequence DESC",
+					new Object[] {categoryId}, Integer.class);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return 0;
+		}
+	}
+	
+	@PostMapping("/assign_menu_item_to_category")
 	public ResponseEntity<?> assignMenuItemToCategory(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody String data) {
-		
-		JSONObject jsonResult = new JSONObject();
 		Connection connection = null;
 		PreparedStatement stmt = null;
 
 		try {
-			
 			JSONObject jsonObj = new JSONObject(data);
+			JSONArray jsonItemsArray = jsonObj.getJSONArray("item_list");
+			Long categoryId = jsonObj.getLong("category_id");
 			
 			connection = dataSource.getConnection();
-			stmt = connection.prepareStatement("DELETE FROM category WHERE id = ?");
-			stmt.setLong(1, id);
-			int categoryRowAffected = stmt.executeUpdate();
 
-			if (categoryRowAffected == 0) {
-				response.setStatus(400);
-				jsonResult.put("response_message", "Category Encountered Error While Perform Deletion!");
-				return jsonResult.toString();
-			} else {
-				stmt = connection.prepareStatement("DELETE FROM category_menu_item WHERE category_id = ?");
-				stmt.setLong(1, id);
+			for(int i=0;i<jsonItemsArray.length();i++) {
+				int index = i;
+				JSONObject jsonItemObj = jsonItemsArray.getJSONObject(i);		
+				stmt = connection.prepareStatement("INSERT INTO category_menu_item (category_id, menu_item_id, category_menu_item_sequence) VALUES (?,?,?)");
+				stmt.setLong(1, categoryId);
+				stmt.setLong(2, jsonItemObj.getLong("id"));
+				stmt.setInt(3, index+1);
 				stmt.executeUpdate();
 			}
+			
+			return ResponseEntity.ok().body(null);
 		} catch (Exception ex) {
 			ex.printStackTrace();
+			return ResponseEntity.badRequest().body(null);
 		} finally {
 			if (connection != null) {
 				try {
@@ -403,7 +413,51 @@ public class CategoryRestController {
 				}
 			}
 		}
-		return jsonResult.toString();
-	}*/
+	}
+	
+	@PostMapping("/reassign_menu_item_to_category")
+	public ResponseEntity<?> reassignMenuItemToCategory(HttpServletRequest request, HttpServletResponse response,
+			@RequestBody String data) {
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		PreparedStatement stmt2 = null;
+
+		try {			
+			JSONObject jsonObj = new JSONObject(data);
+			JSONArray jsonItemsArray = jsonObj.getJSONArray("item_list");
+			Long categoryId = jsonObj.getLong("category_id");
+			
+			connection = dataSource.getConnection();
+
+			stmt = connection.prepareStatement("DELETE FROM category_menu_item WHERE category_id = ?");
+			stmt.setLong(1, categoryId);
+			stmt.executeUpdate();
+
+			for(int i=0;i<jsonItemsArray.length();i++) {
+				int index = i;
+				JSONObject jsonItemObj = jsonItemsArray.getJSONObject(i);
+				stmt2 = connection.prepareStatement("INSERT INTO category_menu_item (category_id, menu_item_id, category_menu_item_sequence) VALUES (?,?,?)");
+				stmt2.setLong(1, categoryId);
+				stmt2.setLong(2, jsonItemObj.getLong("id"));
+				stmt2.setInt(3, index+1);			
+				stmt2.executeUpdate();
+			}
+			
+			return ResponseEntity.ok().body(null);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			System.out.println("Error at Reassign :" + ex.getMessage());
+			return ResponseEntity.badRequest().body(null);
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
 
 }

@@ -9,7 +9,6 @@ CREATE TABLE category
 (
 	id bigInt PRIMARY KEY identity(1,1) NOT NULL,
 	group_category_id bigInt NOT NULL,
-	backend_id nvarchar(50) NOT NULL UNIQUE,
 	category_name nvarchar(150) NOT NULL UNIQUE,
 	category_description nvarchar(255),
 	category_image_path nvarchar(MAX),
@@ -36,24 +35,20 @@ CREATE TABLE menu_item
 
 CREATE TABLE category_menu_item
 (
-	id BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,
 	category_id BIGINT NOT NULL,
 	menu_item_id BIGINT NOT NULL,
-	category_menu_item_sequence INT NOT NULL,
-	is_active BIT DEFAULT 1,
+	category_menu_item_sequence INT NOT NULL
 );
 
 CREATE TABLE menu_item_group
 (
 	id BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,
-	backend_id NVARCHAR(50) NOT NULL UNIQUE,
 	menu_item_group_name NVARCHAR(150) NOT NULL UNIQUE,
 	created_date DATETIME NOT NULL DEFAULT GETDATE()
 );
 
 CREATE TABLE menu_item_group_menu_item
-(
-	id BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,	
+(	
 	menu_item_group_id BigInt,
 	menu_item_id BigInt,
 	menu_item_group_menu_item_sequence INT NOT NULL	
@@ -63,7 +58,6 @@ CREATE TABLE menu_item_group_menu_item
 CREATE TABLE modifier_group
 (
 	id BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,
-	backend_id NVARCHAR(50) NOT NULL UNIQUE,
 	modifier_group_name NVARCHAR(100) NOT NULL UNIQUE,
 	is_active BIT DEFAULT 1,
 	created_date DATETIME NOT NULL DEFAULT GETDATE()
@@ -71,7 +65,6 @@ CREATE TABLE modifier_group
 
 CREATE TABLE menu_item_modifier_group
 (
-	id BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,
 	menu_item_id BIGINT,
 	modifier_group_id BIGINT,
 	menu_item_modifier_group_sequence INT
@@ -213,15 +206,23 @@ CREATE TABLE status_lookup
 	name NVARCHAR(50) NOT NULL UNIQUE 
 );
 
+CREATE TABLE backend_sequence
+(
+	store_backend_sequence INT NOT NULL,
+	modified_date DATE
+);
+
 INSERT INTO status_lookup (id, name) VALUES (1, 'PENDING')
 INSERT INTO status_lookup (id, name) VALUES (2, 'ACTIVE')
 INSERT INTO status_lookup (id, name) VALUES (3, 'INACTIVE')
 
-INSERT INTO menu_item_type_lookup ([menu_item_type_number],[menu_item_type_name]) VALUES(0,'A La Cart');
+INSERT INTO menu_item_type_lookup ([menu_item_type_number],[menu_item_type_name]) VALUES(0,'A La Carte');
 INSERT INTO menu_item_type_lookup ([menu_item_type_number],[menu_item_type_name]) VALUES(1,'Combo');
 INSERT INTO menu_item_type_lookup ([menu_item_type_number],[menu_item_type_name]) VALUES(2,'Modifier');
 
 INSERT INTO group_category([group_category_name]) VALUES ('Breakfast kfc');
+
+INSERT INTO backend_sequence([store_backend_sequence], [modified_date]) VALUES(0,GETDATE());
 
 /*Drop all Table*/
 --DROP TABLE group_category;
@@ -245,3 +246,4 @@ INSERT INTO group_category([group_category_name]) VALUES ('Breakfast kfc');
 --DROP TABLE device_info;
 --DROP TABLE device_type_lookup;
 --DROP TABLE status_lookup;
+--DROP TABLE backend_sequence;

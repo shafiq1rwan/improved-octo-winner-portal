@@ -36,9 +36,7 @@
 										<thead>
 											<tr>
 												<th>ID</th>
-												<th>Backend ID</th>
 												<th>Name</th>
-												<th>Image</th>
 												<th>Status</th>
 												<th>Action</th>
 											</tr>
@@ -120,17 +118,25 @@
 		<div class="modal-dialog modal-lg">
 		    <div class="modal-content">
 		      <div class="modal-header">
-		        <h5 class="modal-title">Menu Item For {{}}</h5>
-		        <button type="button" class="close" data-dismiss="modal" ng-click="resetModal()" aria-label="Close">
+		        <h5 class="modal-title">Menu Item List</h5>
+		        <button type="button" class="close" data-dismiss="modal" ng-click="closeMenuItemModal()" aria-label="Close">
 		          <span aria-hidden="true">&times;</span>
 		        </button>
 		      </div>
 		      <div class="modal-body">		       									  
 						<div class="row">
 									<div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
-										<h6>Item List</h6>
-										<ul class="list-group ">
-										  <li class="list-group-item pl-0 pr-0 pt-1 pb-1" ng-repeat="item in category_menu_item">
+										
+										
+			<!-- 							<div ng-hide="selectedItemList.length === 0">
+											<div class="form-group pull-right" id="switch">
+												<label for="switchToggle">Reorder</label>
+												<div class="input-group"><label class="switch "><input id="switchToggle" type="checkbox" class="info"><span class="slider round"></span></label></div>						
+											</div>
+										</div> -->
+
+										<ul class="list-group" id="sortableList">
+										  <li class="list-group-item pl-0 pr-0 pt-1 pb-1" ng-repeat="item in selectedItemList">
 										  <div class="d-flex flex-row">
 								  			<div class="p-1">
 								  			    <img  style="width:75px; height:75px;" src="{pageContext.request.contextPath}/{{item.menu_item_image_path}}" class="rounded-circle" />  				
@@ -143,11 +149,12 @@
 											</div>
 											<div class="pr-1">
 												<button class="btn btn-outline-danger border-0" type="button" ng-click="unassignItem(item.id)"><i class="fa fa-times-rectangle"></i></button>
+												<i class="fa fa-reorder pull-right"></i>
 											</div>
 											
 											</div>
 											</li>
-											<li class="list-group-item pl-0 pr-0 pt-1 pb-1" ng-show="category_menu_item.length==0">
+											<li class="list-group-item pl-0 pr-0 pt-1 pb-1" ng-if="selectedItemList.length===0">
 										 	<div class="p-1">
 										 		There is no Items assigned.
 										 	</div>
@@ -157,7 +164,10 @@
 								</div>						
 		      </div>
 		      <div class="modal-footer">
+		      		<button class="btn btn-danger" ng-show="assign_item_action =='Edit'" ng-click="unassignAll()" ng-disabled="selectedItemList.length === 0">Unassigned All Items</button>
 		      		<button class="btn btn-default" ng-click="openAssignItemsModal()">Assign Items</button>
+		      		<button class="btn btn-primary" ng-show="assign_item_action =='New'" ng-click="submitAssignedItems('New')" ng-disabled="selectedItemList.length === 0">Submit</button>
+		      		<button class="btn btn-primary" ng-show="assign_item_action =='Edit'" ng-click="submitAssignedItems('Edit')">Update</button>
 		      </div>      
 		    </div>
 		</div>
@@ -174,7 +184,7 @@
 						<div class="modal-header">
 							<h5 class="modal-title">Assign Items</h5>
 							<button type="button" class="close" data-dismiss="modal"
-								ng-click="closeAssignItemsModal()" aria-label="Close">
+								ng-click="clearAssignItemModal()" aria-label="Close">
 								<span aria-hidden="true">&times;</span>
 							</button>
 						</div>
@@ -195,7 +205,8 @@
 							<div class="row">
 								<div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">	
 									  	<div class="d-flex flex-row flex-wrap card-container">
-									  		<div class="col-md-3 pt-3 pr-2" ng-repeat="item in itemList">								  		
+									  		<div class="col-md-3 pt-3 pr-2" ng-repeat="item in itemList" ng-show="item.isAssigned == false">
+							  		
 											    <div class="card custom-card" ng-click="selectCard(item)">
 											        <div class="card-body p-1 ">
 											            <div class="d-flex flex-row">
@@ -210,9 +221,10 @@
 														</div>
 											        </div>
 											    </div>
-											    </label>
+											
+											    
 											</div>
-										 	<div class="p-1" ng-show="itemList.length==0">
+										 	<div class="p-1" ng-if="itemList.length === 0">
 										 		Currently No available item can be assigned.
 										 	</div>
 
@@ -227,7 +239,7 @@
 
 						<div class="modal-footer">	
 							<button class="btn btn-secondary" ng-click="closeAssignItemsModal()">Cancel</button>					
-							<button class="btn btn-primary" type="submit" ng-click="submitAssignItems()">Assign</button>
+							<button class="btn btn-primary" type="submit" ng-click="assignItems()">Assign</button>
 						</div>
 					</form>
 

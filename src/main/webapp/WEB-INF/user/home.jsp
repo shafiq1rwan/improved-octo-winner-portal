@@ -256,6 +256,7 @@ if it's not present, don't show loader */
 <!-- Bootstrap DatetimePicker* -->
 <script type="text/javascript" src="${pageContext.request.contextPath}/assets/plugins/datetimepicker/js/tempusdominus-bootstrap-4.min.js"></script>
 <script src="${pageContext.request.contextPath}/assets/plugins/jquery-sortable/js/jquery-sortable.js"></script>	
+<script type="text/javascript" src="${pageContext.request.contextPath}/assets/plugins/sortable/js/Sortable.min.js"></script>
 	<!-- App js -->
 
 	<%--
