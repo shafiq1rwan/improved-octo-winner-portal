@@ -2,7 +2,7 @@
 	<div id="loading-overlay" class="page-overlay">
 		<div id="loading-main-content"
 			class="d-flex flex-column justify-content-center">
-			<span class="align-self-center md-resp-font">{{loadingText}}</span>
+			<span class="align-self-center md-resp-font text-center">{{loadingText}}</span>
 			<div id="loading-progress" class="progress align-self-center">
 				<div class="progress-bar progress-bar-striped progress-bar-animated lg-resp-img"
 					style="width: {{loadingPercentage}}%" role="progressbar"></div>

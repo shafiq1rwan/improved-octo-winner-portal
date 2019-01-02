@@ -384,7 +384,7 @@
 	 	$scope.performMenuItemOperations = function(action_type){	
 			if($scope.menu_item.menu_item_name == '' || $scope.menu_item.menu_item_name == null || 
 					$scope.menu_item.menu_item_description == '' || $scope.menu_item.menu_item_description == null ||
-					$scope.menu_item.menu_item_base_price == '' || $scope.menu_item.menu_item_base_price == null){
+					$scope.menu_item.menu_item_base_price > 0 || $scope.menu_item.menu_item_base_price == null){
 			} else{			
 				var menu_item_url = '${pageContext.request.contextPath}/menu/menuItem/';
 				

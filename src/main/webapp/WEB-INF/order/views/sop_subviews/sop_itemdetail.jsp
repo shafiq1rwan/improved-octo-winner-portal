@@ -37,7 +37,7 @@
 								class="col-4 col-sm-4 col-md-4 col-lg-3 col-xl-3 d-flex flex-row pl-0">
 								<div
 									class="w-100 align-self-center flex-fill d-flex flex-column">
-									<div class="text-right text-nowrap sm-resp-font">{{systemData.priceTag}}{{selectedItem.price}}</div>
+									<div class="text-right text-nowrap sm-resp-font">{{priceTag}}{{selectedItem.price}}</div>
 								</div>
 							</div>
 						</div>
@@ -96,7 +96,7 @@
 											ng-show="comboTier.isTierCompleted">
 											<button class="btn btn-primary btn-main sm-resp-font"
 												type="button"
-												ng-click="switchToView('tierSelection', comboTier)">{{systemData.priceTag}}{{comboTier.totalPrice}}</button>
+												ng-click="switchToView('tierSelection', comboTier)">{{priceTag}}{{comboTier.totalPrice}}</button>
 										</div>
 										<div class="text-right text-nowrap sm-resp-font"
 											ng-show="!comboTier.isTierCompleted">
@@ -123,7 +123,7 @@
 								class="col-4 col-sm-4 col-md-4 col-lg-3 col-xl-3 d-flex flex-row pl-0">
 								<div
 									class="w-100 align-self-center flex-fill d-flex flex-column">
-									<div class="text-right text-nowrap sm-resp-font">{{systemData.priceTag}}{{totalItemPrice}}</div>
+									<div class="text-right text-nowrap sm-resp-font">{{priceTag}}{{totalItemPrice}}</div>
 								</div>
 							</div>
 						</div>

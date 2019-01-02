@@ -25,16 +25,17 @@ jQuery.fn.extend({
 	}
 });
 
-byodApp.controller('OrderController', function($scope, $http, $timeout) {
+byodApp.controller('OrderController', function($scope, $http, $routeParams, $timeout) {
 	/*Config Data*/
-	$scope.systemData;
 	$scope.localeData;
 	$scope.languageData;
 	$scope.menuList;
+	$scope.priceTag;
+	$scope.storeName;
+	$scope.tableId;
 	/*Dialog Config*/
 	$scope.isAllowKeyboardDismissal = false;
 	$scope.isAllowBackdropClick = false;
-	$scope.isAllowCloseButton = false;
 	$scope.dialogData = {};
 	/*Variables*/
 	$scope.isLoadingFailed;
@@ -42,8 +43,6 @@ byodApp.controller('OrderController', function($scope, $http, $timeout) {
 	$scope.loadingText;
 	$scope.currentLocale;
 	$scope.currentLanguageData;
-	$scope.storeName = "Store X";
-	$scope.tableID = "ID Y";
 	$scope.selectedCategory;
 	$scope.selectedItem;
 	$scope.itemComboTierList;
@@ -156,7 +155,8 @@ byodApp.controller('OrderController', function($scope, $http, $timeout) {
 				tierObject.itemString = "";
 				tierObject.tierNumber = tierStep++;
 				
-				var itemList = []
+				var itemList = [];
+				var hasModifier = false;
 				for (var y = 0; y < tierData.itemList.length; y++) {
 					var itemData = tierData.itemList[y];
 					
@@ -165,9 +165,17 @@ byodApp.controller('OrderController', function($scope, $http, $timeout) {
 					itemObject.name = itemData.name;
 					itemObject.path = itemData.path;
 					itemObject.price = itemData.price;
+					if (itemData.modifierGroupList.length > 0) {
+						hasModifier = true;
+						itemObject.modifierGroupList = itemData.modifierGroupList;
+						itemObject.modifierGroupData = [];
+					}
 					itemObject.selectedQuantity = 0;
 					
 					itemList.push(itemObject);
+				}
+				if (hasModifier) {
+					tierObject.isModifierCompleted = true;
 				}
 				tierObject.itemList = itemList;
 				
@@ -182,10 +190,37 @@ byodApp.controller('OrderController', function($scope, $http, $timeout) {
 		for (var x = 0; x < tierData.itemList.length; x++) {
 			var itemData = tierData.itemList[x];
 			if (itemData.selectedQuantity > 0) {
-				if (itemString != "") {
-					itemString += ", ";
+				if (itemData.modifierGroupData) {
+					var isModifierCompleted = true;
+					var modifierString = "";
+					for (var y = 0; y < itemData.modifierGroupData.length; y++) {
+						var modifierGroupData = itemData.modifierGroupData[y];
+						for (z = 0; z < modifierGroupData.length; z++) {
+							var modifierData = modifierGroupData[z];
+							console.log(modifierData);
+							if (modifierData.selectedModifier == null) {
+								isModifierCompleted = false;
+								break;
+							} else {
+								if (modifierString != "") {
+									modifierString += ", ";
+								}
+								modifierString += modifierData.selectedModifier.name;
+							}
+						}
+					}
+					if (isModifierCompleted) {
+						if (itemString != "") {
+							itemString += ", ";
+						}
+						itemString += itemData.name + "(" + modifierString + ") x 1 ";
+					}
+				} else {
+					if (itemString != "") {
+						itemString += ", ";
+					}
+					itemString += itemData.name + " x " + itemData.selectedQuantity;
 				}
-				itemString += itemData.name + " x " + itemData.selectedQuantity;
 			}
 		}
 		
@@ -214,8 +249,28 @@ byodApp.controller('OrderController', function($scope, $http, $timeout) {
 		tierData.selectedQuantity += 1;
 		tierData.totalPrice = Number(parseFloat(tierData.totalPrice) + parseFloat(itemData.price)).toFixed(2);
 		$scope.totalItemPrice = Number(parseFloat($scope.totalItemPrice) + parseFloat(itemData.price)).toFixed(2);
+		
+		if (itemData.modifierGroupList) {
+			tierData.isModifierCompleted = false;
+			
+			var modifierGroupData = [];
+			
+			for (var x = 0; x < itemData.modifierGroupList.length; x++) {
+				var oriModiferData = itemData.modifierGroupList[x];
+				var modifierData = {};
+				modifierData.name = oriModiferData.name;
+				modifierData.modifierList = oriModiferData.modifierList;
+				modifierData.selectedModifier = null;
+				
+				modifierGroupData.push(modifierData);
+			}
+			
+			itemData.modifierGroupData.push(modifierGroupData);
+		}
+		
 		tierData.itemString = $scope.generateItemString(tierData);
-		if (tierData.selectedQuantity == tierData.quantity) {
+		
+		if (tierData.selectedQuantity == tierData.quantity && tierData.isModifierCompleted) {
 			tierData.isTierCompleted = true;
 			var isAllTierCompleted = true;
 			for (var x = 0; x < $scope.itemComboTierList.length; x++) {
@@ -244,6 +299,26 @@ byodApp.controller('OrderController', function($scope, $http, $timeout) {
 		tierData.totalPrice = Number(parseFloat(tierData.totalPrice) - parseFloat(itemData.price)).toFixed(2);
 		$scope.totalItemPrice = Number(parseFloat($scope.totalItemPrice) - parseFloat(itemData.price)).toFixed(2);
 		tierData.itemString = $scope.generateItemString(tierData);
+		
+		if (itemData.modifierGroupList) {
+			itemData.modifierGroupData.pop();
+			
+			var isModifierCompleted = true;
+			for (var x = 0; x < tierData.itemList.length; x++) {
+				var indItemData = tierData.itemList[x];
+				if (indItemData.modifierGroupData) {
+					for (var y = 0; y < indItemData.modifierGroupData.length; y++) {
+						var indModiferData = indItemData.modifierGroupData[y];
+						if (indModiferData.selectedModifier == null) {
+							isModifierCompleted = false;
+							break;
+						}
+					}
+				}
+			}
+			
+			tierData.isModifierCompleted = isModifierCompleted;
+		}
 	}
 	$scope.addToCart = function() {
 		if (!$scope.isProcessingCartData) {
@@ -295,23 +370,32 @@ byodApp.controller('OrderController', function($scope, $http, $timeout) {
 		$("div#modal-dialog").modal({backdrop: $scope.isAllowBackdropClick, keyboard: $scope.isAllowKeyboardDismissal});
 	}
 	
-	/*System Loading*/
-	$scope.loadSystemData = function() {
-		$scope.loadingPercentage = 10;
-		$scope.loadingText = "Loading System Data...";
+	/*Menu Loading*/
+	$scope.loadStoreData = function() {
+		$scope.loadingPercentage = 20;
+		$scope.loadingText = "Loading Store Data...";
 		$http({
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
 			},
-			data: {
+			params: {
+				storeId: $routeParams.storeId,
+				tableId: $routeParams.tableId
 			},
-			url: '${pageContext.request.contextPath}/order/getSystemData'
+			url: '${pageContext.request.contextPath}/order/getStoreData'
 		}).then(function (response) {
-			if (response != null && response.data != null) {
-				$scope.systemData = response.data;
-				
-				$scope.loadLanguageData();
+			if (response != null && response.data != null && response.data.resultCode != null) {
+				if (response.data.resultCode == "00") {
+					$scope.menuList = response.data.menuList;
+					$scope.storeName = response.data.storeName;
+					$scope.tableId = $routeParams.tableId;
+					$scope.priceTag = response.data.priceTag;
+					
+					$scope.loadLanguageData();
+				} else {
+					$scope.loadFailed(response.data.resultMessage);
+				}
 			} else {
 				$scope.loadFailed();
 			}
@@ -321,48 +405,28 @@ byodApp.controller('OrderController', function($scope, $http, $timeout) {
 	}
 	/*Language Loading*/
 	$scope.loadLanguageData = function() {
-		$scope.loadingPercentage = 30;
+		$scope.loadingPercentage = 80;
 		$scope.loadingText = "Loading Language Pack...";
 		$http({
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
 			},
-			data: {
+			params: {
 			},
 			url: '${pageContext.request.contextPath}/order/getLanguagePack'
 		}).then(function (response) {
-			if (response != null && response.data != null && response.data.localeData != null && response.data.languageData != null) {
-				$scope.localeData = response.data.localeData;
-				$scope.languageData = response.data.languageData;
-				$scope.currentLocale = $scope.localeData[0];
-				$scope.currentLanguageData = $scope.languageData[$scope.currentLocale.shortName];
-				
-				$scope.loadMenuData();
-			} else {
-				$scope.loadFailed();
-			}
-		}, function (error) {
-			$scope.loadFailed();
-	    });
-	}
-	/*Menu Loading*/
-	$scope.loadMenuData = function() {
-		$scope.loadingPercentage = 50;
-		$scope.loadingText = "Loading Menu...";
-		$http({
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			data: {
-			},
-			url: '${pageContext.request.contextPath}/order/getMenuData'
-		}).then(function (response) {
-			if (response != null && response.data != null && response.data.menuList != null) {
-				$scope.menuList = response.data.menuList;
-				
-				$scope.loadSuccess();
+			if (response != null && response.data != null && response.data.resultCode != null) {
+				if (response.data.resultCode == "00") {
+					$scope.localeData = response.data.localeData;
+					$scope.languageData = response.data.languageData;
+					$scope.currentLocale = $scope.localeData[0];
+					$scope.currentLanguageData = $scope.languageData[$scope.currentLocale.shortName];
+					
+					$scope.loadSuccess();
+				} else {
+					$scope.loadFailed(response.data.resultMessage);
+				}
 			} else {
 				$scope.loadFailed();
 			}
@@ -377,17 +441,22 @@ byodApp.controller('OrderController', function($scope, $http, $timeout) {
 		$scope.isLoadingFailed = false;
 		$scope.loadingPercentage = 0;
 		$scope.loadingText = "Loading...";
-		$scope.loadSystemData();
+		$scope.loadStoreData();
 	}
 	$scope.loadSuccess = function() {
 		$scope.loadingPercentage = 100;
 		$scope.loadingText = "Loading Completed.";
 		$timeout(function() {$("div#loading-overlay").slideUp()}, 1000);
 	}
-	$scope.loadFailed = function() {
+	$scope.loadFailed = function(message) {
 		$scope.isLoadingFailed = true;
 		$scope.loadingPercentage = 0;
-		$scope.loadingText = "Loading Failed.";
+		
+		if (message) {
+			$scope.loadingText = message;
+		} else {
+			$scope.loadingText = "Loading Failed.";
+		}
 	}
 	
 	/*Init Function*/
