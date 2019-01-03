@@ -194,7 +194,7 @@
 						<div class="modal-body">	
 								<div class="row">
 									<div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
-										<div class="pull-right">
+										<div class="pull-right" ng-if ="reordering_action === false">
 													<button type="button"
 														class="btn btn-info btn-primary bg-aqua"
 														ng-click ="addNewTier()">
@@ -209,7 +209,7 @@
 									<div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
 										<ul class="list-group no-bullets" id="sortableList">
 										  <li class="list-group-item" ng-repeat="x in tierItems">										  	
-										  	<h5><i class="fa fa-reorder pull-right"></i></h5>							  	
+										  	<h5 ng-if="reordering_action"><i class="fa fa-reorder pull-right"></i></h5>							  	
 										  	<div class="row">
 											  	<div class="col-6 col-md-6">
 													  	<h5>Name</h5>
@@ -223,10 +223,10 @@
 											</div> 
 											<div class="row">
 												<div class="col-6 col-md-6">
-														<h5><i ng-click="openEditTier('update', x.id)" class="fa fa-edit pull-left"></i></h5>
+														<h5><i ng-click="openEditTier('update', x.id)" class="fa fa-edit pull-left" ng-if ="!reordering_action"></i></h5>
 												</div>						 	
 												<div class="col-6 col-md-6">
-														 <h5><i ng-click="removeExistingTier(x.id)" class="fa fa-trash pull-right"></i></h5>
+														 <h5><i ng-click="removeExistingTier(x.id)" class="fa fa-trash pull-right" ng-if ="!reordering_action"></i></h5>
 												</div>
 											</div>
 										  </li>
@@ -241,8 +241,9 @@
 						</div>
 
 						<div class="modal-footer">
-							<button class="btn btn-primary" type="submit" ng-show="tier_action ==='create'" ng-click="createNewTier()">Submit</button>
-							<button class="btn btn-primary" type="submit" ng-show="tier_action ==='update'" ng-click="editExistingTier()">Submit</button>				
+							<button class="btn btn-primary" type="submit" ng-if ="tierItems.length > 1" ng-hide="reordering_action" ng-click="reorderTierItems()">Reorder</button>
+							<button class="btn btn-info" type="submit" ng-if ="reordering_action" ng-click="saveReordering()">Save</button>
+							<button class="btn btn-danger" type="submit" ng-if ="reordering_action" ng-click="cancelReordering()">Cancel</button>				
 						</div>
 					</form>
 

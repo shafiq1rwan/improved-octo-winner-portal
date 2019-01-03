@@ -224,6 +224,51 @@ public class ComboRestController {
 			}
 		}
 	}
+	
+	@PostMapping(value = "/editComboDetailSequence", produces = "application/json")
+	public ResponseEntity<?> editComboDetailSequence(HttpServletRequest request, HttpServletResponse response,
+			@RequestBody String data) {
+		Connection connection = null;
+		PreparedStatement stmt = null;	
+		PreparedStatement stmt2 = null;
+
+		try {
+			JSONObject jsonComboDetailData = new JSONObject(data);
+			Long menuItemId = jsonComboDetailData.getLong("menu_item_id");
+			JSONArray jsonComboDetailArray = jsonComboDetailData.getJSONArray("tier_items");
+			
+			connection = dataSource.getConnection();
+			
+			//Blank all Sequence
+			stmt = connection.prepareStatement(
+						"UPDATE combo_detail SET combo_detail_sequence = 0 WHERE menu_item_id = ?");
+			stmt.setLong(1, menuItemId);
+			stmt.executeUpdate();
+			
+			//Reassign All Sequence
+			stmt2 = connection.prepareStatement("UPDATE combo_detail SET combo_detail_sequence = ? WHERE id = ?");
+			for(int i=0;i<jsonComboDetailArray.length();i++) {
+				int index = i + 1;
+				JSONObject jsonObj = jsonComboDetailArray.getJSONObject(i);	
+				stmt2.setLong(1, index);
+				stmt2.setLong(2, jsonObj.getLong("id"));
+				stmt2.executeUpdate();		
+			}
+			
+			return ResponseEntity.ok(null);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return ResponseEntity.badRequest().body(ex.getMessage());
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
 
 	// TODO delete combo detail item
 	@DeleteMapping(value = "/deleteComboDetail", produces = "application/json")
@@ -241,7 +286,7 @@ public class ComboRestController {
 
 			if (deletedRow == 0) {
 				return ResponseEntity.badRequest().body(null);
-			} else {
+			} else {			
 				stmt = connection.prepareStatement("DELETE FROM combo_item_detail WHERE combo_detail_id = ?");
 				stmt.setLong(1, id);
 				stmt.executeUpdate();

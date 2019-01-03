@@ -6,11 +6,11 @@
 		$scope.action = '';
 		$scope.menu_item_types = [];
 		$scope.modifier_groups = [];
-		$scope.tierNumber;
-		$scope.oldTierNumber=0;
 		$scope.tierItems = [];
 		$scope.menu_item_id;
 		$scope.tier_action = '';
+		$scope.reordering_action = false; 
+		$scope.extra_tier_items = [];
 		
 		// ==== Add, Modifier Tier Operations ====
 		$scope.tier_item = {};
@@ -129,6 +129,59 @@
 					alert("Cannot Delete Existing Tier Item");
 			});
 		}
+		
+		//Reordering Operations for Tier
+		$scope.reorderTierItems = function(){
+			$scope.reordering_action = true;
+			
+			//copy the existing field
+/* 			for(var i=0; i<$scope.tierItems.length;i++){
+				$scope.extra_tier_items.push($scope.tierItems[i]);
+			} */
+		}
+		
+		$scope.saveReordering = function(){
+			
+			var json_data = JSON.stringify({
+				'menu_item_id': $scope.menu_item_id,
+				'tier_items' : $scope.tierItems
+			});
+			
+			console.log(json_data);
+			
+	 		$http
+			.post(
+				'${pageContext.request.contextPath}/menu/combo/editComboDetailSequence', json_data)
+			.then(
+				function(response) {		
+					$scope.extra_tier_items = [];
+					$scope.reordering_action = false;	
+			
+					if(response.status == '200'){				
+						$scope.openComboSetting($scope.menu_item_id);
+					} else if(response.status == '400'){
+						alert("Cannot Reorder Tier Item");
+					}			
+				},
+				function(response) {
+					$scope.extra_tier_items = [];
+					$scope.reordering_action = false;
+					alert("Cannot Reorder Tier Item");
+			});
+		}
+
+		$scope.cancelReordering = function(){
+			
+	/* 		$scope.tierItems = [];
+			for(var i=0; i<$scope.extra_tier_items.length;i++){
+				$scope.tierItems.push($scope.extra_tier_items[i]);
+			} */
+			
+			$scope.extra_tier_items = [];
+			$scope.reordering_action = false;
+			$scope.openComboSetting($scope.menu_item_id);
+		}
+		
 			
 /* 		 $scope.updateTier = function() {
 			
@@ -319,6 +372,9 @@
 			
 			$scope.menu_item_id = undefined;
 			$scope.action = '';
+			
+			$scope.reordering_action = false; 
+			$scope.extra_tier_items = [];
 		}
 		
 		//get menu item type
