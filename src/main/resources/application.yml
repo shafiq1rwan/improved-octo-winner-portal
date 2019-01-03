@@ -5,6 +5,7 @@ spring:
     - application-data
     - language-pack-en
     - language-pack-cn
+    - error-data
   mvc:
     view:
       prefix: /WEB-INF/

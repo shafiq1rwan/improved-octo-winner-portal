@@ -29,7 +29,7 @@
 							<img class="max-img-height card-img-top" ng-src="{{data.path}}"
 								alt="{{data.name}}">
 							<div class="main-color main-text-color text-center sm-resp-font">
-								<b>{{systemData.priceTag}}{{data.price}}</b>
+								<b>{{priceTag}}{{data.price}}</b>
 							</div>
 							<div class="card-body d-flex flex-row">
 								<div class="sub-card-body text-center d-flex flex-column">

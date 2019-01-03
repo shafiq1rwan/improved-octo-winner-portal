@@ -1,0 +1,5 @@
+spring:
+  profiles: error-data
+error-data:
+  e1: "Failed. Contact administrator."
+  e2: "Store does not exist. Please re-scan QR."

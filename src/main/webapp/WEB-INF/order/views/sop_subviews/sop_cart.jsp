@@ -40,7 +40,7 @@
 								<b>x{{cartItem.quantity}}</b>
 							</div>
 							<div class="col-3 pl-0 pr-0 xs-resp-font text-right">
-								<b>{{systemData.priceTag}}{{cartItem.price}}</b>
+								<b>{{priceTag}}{{cartItem.price}}</b>
 							</div>
 						</div>
 						<div class="row ml-0 mr-0" ng-if="cartItem.value = '0'"
@@ -50,7 +50,7 @@
 									ng-repeat="itemData in comboItem.itemList">
 									<div class="col-7 pl-0 pr-0 xs-resp-font text-truncate">&nbsp;&nbsp;{{itemData.name}}</div>
 									<div class="col-2 pl-0 pr-0 xs-resp-font text-center">x{{itemData.selectedQuantity}}</div>
-									<div class="col-3 pl-0 pr-0 xs-resp-font text-right">+{{systemData.priceTag}}{{itemData.price}}</div>
+									<div class="col-3 pl-0 pr-0 xs-resp-font text-right">+{{priceTag}}{{itemData.price}}</div>
 								</div>
 							</div>
 						</div>
@@ -59,7 +59,7 @@
 								<b>{{currentLanguageData.cart_total}}</b>
 							</div>
 							<div class="col-5 pl-0 pr-0 xs-resp-font text-right">
-								<b>{{systemData.priceTag}}{{cartItem.totalPrice}}</b>
+								<b>{{priceTag}}{{cartItem.totalPrice}}</b>
 							</div>
 						</div>
 					</div>
@@ -69,7 +69,7 @@
 								<b>{{currentLanguageData.cart_total}}</b>
 							</div>
 							<div class="col-5 pl-0 pr-0 xs-resp-font text-right">
-								<b>{{systemData.priceTag}}{{getCartTotal()}}</b>
+								<b>{{priceTag}}{{getCartTotal()}}</b>
 							</div>
 						</div>
 					</div>
@@ -77,7 +77,7 @@
 			</div>
 			<div class="pt-1 pb-1 align-self-center" ng-show="cart.length > 0">
 				<button class="btn btn-primary btn-main sm-resp-font" type="button"
-					ng-click="">{{currentLanguageData.cart_checkout}}&nbsp;({{systemData.priceTag}}{{getCartTotal()}})</button>
+					ng-click="">{{currentLanguageData.cart_checkout}}&nbsp;({{priceTag}}{{getCartTotal()}})</button>
 			</div>
 		</div>
 	</div>

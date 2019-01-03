@@ -41,7 +41,7 @@
 											<div
 												class="col-6 col-sm-6 col-md-6 col-lg-8 col-xl-8 pl-0 pr-0 xs-resp-font text-limiter">{{itemData.name}}</div>
 											<div
-												class="col-3 col-sm-3 col-md-3 col-lg-2 col-xl-2 pl-0 pr-0 xs-resp-font text-limiter">+{{systemData.priceTag}}{{itemData.price}}</div>
+												class="col-3 col-sm-3 col-md-3 col-lg-2 col-xl-2 pl-0 pr-0 xs-resp-font text-limiter">+{{priceTag}}{{itemData.price}}</div>
 											<div
 												class="col-3 col-sm-3 col-md-3 col-lg-2 col-xl-2 pl-0 pr-0 text-right text-nowrap">
 												<div class="row ml-0 mr-0">
@@ -57,6 +57,24 @@
 														<img class="md-resp-img"
 															ng-click="addItemQuantity(itemData, selectedTier)"
 															src="${pageContext.request.contextPath}/assets/images/order/icon/plus_icon.svg" />
+													</div>
+												</div>
+											</div>
+										</div>
+										<div class="row ml-0 mr-0"
+											ng-repeat="modifierGroupList in itemData.modifierGroupData">
+											<div class="col-12 pl-0 pr-0 text-truncate">
+												<span class="xs-resp-font"><b>{{itemData.name}}&nbsp;{{($index+
+														1)}}</b></span>
+											</div>
+											<div class="col-12 pl-0 pr-0"
+												ng-repeat="modifierGroupData in modifierGroupList">
+												<div class="row ml-0 mr-0">
+													<div class="col-6 pl-0 pr-0 text-truncate">{{modifierGroupData.name}}</div>
+													<div class="col-6 pl-0 pr-0">
+														<select class="form-control xs-resp-font pt-0 pb-0"
+															ng-options="modifierData.name for modifierData in modifierGroupData.modifierList"
+															ng-model="modifierGroupData.selectedModifier"></select>
 													</div>
 												</div>
 											</div>
