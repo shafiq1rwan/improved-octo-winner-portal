@@ -197,34 +197,43 @@
 										<div class="pull-right">
 													<button type="button"
 														class="btn btn-info btn-primary bg-aqua"
-														ng-click = "addNewTier()">
+														ng-click ="addNewTier()">
 														<span class="btn-label"><i class="fa fa-plus"></i></span>
 														Insert New Tier
 													</button>	
 										</div>
 									</div>
 								</div>		
-						<div class="form-section" style="margin-top: 15px;">
-								
-									
+						<div class="form-section" style="margin-top: 15px;">			
 								<div class="row">	
 									<div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
 										<ul class="list-group no-bullets" id="sortableList">
-										  <li class="list-group-item" ng-repeat="x in tierItems">	
-										<!--   <li class="list-group-item" id="{{x.order}}" ng-repeat="x in tierItems"> -->											  	
-										  	<h5>Tier <i class="fa fa-reorder pull-right"></i></h5>								  	
-										  	<div class="form-row">
-											  	<div class="form-group col-6 col-md-6">
-													  	<label for="">Name</label>
-													  	<input type="text" class="form-control" placeholder="Name" ng-model="x.name" required/>
+										  <li class="list-group-item" ng-repeat="x in tierItems">										  	
+										  	<h5><i class="fa fa-reorder pull-right"></i></h5>							  	
+										  	<div class="row">
+											  	<div class="col-6 col-md-6">
+													  	<h5>Name</h5>
+													  	<p>{{x.name}}</p>
 												</div>
-												<div class="form-group col-6 col-md-6">	
-													  	<label for="">Quantity</label>
-													  	<input type="number" class="form-control" ng-model="x.quantity" min=0 max=99 required/>
+												<div class="col-6 col-md-6">	
+													  	<h5>Quantity</h5>
+													  	<p>{{x.quantity}}</p>
 												</div>
+	
 											</div> 
+											<div class="row">
+												<div class="col-6 col-md-6">
+														<h5><i ng-click="openEditTier('update', x.id)" class="fa fa-edit pull-left"></i></h5>
+												</div>						 	
+												<div class="col-6 col-md-6">
+														 <h5><i ng-click="removeExistingTier(x.id)" class="fa fa-trash pull-right"></i></h5>
+												</div>
+											</div>
 										  </li>
 										</ul>
+										<div ng-if="tierItems.length === 0">
+											<p>No Available Tier</p>
+										</div>
 									</div>
 								</div>
 								
@@ -243,7 +252,57 @@
 		<!-- END Modal -->
 		
 		
-		
+		<!-- Tier Modal -->
+		<div class="modal fade" id="tierModal" role="dialog"
+			aria-labelledby="tierModal" aria-hidden="true">
+			<div class="modal-dialog modal-lg">
+				<div class="modal-content">
+					<form id="menuItemForm" method="POST" accept-charset="UTF-8"
+						role="form" class="form-signin">
+						<div class="modal-header">
+							<h5 class="modal-title">New Tier</h5>
+							<button type="button" class="close" data-dismiss="modal"
+								ng-click="resetNewTierModal()" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+
+						<div class="modal-body">	
+								<div class="form-section">
+																			
+									<div class="row">	
+										<div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
+											<ul class="list-group no-bullets">
+											  <li class="list-group-item">											  	
+											  	<h5>Tier</h5>								  	
+											  	<div class="form-row">
+												  	<div class="form-group col-6 col-md-6">
+														  	<label for="">Name</label>
+														  	<input type="text" class="form-control" placeholder="Name" ng-model="tier_item.name" required/>
+													</div>
+													<div class="form-group col-6 col-md-6">	
+														  	<label for="">Quantity</label>
+														  	<input type="number" class="form-control" ng-model="tier_item.quantity" min=1 max=99 required/>
+													</div>
+												</div> 
+											  </li>
+											</ul>
+										</div>
+									</div>
+									
+								</div>
+						</div>
+
+						<div class="modal-footer">
+							<button class="btn btn-primary" type="submit" ng-hide= "tier_action === 'update'" ng-click="createNewTier()">Create</button>
+							<button class="btn btn-info" type="submit" ng-show= "tier_action ==='update'" ng-click="editExistingTier(tier_item.id)">Update</button>
+						</div>
+					</form>
+
+				</div>
+			</div>
+		</div>
+		<!-- END Modal -->
 		
 		
 		

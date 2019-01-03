@@ -238,7 +238,6 @@ public class ModifierGroupRestController {
 			while (rs.next()) {
 				JSONObject jsonModifierGroupObj = new JSONObject();
 				jsonModifierGroupObj.put("id", rs.getLong("id"));
-				jsonModifierGroupObj.put("backend_id", rs.getString("backend_id"));
 				jsonModifierGroupObj.put("modifier_group_name", rs.getString("modifier_group_name"));
 				jsonModifierGroupObj.put("is_active", rs.getBoolean("is_active"));
 				jsonModifierGroupObj.put("created_date", rs.getDate("created_date"));
@@ -278,7 +277,6 @@ public class ModifierGroupRestController {
 
 			if (rs.next()) {
 				jsonResult.put("id", rs.getLong("id"));
-				jsonResult.put("backend_id", rs.getString("backend_id"));
 				jsonResult.put("modifier_group_name", rs.getString("modifier_group_name"));
 				jsonResult.put("is_active", rs.getBoolean("is_active"));
 				jsonResult.put("created_date", rs.getDate("created_date"));
@@ -315,10 +313,9 @@ public class ModifierGroupRestController {
 
 			connection = dataSource.getConnection();
 			stmt = connection.prepareStatement(
-					"INSERT INTO modifier_group(backend_id, modifier_group_name, is_active) VALUES (?,?,?)");
-			stmt.setString(1, byodUtil.createBackendId("MG", 8));
-			stmt.setString(2, jsonModifierGroupData.getString("modifier_group_name"));
-			stmt.setBoolean(3, isActive);
+					"INSERT INTO modifier_group(modifier_group_name, is_active) VALUES (?,?)");
+			stmt.setString(1, jsonModifierGroupData.getString("modifier_group_name"));
+			stmt.setBoolean(2, isActive);
 			int rowAffected = stmt.executeUpdate();
 
 			if (rowAffected == 0) {

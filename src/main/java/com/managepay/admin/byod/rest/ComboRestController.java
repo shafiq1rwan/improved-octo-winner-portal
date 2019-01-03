@@ -17,6 +17,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -37,7 +38,7 @@ public class ComboRestController {
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
 
-	@PostMapping(value = "/createComboDetail", produces = "application/json")
+/*	@PostMapping(value = "/createComboDetail", produces = "application/json")
 	public ResponseEntity<?> createComboDetail(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody String data) {
 		Connection connection = null;
@@ -72,10 +73,51 @@ public class ComboRestController {
 				}
 			}
 		}
+	}*/
+	
+	@PostMapping(value = "/createComboDetail", produces = "application/json")
+	public ResponseEntity<?> createComboDetail(HttpServletRequest request, HttpServletResponse response,
+			@RequestBody String data) {
+		Connection connection = null;
+		PreparedStatement stmt = null;
+
+		try {
+			JSONObject jsonComboDetailData = new JSONObject(data);
+			connection = dataSource.getConnection();
+			
+				stmt = connection.prepareStatement(
+						"INSERT INTO combo_detail(menu_item_id, combo_detail_name, combo_detail_quantity, combo_detail_sequence) VALUES (?,?,?,?)");
+				stmt.setLong(1, jsonComboDetailData.getLong("menu_item_id"));
+				stmt.setString(2, jsonComboDetailData.getString("combo_detail_name"));
+				stmt.setInt(3, jsonComboDetailData.getInt("combo_detail_quantity"));
+				stmt.setInt(4, checkComboDetailSequence(jsonComboDetailData.getLong("menu_item_id"))+ 1);
+				stmt.executeUpdate();
+			
+			return ResponseEntity.ok(null);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return ResponseEntity.badRequest().body(ex.getMessage());
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
+	private int checkComboDetailSequence(Long menu_item_id) {
+		try {
+			return jdbcTemplate.queryForObject("SELECT TOP 1 combo_detail_sequence FROM combo_detail WHERE menu_item_id = ? ORDER BY combo_detail_sequence DESC", new Object[] {menu_item_id}, Integer.class);
+		} catch(DataAccessException ex) {
+			return 0;
+		}
 	}
 
 	@GetMapping(value = "/getComboDetailByMenuItemId", produces = "application/json")
-	public ResponseEntity<?> getComboDetailById(HttpServletRequest request, HttpServletResponse response,
+	public ResponseEntity<?> getComboDetailByMenuItemId(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam("menuItemId") Long menuItemId) {
 		JSONArray jsonComboDetailArray = new JSONArray();
 		Connection connection = null;
@@ -114,46 +156,60 @@ public class ComboRestController {
 			}
 		}
 	}
+	
+	@GetMapping(value = "/getComboDetailById", produces = "application/json")
+	public ResponseEntity<?> getComboDetailById(HttpServletRequest request, HttpServletResponse response,
+			@RequestParam("id") Long id) {
+		JSONObject jsonResult = new JSONObject();
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+
+		try {
+			connection = dataSource.getConnection();
+			stmt = connection.prepareStatement(
+					"SELECT * FROM combo_detail WHERE id = ?");
+			stmt.setLong(1, id);
+			rs = (ResultSet) stmt.executeQuery();
+
+			if (rs.next()) {
+				jsonResult.put("id", rs.getLong("id"));
+				jsonResult.put("menu_item_id", rs.getLong("menu_item_id"));
+				jsonResult.put("name", rs.getString("combo_detail_name"));
+				jsonResult.put("quantity", rs.getInt("combo_detail_quantity"));
+			}
+
+			return ResponseEntity.ok(jsonResult.toString());
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return ResponseEntity.badRequest().body(ex.getMessage());
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
 
 	@PostMapping(value = "/editComboDetail", produces = "application/json")
 	public ResponseEntity<?> editComboDetail(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody String data) {
 		Connection connection = null;
 		PreparedStatement stmt = null;		
-		PreparedStatement stmt2 = null;
 
 		try {
-			JSONObject jsonComboDetailObj = new JSONObject(data);
-
-			if (!jsonComboDetailObj.isNull("menu_item_id")) {
-				
-				JSONArray jsonComboDetailArray = jsonComboDetailObj.getJSONArray("tier_items");
-				Long menuItemId = jsonComboDetailObj.getLong("menu_item_id");
-
+			JSONObject jsonComboDetailData = new JSONObject(data);
 				connection = dataSource.getConnection();
-				
 				stmt = connection.prepareStatement(
-						"DELETE FROM combo_detail WHERE menu_item_id = ?");
-				stmt.setLong(1, menuItemId);
+						"UPDATE combo_detail SET combo_detail_name = ?, combo_detail_quantity = ? WHERE id = ?");
+				stmt.setString(1, jsonComboDetailData.getString("combo_detail_name"));
+				stmt.setInt(2, jsonComboDetailData.getInt("combo_detail_quantity"));
+				stmt.setLong(3, jsonComboDetailData.getLong("id"));
 				stmt.executeUpdate();
-				
-				//New Insertion
-				stmt2 = connection.prepareStatement(
-						"INSERT INTO combo_detail(menu_item_id, combo_detail_name, combo_detail_quantity, combo_detail_sequence) VALUES (?,?,?,?)");
-				
-				for (int i = 0; i < jsonComboDetailArray.length(); i++) {
-					int index = i+1;
-					JSONObject jsonComboObj = jsonComboDetailArray.getJSONObject(i);
-					stmt2.setLong(1, menuItemId);
-					stmt2.setString(2, jsonComboObj.getString("name"));
-					stmt2.setInt(3, jsonComboObj.getInt("quantity"));
-					stmt2.setInt(4, index);
-					stmt2.executeUpdate();
-				}
-				
-			} else {
-				return ResponseEntity.notFound().build();
-			}
+
 			return ResponseEntity.ok(null);
 		} catch (Exception ex) {
 			ex.printStackTrace();

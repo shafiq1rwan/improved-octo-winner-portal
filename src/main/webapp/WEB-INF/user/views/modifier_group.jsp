@@ -49,7 +49,6 @@
 											<thead>
 												<tr>
 													<th>ID</th>
-													<th>Backend ID</th>
 													<th>Name</th>
 													<th>Active Status</th>
 													<th>Action</th>

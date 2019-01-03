@@ -12,19 +12,125 @@
 		$scope.menu_item_id;
 		$scope.tier_action = '';
 		
-		$scope.addNewTier = function(){
+		// ==== Add, Modifier Tier Operations ====
+		$scope.tier_item = {};
+		
+		$scope.addNewTier = function(){	
+			$('#comboSettingModal').modal('toggle');
+			$('#tierModal').modal({backdrop: 'static', keyboard: false});
 			
+			console.log("hry "+ $scope.menu_item_id);
+		}
+
+		$scope.createNewTier = function(){
 			
-			
-			
-			
+			if($scope.tier_item.name == null 
+					|| $scope.tier_item.quantity == null 
+					|| $scope.tier_item.name == '' 
+					|| $scope.tier_item.quantity == '') {
+			} else {
+				var json_data = JSON.stringify({
+					'menu_item_id': $scope.menu_item_id,
+					'combo_detail_name': $scope.tier_item.name,
+					'combo_detail_quantity': $scope.tier_item.quantity
+				});
+				
+				$http
+				.post(
+					'${pageContext.request.contextPath}/menu/combo/createComboDetail', json_data)
+				.then(
+					function(response) {	
+						if(response.status == '200'){
+							//$scope.resetNewTierModal();
+							$('#tierModal').modal('toggle');		
+							$scope.openComboSetting($scope.menu_item_id);
+						} else if(response.status == '400'){
+							alert("Cannot Add Tier Item");
+						}			
+					},
+					function(response) {
+						alert("Cannot Add Tier Item");
+				});
+			}
 		}
 		
-		
-		
-		
+		$scope.resetNewTierModal = function(){
+			$scope.tier_item = {};
+			$scope.tier_action = '';
 			
-		$scope.updateTier = function() {
+			//$('#tierModal').modal('toggle');
+			//$('#comboSettingModal').modal('toggle');
+		}
+		
+		$scope.openEditTier = function(action_type, id){
+			$scope.tier_action = action_type;
+
+		 	$http
+			.get(
+				'${pageContext.request.contextPath}/menu/combo/getComboDetailById?id='+ id)
+			.then(
+				function(response) {	
+					if(response.status == '200'){		
+						$scope.tier_item = response.data;
+						
+						$('#comboSettingModal').modal('toggle');
+						$('#tierModal').modal('toggle');
+						
+					} else if(response.status == '400'){
+						alert("Cannot Retrieve Existing Tier Data");
+					}			
+				},
+				function(response) {
+					alert("Cannot Retrieve Existing Tier Data");
+			});	
+		}
+		
+		$scope.editExistingTier = function(id){			
+			if($scope.tier_item.quantity == null ||  $scope.tier_item.quantity == 0 ||  $scope.tier_item.quantity == ''){			
+			} else {
+				var json_data = JSON.stringify({
+					'id':id,	
+					'combo_detail_name': $scope.tier_item.name,
+					'combo_detail_quantity': $scope.tier_item.quantity
+				});
+				
+				$http
+				.post(
+					'${pageContext.request.contextPath}/menu/combo/editComboDetail', json_data)
+				.then(
+					function(response) {	
+						if(response.status == '200'){
+							$scope.resetNewTierModal();
+							$('#tierModal').modal('toggle');		
+							$scope.openComboSetting($scope.menu_item_id);
+						} else if(response.status == '400'){
+							alert("Cannot Edit Existing Tier Item");
+						}			
+					},
+					function(response) {
+						alert("Cannot Edit Existing Tier Item");
+				});
+			}
+		}
+		
+		$scope.removeExistingTier = function(id){
+			$http
+			.delete(
+				'${pageContext.request.contextPath}/menu/combo/deleteComboDetail?id='+id)
+			.then(
+				function(response) {	
+					if(response.status == '200'){	
+						$scope.openComboSetting($scope.menu_item_id);
+					} else if(response.status == '400'){
+						alert("Cannot Delete Tier Item");
+					}			
+				},
+				function(response) {
+					alert("Cannot Delete Existing Tier Item");
+			});
+		}
+			
+/* 		 $scope.updateTier = function() {
 			
 			if($scope.tierNumber==null || $scope.tierNumber==0 || $scope.tierNumber==''){
 				alert('Tier Number cannot be zero');
@@ -51,28 +157,15 @@
 				    	  $scope.tierItems.splice($scope.tierNumber, count);
 				    }
 				}
-					//$scope.tierItems = [];
-					
-/* 					$('#switch').show();
-					$("#switchToggle").prop('checked', false); */
-					
-			     /*  for(var a=0; a< count; a++){
-			    	  var item = {
-			    			  name:"test"+a,
-			    			  order: a
-			    	  }
-			    	  $scope.tierItems.push(item);
-			      } */
 			      console.log($scope.tierItems);
 
 			}
 			$scope.oldTierNumber = $scope.tierNumber;	
-	    };
+	    };  */
 	    
 	 	// open combo setting modal
 		$scope.openComboSetting = function(menu_item_id){
 			$scope.menu_item_id = menu_item_id;
-			var i =0;
 			
 		     var sortable = Sortable.create($('#sortableList')[0], {
 			   		handle: ".fa-reorder",
@@ -98,14 +191,8 @@
 				'${pageContext.request.contextPath}/menu/combo/getComboDetailByMenuItemId?menuItemId='+ menu_item_id)
 			.then(
 				function(response) {			
-					if(response.data.length>0){
-						$scope.tier_action = 'update',
-						$scope.tierNumber = response.data.length;
-						$scope.oldTierNumber = $scope.tierNumber;
+					if(response.status == '200'){
 						$scope.tierItems = response.data;
-					} else {
-						$scope.tier_action = 'create';	
-						//$scope.oldTierNumber = $scope.tierNumber;
 					}
 				},
 				function(response) {
@@ -131,7 +218,7 @@
 		     arr.splice(new_index, 0, arr.splice(old_index, 1)[0]); 
 		}
 	    
-	    $scope.createNewTier = function(){
+	/*     $scope.createNewTier = function(){
 	    	
 	    	if($scope.tierNumber == null || $scope.tierNumber == '' || $scope.tierNumber <= 0){
 
@@ -159,10 +246,10 @@
 		    	}
 
 	    	}
-	    }
+	    } */
 	    
 	    
-	    function createTierData(tierItemList){	    	
+/*  	    function createTierData(tierItemList){	    	
 	    	var json_data = JSON.stringify(
 	    			tierItemList
 			);
@@ -176,9 +263,6 @@
 					function(response) {			
 						$scope.resetModal();	
 						$('#comboSettingModal').modal('toggle');
-
-				/* 		if(response.status == 400)
-							alert(response.data); */
 					},
 					function(response) {
 						alert("Session TIME OUT");
@@ -186,9 +270,9 @@
 								.attr('href',
 										'${pageContext.request.contextPath}/user');
 					}); 
-	    }
+	    }  */
 	    
-	    $scope.editExistingTier = function(){
+	/*     $scope.editExistingTier = function(){
 	    	
  	    	var json_data = JSON.stringify({
 	    		'menu_item_id': $scope.menu_item_id,
@@ -215,7 +299,7 @@
 										'${pageContext.request.contextPath}/user');
 					}); 
 	    	
-	    }
+	    } */
 
 		$(document).ready(function() {					
 			$scope.refreshItemMenuGroupTable();
@@ -235,9 +319,6 @@
 			
 			$scope.menu_item_id = undefined;
 			$scope.action = '';
-			
-			console.log($scope.tierNumber);
-			//$scope.tier_action = '';
 		}
 		
 		//get menu item type
@@ -463,9 +544,6 @@
 
 			}
 		} 
-		
-		
-		
 		
 		$scope.removeMenuItem = function(id){
 			$http

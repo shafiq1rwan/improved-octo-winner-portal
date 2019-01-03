@@ -114,8 +114,7 @@
 				destroy : true,
 				"order" : [ [ 0, "asc" ] ] ,
 				"columns" : [ 
-					{"data" : "id", "width": "4%"}, 
-					{"data" : "backend_id", "width": "10%"},
+					{"data" : "id", "width": "4%"},
 					{"data" : "modifier_group_name","width": "15%"},
 					{"data" : "is_active", "width": "10%"},
 					{"data": "id", "width": "15%",
@@ -130,8 +129,8 @@
 				    }			
 			});
 			
-			$('#modifierGroup_dtable tbody').off('click', 'tr td:nth-child(-n+4)');
-			$('#modifierGroup_dtable tbody').on('click', 'tr td:nth-child(-n+4)', function() {
+			$('#modifierGroup_dtable tbody').off('click', 'tr td:nth-child(-n+3)');
+			$('#modifierGroup_dtable tbody').on('click', 'tr td:nth-child(-n+3)', function() {
 				$http({
 					method : 'GET',
 					headers : {'Content-Type' : 'application/json'},
