@@ -73,8 +73,12 @@
 													<div class="col-6 pl-0 pr-0 text-truncate">{{modifierGroupData.name}}</div>
 													<div class="col-6 pl-0 pr-0">
 														<select class="form-control xs-resp-font pt-0 pb-0"
-															ng-options="modifierData.name for modifierData in modifierGroupData.modifierList"
-															ng-model="modifierGroupData.selectedModifier"></select>
+															ng-model="modifierGroupData.selectedModifier"
+															ng-change="updateModifierData(modifierGroupData, selectedTier)">
+															<option
+																ng-repeat="modifierData in modifierGroupData.modifierList"
+																ng-value="modifierData">{{modifierData.name}} (+{{priceTag}}{{modifierData.price}})</option>
+														</select>
 													</div>
 												</div>
 											</div>
