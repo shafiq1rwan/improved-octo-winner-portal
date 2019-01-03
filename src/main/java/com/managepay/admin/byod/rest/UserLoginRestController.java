@@ -3,6 +3,7 @@ package com.managepay.admin.byod.rest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,6 +19,9 @@ public class UserLoginRestController {
 	
 	/*@Autowired
 	UserService adminService;*/
+	
+	@Autowired
+	StoreRestController storeRestController;
 	
 	// SIGNIN
 	@RequestMapping(value = { "/signin" }, method = RequestMethod.GET)
@@ -89,7 +93,13 @@ public class UserLoginRestController {
 	@RequestMapping(value = { "/views/store/{id}/ecpos" }, method = RequestMethod.GET)
 	public ModelAndView viewECPos(@PathVariable(value = "id") long id) {
 		ModelAndView model = new ModelAndView();
-		model.setViewName("/user/views/ecpos");
+		
+		if(storeRestController.getEcposStatus(id)) {
+			model.setViewName("/user/views/ecpos");
+		}
+		else {
+			model.setViewName("/user/views/unauthorized");
+		}
 		return model;
 	}
 	

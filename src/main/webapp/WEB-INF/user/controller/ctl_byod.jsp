@@ -2,33 +2,136 @@
 <script>
 	app.controller('ctl_byod', function($scope, $http, $compile, $routeParams) {
 		
-		$scope.store = {};
+		$scope.store = {id : $routeParams.id};
+		$scope.byod = [];
 		
-		$scope.byod = [{id:1}, {id:2}];
-		
-		$http({
-			method : 'GET',
-			headers : {'Content-Type' : 'application/json'},
-			url : '${pageContext.request.contextPath}/menu/store/'+$routeParams.id+'/ecpos'	
-		})
-		.then(function(response) {
-			if (response.status == "404") {
-				alert("Unable to find store detail");
-			} else {
-				$scope.store.id = response.data.id;
+		$scope.getDeviceInfo = function(){
+			$http({
+				method : 'GET',
+				headers : {'Content-Type' : 'application/json'},
+				url : '${pageContext.request.contextPath}/menu/store/byodByStoreId?store_id='+$scope.store.id	
+			})
+			.then(function(response) {
+				console.log(response.data);
 				$scope.store.name = response.data.store_name;
 				$scope.store.backend_id = response.data.backend_id;
-				console.log($scope.store);
-			}
-		});
-		
-		/* $scope.refreshTable = function(){
-			var table = $('#employee_dtable').DataTable();
+				$scope.store.byod = response.data.byod;
+				$scope.store.byod_count = $scope.store.byod.length;
+			});
 		}
 		
-		$(document).ready(function() {	
-			$scope.refreshTable();
-		}); */
+		$scope.addDevice = function(){
+			swal({
+				  title: "Are you sure?",
+				  text: "Do you want to generate Activation ID for new BYOD?",
+				  icon: "warning",
+				  buttons: true,
+				  dangerMode: true,
+				})
+				.then((willCreate) => {
+				  if (willCreate) {
+					  
+					  $http({
+							method : 'GET',
+							headers : {'Content-Type' : 'application/json'},
+							url : '${pageContext.request.contextPath}/menu/store/byod/activate?store_id='+$scope.store.id 	
+						})
+						.then(function successCallback(response) {
+							if(response.status==200){
+								swal("Activation ID is generated", {
+									icon: "success",
+								});
+								
+								$scope.getDeviceInfo();
+							}
+						 }, function errorCallback(response) {	
+					    	swal({
+								  title: "Error",
+								  text: response.data,
+								  icon: "warning",
+								  dangerMode: true,
+							});
+						});
+				}					 
+			});
+		}
+		
+		$scope.terminateDevice = function(activation_id){
+			swal({
+				  title: "Are you sure?",
+				  text: "Do you want to terminate BYOD?",
+				  icon: "warning",
+				  buttons: true,
+				  dangerMode: true,
+				})
+				.then((willCreate) => {
+				  if (willCreate) {				 
+					  $http({
+							method : 'GET',
+							headers : {'Content-Type' : 'application/json'},
+							url : '${pageContext.request.contextPath}/menu/store/byod/terminate?activation_id='+activation_id 	
+						})
+						.then(function successCallback(response) {
+							console.log(response);
+							if(response.status==200){
+								//console.log(response);
+								swal("Successfully terminate BYOD.", {
+									icon: "success",
+								});
+								$scope.getDeviceInfo();
+							}
+						 }, function errorCallback(response) {
+							 console.log(response);
+							swal({
+								  title: "Error",
+								  text: response.data,
+								  icon: "warning",
+								  dangerMode: true,
+							});					
+						});				 
+				}					 
+			});
+		}
+		
+		$scope.reactivateDevice = function(activation_id){		
+			swal({
+				  title: "Are you sure?",
+				  text: "Do you want to reactivate BYOD?",
+				  icon: "warning",
+				  buttons: true,
+				  dangerMode: true,
+				})
+				.then((willCreate) => {
+				  if (willCreate) {				 
+					  $http({
+							method : 'GET',
+							headers : {'Content-Type' : 'application/json'},
+							url : '${pageContext.request.contextPath}/menu/store/byod/reactivate?activation_id='+activation_id	
+						})
+						.then(function successCallback(response) {
+							console.log(response);
+							if(response.status==200){
+								//console.log(response);
+								swal("Successfully terminate BYOD.", {
+									icon: "success",
+								});
+								$scope.getDeviceInfo();
+							}
+						 }, function errorCallback(response) {
+							 console.log(response);
+							 swal({
+								  title: "Error",
+								  text: response.data,
+								  icon: "warning",
+								  dangerMode: true,
+							});		
+						});		 
+				}					 
+			});
+		}
+		
+		$scope.getDeviceInfo();
+		
 	});
 	
 </script>

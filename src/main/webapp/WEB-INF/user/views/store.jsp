@@ -41,7 +41,7 @@
 												<th>ID</th>
 												<th>Backend ID</th>
 												<th>Name</th>
-												<th>Image</th>
+												<!-- <th>Image</th> -->
 												<th>Country</th>
 												<th>Publish Status</th>
 												<th>Action</th>
@@ -148,19 +148,7 @@
 					                </div>
 					            </div>
 					        </div>
-					    </div>
-						<!-- <div class="row">
-							<div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
-								<div class="form-group">
-									<label class="login-label">Image</label>
-									<input class="form-control" type="file" name="files[]" id="storeImage" multiple="multiple"> 
-								</div>
-								<div style="text-align: center">
-											<img id="updateDbImg" />
-								</div>
-							</div>
-						</div> -->
-						
+					    </div>					
 						<div class="row">
 							 <div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
 							 	<div class="form-group">
@@ -168,17 +156,60 @@
 							 	</div>									
 								<div class="form-group">																							
 									<label class="login-label">Image</label> 
-									<input id="storeImage" type="file" accept="image/*" required /> 
+									<input id="storeImage" type="file" accept="image/*" /> 
 								</div>
 							</div>
-						</div>	
+						</div>								
+					</div>
+					<hr>
+					<div>
+						<div class="row">
+							<div class="col-4 col-sm-4 col-md-4 col-lg-4 col-xl-4">
+								<div class="form-group">
+									<label class="login-label">POS Setting</label>
+									<div class="form-check">
+									  <input class="form-check-input" type="radio" ng-model="store.ecpos" id="exampleRadios1" ng-value=true checked>
+									  <label class="form-check-label" for="exampleRadios1">
+									    ECPOS
+									  </label>
+									</div>									
+									<div class="form-check">
+									  <input class="form-check-input" type="radio" ng-model="store.ecpos" id="exampleRadios2" ng-value=false checked>
+									  <label class="form-check-label" for="exampleRadios2">
+									    Other POS
+									  </label>
+									</div>
+								</div>
+							</div>							
+						</div>
+						<div class="row" ng-show="store.pos==1 && action=='update'">
+							<div class="col-4 col-sm-4 col-md-4 col-lg-4 col-xl-4">
+								<div class="form-group">
+									<label class="login-label">Backend ID</label>
+									<input class="form-control" name="storeSecureHash" ng-model="store.secureHash" type="text" disabled> 							
+								</div>
+							</div>
+							<div class="col-4 col-sm-4 col-md-4 col-lg-4 col-xl-4">
+								<div class="form-group">
+									<label class="login-label">Activation ID</label>
+									<input class="form-control" name="storeSecureHash" ng-model="store.secureHash" type="text" disabled> 							
+								</div>
+							</div>
+							<div class="col-4 col-sm-4 col-md-4 col-lg-4 col-xl-4">
+								<div class="form-group">
+									<label class="login-label">Activation Key</label>
+									<input class="form-control" name="storeSecureHash" ng-model="store.secureHash" type="text" disabled> 							
+								</div>
+							</div>
+						</div>
 					</div>				 									
 		      </div>
 		      <div class="modal-footer">
 		      	<button class="btn btn-primary" ng-show="action=='create'" type="submit" ng-click="submitStore()"> Submit</button>
-		      	<button class="btn btn-success" ng-show="action=='create'" type="submit" ng-click="submitStore(1)"> Submit & Publish</button>
+		      	<button class="btn btn-success" ng-show="action=='create'" type="submit" ng-click="submitStore(1)"> Submit & Publish Store</button>
 		      	<button class="btn btn-primary" ng-show="action=='update'" type="submit" ng-click="submitStore()"> Update</button>
-		      	<button class="btn btn-success" ng-show="action=='update'" type="submit" ng-click="submitStore(1)"> Update & Publish</button>
+		      	<button class="btn btn-success" ng-show="action=='update' && !store.isPublish" type="submit" ng-click="submitStore(1)"> Update & Publish Store</button>
+		      	<button class="btn btn-success" ng-show="action=='update' && store.isPublish" type="submit" ng-click="submitStore(0)"> Update & Unpublish Store</button>
 		      </div>
 		       </form>		      
 		    </div>

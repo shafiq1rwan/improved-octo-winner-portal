@@ -4,9 +4,10 @@
 		
 		$scope.action = '';
 		$scope.store = {id : $routeParams.id};
-		$scope.staff = {
-		}
+		$scope.staff = {}
 		$scope.roleList = [];
+		$scope.ecpos = {}
+		$scope.showActivation = false;
 		
 		$scope.modalType = function(action){
 			$scope.action = action;
@@ -18,13 +19,14 @@
 		$http({
 			method : 'GET',
 			headers : {'Content-Type' : 'application/json'},
-			url : '${pageContext.request.contextPath}/menu/store/'+$scope.store.id+'/ecpos'	
+			url : '${pageContext.request.contextPath}/menu/store/storeById?id='+$scope.store.id	
 		})
 		.then(function(response) {
 			$scope.store.name = response.data.store_name;
 			$scope.store.backend_id = response.data.backend_id;
 			console.log($scope.store);		
 		});
+		
 		
 		// get role list
 		$http({
@@ -185,6 +187,141 @@
 				});
 			});
 		}
+		
+		$scope.generateActivation = function(){
+			swal({
+				  title: "Are you sure?",
+				  text: "Do you want to generate Activation ID?",
+				  icon: "warning",
+				  buttons: true,
+				  dangerMode: true,
+				})
+				.then((willCreate) => {
+				  if (willCreate) {
+					  
+					  $http({
+							method : 'GET',
+							headers : {'Content-Type' : 'application/json'},
+							url : '${pageContext.request.contextPath}/menu/store/ecpos/activate?store_id='+$scope.store.id 	
+						})
+						.then(function successCallback(response) {
+							if(response.status==200){
+								swal("Activation ID is generated", {
+									icon: "success",
+								});
+								
+								$scope.getDeviceInfo();
+							}
+						 }, function errorCallback(response) {	
+					    	swal({
+								  title: "Error",
+								  text:  response.data,
+								  icon: "warning",
+								  dangerMode: true,
+							});						    
+						});
+				}					 
+			});
+		}
+		
+		$scope.terminateDevice = function(){
+			swal({
+				  title: "Are you sure?",
+				  text: "Do you want to terminate ECPOS?",
+				  icon: "warning",
+				  buttons: true,
+				  dangerMode: true,
+				})
+				.then((willCreate) => {
+				  if (willCreate) {				 
+					  $http({
+							method : 'GET',
+							headers : {'Content-Type' : 'application/json'},
+							url : '${pageContext.request.contextPath}/menu/store/ecpos/terminate?store_id='+$scope.store.id 	
+						})
+						.then(function successCallback(response) {
+							console.log(response);
+							if(response.status==200){
+								//console.log(response);
+								swal("Successfully terminate ECPOS.", {
+									icon: "success",
+								});
+								$scope.getDeviceInfo();
+							}
+						 }, function errorCallback(response) {
+							 console.log(response);
+							swal({
+								  title: "Error",
+								  text: response.data,
+								  icon: "warning",
+								  dangerMode: true,
+							});					
+						});				 
+				}					 
+			});
+		}
+		
+		$scope.reactivateDevice = function(){		
+			swal({
+				  title: "Are you sure?",
+				  text: "Do you want to reactivate ECPOS?",
+				  icon: "warning",
+				  buttons: true,
+				  dangerMode: true,
+				})
+				.then((willCreate) => {
+				  if (willCreate) {				 
+					  $http({
+							method : 'GET',
+							headers : {'Content-Type' : 'application/json'},
+							url : '${pageContext.request.contextPath}/menu/store/ecpos/reactivate?store_id='+$scope.store.id 	
+						})
+						.then(function successCallback(response) {
+							console.log(response);
+							if(response.status==200){
+								//console.log(response);
+								swal("Successfully reactivate ECPOS.", {
+									icon: "success",
+								});
+								$scope.getDeviceInfo();
+							}
+						 }, function errorCallback(response) {
+							 console.log(response);
+							 swal({
+								  title: "Error",
+								  text: response.data,
+								  icon: "warning",
+								  dangerMode: true,
+							});		
+						});		 
+				}					 
+			});
+		}
+		
+		$scope.getDeviceInfo = function(){
+			$http({
+				method : 'GET',
+				headers : {'Content-Type' : 'application/json'},
+				url : '${pageContext.request.contextPath}/menu/store/ecpos/getInfo?store_id='+$scope.store.id 	
+			})
+			.then(function successCallback(response) {
+				if(response.status==200){
+					console.log(response.data);
+					$scope.showActivation = false;
+					$scope.ecpos.activation_id = response.data.activation_id;
+					$scope.ecpos.activation_key = response.data.activation_key;
+					$scope.ecpos.created_date = response.data.created_date;
+					$scope.ecpos.status = response.data.status;
+					console.log($scope.ecpos);
+				}
+			 }, function errorCallback(response) {	
+			    if(response.status==400){
+			    	$scope.showActivation = true;
+			    }
+			});
+		}
+		
+		$scope.getDeviceInfo();
 		
 		$(document).ready(function() {	
 			$scope.refreshTable();

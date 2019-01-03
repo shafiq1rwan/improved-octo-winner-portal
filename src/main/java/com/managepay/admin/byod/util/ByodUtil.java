@@ -3,6 +3,7 @@ package com.managepay.admin.byod.util;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.security.MessageDigest;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Base64;
@@ -28,8 +29,20 @@ public class ByodUtil {
 		return typePrefix + generatedString + dateSuffix;
 	}
 
-	private static String createRandomString(int length) {
+	public String createRandomString(int length) {
 		String possibleChar = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+		StringBuilder builder = new StringBuilder();
+		Random random = new Random();
+
+		while (builder.length() < length) {
+			int index = (int) (random.nextFloat() * possibleChar.length());
+			builder.append(possibleChar.charAt(index));
+		}
+		return builder.toString();
+	}
+	
+	public String createRandomDigit(int length) {
+		String possibleChar = "0123456789";
 		StringBuilder builder = new StringBuilder();
 		Random random = new Random();
 
@@ -76,5 +89,6 @@ public class ByodUtil {
 
 		return imageName + ".png";
 	}
+	
 
 }
