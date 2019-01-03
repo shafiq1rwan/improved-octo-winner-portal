@@ -41,7 +41,10 @@ public class Store {
 	
 	@JsonProperty("store_end_operating_time")
 	private Date operatingEndTime;
-
+	
+	@JsonProperty("store_ecpos")
+	private boolean ecpos;
+	
 	public Store() {
 	}
 
@@ -139,6 +142,14 @@ public class Store {
 
 	public void setOperatingEndTime(Date operatingEndTime) {
 		this.operatingEndTime = operatingEndTime;
+	}
+	
+	public boolean getEcpos() {
+		return ecpos;
+	}
+
+	public void setEcpos(boolean ecpos) {
+		this.ecpos = ecpos;
 	}
 
 }

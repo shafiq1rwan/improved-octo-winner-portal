@@ -1,5 +1,6 @@
 package com.managepay.admin.byod.service;
 
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 
@@ -50,6 +51,18 @@ public class StoreServiceImp implements StoreService {
 		try {
 			store.setBackendId(byodUtil.createBackendId("S", 8));
 			store.setLogoPath(byodUtil.saveImageFile(store.getLogoPath(), null));
+			Calendar startTime = Calendar.getInstance();
+			startTime.setTime(store.getOperatingStartTime());
+			startTime.set(Calendar.SECOND, 0);
+			startTime.set(Calendar.MILLISECOND, 0);
+			store.setOperatingStartTime(startTime.getTime());
+			
+			Calendar endTime = Calendar.getInstance();
+			endTime.setTime(store.getOperatingEndTime());
+			endTime.set(Calendar.SECOND, 0);
+			endTime.set(Calendar.MILLISECOND, 0);
+			store.setOperatingEndTime(endTime.getTime());
+			
 			return storeRepo.createStore(store);
 		} catch (DuplicateKeyException ex) {
 			throw new DuplicateKeyException("Duplication Found");
@@ -62,8 +75,13 @@ public class StoreServiceImp implements StoreService {
 	@Override
 	public int editStore(Long id, Store store) {
 		try {
-			store.setLogoPath(byodUtil.saveImageFile(store.getLogoPath(), null));
-			return storeRepo.editStore(id, store);
+			if(store.getLogoPath()!=null) {
+				String image = byodUtil.saveImageFile(store.getLogoPath(), null);
+				return storeRepo.editStore(id, store, image);
+			}
+			else {
+				return storeRepo.editStore(id, store);
+			}
 		} catch (DuplicateKeyException ex) {
 			throw new DuplicateKeyException("Duplication Found");
 		} catch (DataAccessException ex) {
