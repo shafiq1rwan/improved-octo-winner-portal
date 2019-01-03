@@ -49,13 +49,14 @@ public class ComboRestController {
 			connection = dataSource.getConnection();
 
 			for (int i = 0; i < jsonComboDetailArray.length(); i++) {
+				int index = i + 1;
 				JSONObject jsonComboDetailObj = jsonComboDetailArray.getJSONObject(i);
 				stmt = connection.prepareStatement(
 						"INSERT INTO combo_detail(menu_item_id, combo_detail_name, combo_detail_quantity, combo_detail_sequence) VALUES (?,?,?,?)");
 				stmt.setLong(1, jsonComboDetailObj.getLong("menu_item_id"));
 				stmt.setString(2, jsonComboDetailObj.getString("combo_detail_name"));
 				stmt.setInt(3, jsonComboDetailObj.getInt("combo_detail_quantity"));
-				stmt.setInt(4, jsonComboDetailObj.getInt("combo_detail_sequence"));
+				stmt.setInt(4, index);
 				stmt.executeUpdate();
 			}
 			return ResponseEntity.ok(null);
@@ -118,73 +119,38 @@ public class ComboRestController {
 	public ResponseEntity<?> editComboDetail(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody String data) {
 		Connection connection = null;
-		PreparedStatement stmt = null;
+		PreparedStatement stmt = null;		
+		PreparedStatement stmt2 = null;
 
 		try {
 			JSONObject jsonComboDetailObj = new JSONObject(data);
 
-			if (!jsonComboDetailObj.isNull("menu_item_id") || !jsonComboDetailObj.isNull("oldTierItems")
-					|| !jsonComboDetailObj.isNull("newTierItems")) {
-
-				JSONArray oldJsonComboDetailArray = jsonComboDetailObj.getJSONArray("oldTierItems");
-				JSONArray newJsonComboDetailArray = jsonComboDetailObj.getJSONArray("newTierItems");
+			if (!jsonComboDetailObj.isNull("menu_item_id")) {
+				
+				JSONArray jsonComboDetailArray = jsonComboDetailObj.getJSONArray("tier_items");
 				Long menuItemId = jsonComboDetailObj.getLong("menu_item_id");
 
-				HashSet<Long> deleteComboDetailSet = new HashSet<>();
 				connection = dataSource.getConnection();
-
-				for (int i = 0; i < newJsonComboDetailArray.length(); i++) {
-					JSONObject newJsonComboDetailObj = newJsonComboDetailArray.getJSONObject(i);
-					Long id = newJsonComboDetailObj.isNull("id") ? 0 : newJsonComboDetailObj.getLong("id");
-
-					// new
-					if (newJsonComboDetailObj.isNull("id")) {
-						stmt = connection.prepareStatement(
-								"INSERT INTO combo_detail(menu_item_id, combo_detail_name, combo_detail_quantity, combo_detail_sequence) VALUES (?,?,?,?)");
-						stmt.setLong(1, menuItemId);
-						stmt.setString(2, newJsonComboDetailObj.getString("name"));
-						stmt.setInt(3, newJsonComboDetailObj.getInt("quantity"));
-						stmt.setInt(4, newJsonComboDetailObj.getInt("order"));
-						stmt.executeUpdate();
-
-						for (int j = 0; j < oldJsonComboDetailArray.length(); j++) {
-							JSONObject oldJsonComboDetailObj = oldJsonComboDetailArray.getJSONObject(j);
-							if (id == oldJsonComboDetailObj.getLong("id")) {
-
-							} else {
-								deleteComboDetailSet.add(oldJsonComboDetailObj.getLong("id"));
-							}
-						}
-
-					} else {
-						stmt = connection.prepareStatement(
-								"UPDATE combo_detail SET combo_detail_name = ?, combo_detail_quantity = ?, combo_detail_sequence = ? WHERE id = ?");
-						stmt.setString(1, newJsonComboDetailObj.getString("name"));
-						stmt.setInt(2, newJsonComboDetailObj.getInt("quantity"));
-						stmt.setInt(3, newJsonComboDetailObj.getInt("order"));
-						stmt.setLong(4, newJsonComboDetailObj.getLong("id"));
-						stmt.executeUpdate();
-
-						for (int j = 0; j < oldJsonComboDetailArray.length(); j++) {
-							JSONObject oldJsonComboDetailObj = oldJsonComboDetailArray.getJSONObject(j);
-							if (id == oldJsonComboDetailObj.getLong("id")) {
-
-							} else {
-								deleteComboDetailSet.add(oldJsonComboDetailObj.getLong("id"));
-							}
-						}
-
-					}
-
+				
+				stmt = connection.prepareStatement(
+						"DELETE FROM combo_detail WHERE menu_item_id = ?");
+				stmt.setLong(1, menuItemId);
+				stmt.executeUpdate();
+				
+				//New Insertion
+				stmt2 = connection.prepareStatement(
+						"INSERT INTO combo_detail(menu_item_id, combo_detail_name, combo_detail_quantity, combo_detail_sequence) VALUES (?,?,?,?)");
+				
+				for (int i = 0; i < jsonComboDetailArray.length(); i++) {
+					int index = i+1;
+					JSONObject jsonComboObj = jsonComboDetailArray.getJSONObject(i);
+					stmt2.setLong(1, menuItemId);
+					stmt2.setString(2, jsonComboObj.getString("name"));
+					stmt2.setInt(3, jsonComboObj.getInt("quantity"));
+					stmt2.setInt(4, index);
+					stmt2.executeUpdate();
 				}
-
-				System.out.println(deleteComboDetailSet.toString());
-				for (Long id : deleteComboDetailSet) {
-					System.out.println(id);
-					stmt = connection.prepareStatement("DELETE FROM combo_detail WHERE id = ?");
-					stmt.setLong(1, id);
-					stmt.executeUpdate();
-				}
+				
 			} else {
 				return ResponseEntity.notFound().build();
 			}

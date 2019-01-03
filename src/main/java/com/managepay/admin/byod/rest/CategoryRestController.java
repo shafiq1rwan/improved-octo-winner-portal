@@ -56,7 +56,6 @@ public class CategoryRestController {
 				JSONObject jsonCategoryObj = new JSONObject();
 				jsonCategoryObj.put("id", rs.getLong("id"));
 				jsonCategoryObj.put("group_category_id", rs.getLong("group_category_id"));
-				jsonCategoryObj.put("backend_id", rs.getString("backend_id"));
 				jsonCategoryObj.put("category_name", rs.getString("category_name"));
 				jsonCategoryObj.put("category_description", rs.getString("category_description"));
 				jsonCategoryObj.put("category_image_path", rs.getString("category_image_path"));
@@ -100,7 +99,6 @@ public class CategoryRestController {
 				JSONObject jsonCategoryObj = new JSONObject();
 				jsonCategoryObj.put("id", rs.getLong("id"));
 				jsonCategoryObj.put("group_category_id", rs.getLong("group_category_id"));
-				jsonCategoryObj.put("backend_id", rs.getString("backend_id"));
 				jsonCategoryObj.put("category_name", rs.getString("category_name"));
 				jsonCategoryObj.put("category_description", rs.getString("category_description"));
 				jsonCategoryObj.put("category_image_path", rs.getString("category_image_path"));
@@ -144,7 +142,6 @@ public class CategoryRestController {
 			if (rs.next()) {
 				jsonResult.put("id", rs.getLong("id"));
 				jsonResult.put("group_category_id", rs.getLong("group_category_id"));
-				jsonResult.put("backend_id", rs.getString("backend_id"));
 				jsonResult.put("category_name", rs.getString("category_name"));
 				jsonResult.put("category_description", rs.getString("category_description"));
 				jsonResult.put("category_image_path", rs.getString("category_image_path"));
@@ -211,14 +208,13 @@ public class CategoryRestController {
 
 				connection = dataSource.getConnection();
 				stmt = connection.prepareStatement(
-						"INSERT into category(group_category_id, backend_id, category_name, category_description, category_image_path, category_sequence, is_active) VALUES (?,?,?,?,?,?,?)");
+						"INSERT into category(group_category_id, category_name, category_description, category_image_path, category_sequence, is_active) VALUES (?,?,?,?,?,?)");
 				stmt.setLong(1, jsonCategoryData.getLong("group_category_id"));
-				stmt.setString(2, byodUtil.createBackendId("C", 8));
-				stmt.setString(3, jsonCategoryData.getString("category_name"));
-				stmt.setString(4, description);
-				stmt.setString(5, imagePath);
-				stmt.setInt(6, getCategorySequenceNumber(jsonCategoryData.getLong("group_category_id")) + 1);
-				stmt.setBoolean(7, jsonCategoryData.getBoolean("is_active"));
+				stmt.setString(2, jsonCategoryData.getString("category_name"));
+				stmt.setString(3, description);
+				stmt.setString(4, imagePath);
+				stmt.setInt(5, getCategorySequenceNumber(jsonCategoryData.getLong("group_category_id")) + 1);
+				stmt.setBoolean(6, jsonCategoryData.getBoolean("is_active"));
 				stmt.executeUpdate();
 			} else {
 				response.setStatus(404);
@@ -271,7 +267,6 @@ public class CategoryRestController {
 				stmt.setString(3, imagePath);
 				stmt.setBoolean(4, jsonCategoryData.getBoolean("is_active"));
 				stmt.setLong(5, jsonCategoryData.getLong("id"));
-
 				stmt.executeUpdate();
 			} else {
 				response.setStatus(404);

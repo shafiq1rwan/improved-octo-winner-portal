@@ -260,6 +260,9 @@ public class MenuItemRestController {
 		PreparedStatement stmt = null;
 
 		try {
+			
+			System.out.println(data);
+			
 			JSONObject jsonMenuItemData = new JSONObject(data);
 			
 			String imagePath = jsonMenuItemData.isNull("menu_item_image_path")?null:jsonMenuItemData.getString("menu_item_image_path");
@@ -415,12 +418,15 @@ public class MenuItemRestController {
 
 		try {
 			JSONObject jsonMenuItemData = new JSONObject(data);
-			if(jsonMenuItemData.has("id") && jsonMenuItemData.has("is_active")) {
+			if(jsonMenuItemData.has("id") && jsonMenuItemData.has("active_status")) {
 				connection = dataSource.getConnection();
 				stmt = connection.prepareStatement("UPDATE menu_item SET is_active = ? WHERE id = ?");
-				stmt.setBoolean(1, jsonMenuItemData.getBoolean("is_active"));
+				stmt.setBoolean(1, !jsonMenuItemData.getBoolean("active_status"));
 				stmt.setLong(2, jsonMenuItemData.getLong("id"));
-				stmt.executeUpdate();	
+				int rowAffected = stmt.executeUpdate();	
+				
+				if(rowAffected == 0)
+					throw new Exception();
 				
 				return ResponseEntity.ok(null);	
 			}

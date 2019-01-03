@@ -9,17 +9,27 @@
 		$scope.tierNumber;
 		$scope.oldTierNumber=0;
 		$scope.tierItems = [];
-		$scope.oldTierItems = [];
 		$scope.menu_item_id;
 		$scope.tier_action = '';
+		
+		$scope.addNewTier = function(){
+			
+			
+			
+			
+			
+		}
+		
+		
+		
+		
 			
 		$scope.updateTier = function() {
-	/* 		console.log('old: ' + $scope.oldTierNumber);
-			console.log('new: ' + $scope.tierNumber); */
 			
-			if($scope.tierNumber==0 || $scope.tierNumber=='' || $scope.tierNumber==null){
+			if($scope.tierNumber==null || $scope.tierNumber==0 || $scope.tierNumber==''){
 				alert('Tier Number cannot be zero');
-				$scope.tierItems = [];
+				$scope.tierNumber = 0;
+		 		$scope.tierItems = [];
 				$scope.oldTierNumber = 0;
 			}
 			else{	
@@ -30,7 +40,6 @@
 				    	  var item = {
 				    			  id : null,
 				    			  name:"test"+a,
-				    			  order: a,
 				    			  quantity: 0
 				    	  }
 				    	  $scope.tierItems.push(item);
@@ -44,8 +53,8 @@
 				}
 					//$scope.tierItems = [];
 					
-					$('#switch').show();
-					$("#switchToggle").prop('checked', false);
+/* 					$('#switch').show();
+					$("#switchToggle").prop('checked', false); */
 					
 			     /*  for(var a=0; a< count; a++){
 			    	  var item = {
@@ -56,79 +65,100 @@
 			      } */
 			      console.log($scope.tierItems);
 
-		      // drag and drop list
-		      var oldContainer;
-		      $("#sortableList").sortable({
-		        group: 'nested',
-		        handle: 'i.fa-reorder',
-		        pullPlaceholder: false,
-		        // animation on drop
-		        onDrop: function  ($item, container, _super) {
-		        	container.el.removeClass("active");	         
-		        	
-		          var $clonedItem = $('<li/>').css({height: 0});
-		          $item.before($clonedItem);
-		          $clonedItem.animate({'height': $item.height()});
-	
-		          $item.animate($clonedItem.position(), function  () {
-		            $clonedItem.detach();
-		            _super($item, container);
-		          });     	
-		        },
-	
-		        // set $item relative to cursor position
-		        onDragStart: function ($item, container, _super) {
-		          var offset = $item.offset(),
-		              pointer = container.rootGroup.pointer;
-	
-		          adjustment = {
-		            left: pointer.left - offset.left,
-		            top: pointer.top - offset.top
-		          };
-	
-		          _super($item, container);
-		        },
-		        afterMove: function (placeholder, container) {
-			          if(oldContainer != container){
-			            if(oldContainer)
-			              oldContainer.el.removeClass("active");
-			            container.el.addClass("active");
-	
-			            oldContainer = container;
-			          }        
-			        },
-		        onDrag: function ($item, position) {	        	
-		          $item.css({
-		            left: position.left - adjustment.left,
-		            top: position.top - adjustment.top
-		          });
-		        }
-		      });      
-		   		// end drag and drop list	
 			}
-	      	
-			$scope.oldTierNumber = $scope.tierNumber;
-			
+			$scope.oldTierNumber = $scope.tierNumber;	
 	    };
 	    
-	    $scope.createNewTier = function(){
-	    	var listItems = $("#sortableList li");
-	    	var tierItemList = [];
-	    	listItems.each(function(idx, li) {
-	    	    var product = $(li);
-				console.log(product.attr('id'));
+	 	// open combo setting modal
+		$scope.openComboSetting = function(menu_item_id){
+			$scope.menu_item_id = menu_item_id;
+			var i =0;
 			
-	    	    // and the rest of your code
-	    	    var tierItem = {
-	    	    		"menu_item_id":$scope.menu_item_id,
-	    	    		"combo_detail_name": $scope.tierItems[idx].name,
-	    	    		"combo_detail_quantity": $scope.tierItems[idx].quantity,
-						"combo_detail_sequence": product.attr('id')
-	    	    }; 	    
-	    	    console.log(tierItem);    	    
-	    	    tierItemList.push(tierItem);  
-	    	});    	
-	    	createTierData(tierItemList);
+		     var sortable = Sortable.create($('#sortableList')[0], {
+			   		handle: ".fa-reorder",
+			   		scroll: true,
+			   		// Element is chosen
+			   		onChoose: function (/**Event*/evt) {
+	
+			   		},
+			   		// Element dragging started
+			   		onStart: function (/**Event*/evt) {
+	
+			   		},
+			   		// Element dragging ended
+			   		onEnd: function (evt) {
+			   			move($scope.tierItems,evt.oldIndex,evt.newIndex);
+			   			console.log("My List: ");
+			   			console.log($scope.tierItems);
+			   		}
+		   	});
+			
+			$http
+			.get(
+				'${pageContext.request.contextPath}/menu/combo/getComboDetailByMenuItemId?menuItemId='+ menu_item_id)
+			.then(
+				function(response) {			
+					if(response.data.length>0){
+						$scope.tier_action = 'update',
+						$scope.tierNumber = response.data.length;
+						$scope.oldTierNumber = $scope.tierNumber;
+						$scope.tierItems = response.data;
+					} else {
+						$scope.tier_action = 'create';	
+						//$scope.oldTierNumber = $scope.tierNumber;
+					}
+				},
+				function(response) {
+					alert("Cannot Retrive Combo Detail!");
+			});
+
+			$('#comboSettingModal').modal({backdrop: 'static', keyboard: false});
+		}
+	    
+		function move(arr, old_index, new_index) {
+		    while (old_index < 0) {
+		        old_index += arr.length;
+		    }
+		    while (new_index < 0) {
+		        new_index += arr.length;
+		    }
+		    if (new_index >= arr.length) {
+		        var k = new_index - arr.length;
+		        while ((k--) + 1) {
+		            arr.push(undefined);
+		        }
+		    }
+		     arr.splice(new_index, 0, arr.splice(old_index, 1)[0]); 
+		}
+	    
+	    $scope.createNewTier = function(){
+	    	
+	    	if($scope.tierNumber == null || $scope.tierNumber == '' || $scope.tierNumber <= 0){
+
+	    	} else {
+	    		var listItems = $("#sortableList li");
+		    	var tierItemList = [];
+		    	listItems.each(function(idx, li) {
+		    	    var product = $(li);
+					console.log(product.attr('id'));
+				
+		    	    // and the rest of your code
+		    	    var tierItem = {
+		    	    		"menu_item_id":$scope.menu_item_id,
+		    	    		"combo_detail_name": $scope.tierItems[idx].name,
+		    	    		"combo_detail_quantity": $scope.tierItems[idx].quantity
+		    	    }; 	    
+		    	    console.log(tierItem);    	    
+		    	    tierItemList.push(tierItem);  
+		    	});    	
+		    	
+		    	if(tierItemList.length >0){
+			    	createTierData(tierItemList);
+		    	} else {
+		    		alert("Please fill in Tier Info");
+		    	}
+
+	    	}
 	    }
 	    
 	    
@@ -160,12 +190,11 @@
 	    
 	    $scope.editExistingTier = function(){
 	    	
-	    	var json_data = JSON.stringify({
+ 	    	var json_data = JSON.stringify({
 	    		'menu_item_id': $scope.menu_item_id,
-	    		'newTierItems': $scope.tierItems,
-	    		'oldTierItems': $scope.oldTierItems
-	    	});
-	    	
+	    		'tier_items': $scope.tierItems
+	    	}); 
+	    		    	
 	    	console.log(json_data);
 	    	
 	      	$http
@@ -176,7 +205,7 @@
 						$scope.resetModal();	
 						$('#comboSettingModal').modal('toggle');
 
-				 		if(response.status == 400)
+				 		if(response.status == '400')
 							alert(response.data);
 					},
 					function(response) {
@@ -188,22 +217,7 @@
 	    	
 	    }
 
-		$(document).ready(function() {				
-			
-			$("#switchToggle").on("click", function  (e) { 
-		    	  var method;
-		    	  if($(this).prop( "checked" )){
-		    		  method = "enable";
-		    		  $( "#sortableList").find( "i.fa-reorder" ).show("fast");
-		    	  }
-		    	  else{
-		    		  method = "disable";
-		    		  $( "#sortableList").find( "i.fa-reorder" ).hide("fast");
-		    	  }
-		    	  
-		    	  $("#sortableList").sortable(method);
-		      });
-			
+		$(document).ready(function() {					
 			$scope.refreshItemMenuGroupTable();
 		});
 		
@@ -218,7 +232,6 @@
 			$scope.oldTierNumber = 0;
 			
 			$scope.tierItems = [];
-			$scope.oldTierItems = [];
 			
 			$scope.menu_item_id = undefined;
 			$scope.action = '';
@@ -254,41 +267,7 @@
 			function(response) {
 				alert("Cannot Retrive Modifier Group!");
 		});
-		
-		// open combo setting modal
-		$scope.openComboSetting = function(menu_item_id){
-			$scope.menu_item_id = menu_item_id;
-			var i =0;
-			
-			$http
-			.get(
-				'${pageContext.request.contextPath}/menu/combo/getComboDetailByMenuItemId?menuItemId='+ menu_item_id)
-			.then(
-				function(response) {			
-					if(response.data.length>0){
-						$scope.tier_action = 'update',
-						$scope.tierNumber = response.data.length;
-						$scope.oldTierNumber = $scope.tierNumber;
-						$scope.tierItems = response.data;
-						
-						for(i=0;i<response.data.length;i++){
-							$scope.oldTierItems.push(response.data[i]);
-						}		
-						
-/* 						$('#switch').show();
-						$("#switchToggle").prop('checked', false); */
-					} else {
-						$scope.tier_action = 'create';	
-						//$scope.oldTierNumber = $scope.tierNumber;
-					}
-				},
-				function(response) {
-					alert("Cannot Retrive Combo Detail!");
-			});
-
-			$('#comboSettingModal').modal('toggle');
-		}
-				
+					
 		$scope.refreshItemMenuGroupTable = function(){
 			
 			var table = $('#menuItem_dtable').DataTable({
@@ -323,10 +302,16 @@
 						 return result.menu_item_type_name;
 					 }
 					},
-					{"data" : null, "width" : "5%", 
-					 "render": function(data, type, full, meta){
-						 return '<div class="input-group"><label class="switch "><input type="checkbox" class="info"><span class="slider round"></span></label></div>';
-					 }
+					{"data" : "is_active", "width" : "5%", 
+					 "render": function(data, type, full, meta){		 
+						 var id = full.id;				 
+			 		  	 if(full.is_active)
+			 				$('.switch>#'+id).prop("checked", true);
+				 		 else
+					 		$('.switch>#'+id).prop("checked", false);
+		 
+						 return '<div class="input-group"><label class="switch"><input ng-click="updateMenuItemStatus('+ full.is_active +','+id +')" type="checkbox" class="info" id="'+ id +'"><span class="slider round"></span></label></div>';
+					 } 
 					},		
 					{"data": "id", "width": "20%",
 					 "render": function ( data, type, full, meta ) {
@@ -379,6 +364,43 @@
 					}
 				});
 			});
+		}
+		
+		$scope.updateMenuItemStatus = function(status, id){
+			
+			var reply = confirm("Do you want to change the menu item status ?");
+			
+			if(reply){	
+				var post_data = JSON.stringify({
+					'id': id,
+					'active_status' : status
+				});
+				
+				$http
+				.post(
+					'${pageContext.request.contextPath}/menu/menuItem/updateMenuItemActiveStatus',post_data)
+				.then(
+					function(response) {
+						
+						if(response.status == '200'){
+							$scope.refreshItemMenuGroupTable();
+						}
+						else if(response.status == '404'){
+							alert('Missing data for updating status!');
+							$('.switch>#'+id).prop("checked", status);
+						}
+						else if(response.status == '400'){
+							alert('Fail to change the menu item status!');
+							$('.switch>#'+id).prop("checked", status);
+						}
+					},
+					function(response) {
+						alert('Fail to change the menu item status!');
+						$('.switch>#'+id).prop("checked", status);
+				}); 
+			} else {
+				$('.switch>#'+id).prop("checked", status);
+			}
 		}
 		
 	 	$scope.performMenuItemOperations = function(action_type){	

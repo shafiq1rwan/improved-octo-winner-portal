@@ -28,7 +28,7 @@
 		
 		$scope.createCategory = function(){			
 			
-			if($scope.category.category_name == '' || $scope.category.category_name == null){
+			if($scope.category.category_name == null || $scope.category.category_name == ''){
 				
 			} else {
 
@@ -88,6 +88,7 @@
 					{"data" : "is_active", "width": "10%", 
 						"render": function(data, type, full, meta ){
 							var status = full.is_active;
+							console.log(status);
 							if(status)
 								return 'Yes';
 							 else 
@@ -106,8 +107,8 @@
 				    }
 			});
 			
-			$('#category_dtable tbody').off('click', 'tr td:nth-child(-n+4)');
-			$('#category_dtable tbody').on('click', 'tr td:nth-child(-n+4)', function() {
+			$('#category_dtable tbody').off('click', 'tr td:nth-child(-n+3)');
+			$('#category_dtable tbody').on('click', 'tr td:nth-child(-n+3)', function() {
 				$http({
 					method : 'GET',
 					headers : {'Content-Type' : 'application/json'},
