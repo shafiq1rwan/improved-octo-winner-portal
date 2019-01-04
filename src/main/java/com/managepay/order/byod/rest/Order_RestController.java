@@ -109,7 +109,7 @@ public class Order_RestController {
 					String categoryImagePath = rs2.getString("category_image_path");
 
 					JSONArray itemList = new JSONArray();
-					sqlStatement = "SELECT mi.id, mi.menu_item_name, mi.menu_item_description, mi.menu_item_type, mi.menu_item_image_path, mi.menu_item_base_price FROM category_menu_item cmi, menu_item mi WHERE cmi.is_active = 'True' AND cmi.category_id = ? AND cmi.menu_item_id = mi.id and mi.is_active = 'True' ORDER BY category_menu_item_sequence ASC";
+					sqlStatement = "SELECT mi.id, mi.menu_item_name, mi.menu_item_description, mi.menu_item_type, mi.menu_item_image_path, mi.menu_item_base_price FROM category_menu_item cmi, menu_item mi WHERE cmi.category_id = ? AND cmi.menu_item_id = mi.id and mi.is_active = 'True' ORDER BY category_menu_item_sequence ASC";
 					PreparedStatement ps3 = connection.prepareStatement(sqlStatement);
 					ps3.setInt(1, Integer.parseInt(categoryID));
 					ResultSet rs3 = ps3.executeQuery();
