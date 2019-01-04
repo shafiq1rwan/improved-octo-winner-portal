@@ -80,10 +80,30 @@
 						}
 					}
 				},
+				  "dom": 'Bfrtip',
+				   "buttons": [
+				        {
+				            text: 'Save',
+				            enabled: false,
+				            action: function ( e, dt, node, config ) {
+				            	
+				            	//table.column(3).visible(true);
+				            }
+				        },
+				        {
+				        	text: 'Reorder',
+				            action: function ( e, dt, node, config ) {        	
+				            	table.button(0).enable();
+				            	table.rowReorder.enable();
+				            	//table.column(3).visible(false);
+				            }
+				        }
+				    ],
 				destroy : true,
+		 		"rowReorder": { "selector": 'td:nth-child(2)',"enable": false,"dataSrc":"category_sequence", "update": true},
 				"order" : [ [ 0, "asc" ] ] ,
 				"columns" : [ 
-					{"data" : "id", "width": "5%"}, 
+					{"data" : "category_sequence", "visible": false, "searchable": false}, 
 					{"data" : "category_name"},
 					{"data" : "is_active", "width": "10%", 
 						"render": function(data, type, full, meta ){
@@ -107,8 +127,8 @@
 				    }
 			});
 			
-			$('#category_dtable tbody').off('click', 'tr td:nth-child(-n+3)');
-			$('#category_dtable tbody').on('click', 'tr td:nth-child(-n+3)', function() {
+			$('#category_dtable tbody').off('click', 'tr td:nth-child(1)');
+			$('#category_dtable tbody').on('click', 'tr td:nth-child(1)', function() {
 				$http({
 					method : 'GET',
 					headers : {'Content-Type' : 'application/json'},

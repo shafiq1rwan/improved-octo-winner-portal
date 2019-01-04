@@ -335,7 +335,7 @@ public class CategoryRestController {
 
 	private int getCategorySequenceNumber(Long groupCategoryId) {
 		try {
-			return jdbcTemplate.queryForObject("SELECT COUNT(category_sequence) WHERE group_category_id = ?",
+			return jdbcTemplate.queryForObject("SELECT TOP 1 category_sequence FROM category WHERE group_category_id = ? ORDER BY category_sequence DESC",
 					new Object[] { groupCategoryId }, Integer.class);
 		} catch (Exception ex) {
 			return 0;

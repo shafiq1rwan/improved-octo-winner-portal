@@ -208,7 +208,9 @@ CREATE TABLE status_lookup
 
 CREATE TABLE backend_sequence
 (
-	store_backend_sequence INT NOT NULL,
+	id BIGINT PRIMARY KEY NOT NULL,
+	backend_sequence_name NVARCHAR(100) UNIQUE NOT NULL, 
+	backend_sequence INT NOT NULL,
 	modified_date DATE
 );
 
@@ -222,7 +224,10 @@ INSERT INTO menu_item_type_lookup ([menu_item_type_number],[menu_item_type_name]
 
 INSERT INTO group_category([group_category_name]) VALUES ('Breakfast kfc');
 
-INSERT INTO backend_sequence([store_backend_sequence], [modified_date]) VALUES(0,GETDATE());
+INSERT INTO backend_sequence([id], [backend_sequence_name], [backend_sequence], [modified_date]) VALUES(1, 'Store',0,GETDATE());
+INSERT INTO backend_sequence([id], [backend_sequence_name], [backend_sequence], [modified_date]) VALUES(2, 'Store Image',0,GETDATE());
+INSERT INTO backend_sequence([id], [backend_sequence_name], [backend_sequence], [modified_date]) VALUES(3, 'Menu Item Image', 0,GETDATE());
+INSERT INTO backend_sequence([id], [backend_sequence_name], [backend_sequence], [modified_date]) VALUES(4, 'Category Image', 0,GETDATE());
 
 /*Drop all Table*/
 --DROP TABLE group_category;

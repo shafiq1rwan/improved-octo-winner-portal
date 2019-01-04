@@ -41,7 +41,7 @@
 				.then(
 					function(response) {	
 						if(response.status == '200'){
-							//$scope.resetNewTierModal();
+							$scope.resetNewTierModal();
 							$('#tierModal').modal('toggle');		
 							$scope.openComboSetting($scope.menu_item_id);
 						} else if(response.status == '400'){

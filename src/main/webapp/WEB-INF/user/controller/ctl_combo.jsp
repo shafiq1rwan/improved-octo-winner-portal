@@ -60,7 +60,8 @@
 					            text: 'Save',
 					            enabled: false,
 					            action: function ( e, dt, node, config ) {
-					            	$scope.editComboItemSequence(getAllComboDetailItemWithSequence());		            	
+					            	$scope.editComboItemSequence(getAllComboDetailItemWithSequence());
+					            	//table.column(5).visible(true);
 					            }
 					        },
 					        {
@@ -68,6 +69,7 @@
 					            action: function ( e, dt, node, config ) {        	
 					            	table.button(0).enable();
 					            	table.rowReorder.enable();
+					            	table.column(5).visible(false);
 					            }
 					        }
 					    ],

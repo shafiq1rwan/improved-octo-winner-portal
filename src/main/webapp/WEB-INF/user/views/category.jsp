@@ -35,7 +35,7 @@
 									<table id="category_dtable" class="table table-bordered table-hover display" style="width:100%">
 										<thead>
 											<tr>
-												<th>ID</th>
+												<th></th>
 												<th>Name</th>
 												<th>Status</th>
 												<th>Action</th>
