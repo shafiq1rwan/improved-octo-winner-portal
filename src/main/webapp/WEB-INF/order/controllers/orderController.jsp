@@ -100,6 +100,7 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 				dialogOption.button1 = {
 						name: $scope.currentLanguageData.dialog_button_yes,
 						fn: function() {
+							$scope.cart = [];
 							$("div#item-category-overlay").fadeOutToLeft();
 							$("div#modal-dialog").modal("hide");
 						}
