@@ -184,6 +184,14 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 				$scope.itemComboTierList.push(tierObject);
 			}
 		} else {
+			if (data.modifierList.length > 0) {
+				$scope.itemModifierList = {};
+				
+				$scope.itemModifierList.modifierGroupList = data.modifierList;
+				$scope.itemModifierList.modifierGroupData = [];
+			} else {
+				$scope.itemModifierList = null;
+			}
 		}
 	}
 	$scope.generateItemString = function(tierData) {
@@ -230,16 +238,53 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 		$scope.alacarteQuantity += 1;
 		$scope.totalItemPrice = Number(parseFloat($scope.totalItemPrice) + parseFloat(data.price)).toFixed(2);
 		
-		$scope.isReadyForCart = true;
+		if ($scope.itemModifierList != null) {
+			var modifierGroupData = [];
+			
+			for (var x = 0; x < $scope.itemModifierList.modifierGroupList.length; x++) {
+				var oriModiferData = $scope.itemModifierList.modifierGroupList[x];
+				var modifierData = {};
+				modifierData.name = oriModiferData.name;
+				modifierData.modifierList = oriModiferData.modifierList;
+				modifierData.selectedModifier = null;
+				modifierData.lastSelectedModifier = null;
+				
+				modifierGroupData.push(modifierData);
+			}
+			
+			$scope.itemModifierList.modifierGroupData.push(modifierGroupData);
+		}
+		
+		$scope.checkCartReadiness();
 	}
 	$scope.minusAlacarteQuantity = function(data) {
 		if ($scope.alacarteQuantity > 0) {
 			$scope.alacarteQuantity -= 1;
 			$scope.totalItemPrice = Number(parseFloat($scope.totalItemPrice) - parseFloat(data.price)).toFixed(2);
+			
+			if ($scope.itemModifierList != null) {
+				var delModifierGroupData = $scope.itemModifierList.modifierGroupData.pop();
+				if (delModifierGroupData) {
+					for (var x = 0; x < delModifierGroupData.length; x++) {
+						var delModifierData = delModifierGroupData[x];
+						if (delModifierData.selectedModifier && delModifierData.selectedModifier != null) {
+							$scope.totalItemPrice = Number(parseFloat($scope.totalItemPrice) - parseFloat(delModifierData.selectedModifier.price)).toFixed(2);
+						}
+					}
+				}
+			}
 		}
-		if ($scope.alacarteQuantity <= 0) {
-			$scope.isReadyForCart = false
+		
+		$scope.checkCartReadiness();
+	}
+	$scope.updateAlacarteModifierData = function(modifierGroupData) {
+		if (modifierGroupData.lastSelectedModifier != null) {
+			$scope.totalItemPrice = Number(parseFloat($scope.totalItemPrice) - parseFloat(modifierGroupData.lastSelectedModifier.price)).toFixed(2);
 		}
+		modifierGroupData.lastSelectedModifier = angular.copy(modifierGroupData.selectedModifier);
+		$scope.totalItemPrice = Number(parseFloat($scope.totalItemPrice) + parseFloat(modifierGroupData.selectedModifier.price)).toFixed(2);
+		
+		$scope.checkCartReadiness();
 	}
 	$scope.addItemQuantity = function(itemData, tierData) {
 		if (tierData.selectedQuantity >= tierData.quantity) {
@@ -355,52 +400,78 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 		}
 	}
 	$scope.checkCartReadiness = function() {
-		var isAllTierCompleted = true;
-		for (var x = 0; x < $scope.itemComboTierList.length; x++) {
-			var itemData = $scope.itemComboTierList[x];
-			if (!itemData.isTierCompleted) {
-				isAllTierCompleted = false;
-				break;
-			}
-		}
-		$scope.isReadyForCart = isAllTierCompleted;
-		if ($scope.isReadyForCart) {
-			$scope.hideFromView("tierSelection");
-		} else {
-			if ($scope.selectedTier.tierNumber < $scope.itemComboTierList.length) {
-				var currentTierIndex = $scope.selectedTier.tierNumber - 1;
-				while ((currentTierIndex < $scope.itemComboTierList.length) && $scope.itemComboTierList[currentTierIndex].isTierCompleted) {
-					currentTierIndex++;
+		if ($scope.itemComboTierList != null) {
+			//Combo Readiness
+			var isAllTierCompleted = true;
+			for (var x = 0; x < $scope.itemComboTierList.length; x++) {
+				var itemData = $scope.itemComboTierList[x];
+				if (!itemData.isTierCompleted) {
+					isAllTierCompleted = false;
+					break;
 				}
-				if (currentTierIndex == $scope.itemComboTierList.length) {
-					var isAllCompleted = true;
+			}
+			$scope.isReadyForCart = isAllTierCompleted;
+			if ($scope.isReadyForCart) {
+				$scope.hideFromView("tierSelection");
+			} else {
+				if ($scope.selectedTier.tierNumber < $scope.itemComboTierList.length) {
+					var currentTierIndex = $scope.selectedTier.tierNumber - 1;
+					while ((currentTierIndex < $scope.itemComboTierList.length) && $scope.itemComboTierList[currentTierIndex].isTierCompleted) {
+						currentTierIndex++;
+					}
+					if (currentTierIndex == $scope.itemComboTierList.length) {
+						var isAllCompleted = true;
+						for (var x = 0; x < $scope.itemComboTierList.length; x++) {
+							var itemData = $scope.itemComboTierList[x];
+							if (!itemData.isTierCompleted) {
+								isAllCompleted = false;
+								$scope.selectedTier = $scope.itemComboTierList[x];
+								$("a#nav-tier-" + (x + 1))[0].scrollIntoView({behavior: "smooth", block: "start", inline: "start"});
+								break;
+							}
+						}
+						if (isAllCompleted) {
+							//Just In Case
+							$scope.isReadyForCart = true;
+							$scope.hideFromView("tierSelection");
+						}
+					} else {
+						$scope.selectedTier = $scope.itemComboTierList[currentTierIndex];
+						$("a#nav-tier-" + ($scope.selectedTier.tierNumber))[0].scrollIntoView({behavior: "smooth", block: "start", inline: "start"});
+					}
+				} else {
 					for (var x = 0; x < $scope.itemComboTierList.length; x++) {
 						var itemData = $scope.itemComboTierList[x];
 						if (!itemData.isTierCompleted) {
-							isAllCompleted = false;
 							$scope.selectedTier = $scope.itemComboTierList[x];
 							$("a#nav-tier-" + (x + 1))[0].scrollIntoView({behavior: "smooth", block: "start", inline: "start"});
 							break;
 						}
 					}
-					if (isAllCompleted) {
-						//Just In Case
-						$scope.isReadyForCart = true;
-						$scope.hideFromView("tierSelection");
+				}
+			}
+		} else {
+			//Alacarte Readiness
+			if ($scope.alacarteQuantity > 0) {
+				if ($scope.itemModifierList && $scope.itemModifierList.modifierGroupData.length > 0) {
+					var isModifierCompleted = true;
+					for (var x = 0; x < $scope.itemModifierList.modifierGroupData.length; x++) {
+						var modifierGroupData = $scope.itemModifierList.modifierGroupData[x];
+						for (var y = 0; y < modifierGroupData.length; y++) {
+							var modifierData = modifierGroupData[y];
+							if (!modifierData.selectedModifier) {
+								isModifierCompleted = false;
+								break;
+							}
+						}
 					}
+					
+					$scope.isReadyForCart = isModifierCompleted;
 				} else {
-					$scope.selectedTier = $scope.itemComboTierList[currentTierIndex];
-					$("a#nav-tier-" + ($scope.selectedTier.tierNumber))[0].scrollIntoView({behavior: "smooth", block: "start", inline: "start"});
+					$scope.isReadyForCart = true;
 				}
 			} else {
-				for (var x = 0; x < $scope.itemComboTierList.length; x++) {
-					var itemData = $scope.itemComboTierList[x];
-					if (!itemData.isTierCompleted) {
-						$scope.selectedTier = $scope.itemComboTierList[x];
-						$("a#nav-tier-" + (x + 1))[0].scrollIntoView({behavior: "smooth", block: "start", inline: "start"});
-						break;
-					}
-				}
+				$scope.isReadyForCart = false;
 			}
 		}
 	}
@@ -419,6 +490,7 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 			cartObj.modifierData = angular.copy($scope.itemModifierList);
 			
 			$scope.cart.push(cartObj);
+			console.log(cartObj)
 			
 			var dialogOption = {};
 			dialogOption.title = $scope.currentLanguageData.dialog_cart_add_success_title;

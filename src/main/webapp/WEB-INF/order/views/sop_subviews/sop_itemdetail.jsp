@@ -41,8 +41,7 @@
 								</div>
 							</div>
 						</div>
-						<div class="w-100"
-							ng-show="selectedItem.type != '0' && itemModifierList == null">
+						<div class="w-100" ng-show="selectedItem.type != '0'">
 							<hr class="ml-3 mr-3">
 							<div class="row ml-0 mr-0">
 								<div
@@ -69,6 +68,27 @@
 													ng-click="addAlacarteQuantity(selectedItem)"
 													src="${pageContext.request.contextPath}/assets/images/order/icon/plus_icon.svg" />
 											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<hr class="ml-1 mr-1" ng-show="itemModifierList && itemModifierList.modifierGroupData.length > 0">
+							<div class="row ml-0 mr-0">
+								<div class="col-12"
+									ng-repeat="modifierGroupList in itemModifierList.modifierGroupData">
+									<div class="row ml-0 mr-0">
+										<div class="col-12 pl-0 pr-0 text-truncate"><b>{{selectedItem.name}}&nbsp;{{$index + 1}}</b></div>
+									</div>
+									<div class="row ml-0 mr-0" ng-repeat="modifierGroupData in modifierGroupList">
+										<div class="col-6 pl-0 pr-0 text-truncate">{{modifierGroupData.name}}</div>
+										<div class="col-6 pl-0 pr-0">
+											<select class="form-control xs-resp-font pt-0 pb-0"
+												ng-model="modifierGroupData.selectedModifier"
+												ng-change="updateAlacarteModifierData(modifierGroupData)">
+												<option
+													ng-repeat="modifierData in modifierGroupData.modifierList"
+													ng-value="modifierData">{{modifierData.name}} (+{{priceTag}}{{modifierData.price}})</option>
+											</select>
 										</div>
 									</div>
 								</div>

@@ -122,6 +122,7 @@ public class Order_RestController {
 						String itemPrice = String.format("%.2f", rs3.getDouble("menu_item_base_price"));
 
 						JSONArray comboList = new JSONArray();
+						JSONArray alacarteModifierList = new JSONArray();
 						if (itemType.equals("0")) {
 							sqlStatement = "SELECT cd.combo_detail_name, cd.combo_detail_quantity, cid.combo_detail_id, cid.menu_item_id, cid.menu_item_group_id FROM combo_detail cd, combo_item_detail cid WHERE cd.menu_item_id = ? AND cd.id = cid.combo_detail_id ORDER BY cd.combo_detail_sequence ASC, cid.combo_item_detail_sequence ASC";
 							PreparedStatement ps4 = connection.prepareStatement(sqlStatement);
@@ -221,7 +222,7 @@ public class Order_RestController {
 										menuItem.put("price", rs5.getString("menu_item_base_price"));
 
 										JSONArray modifierGroupList = new JSONArray();
-										sqlStatement = "SELECT mimg.modifier_group_id, mg.modifier_group_name FROM menu_item_modifier_group mimg, modifier_group mg WHERE mimg.menu_item_id = ? ORDER BY mimg.menu_item_modifier_group_sequence ASC";
+										sqlStatement = "SELECT mimg.modifier_group_id, mg.modifier_group_name FROM menu_item_modifier_group mimg, modifier_group mg WHERE mimg.menu_item_id = ? AND mg.id = mimg.modifier_group_id ORDER BY mimg.menu_item_modifier_group_sequence ASC";
 										PreparedStatement ps6 = connection.prepareStatement(sqlStatement);
 										ps6.setInt(1, Integer.parseInt(rs5.getString("id")));
 										ResultSet rs6 = ps6.executeQuery();
@@ -268,6 +269,37 @@ public class Order_RestController {
 							}
 							rs4.close();
 							ps4.close();
+						} else {
+							sqlStatement = "SELECT mimg.modifier_group_id, mg.modifier_group_name FROM menu_item_modifier_group mimg, modifier_group mg WHERE mimg.menu_item_id = ? AND mg.id = mimg.modifier_group_id ORDER BY mimg.menu_item_modifier_group_sequence ASC";
+							PreparedStatement ps4 = connection.prepareStatement(sqlStatement);
+							ps4.setInt(1, Integer.parseInt(itemID));
+							ResultSet rs4 = ps4.executeQuery();
+							while (rs4.next()) {
+								JSONObject modifierGroupData = new JSONObject();
+								modifierGroupData.put("name", rs4.getString("modifier_group_name"));
+
+								JSONArray modifierList = new JSONArray();
+								sqlStatement = "SELECT id, menu_item_name, menu_item_base_price FROM menu_item WHERE modifier_group_id = ?";
+								PreparedStatement ps5 = connection.prepareStatement(sqlStatement);
+								ps5.setInt(1, Integer.parseInt(rs4.getString("modifier_group_id")));
+								ResultSet rs5 = ps5.executeQuery();
+								while (rs5.next()) {
+									JSONObject modifierData = new JSONObject();
+									modifierData.put("id", rs5.getString("id"));
+									modifierData.put("name", rs5.getString("menu_item_name"));
+									modifierData.put("price", rs5.getString("menu_item_base_price"));
+
+									modifierList.put(modifierData);
+								}
+								rs5.close();
+								ps5.close();
+
+								modifierGroupData.put("modifierList", modifierList);
+
+								alacarteModifierList.put(modifierGroupData);
+							}
+							rs4.close();
+							ps4.close();
 						}
 
 						JSONObject menuItem = new JSONObject();
@@ -277,6 +309,7 @@ public class Order_RestController {
 						menuItem.put("type", itemType);
 						menuItem.put("path", itemPath);
 						menuItem.put("comboList", comboList);
+						menuItem.put("modifierList", alacarteModifierList);
 						menuItem.put("price", itemPrice);
 
 						itemList.put(menuItem);

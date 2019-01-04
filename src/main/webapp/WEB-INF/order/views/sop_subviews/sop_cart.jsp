@@ -32,7 +32,7 @@
 				<div class="row ml-0 mr-0 pl-1 pr-1">
 					<div class="col-12 cart-item pl-1 pr-1 mb-2"
 						ng-repeat="cartItem in cart">
-						<div class="row ml-0 mr-0">
+						<div class="row ml-0 mr-0" ng-if="!cartItem.modifierData">
 							<div class="col-7 pl-0 pr-0 xs-resp-font text-truncate">
 								<b>{{cartItem.name}}</b>
 							</div>
@@ -43,23 +43,48 @@
 								<b>{{priceTag}}{{cartItem.price}}</b>
 							</div>
 						</div>
+						<div class="row ml-0 mr-0" ng-if="cartItem.modifierData"
+							ng-repeat="modifierGroupList in cartItem.modifierData.modifierGroupData">
+							<div class="col-7 pl-0 pr-0 xs-resp-font text-truncate">
+								<b>{{cartItem.name}}</b>
+							</div>
+							<div class="col-2 pl-0 pr-0 xs-resp-font text-center">
+								<b>x1</b>
+							</div>
+							<div class="col-3 pl-0 pr-0 xs-resp-font text-right">
+								<b>{{priceTag}}{{cartItem.price}}</b>
+							</div>
+							<div class="col-12 pl-0 pr-0 row ml-0 mr-0"
+								ng-repeat="modifierGroupData in modifierGroupList">
+								<div class="col-9 pl-0 pr-0 xs-resp-font text-truncate">
+									&nbsp;&nbsp;-{{modifierGroupData.selectedModifier.name}}
+								</div>
+								<div class="col-3 pl-0 pr-0 xs-resp-font text-right">
+									{{priceTag}}{{modifierGroupData.selectedModifier.price}}
+								</div>
+							</div>
+						</div>
 						<div class="row ml-0 mr-0" ng-if="cartItem.value = '0'"
 							ng-repeat="comboItem in cartItem.comboData">
 							<div class="col-12 pl-0 pr-0">
 								<div class="row ml-0 mr-0" ng-if="itemData.selectedQuantity > 0"
 									ng-repeat="itemData in comboItem.itemList">
-									<div class="col-12 pl-0 pr-0 row ml-0 mr-0" ng-if="itemData.modifierGroupData && itemData.modifierGroupData.length > 0" ng-repeat="modifierGroupData in itemData.modifierGroupData">
+									<div class="col-12 pl-0 pr-0 row ml-0 mr-0"
+										ng-if="itemData.modifierGroupData && itemData.modifierGroupData.length > 0"
+										ng-repeat="modifierGroupData in itemData.modifierGroupData">
 										<div class="col-12 pl-0 pr-0 row ml-0 mr-0">
 											<div class="col-7 pl-0 pr-0 xs-resp-font text-truncate">&nbsp;&nbsp;{{itemData.name}}</div>
 											<div class="col-2 pl-0 pr-0 xs-resp-font text-center">x1</div>
 											<div class="col-3 pl-0 pr-0 xs-resp-font text-right">+{{priceTag}}{{itemData.price}}</div>
 										</div>
-										<div class="col-12 pl-0 pr-0 row ml-0 mr-0" ng-repeat="modifierData in modifierGroupData">
+										<div class="col-12 pl-0 pr-0 row ml-0 mr-0"
+											ng-repeat="modifierData in modifierGroupData">
 											<div class="col-9 pl-0 pr-0 xs-resp-font text-truncate">&nbsp;&nbsp;&nbsp;&nbsp;-{{modifierData.selectedModifier.name}}</div>
 											<div class="col-3 pl-0 pr-0 xs-resp-font text-right">+{{priceTag}}{{modifierData.selectedModifier.price}}</div>
 										</div>
 									</div>
-									<div class="col-12 pl-0 pr-0 row ml-0 mr-0" ng-if="!itemData.modifierGroupData">
+									<div class="col-12 pl-0 pr-0 row ml-0 mr-0"
+										ng-if="!itemData.modifierGroupData">
 										<div class="col-7 pl-0 pr-0 xs-resp-font text-truncate">&nbsp;&nbsp;{{itemData.name}}</div>
 										<div class="col-2 pl-0 pr-0 xs-resp-font text-center">x{{itemData.selectedQuantity}}</div>
 										<div class="col-3 pl-0 pr-0 xs-resp-font text-right">+{{priceTag}}{{itemData.price}}</div>
