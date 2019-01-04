@@ -8,9 +8,12 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Base64;
 import java.util.Date;
+import java.util.Map;
 import java.util.Random;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -18,6 +21,40 @@ public class ByodUtil {
 
 	@Value("${upload-path}")
 	private String filePath;
+
+	@Autowired
+	private JdbcTemplate jdbcTemplate;
+
+	public String createUniqueBackendId(String prefix) {
+		String resultString = "";
+		Date currentDate = new Date();	
+		SimpleDateFormat standardDateFormat = new SimpleDateFormat("ddMMyyyy");
+		int sequence = getSequence(prefix);
+		
+		resultString = prefix + "_" + standardDateFormat.format(currentDate) + sequence;
+		return resultString;
+	}
+
+	private int getSequence(String code) {
+		boolean isSameDay = false;
+		int sequence = 0;
+		SimpleDateFormat standardDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+
+		Map<String, Object> backendSequenceResult = jdbcTemplate.queryForMap("SELECT * FROM backend_sequence WHERE backend_sequence_code = ?", new Object[] {code});
+		Date databaseDate = (Date) backendSequenceResult.get("modified_date");
+		Date currentDate = new Date();
+
+		if (standardDateFormat.format(databaseDate).compareTo(standardDateFormat.format(currentDate)) == 0)
+			isSameDay = true;
+
+		if (isSameDay)
+			sequence = (int) backendSequenceResult.get("backend_sequence") + 1;
+		else
+			sequence = 1;
+
+		jdbcTemplate.update("UPDATE backend_sequence SET backend_sequence = ? WHERE backend_sequence_code = ?", new Object[] { sequence,code });
+		return sequence;
+	}
 
 	public String createBackendId(String typePrefix, int length) {
 		String generatedString = createRandomString(length);
@@ -40,7 +77,7 @@ public class ByodUtil {
 		}
 		return builder.toString();
 	}
-	
+
 	public String createRandomDigit(int length) {
 		String possibleChar = "0123456789";
 		StringBuilder builder = new StringBuilder();
@@ -89,6 +126,5 @@ public class ByodUtil {
 
 		return imageName + ".png";
 	}
-	
 
 }

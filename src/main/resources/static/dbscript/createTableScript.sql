@@ -22,7 +22,7 @@ CREATE TABLE menu_item
 	id BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,
 	backend_id NVARCHAR(50) NOT NULL UNIQUE,
 	modifier_group_id BIGINT,
-	menu_item_name NVARCHAR(150) NOT NULL UNIQUE,
+	menu_item_name NVARCHAR(150) NOT NULL,
 	menu_item_description NVARCHAR(255),
 	menu_item_image_path NVARCHAR(MAX),
 	menu_item_base_price DECIMAL(10,2) DEFAULT 0.00,
@@ -209,9 +209,10 @@ CREATE TABLE status_lookup
 CREATE TABLE backend_sequence
 (
 	id BIGINT PRIMARY KEY NOT NULL,
+	backend_sequence_code NVARCHAR(20) UNIQUE NOT NULL,
 	backend_sequence_name NVARCHAR(100) UNIQUE NOT NULL, 
 	backend_sequence INT NOT NULL,
-	modified_date DATE
+	modified_date DATE NOT NULL DEFAULT GETDATE()
 );
 
 INSERT INTO status_lookup (id, name) VALUES (1, 'PENDING')
@@ -224,10 +225,10 @@ INSERT INTO menu_item_type_lookup ([menu_item_type_number],[menu_item_type_name]
 
 INSERT INTO group_category([group_category_name]) VALUES ('Breakfast kfc');
 
-INSERT INTO backend_sequence([id], [backend_sequence_name], [backend_sequence], [modified_date]) VALUES(1, 'Store',0,GETDATE());
-INSERT INTO backend_sequence([id], [backend_sequence_name], [backend_sequence], [modified_date]) VALUES(2, 'Store Image',0,GETDATE());
-INSERT INTO backend_sequence([id], [backend_sequence_name], [backend_sequence], [modified_date]) VALUES(3, 'Menu Item Image', 0,GETDATE());
-INSERT INTO backend_sequence([id], [backend_sequence_name], [backend_sequence], [modified_date]) VALUES(4, 'Category Image', 0,GETDATE());
+INSERT INTO backend_sequence([id], [backend_sequence_code], [backend_sequence_name], [backend_sequence], [modified_date]) VALUES(1, 'S','Store',0,GETDATE());
+INSERT INTO backend_sequence([id], [backend_sequence_code], [backend_sequence_name], [backend_sequence], [modified_date]) VALUES(2, 'imgS','Store Image',0,GETDATE());
+INSERT INTO backend_sequence([id], [backend_sequence_code], [backend_sequence_name], [backend_sequence], [modified_date]) VALUES(3, 'imgMI','Menu Item Image', 0,GETDATE());
+INSERT INTO backend_sequence([id], [backend_sequence_code], [backend_sequence_name], [backend_sequence], [modified_date]) VALUES(4, 'imgC','Category Image', 0,GETDATE());
 
 /*Drop all Table*/
 --DROP TABLE group_category;
