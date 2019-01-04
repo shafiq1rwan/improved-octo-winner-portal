@@ -127,6 +127,68 @@
 		    </div>
 		</div>
 	</div>
+	
+	<!-- Item Modal -->
+	<div class="modal fade" id="menuItemModal" tabindex="-1" role="dialog" aria-labelledby="menuItemModal" aria-hidden="true">
+		<div class="modal-dialog modal-lg">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Menu Item List</h5>
+					<button type="button" class="close" data-dismiss="modal" ng-click="closeMenuItemModal()" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<div class="row">
+						<div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
+							<ul class="list-group" id="sortableList">
+								<li class="list-group-item pl-0 pr-0 pt-1 pb-1" ng-repeat="item in selectedItemList">
+									<div class="d-flex flex-row">
+										<div class="p-1">
+											<img style="width:75px; heigh: 75px;" src="{pageContext.request.contextPath}/{{item.menu_item_image_path}}" class="rounded-circle"/>
+										</div>
+										<div class="pl-3 pt-2 pr-2 pb-2 flex-grow-1  border-left">
+											<h5 class="card-title">
+												{{item.menu_item_name}} <sub style="font-size:60%">{{item.menu_item_type_name}}</sub>
+											</h5>
+											<h6 class="text-info">{{item.backend_id}}</h6>
+										</div>
+										<div class="pr-1">
+											<button class="btn btn-outline"></button>
+										</div>
+									</div>
+								</li>
+								<li class="list-group-item pl-0 pr-0 pt-1 pb-1" ng-if="selectedItemList.length===0">
+									There is no Items assigned.
+								</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button class="btn btn-danger" ng-show="assign_item_action =='Edit'" ng-click="unassignAll()" ng-disabled="selectedItemList.length === 0">Unassigned All Items</button>
+					<button class="btn btn-default" ng-click="openAssignItemsModal()">Assign Items</button>
+		      		<button class="btn btn-primary" ng-show="assign_item_action =='New'" ng-click="submitAssignedItems('New')" ng-disabled="selectedItemList.length === 0">Submit</button>
+		      		<button class="btn btn-primary" ng-show="assign_item_action =='Edit'" ng-click="submitAssignedItems('Edit')">Update</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- Items Assign & Unassign -->
+	<div class="modal fade" id="assignItemsModal" role="dialog"
+		aria-labelledby="assignItemsModal" aria-hidden="true">
+		<div class="modal-dialog modal-xl">
+			<div class="modal-content">
+				<form id="assignItemForm" method="POST" accept-charset="UTF-8"
+					role="form" class="form-signin">
+					<div class="modal-header">
+						<h5 class="modal-title">Assign Item</h5>
+						<button type="button" class="close" data-dismiss="modal"></button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
 </div>
 </body>
 </html>
