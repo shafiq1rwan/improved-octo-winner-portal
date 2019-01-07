@@ -198,6 +198,9 @@ public class CategoryRestController {
 		PreparedStatement stmt = null;
 
 		try {
+			System.out.println("ReMe");
+			System.out.println(byodUtil.createUniqueBackendId("imgC"));
+			
 			JSONObject jsonCategoryData = new JSONObject(data);
 			if (jsonCategoryData.has("group_category_id") && jsonCategoryData.has("category_name")) {
 
@@ -295,6 +298,40 @@ public class CategoryRestController {
 			}
 		}
 		return jsonResult.toString();
+	}
+	
+	@PostMapping(value = "/edit_category_sequence",produces = "application/json")
+	public ResponseEntity<?> editCategorySequence(HttpServletRequest request, HttpServletResponse response, @RequestBody String data) {
+		Connection connection = null;
+		PreparedStatement stmt = null;
+
+		try {
+			JSONArray jsonCategorySequenceArray = new JSONArray(data);
+			connection = dataSource.getConnection();
+			stmt = connection.prepareStatement(
+					"UPDATE category SET category_sequence = ? WHERE id = ?");
+			
+			for(int i=0;i<jsonCategorySequenceArray.length();i++) {
+				int index = i + 1;
+				JSONObject jsonObj = jsonCategorySequenceArray.getJSONObject(i);			
+				stmt.setInt(1, index);
+				stmt.setLong(2, jsonObj.getLong("id"));
+				stmt.executeUpdate();
+			}
+			return ResponseEntity.ok(null);
+		}
+		catch (Exception ex) {
+			ex.printStackTrace();
+			return ResponseEntity.badRequest().body(ex.getMessage());
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 
 	@DeleteMapping("/delete_category")

@@ -516,7 +516,7 @@ public class ComboRestController {
 				jsonMenuItemGroupObj.put("sequence", rs2.getInt("combo_item_detail_sequence"));
 
 				stmt = connection.prepareStatement(
-						"SELECT mi.* FROM menu_item mi INNER JOIN menu_item_group_menu_item migmi ON mi.id = migmi.menu_item_id WHERE migmi.menu_item_group_id = ? ORDER BY migmi.menu_item_group_menu_item_sequence");
+						"SELECT mi.* FROM menu_item mi INNER JOIN menu_item_group_sequence migs ON mi.id = migs.menu_item_id WHERE migs.menu_item_group_id = ? ORDER BY migs.menu_item_group_sequence");
 				stmt.setLong(1, rs2.getLong("id"));
 				rs3 = (ResultSet) stmt.executeQuery();
 

@@ -47,13 +47,19 @@ CREATE TABLE menu_item_group
 	created_date DATETIME NOT NULL DEFAULT GETDATE()
 );
 
-CREATE TABLE menu_item_group_menu_item
-(	
+--CREATE TABLE menu_item_group_menu_item
+--(	
+--	menu_item_group_id BigInt,
+--	menu_item_id BigInt,
+--	menu_item_group_menu_item_sequence INT NOT NULL	
+--);
+
+CREATE TABLE menu_item_group_sequence
+(
 	menu_item_group_id BigInt,
 	menu_item_id BigInt,
-	menu_item_group_menu_item_sequence INT NOT NULL	
+	menu_item_group_sequence INT NOT NULL	
 );
-
 
 CREATE TABLE modifier_group
 (
@@ -68,6 +74,13 @@ CREATE TABLE menu_item_modifier_group
 	menu_item_id BIGINT,
 	modifier_group_id BIGINT,
 	menu_item_modifier_group_sequence INT
+);
+
+CREATE TABLE modifier_item_sequence
+(
+	modifier_group_id BIGINT NOT NULL,
+	menu_item_id BIGINT NOT NULL,
+	modifier_item_sequence INT
 );
 
 CREATE TABLE combo_detail
@@ -239,9 +252,10 @@ INSERT INTO backend_sequence([id], [backend_sequence_code], [backend_sequence_na
 --DROP TABLE menu_item;
 --DROP TABLE category_menu_item;
 --DROP TABLE menu_item_group;
---DROP TABLE menu_item_group_menu_item;
+--DROP TABLE menu_item_group_sequence;
 --DROP TABLE modifier_group;
 --DROP TABLE menu_item_modifier_group;
+--DROP TABLE modifier_item_sequence;
 --DROP TABLE combo_detail;
 --DROP TABLE combo_item_detail;
 --DROP TABLE menu_item_type_lookup;

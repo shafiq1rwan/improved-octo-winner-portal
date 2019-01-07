@@ -131,7 +131,7 @@ public class ItemGroupRestController {
 					stmt = null;
 					int i = 1;
 					for(int item_id : items) {
-						stmt = connection.prepareStatement("INSERT INTO menu_item_group_menu_item(menu_item_group_id, menu_item_id, menu_item_group_menu_item_sequence) "
+						stmt = connection.prepareStatement("INSERT INTO menu_item_group_sequence(menu_item_group_id, menu_item_id, menu_item_group_sequence) "
 								+ "VALUES(?, ?, ?)");
 						stmt.setLong(1, rs.getLong(1));
 						stmt.setLong(2, item_id);
@@ -276,7 +276,7 @@ public class ItemGroupRestController {
 			}
 			
 			connection = dataSource.getConnection();
-			stmt = connection.prepareStatement("UPDATE menu_item_group SET backend_id = ?, menu_item_group_name = ?, menu_item_group_menu_item_sequnce = ? "
+			stmt = connection.prepareStatement("UPDATE menu_item_group SET backend_id = ?, menu_item_group_name = ?, menu_item_group_sequence = ? "
 					+ "WHERE id = ?; SELECT SCOPE_IDENTITY();");
 			stmt.setLong(1, jObject.getLong("backend_id"));
 			stmt.setString(2, jObject.getString("group_name"));
@@ -310,7 +310,7 @@ public class ItemGroupRestController {
 		
 		try {
 			connection = dataSource.getConnection();
-			stmt = connection.prepareStatement("DELETE FROM menu_item_group_menu_item WHERE menu_item_group_id = ?");
+			stmt = connection.prepareStatement("DELETE FROM menu_item_group_sequence WHERE menu_item_group_id = ?");
 			stmt.setLong(1, id);
 			int affectedRow = stmt.executeUpdate();
 			
