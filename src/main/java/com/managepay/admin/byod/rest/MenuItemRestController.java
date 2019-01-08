@@ -128,8 +128,9 @@ public class MenuItemRestController {
 
 		try {
 			connection = dataSource.getConnection();		
-			if(menuItemType == 3) {
-				stmt = connection.prepareStatement("SELECT mi.*, mitl.menu_item_type_name FROM menu_item mi INNER JOIN menu_item_type_lookup mitl ON mi.menu_item_type = mitl.menu_item_type_number WHERE menu_item_type != 2 AND is_active = 1");
+			if(menuItemType == -1) {
+				// ala carte + combo
+				stmt = connection.prepareStatement("SELECT mi.*, mitl.menu_item_type_name FROM menu_item mi INNER JOIN menu_item_type_lookup mitl ON mi.menu_item_type = mitl.menu_item_type_number WHERE menu_item_type IN (0, 1) AND is_active = 1");
 			} else {
 				stmt = connection.prepareStatement("SELECT mi.*, mitl.menu_item_type_name FROM menu_item mi INNER JOIN menu_item_type_lookup mitl ON mi.menu_item_type = mitl.menu_item_type_number WHERE menu_item_type = ? AND is_active = 1");
 				stmt.setInt(1, menuItemType);

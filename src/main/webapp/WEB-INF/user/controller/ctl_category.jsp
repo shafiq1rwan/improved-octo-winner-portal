@@ -285,6 +285,12 @@
 				}
 			}
 			
+			$scope.emptyList = true;
+			for(var a=0; a<$scope.itemList.length; a++){
+				if(!$scope.itemList[a].isAssigned)
+					$scope.emptyList = false;
+			}
+			
 			$('#assignItemsModal').modal('toggle');
 			$('#menuItemModal').modal('toggle');
 		}
@@ -316,7 +322,7 @@
 				$http({
 					method : 'GET',
 					headers : {'Content-Type' : 'application/json'},
-					url : ('${pageContext.request.contextPath}/menu/menuItem/getAllMenuItemByType?menuItemType=3')
+					url : ('${pageContext.request.contextPath}/menu/menuItem/getAllMenuItemByType?menuItemType=-1')
 				})
 				.then(function(response) {
 					if(response.status == "200") {
@@ -324,13 +330,21 @@
 						for(var i=0;i<$scope.itemList.length;i++){
 							$scope.itemList[i].isAssigned = false;
 						}
+						
 						isEdit($scope.itemList);
+						
+						$scope.emptyList = true;
+						for(var a=0; a<$scope.itemList.length; a++){
+							if(!$scope.itemList[a].isAssigned)
+								$scope.emptyList = false;
+						}
+						
 					}
 					else {
 						alert("Cannot Retrieve Item List");
 					}
 				});
-			} 
+			}
 		}
 		
 		function isEdit(item_list) {
@@ -470,7 +484,14 @@
 		    }
 		     arr.splice(new_index, 0, arr.splice(old_index, 1)[0]); 
 		}
-
+		
+		// case insensitive
+		$.expr[":"].contains = $.expr.createPseudo(function(arg) {
+		    return function( elem ) {
+		        return $(elem).text().toUpperCase().indexOf(arg.toUpperCase()) >= 0;
+		    };
+		});
+		
 		// search input on change
 		$('#searchbox-input').on('input',function(e){
 		    var filter = $(this).val(); // get the value of the input, which we filter on

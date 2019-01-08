@@ -93,8 +93,7 @@
 										'${pageContext.request.contextPath}/user');
 					});
 			
-		}
-		
+		}	
 		
 		//TODO modified the existing menu_item (modifier item type)
 		$scope.refreshModifierGroupTable = function(){
@@ -115,12 +114,12 @@
 				"order" : [ [ 0, "asc" ] ] ,
 				"columns" : [ 
 					{"data" : "id", "width": "4%"},
-					{"data" : "modifier_group_name","width": "15%"},
-					{"data" : "is_active", "width": "10%"},
-					{"data": "id", "width": "15%",
+					{"data" : "modifier_group_name"},
+					{"data" : "is_active", "width": "15%"},
+					{"data": "id", "width": "20%",
 					 "render": function ( data, type, full, meta ) {
 						 	var id = full.id;
-						    return '<div class="btn-toolbar justify-content-between"><button ng-click="removeModifierGroup('+ id +')" class="btn btn-danger custom-fontsize"><b><i class="fa fa-trash"></i>Remove</b></button></div>'			   
+						    return '<div class="btn-toolbar justify-content-between"><button ng-click="removeModifierGroup('+ id +')" class="btn btn-danger custom-fontsize"><b><i class="fa fa-trash"></i>Remove</b></button><button ng-click="getModifierGroupMenuItem('+ id +')" type="button" data-toggle="modal" data-backdrop="static" data-keyboard="false" data-target="#menuItemModal" class="btn btn-default custom-fontsize"><b><i class="fa fa-trash"></i>Items</b></button></div>'			   
 					 }
 					}
 					],
@@ -145,35 +144,12 @@
 						$scope.modifier_group.modifier_group_name = response.data.modifier_group_name;
 						$scope.modifier_group.is_active = response.data.is_active;
 						$scope.action = 'update';
-						$('#createModifierGroupModal').modal({backdrop: 'static', keyboard: false});
-						
-						getAssignedItemList();
+						$('#createModifierGroupModal').modal({backdrop: 'static', keyboard: false});					
 					}
 				});						
 			});
 			
 		}
-		
-		/* Start assigned item list */
-		$scope.assignedItemList = [];
-		
-		$scope.unassignItem = function(id){
-			console.log(id);
-			$http({
-				method : 'GET',
-				headers : {'Content-Type' : 'application/json'},
-				url : '${pageContext.request.contextPath}/menu/modifier_group/unassign_menu_item?id='+id	
-			})
-			.then(function(response) {
-				if (response.status == "400") {
-					alert("Unable to unassign menu item.");
-				} else if(response.status == "200") {
-					alert("Successfully unassign menu item.")	
-					getAssignedItemList();
-				}
-			});			
-		}
-		/* End assigned item list */
 		
 		
 		/* Start assign items modal */
@@ -185,118 +161,225 @@
 		$scope.itemList = [];
 		$scope.selectedItemList = [];
 		
-		function getAssignedItemList(){
-			$scope.assignedItemList = [];
-			// get assigned menu item list
-			$http({
-				method : 'GET',
-				headers : {'Content-Type' : 'application/json'},
-				url : ($scope.action=='create'?'${pageContext.request.contextPath}/menu/modifier_group/get_assigned_menu_item_list?id=-1':
-					'${pageContext.request.contextPath}/menu/modifier_group/get_assigned_menu_item_list?id='+ $scope.modifier_group.id)
-			})
-			.then(function(response) {
-				if (response.status == "404") {
-					alert("Unable to find modifier group detail");
-				} else if(response.status == "200") {
-					console.log(response.data);
-					var result = response.data.data;
-
-					for(var a=0; a<result.length; a++){
-						$scope.assignedItemList.push(
-								{
-									id: result[a].id,
-									backend_id: result[a].backend_id,
-									menu_item_name: result[a].menu_item_name,
-									menu_item_type_name: result[a].menu_item_type_name,
-									menu_item_image_path: result[a].menu_item_image_path,
-								}
-						)
-					}
-				}
-			});
-		}
-		
-		$scope.openAssignItemsModal = function(){
-			$('#createModifierGroupModal').modal('toggle');
-			// open assign items modal
-			$('#assignItemsModal').modal({backdrop: 'static', keyboard: false});
+		$scope.getModifierGroupMenuItem = function(modifier_group_id){
+			$scope.modifier_group_id = modifier_group_id;
 			
-			// get menu item list
-			$http({
-				method : 'GET',
-				headers : {'Content-Type' : 'application/json'},
-				url : ($scope.action=='create'?'${pageContext.request.contextPath}/menu/modifier_group/get_menu_item_list?id=-1':
-					'${pageContext.request.contextPath}/menu/modifier_group/get_menu_item_list?id='+ $scope.modifier_group.id)
-			})
-			.then(function(response) {
-				if (response.status == "404") {
-					alert("Unable to find modifier group detail");
-				} else if(response.status == "200") {
-					console.log(response.data);
-					var result = response.data.data;
-					console.log(result);
-					console.log(result[0].backend_id);
-					for(var a=0; a<result.length; a++){
-						$scope.itemList.push(
-								{
-									id: result[a].id,
-									backend_id: result[a].backend_id,
-									menu_item_name: result[a].menu_item_name,
-									menu_item_type_name: result[a].menu_item_type_name,
-									check: false
+			$http.get('${pageContext.request.contextPath}/menu/modifier_group/get_assigned_menu_item_list?modifier_group_id='+ modifier_group_id).then(
+					function(response) {					
+						if(response.status == 200){					
+							if(response.data.length == 0){
+								$scope.assign_item_action = 'New';
+							} else {			
+								$scope.assign_item_action = 'Edit';					
+								$scope.selectedItemList = response.data;
+								//Keep Track old data
+								for(var i =0; i<response.data.length; i++){
+									$scope.oldItemList.push(response.data[i]);
 								}
-						)
-					}
-				}
-			});
+							}
+						}
+					},
+					function(response) {
+						if(response.status == 400){
+							alert(response.data.response_message);
+						} else {
+							console.log(response.data);
+							alert("Session TIME OUT");
+			 				$(location).attr('href', '${pageContext.request.contextPath}/user');
+						}
+					});
+			
+			  // drag and drop list
+			   var sortable = Sortable.create($('#sortableList')[0], {
+			   		handle: ".fa-reorder",
+			   		scroll: true,
+			   		// Element is chosen
+			   		onChoose: function (/**Event*/evt) {
+	
+			   		},
+			   		// Element dragging started
+			   		onStart: function (/**Event*/evt) {
+	
+			   		},
+			   		// Element dragging ended
+			   		onEnd: function (evt) {
+			   			//changeElementPositionInArray(evt.oldIndex, evt.newIndex);
+			   			move($scope.selectedItemList,evt.oldIndex,evt.newIndex);
+			   		}
+		   		});
+		   	// end drag and drop list	
 		}
 		
-		$scope.submitAssignItems = function(){
+		//Assigned Item Related Operations
+		$scope.submitAssignedItems = function(action_type){		
+				var json_data = JSON.stringify({
+					'modifier_group_id' : $scope.modifier_group_id,
+					'item_list' : $scope.selectedItemList
+				});
+
+				if(action_type === 'New'){
+				 	$http
+				 	.post('${pageContext.request.contextPath}/menu/modifier_group/assign_menu_items', json_data)
+					.then(
+						function(response) {
+							if(response.status == 200){				
+								alert("Successfully assigned menu items.")
+								$scope.getModifierGroupMenuItem($scope.modifier_group_id);
+								$scope.closeMenuItemModal();
+							}
+						},
+						function(response) {									
+							if(response.status == 400){
+								alert("Unable to assign menu item.");
+							} else {
+								alert("Session TIME OUT");
+				 				$(location)
+								.attr('href',
+										'${pageContext.request.contextPath}/user');
+							}
+						}); 
+				} else if(action_type === 'Edit'){
+					$http
+					.post('${pageContext.request.contextPath}/menu/modifier_group/reassign_menu_items', json_data)
+					.then(
+							function(response) {
+								if(response.status == 200){		
+									console.log("Success");
+									$scope.closeMenuItemModal();
+								}
+							},
+							function(response) {									
+								if(response.status == 400){
+									alert("Unable to reassign menu item.");
+								} else {
+					 				alert("Session TIME OUT");
+					 				$(location)
+									.attr('href',
+											'${pageContext.request.contextPath}/user');
+								}
+							});
+
+					
+				}
+
+		}
+			
+		$scope.assignItems = function(){	
 			for(var a=0; a<$scope.itemList.length; a++){
 				if($scope.itemList[a].check){
-					$scope.selectedItemList.push($scope.itemList[a]);
-				}
-			}
-			
-			var postdata = {
-					modifier_group_id : $scope.modifier_group.id,
-					item_list : $scope.selectedItemList
-			}
-			console.log(postdata);
-			
-			// assign menu item
-			$http({
-				method : 'POST',
-				headers : {'Content-Type' : 'text/plain'},
-				url : '${pageContext.request.contextPath}/menu/modifier_group/assign_menu_items',
-				data : {
-					modifier_group_id : $scope.modifier_group.id,
-					item_list : $scope.selectedItemList
-				}
-			})
-			.then(function(response) {
-				if (response.status == "400") {
-					alert("Unable to assign menu item.");
-				} else if(response.status == "200") {
-					console.log(response.data);
+					$scope.selectedItemList.push(
+						$scope.itemList[a]
+					);
 					
-					alert("Successfully assigned menu items.")
-					getAssignedItemList();
-					$scope.closeAssignItemsModal();
+					$scope.itemList[a].check = false;
+					$scope.itemList[a].isAssigned = true;
 				}
-			});
+			}
 			
+			$scope.emptyList = true;
+			for(var a=0; a<$scope.itemList.length; a++){
+				if(!$scope.itemList[a].isAssigned)
+					$scope.emptyList = false;
+			}
+			
+			$('#assignItemsModal').modal('toggle');
+			$('#menuItemModal').modal('toggle');
 		}
 		
-		$scope.closeAssignItemsModal = function(){
-			// close assign items modal
-			$('#assignItemsModal').modal('toggle');
-			$('#createModifierGroupModal').modal('toggle');
+		$scope.unassignItem = function(item_id){
+			for(var a=0; a<$scope.selectedItemList.length; a++){
+					if($scope.selectedItemList[a].id === item_id){			
+						
+						for(var e=0; e<$scope.itemList.length;e++){
+							if($scope.itemList[e].id === $scope.selectedItemList[a].id){
+								$scope.itemList[e].isAssigned = false;
+							}
+						}
+						
+						$scope.selectedItemList.splice($scope.selectedItemList.indexOf($scope.selectedItemList[a]),1);		
+					}
+				}
+		}
+		
+		$scope.unassignAll = function(){
+			$scope.selectedItemList = [];
+		}
+
+		$scope.openAssignItemsModal = function(){
+			$('#menuItemModal').modal('toggle');
+			$('#assignItemsModal').modal({backdrop: 'static', keyboard: false});
 			
-			// reinitialize
+			if($scope.itemList.length == 0){
+				$http({
+					method : 'GET',
+					headers : {'Content-Type' : 'application/json'},
+					url : ('${pageContext.request.contextPath}/menu/menuItem/getAllMenuItemByType?menuItemType=2')
+				})
+				.then(function(response) {
+					if(response.status == "200") {
+						$scope.itemList = response.data;
+						for(var i=0;i<$scope.itemList.length;i++){
+							$scope.itemList[i].isAssigned = false;
+						}
+						
+						isEdit($scope.itemList);
+						
+						$scope.emptyList = true;
+						for(var a=0; a<$scope.itemList.length; a++){
+							if(!$scope.itemList[a].isAssigned)
+								$scope.emptyList = false;
+						}
+						
+					}
+					else {
+						alert("Cannot Retrieve Item List");
+					}
+				});
+			}
+		}
+		
+		function isEdit(item_list) {
+			if($scope.assign_item_action === 'Edit'){
+				for(var i=0; i<item_list.length;i++){
+					
+					for(var j=0;j<$scope.selectedItemList.length;j++){				
+						if(item_list[i].id === $scope.selectedItemList[j].id){
+							item_list[i].isAssigned = true;
+						}
+						
+					}
+
+				}
+			}
+		}
+		
+		$scope.closeAssignItemsModal = function(){	
+			$('#menuItemModal').modal('toggle');
+			$('#assignItemsModal').modal('toggle');
+			
 			$scope.filterSelected = {id: 1};
+			$('#searchbox-input').val('');
+			
+			for(var i=0;i<$scope.itemList.length;i++){
+				$scope.itemList[i].check = false;
+			}
+		}
+		
+		$scope.clearAssignItemModal = function(){
+			$scope.filterSelected = {id: 1};
+			$('#searchbox-input').val('');
+			
+			$scope.closeMenuItemModal();
+		}
+		
+		$scope.closeMenuItemModal = function(){	 	
+			$('#menuItemModal').modal('hide');
+			
+			$scope.oldItemList = [];
 			$scope.itemList = [];
 			$scope.selectedItemList = [];
+			$scope.modifier_group_id = 0;
+			$scope.assign_item_action = '';
 		}
 		
 		$scope.selectCard = function(item){
@@ -308,9 +391,33 @@
 			}
 		}
 		
+		function move(arr, old_index, new_index) {
+		    while (old_index < 0) {
+		        old_index += arr.length;
+		    }
+		    while (new_index < 0) {
+		        new_index += arr.length;
+		    }
+		    if (new_index >= arr.length) {
+		        var k = new_index - arr.length;
+		        while ((k--) + 1) {
+		            arr.push(undefined);
+		        }
+		    }
+		     arr.splice(new_index, 0, arr.splice(old_index, 1)[0]); 
+		}
+		
+		// case insensitive
+		$.expr[":"].contains = $.expr.createPseudo(function(arg) {
+		    return function( elem ) {
+		        return $(elem).text().toUpperCase().indexOf(arg.toUpperCase()) >= 0;
+		    };
+		});
+		
 		// search input on change
-		$('#searchbox-input').on('input',function(e){
+		$('#searchbox-input').on('input',function(e){				
 		    var filter = $(this).val(); // get the value of the input, which we filter on
+		    //console.log($('.card-container').find(".card-title").innerText());
 		   	if($scope.filterSelected.id==1){
 			    $('.card-container').find(".card-title:not(:contains(" + filter + "))").parentsUntil('.card-container').css('display','none');
 			    $('.card-container').find(".card-title:contains(" + filter + ")").parentsUntil('.card-container').css('display','block');
@@ -322,7 +429,7 @@
 		});
 		
 		// filter type on change
-		 $scope.filterOnChange = function ($event){	         
+		 $scope.filterOnChange = function ($event){		
 	            var filter = $('#searchbox-input').val();
 	            if($scope.filterSelected.id==1){
 				    $('.card-container').find(".card-title:not(:contains(" + filter + "))").parentsUntil('.card-container').css('display','none');

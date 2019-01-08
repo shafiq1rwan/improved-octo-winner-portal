@@ -150,7 +150,7 @@
 					{"data": "id", "width": "25%",
 					 "render": function ( data, type, full, meta ) {
 						 	var id = full.id;
-						    return '<div class="btn-toolbar justify-content-between"><a ng-href= "${pageContext.request.contextPath}/user/#!Router_group_category_category/'+id+'" class="btn btn-outline-info border-0 p-0 custom-fontsize"><b><i class="fa fa-edit"></i> Edit Categories</b></a></div>'			   
+						    return '<div class="btn-toolbar justify-content-start"><a ng-href= "${pageContext.request.contextPath}/user/#!Router_group_category_category/'+id+'" class="btn btn-outline-info p-1 custom-fontsize"><i class="fa fa-edit"></i> Edit Category</a><button class="btn btn-outline-danger p-1 custom-fontsize" ng-click="publishMenu('+id+')"><i class="fa fa-upload"></i> Publish Menu</button></div>'			   
 					 }
 					}
 					],
@@ -223,6 +223,20 @@
 			store_url = '';
 		}
 		
+		$scope.publishMenu = function(id){
+			
+			$http({
+				method : 'GET',
+				headers : {'Content-Type' : 'application/json'},
+				url : '${pageContext.request.contextPath}/menu/group_category/publish_menu?group_category_id='+id	
+			})
+			.then(function(response) {
+				console.log(response.data);
+			}, function(response){
+				console.log(response.data)
+				alert("Unknown Error Occured While Obtaining Store List");
+			});
+		}
 
 		
 		

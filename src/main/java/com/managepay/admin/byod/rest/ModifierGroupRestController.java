@@ -42,187 +42,6 @@ public class ModifierGroupRestController {
 	@Autowired
 	private ByodUtil byodUtil;
 	
-	@RequestMapping(value = "/get_menu_item_list", method = RequestMethod.GET)
-	public String getMenuItemList(@RequestParam("id") Long id) {
-		JSONArray JARY = new JSONArray();
-		JSONObject jObject = new JSONObject();
-		JSONObject jObjectResult = new JSONObject();
-		Connection connection = null;
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-		
-		try {
-			connection = dataSource.getConnection();
-			stmt = connection.prepareStatement("SELECT * FROM menu_item a "
-					+ "INNER JOIN menu_item_type_lookup b ON a.menu_item_type = b.menu_item_type_number "
-					+ "WHERE a.modifier_group_id != ? AND a.menu_item_type = 2");
-			
-			stmt.setLong(1, id);
-			rs = (ResultSet) stmt.executeQuery();
-			 
-			while(rs.next()) {
-				jObject = new JSONObject();
-				jObject.put("id", rs.getLong("id"));
-				jObject.put("menu_item_name", rs.getString("menu_item_name"));
-				jObject.put("backend_id", rs.getString("backend_id"));
-				jObject.put("menu_item_type_name", rs.getString("menu_item_type_name"));
-				JARY.put(jObject);
-			}
-			
-			jObjectResult = new JSONObject();
-			jObjectResult.put("data", JARY);
-		}catch(Exception e) {
-			e.printStackTrace();
-		}
-		finally {
-			if (connection != null) {
-				try {
-					connection.close();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}
-		return jObjectResult.toString();
-	}	
-
-	@RequestMapping(value = "/get_assigned_menu_item_list", method = RequestMethod.GET)
-	public String getAssignedMenuItemList(@RequestParam("id") Long id) {
-		JSONArray JARY = new JSONArray();
-		JSONObject jObject = new JSONObject();
-		JSONObject jObjectResult = new JSONObject();
-		Connection connection = null;
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-		
-		try {
-			connection = dataSource.getConnection();
-			stmt = connection.prepareStatement("SELECT * FROM menu_item a "
-					+ "INNER JOIN menu_item_type_lookup b ON a.menu_item_type = b.menu_item_type_number "
-					+ "WHERE a.modifier_group_id = ? AND a.menu_item_type = 2 ");
-			
-			stmt.setLong(1, id);
-			rs = (ResultSet) stmt.executeQuery();
-			 
-			while(rs.next()) {
-				jObject = new JSONObject();
-				jObject.put("id", rs.getLong("id"));
-				jObject.put("menu_item_name", rs.getString("menu_item_name"));
-				jObject.put("backend_id", rs.getString("backend_id"));
-				jObject.put("menu_item_type_name", rs.getString("menu_item_type_name"));
-				jObject.put("menu_item_image_path", rs.getString("menu_item_image_path"));
-				JARY.put(jObject);
-			}
-			
-			jObjectResult = new JSONObject();
-			jObjectResult.put("data", JARY);
-		}catch(Exception e) {
-			e.printStackTrace();
-		}
-		finally {
-			if (connection != null) {
-				try {
-					connection.close();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}
-		return jObjectResult.toString();
-	}
-	
-	@RequestMapping(value = "/assign_menu_items", method = RequestMethod.POST)
-	public ResponseEntity<?> assignMenuItems(@RequestBody String formfield) {
-		JSONArray JARY = new JSONArray();
-		JSONObject jObject = new JSONObject();
-		JSONObject jObjectResult = new JSONObject();
-		Connection connection = null;
-		PreparedStatement stmt = null;
-		
-		try {
-			jObject = new JSONObject(formfield);
-			Long id = jObject.getLong("modifier_group_id");
-			JARY = jObject.getJSONArray("item_list");
-			
-			int updateCount = JARY.length();
-			String append = "";
-			
-			for(int a=0; a< updateCount; a++) {
-				if(a!=0) {
-					append+=" , ";
-				}
-				append +="? ";
-			}
-			
-			String sql = "UPDATE menu_item SET modifier_group_id = ? WHERE id IN (" + append + ")";
-			
-			connection = dataSource.getConnection();
-			stmt = connection.prepareStatement(sql);
-			
-			int count = 1;
-			stmt.setLong(count++, id);
-			for(int a=0; a< updateCount; a++) {
-				stmt.setLong(count++, JARY.getJSONObject(a).getLong("id"));
-			}
-			
-			int rowAffected = stmt.executeUpdate();	 
-			if (rowAffected == 0) {
-				return ResponseEntity.badRequest().body("Failed to assign menu item");
-			}
-			return ResponseEntity.ok().body(null);
-			
-		}catch(Exception e) {
-			e.printStackTrace();
-			return ResponseEntity.badRequest().body(e.getMessage());
-		}
-		finally {
-			if (connection != null) {
-				try {
-					connection.close();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}
-	}
-	
-	@RequestMapping(value = "/unassign_menu_item", method = RequestMethod.GET)
-	public ResponseEntity<?> unassignMenuItem(@RequestParam("id") Long id) {
-		/*JSONArray JARY = new JSONArray();
-		JSONObject jObject = new JSONObject();
-		JSONObject jObjectResult = new JSONObject();*/
-		Connection connection = null;
-		PreparedStatement stmt = null;
-		/*ResultSet rs = null;*/
-		
-		try {
-			connection = dataSource.getConnection();
-			stmt = connection.prepareStatement("UPDATE menu_item SET modifier_group_id = 0 "
-					+ "WHERE id = ? AND menu_item_type = 2 ");
-			
-			int count = 1;
-			stmt.setLong(count++, id);
-			int rowAffected = stmt.executeUpdate();	 
-			if (rowAffected == 0) {
-				return ResponseEntity.badRequest().body("Failed to unassign menu item");
-			}
-			
-			return ResponseEntity.ok().body(null);
-		}catch(Exception e) {
-			e.printStackTrace();
-			return ResponseEntity.badRequest().body(e.getMessage());
-		}
-		finally {
-			if (connection != null) {
-				try {
-					connection.close();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}
-	}
-	
 	@GetMapping(value = "/get_all_modifier_group", produces = "application/json")
 	public ResponseEntity<?> getAllModifierGroup(HttpServletRequest request, HttpServletResponse response) {
 		JSONArray jsonModifierGroupArray = new JSONArray();
@@ -426,6 +245,132 @@ public class ModifierGroupRestController {
 			}
 		}
 
+	}
+	
+	@GetMapping(value = "/get_assigned_menu_item_list", produces = "application/json")
+	public ResponseEntity<?> getAssignedMenuItemList(@RequestParam("modifier_group_id") Long modifierGroupId, HttpServletRequest request, HttpServletResponse response) {
+		JSONArray jsonMenuItemArray = new JSONArray();
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+
+		try {		
+			connection = dataSource.getConnection();
+			stmt = connection.prepareStatement("SELECT * FROM menu_item a " + 
+					"INNER JOIN menu_item_type_lookup b ON a.menu_item_type = b.menu_item_type_number " + 
+					"INNER JOIN modifier_item_sequence c ON a.id = c.menu_item_id " + 
+					"WHERE c.modifier_group_id = ? ");
+			stmt.setLong(1, modifierGroupId);
+			rs = (ResultSet) stmt.executeQuery();
+
+			while (rs.next()) {
+				JSONObject jsonMenuItemObj = new JSONObject();
+				jsonMenuItemObj.put("id", rs.getLong("id"));
+				jsonMenuItemObj.put("backend_id", rs.getString("backend_id"));
+				jsonMenuItemObj.put("menu_item_name", rs.getString("menu_item_name"));
+				jsonMenuItemObj.put("menu_item_image_path", rs.getString("menu_item_image_path"));
+				jsonMenuItemObj.put("menu_item_base_price", rs.getBigDecimal("menu_item_base_price"));
+				jsonMenuItemObj.put("menu_item_type_name", rs.getString("menu_item_type_name"));			
+				jsonMenuItemArray.put(jsonMenuItemObj);
+			}
+			
+			System.out.println("Existing Set " + jsonMenuItemArray.toString());
+			
+			return ResponseEntity.ok().body(jsonMenuItemArray.toString());
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return ResponseEntity.badRequest().body(null);
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
+	@PostMapping("/assign_menu_items")
+	public ResponseEntity<?> assignMenuItems(HttpServletRequest request, HttpServletResponse response,
+			@RequestBody String data) {
+		Connection connection = null;
+		PreparedStatement stmt = null;
+
+		try {
+			JSONObject jsonObj = new JSONObject(data);
+			JSONArray jsonItemsArray = jsonObj.getJSONArray("item_list");
+			Long modifierGroupId = jsonObj.getLong("modifier_group_id");
+			
+			connection = dataSource.getConnection();
+
+			for(int i=0;i<jsonItemsArray.length();i++) {
+				int index = i;
+				JSONObject jsonItemObj = jsonItemsArray.getJSONObject(i);		
+				stmt = connection.prepareStatement("INSERT INTO modifier_item_sequence (modifier_group_id, menu_item_id, modifier_item_sequence) VALUES (?,?,?)");
+				stmt.setLong(1, modifierGroupId);
+				stmt.setLong(2, jsonItemObj.getLong("id"));
+				stmt.setInt(3, index+1);
+				stmt.executeUpdate();
+			}
+			
+			return ResponseEntity.ok().body(null);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return ResponseEntity.badRequest().body(null);
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
+	@PostMapping("/reassign_menu_items")
+	public ResponseEntity<?> reassignMenuItems(HttpServletRequest request, HttpServletResponse response,
+			@RequestBody String data) {
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		PreparedStatement stmt2 = null;
+
+		try {			
+			JSONObject jsonObj = new JSONObject(data);
+			JSONArray jsonItemsArray = jsonObj.getJSONArray("item_list");
+			Long modifierGroupId = jsonObj.getLong("modifier_group_id");
+			
+			connection = dataSource.getConnection();
+
+			stmt = connection.prepareStatement("DELETE FROM modifier_item_sequence WHERE modifier_group_id = ?");
+			stmt.setLong(1, modifierGroupId);
+			stmt.executeUpdate();
+
+			for(int i=0;i<jsonItemsArray.length();i++) {
+				int index = i;
+				JSONObject jsonItemObj = jsonItemsArray.getJSONObject(i);
+				stmt2 = connection.prepareStatement("INSERT INTO modifier_item_sequence (modifier_group_id, menu_item_id, modifier_item_sequence) VALUES (?,?,?)");
+				stmt2.setLong(1, modifierGroupId);
+				stmt2.setLong(2, jsonItemObj.getLong("id"));
+				stmt2.setInt(3, index+1);			
+				stmt2.executeUpdate();
+			}
+			
+			return ResponseEntity.ok().body(null);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			System.out.println("Error at Reassign :" + ex.getMessage());
+			return ResponseEntity.badRequest().body(null);
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 
 }

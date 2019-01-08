@@ -156,7 +156,7 @@
 											</li>
 											<li class="list-group-item pl-0 pr-0 pt-1 pb-1" ng-if="selectedItemList.length===0">
 										 	<div class="p-1">
-										 		There is no Items assigned.
+										 		There is no item assigned.
 										 	</div>
 											</li>
 										</ul>
@@ -224,10 +224,9 @@
 											
 											    
 											</div>
-										 	<div class="p-1" ng-if="itemList.length === 0">
-										 		Currently No available item can be assigned.
+										 	<div class="p-1" ng-if="emptyList">
+										 		You have assigned all items or there is no item created.
 										 	</div>
-
 										</div>
 									</div>							
 									
