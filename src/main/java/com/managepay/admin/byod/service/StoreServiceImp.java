@@ -49,8 +49,8 @@ public class StoreServiceImp implements StoreService {
 	@Override
 	public int createStore(Store store) {
 		try {
-			store.setBackendId(byodUtil.createBackendId("S", 8));
-			store.setLogoPath(byodUtil.saveImageFile(store.getLogoPath(), null));
+			store.setBackendId(byodUtil.createUniqueBackendId("S"));
+			store.setLogoPath(byodUtil.saveImageFile("imgS", store.getLogoPath(), null));
 			Calendar startTime = Calendar.getInstance();
 			startTime.setTime(store.getOperatingStartTime());
 			startTime.set(Calendar.SECOND, 0);
@@ -76,7 +76,7 @@ public class StoreServiceImp implements StoreService {
 	public int editStore(Long id, Store store) {
 		try {
 			if(store.getLogoPath()!=null) {
-				String image = byodUtil.saveImageFile(store.getLogoPath(), null);
+				String image = byodUtil.saveImageFile("imgS", store.getLogoPath(), null);
 				return storeRepo.editStore(id, store, image);
 			}
 			else {

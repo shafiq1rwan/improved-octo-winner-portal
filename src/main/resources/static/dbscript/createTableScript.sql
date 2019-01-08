@@ -236,7 +236,7 @@ INSERT INTO menu_item_type_lookup ([menu_item_type_number],[menu_item_type_name]
 INSERT INTO menu_item_type_lookup ([menu_item_type_number],[menu_item_type_name]) VALUES(1,'Combo');
 INSERT INTO menu_item_type_lookup ([menu_item_type_number],[menu_item_type_name]) VALUES(2,'Modifier');
 
-INSERT INTO group_category([group_category_name]) VALUES ('Breakfast kfc');
+INSERT INTO group_category([group_category_name]) VALUES ('West Malaysia Branches');
 
 INSERT INTO backend_sequence([id], [backend_sequence_code], [backend_sequence_name], [backend_sequence], [modified_date]) VALUES(1, 'S','Store',0,GETDATE());
 INSERT INTO backend_sequence([id], [backend_sequence_code], [backend_sequence_name], [backend_sequence], [modified_date]) VALUES(2, 'imgS','Store Image',0,GETDATE());

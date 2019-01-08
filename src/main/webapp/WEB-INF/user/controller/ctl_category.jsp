@@ -1,6 +1,8 @@
 <html>
 <script>
 	app.controller('ctl_category', function($scope, $http, $routeParams, $compile) {
+		var table;
+		var previewDefault;
 		
 		$scope.category_id = 0;
 		$scope.category = {};
@@ -18,9 +20,110 @@
 		
 		var group_category_id = $routeParams.id;
 		
+		$scope.setImage = function(param){			
+			$scope.category.category_image_path = param
+			$scope.category.default_preview = param
+		}
+
+		
 		$(document).ready(function() {
 			$scope.refreshCategoryTable();
 		});
+		
+		$('input[type=file]').change(function(event) {
+			var element = event.target.id;			
+			var _URL = window.URL || window.webkitURL;
+			var file = this.files[0];
+			fileCheck(file, element);	
+		});
+		
+		function fileCheck(file, elementName) {		
+			var img;
+			var status = true;
+			
+			if (file.type.indexOf("image") == -1) {
+				alert("Invalid image file.");
+				$('#' + elementName).wrap('<form>').closest('form').get(0).reset();
+				$('#' + elementName).unwrap();
+				$scope.category.category_image_path = null;
+				$scope.category.default_preview = null;
+				$scope.$apply();
+				status = false;
+			}
+			
+			if (file.size > 150000) {
+				alert("Image file must not exceed 150kb.");
+				$('#' + elementName).wrap('<form>').closest('form').get(0).reset();
+				$('#' + elementName).unwrap();
+				$scope.category.category_image_path = null;
+				$scope.category.default_preview = null;
+				$scope.$apply();
+				status = false;
+			}
+
+			if (status && file) {
+				img = new Image();	
+				img.onload = function() {
+					var aspectRatio = this.width / this.height;
+					if(aspectRatio<1 || aspectRatio>1.5){
+						alert("Please make sure that the image aspect ratio is within 1:1 to 3:2");
+						$('#' + elementName).wrap('<form>').closest('form').get(0).reset();
+						$('#' + elementName).unwrap();
+						$scope.category.category_image_path = null;
+						$scope.category.default_preview = null;
+						$scope.$apply();
+						status = false;
+					}		
+					else if(this.width < 300){
+						alert("Please make sure that the image has minimum width of 300px");
+						$('#' + elementName).wrap('<form>').closest('form').get(0).reset();
+						$('#' + elementName).unwrap();
+						$scope.category.category_image_path = null;
+						$scope.category.default_preview = null;
+						$scope.$apply();
+						status = false;
+					}
+					else if(this.height < 200){
+						alert("Please make sure that the image has minimum height of 200px");
+						$('#' + elementName).wrap('<form>').closest('form').get(0).reset();
+						$('#' + elementName).unwrap();
+						$scope.category.category_image_path = null;
+						$scope.category.default_preview = null;
+						$scope.$apply();
+						status = false;
+					}
+					
+					if(status){
+						var reader = new FileReader();
+						reader.readAsDataURL(file);
+						reader.onload = function() {			
+							if (elementName === "categoryImage")
+							{
+								console.log("Image Onload here")
+								$scope.category.category_image_path = reader.result;
+								$scope.category.default_preview = reader.result; 
+								$scope.$apply();
+							}
+						}
+						reader.onerror = function(error) {
+							console.log("Error Reader");
+						}
+					}
+					
+				}
+				
+				img.onerror = function() {
+					alert("Invalid image file.");
+					$('#' + elementName).wrap('<form>').closest('form').get(0).reset();
+					$('#' + elementName).unwrap();
+					$scope.category.category_image_path = null;
+					$scope.category.default_preview = null;
+					$scope.$apply();
+		        };
+		        
+				img.src = URL.createObjectURL(file);
+			}
+		}
 		
 		$scope.setModalType = function(action_type){
 			$scope.action = action_type;
@@ -28,10 +131,11 @@
 		
 		$scope.createCategory = function(){			
 			
-			if($scope.category.category_name == null || $scope.category.category_name == ''){
+			if($scope.category.category_name == null 
 				
+					|| $scope.category.category_name == '' 
+					){
 			} else {
-
 				var postdata = JSON.stringify ({
 					group_category_id : group_category_id,
 					category_name : $scope.category.category_name,
@@ -67,7 +171,7 @@
 
 		
 		$scope.refreshCategoryTable = function(){		
-			var table = $('#category_dtable').DataTable({
+			table = $('#category_dtable').DataTable({
 				"ajax" : {
 					"url" : "${pageContext.request.contextPath}/menu/category/get_all_category_by_group_category_id?group_category_id="+ group_category_id,
 					"dataSrc": function ( json ) {
@@ -86,8 +190,9 @@
 				            text: 'Save',
 				            enabled: false,
 				            action: function ( e, dt, node, config ) {
-				            	
-				            	//table.column(3).visible(true);
+				            	console.log(getAllCategoryWithSequence());
+				            	$scope.updateCategorySequence(getAllCategoryWithSequence());
+				            	//table.column(4).visible(true);
 				            }
 				        },
 				        {
@@ -95,7 +200,7 @@
 				            action: function ( e, dt, node, config ) {        	
 				            	table.button(0).enable();
 				            	table.rowReorder.enable();
-				            	//table.column(3).visible(false);
+				            	table.column(4).visible(false);
 				            }
 				        }
 				    ],
@@ -104,6 +209,7 @@
 				"order" : [ [ 0, "asc" ] ] ,
 				"columns" : [ 
 					{"data" : "category_sequence", "visible": false, "searchable": false}, 
+					{"data" : "id", "visible": false, "searchable": false},
 					{"data" : "category_name"},
 					{"data" : "is_active", "width": "10%", 
 						"render": function(data, type, full, meta ){
@@ -143,14 +249,47 @@
 						$scope.category.category_description = response.data.category_description;
 						$scope.category.category_image_path = response.data.category_image_path;
 						$scope.category.is_active = response.data.is_active;
-						$scope.action = 'update';
+						$scope.action = 'update';					
+						$scope.category.default_preview = "${pageContext.request.contextPath}" + response.data.category_image_path;					
+						//$('#previewImage').attr('src', previewDefault);		
 						$('#createCategoryModal').modal('toggle');
 					}
 				});
 			});
 			
+		}
+		
+		$scope.updateCategorySequence = function(category_list){
+			$http({
+					method : 'POST',
+					headers : {'Content-Type' : 'application/json'},
+					url : '${pageContext.request.contextPath}/menu/category/edit_category_sequence',
+					data : category_list
+				})
+				.then(function(response) {
+						if(response.status == '200'){
+							$scope.refreshCategoryTable();
+						}
+				}, function(response) {
+						alert('Session TIME OUT');
+						$(location).attr('href','${pageContext.request.contextPath}/admin');	
+						
+				});
+		}
+		
+		function getAllCategoryWithSequence(){
 			
-			
+			var categories = table.rows().data();	
+	 		var category_holder = [];
+
+			for (var i = 0; i < categories.count(); i++) {
+				var json_data = {
+					'id': categories[i].id
+				};
+				
+				category_holder.push(json_data);
+			}
+			return category_holder; 
 		}
 		
 		$scope.updateCategory = function(){
@@ -209,11 +348,14 @@
 		}
 		
 		$scope.resetModal = function(){
-			$scope.category = {};
+			$scope.category = {};		
 			$scope.action = '';
 			$scope.category_menu_item = [];
+			
+			//$('#previewImage').attr('src', "");
+			$('#categoryImage').val('');
+			//previewDefault = '';
 		}
-		
 		
 		//Assigned Item Related Operations
 		$scope.submitAssignedItems = function(action_type){		
@@ -344,7 +486,7 @@
 						alert("Cannot Retrieve Item List");
 					}
 				});
-			}
+			} 
 		}
 		
 		function isEdit(item_list) {
@@ -484,7 +626,7 @@
 		    }
 		     arr.splice(new_index, 0, arr.splice(old_index, 1)[0]); 
 		}
-		
+
 		// case insensitive
 		$.expr[":"].contains = $.expr.createPseudo(function(arg) {
 		    return function( elem ) {

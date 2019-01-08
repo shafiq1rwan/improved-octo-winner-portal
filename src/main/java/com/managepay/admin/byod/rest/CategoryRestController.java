@@ -199,7 +199,7 @@ public class CategoryRestController {
 
 		try {
 			System.out.println("ReMe");
-			System.out.println(byodUtil.createUniqueBackendId("imgC"));
+			System.out.println(data);
 			
 			JSONObject jsonCategoryData = new JSONObject(data);
 			if (jsonCategoryData.has("group_category_id") && jsonCategoryData.has("category_name")) {
@@ -207,8 +207,8 @@ public class CategoryRestController {
 				String description = jsonCategoryData.isNull("category_description") ? null
 						: jsonCategoryData.getString("category_description");
 				String imagePath = jsonCategoryData.isNull("category_image_path") ? null
-						: jsonCategoryData.getString("category_image_path");
-
+						: byodUtil.saveImageFile("imgC",jsonCategoryData.getString("category_image_path"), null);
+				
 				connection = dataSource.getConnection();
 				stmt = connection.prepareStatement(
 						"INSERT into category(group_category_id, category_name, category_description, category_image_path, category_sequence, is_active) VALUES (?,?,?,?,?,?)");
@@ -260,7 +260,7 @@ public class CategoryRestController {
 				String description = jsonCategoryData.isNull("category_description") ? null
 						: jsonCategoryData.getString("category_description");
 				String imagePath = jsonCategoryData.isNull("category_image_path") ? null
-						: jsonCategoryData.getString("category_image_path");
+						: byodUtil.saveImageFile("imgC",jsonCategoryData.getString("category_image_path"), null);
 				
 				connection = dataSource.getConnection();
 				stmt = connection.prepareStatement(
