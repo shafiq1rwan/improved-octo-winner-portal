@@ -209,7 +209,7 @@ public class Order_RestController {
 									rs5.close();
 									ps5.close();
 								} else {
-									sqlStatement = "SELECT mi.id, mi.menu_item_name, mi.menu_item_image_path, mi.menu_item_base_price FROM menu_item mi, menu_item_group_menu_item migmi WHERE migmi.menu_item_group_id = ? AND mi.id = migmi.menu_item_id ORDER BY migmi.menu_item_group_menu_item_sequence ASC";
+									sqlStatement = "SELECT mi.id, mi.menu_item_name, mi.menu_item_image_path, mi.menu_item_base_price FROM menu_item mi, menu_item_group_sequence migs WHERE migs.menu_item_group_id = ? AND mi.id = migs.menu_item_id ORDER BY migs.menu_item_group_sequence ASC";
 									PreparedStatement ps5 = connection.prepareStatement(sqlStatement);
 									ps5.setInt(1, Integer.parseInt(tierItemGroupID));
 									ResultSet rs5 = ps5.executeQuery();
@@ -222,7 +222,7 @@ public class Order_RestController {
 										menuItem.put("price", rs5.getString("menu_item_base_price"));
 
 										JSONArray modifierGroupList = new JSONArray();
-										sqlStatement = "SELECT mimg.modifier_group_id, mg.modifier_group_name FROM menu_item_modifier_group mimg, modifier_group mg WHERE mimg.menu_item_id = ? AND mg.id = mimg.modifier_group_id ORDER BY mimg.menu_item_modifier_group_sequence ASC";
+										sqlStatement = "SELECT mis.modifier_group_id, mg.modifier_group_name FROM modifier_item_sequence mis, modifier_group mg WHERE mis.menu_item_id = ? AND mg.id = mis.modifier_group_id ORDER BY mis.modifier_item_sequence ASC";
 										PreparedStatement ps6 = connection.prepareStatement(sqlStatement);
 										ps6.setInt(1, Integer.parseInt(rs5.getString("id")));
 										ResultSet rs6 = ps6.executeQuery();
@@ -270,7 +270,7 @@ public class Order_RestController {
 							rs4.close();
 							ps4.close();
 						} else {
-							sqlStatement = "SELECT mimg.modifier_group_id, mg.modifier_group_name FROM menu_item_modifier_group mimg, modifier_group mg WHERE mimg.menu_item_id = ? AND mg.id = mimg.modifier_group_id ORDER BY mimg.menu_item_modifier_group_sequence ASC";
+							sqlStatement = "SELECT mis.modifier_group_id, mg.modifier_group_name FROM modifier_item_sequence mis, modifier_group mg WHERE mis.menu_item_id = ? AND mg.id = mis.modifier_group_id ORDER BY mis.modifier_item_sequence ASC";
 							PreparedStatement ps4 = connection.prepareStatement(sqlStatement);
 							ps4.setInt(1, Integer.parseInt(itemID));
 							ResultSet rs4 = ps4.executeQuery();
