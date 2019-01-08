@@ -220,12 +220,6 @@ public class ModifierGroupRestController {
 			if (rowAffected == 0) {
 				return ResponseEntity.badRequest().body("Failed To Remove Modifer Group");
 			} else {
-				// Update Menu Item (Modifier Item)
-				stmt2 = connection
-						.prepareStatement("UPDATE menu_item SET modifier_group_id = 0 WHERE modifier_group_id = ?");
-				stmt2.setLong(1, id);
-				stmt2.executeUpdate();
-
 				// Delete from menu_item_modifier_group
 				stmt3 = connection.prepareStatement("DELETE FROM menu_item_modifier_group WHERE modifier_group_id = ?");
 				stmt3.setLong(1, id);

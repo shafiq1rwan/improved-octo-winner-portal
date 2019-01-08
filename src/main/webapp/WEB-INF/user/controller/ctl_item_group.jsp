@@ -1,132 +1,107 @@
 <html>
 <script>
-	app.controller('ctl_item_group', function($scope, $http, $compile, $routeParams) {
-		
+	app.controller('ctl_item_group', function($scope, $http, $compile) {
+		$scope.menu_item_group = {};
 		$scope.action = '';
-		$scope.store = {id : $routeParams.id};
-		$scope.staff = {
-		}
-		$scope.roleList = [];
 		
-		$scope.modalType = function(action){
-			$scope.action = action;
-			// close staff list modal
-			$('#staffListModal').modal('toggle');
-		}
-		
-		// get store info
-		$http({
-			method : 'GET',
-			headers : {'Content-Type' : 'application/json'},
-			url : '${pageContext.request.contextPath}/menu/store/'+$scope.store.id+'/ecpos'	
-		})
-		.then(function(response) {
-			$scope.store.name = response.data.store_name;
-			$scope.store.backend_id = response.data.backend_id;
-			console.log($scope.store);		
+		$(document).ready(function() {
+			$scope.refreshItemGroupTable();
 		});
 		
-		// get role list
-		$http({
-			method : 'GET',
-			headers : {'Content-Type' : 'application/json'},
-			url : '${pageContext.request.contextPath}/menu/store/ecpos/getstaffrole'	
-		})
-		.then(function(response) {
-			$scope.roleList = response.data;
-			console.log($scope.roleList);
-		});
-		
-		// validation
-		$scope.submitStaff = function(){
-			if($scope.staff.name == null || $scope.staff.name=='' ||
-					$scope.staff.email == null || $scope.staff.email=='' ||
-						$scope.staff.mobilePhone == null || $scope.staff.mobilePhone=='' ||
-							$scope.staff.username == null || $scope.staff.username=='' ||
-								$scope.staff.password == null || $scope.staff.password=='' ||
-									$scope.staff.role.id == null || $scope.staff.role.id==''){
-			}
-			else{
-				if($scope.action=='create'){
-					swal({
-						  title: "Are you sure?",
-						  text: "Once created, you will not be able to remove staff",
-						  icon: "warning",
-						  buttons: true,
-						  dangerMode: true,
-						})
-						.then((willCreate) => {
-						  if (willCreate) {
-							  $scope.postRequest();
-						}
-					});
-				}
-				else if($scope.action=='update'){
-					 $scope.postRequest();
-				}				
-			}
-		}
-		
-		// submit request
-		$scope.postRequest = function(){
-			var postdata = {
-					staff_id : $scope.action=='create'?undefined:$scope.staff.id,
-					store_id: $scope.store.id,
-					name : $scope.staff.name,
-					email : $scope.staff.email,
-					mobilePhone : $scope.staff.mobilePhone,
-					username : $scope.staff.username,
-					password: $scope.staff.password,
-					role_id: $scope.staff.role.id,
-					isActive: $scope.action=='create'?undefined:$scope.staff.isActive
-				}
-				
-				console.log(postdata);
-				
-			$http({
-				method : 'POST',
-				headers : {'Content-Type' : 'application/json'},
-				url : $scope.action=='create'?'${pageContext.request.contextPath}/menu/store/ecpos/createstaff':'${pageContext.request.contextPath}/menu/store/ecpos/updatestaff',
-				data : postdata
-			})
-			.then(function(response) {
-
-				if (response.status == "403") {
-					alert("Session TIME OUT");
-					$(location).attr('href','${pageContext.request.contextPath}/admin');			
-				} else if(response.status == "200") {
-					// ok
-					if($scope.action=='create'){
-						swal("The staff has been created", {
-							icon: "success",
-						});
-					}
-					else if($scope.action=='update'){
-						swal("The staff has been updated", {
-							icon: "success",
-						});
-					}
-					$scope.resetModal();
-					$('#staffModal').modal('toggle');
-					$('#staffListModal').modal('toggle');
-					$scope.refreshTable();
-				}
-			});
+		$scope.setModalType = function(action_type){
+			$scope.action = action_type;
 		}
 		
 		$scope.resetModal = function(){
-			$scope.action = {};
-			$scope.staff = {	
-};
+			$scope.menu_item_group = {};
+			$scope.action = '';
 		}
 		
-		$scope.refreshTable = function(){
-			var table = $('#itemGroupList_dtable').DataTable({
+		$scope.performModifierGroupOperations = function(action_type){
+			
+			if($scope.menu_item_group.menu_item_group_name == '' || $scope.menu_item_group.menu_item_group_name == null){
+			}else{
+				var jsonData = JSON.stringify({
+					"id" : $scope.menu_item_group.id || null,
+					"menu_item_group_name" : $scope.menu_item_group.menu_item_group_name,
+					"is_active": $scope.menu_item_group.is_active || null
+				});
+				
+				var menu_item_group_url = '${pageContext.request.contextPath}/menu/item_group/';
+				
+				if(action_type === 'create'){
+					menu_item_group_url += 'create_item_group';
+				} else if(action_type === 'update'){
+					menu_item_group_url += 'edit_item_group';
+				}
+
+				console.log(jsonData);
+							
+				$http
+				.post(
+						menu_item_group_url,
+						jsonData)
+				.then(
+						function(response) {		
+							$scope.resetModal();	
+							$('#createItemGroupModal').modal('toggle');
+							
+							if(response.status == 200){
+								$scope.refreshItemGroupTable();
+							}
+							else if(response.status == 400){
+								alert("Operations Failed To Perform!");
+							}
+							else if(response.status == 409){
+								alert("Item Group Duplication Found!");
+							}
+						},
+						function(response) {
+							
+							$scope.resetModal();	
+							$('#createItemGroupModal').modal('toggle');
+							
+							alert("Session TIME OUT");
+							$(location)
+									.attr('href',
+											'${pageContext.request.contextPath}/user');
+						});
+				
+				menu_item_group_url = '';
+			}
+			
+			
+			
+		}
+		
+		$scope.removeItemGroup = function(id){			
+			$http
+			.delete('${pageContext.request.contextPath}/menu/item_group/delete_item_group?id=' + id)
+			.then(
+					function(response) {							
+						if(response.status == 200){
+							$scope.refreshItemGroupTable();
+						}
+						else if(response.stauts == 400){
+							alert("Operations Failed To Perform!");
+						}
+					},
+					function(response) {		
+						alert("Session TIME OUT");
+						$(location)
+								.attr('href',
+										'${pageContext.request.contextPath}/user');
+					});
+			
+		}	
+		
+		$scope.refreshItemGroupTable = function(){
+			var table = $('#itemGroup_dtable').DataTable({
 				"ajax" : {
 					"url" : "${pageContext.request.contextPath}/menu/item_group/get_all_item_group",
-					"dataSrc": function ( json ) {
-		                return json.data;
-		            },
+					"dataSrc": function ( json ) { 
+		                return json;
+		            },  
 					"statusCode" : {
 						403 : function() {
 							alert("Session TIME OUT");
@@ -137,47 +112,336 @@
 				destroy : true,
 				"order" : [ [ 0, "asc" ] ] ,
 				"columns" : [ 
-					{"data" : "id", "width": "5%"}, 
-					{"data" : "backend_id"},
-					{"data" : "name"},
-					{"data" : "created_date", "width" : "20%"}
-				]
-				
+					{"data" : "id", "width": "4%"},
+					{"data" : "menu_item_group_name"},
+					{"data" : "is_active", "width": "15%"},
+					{"data": "id", "width": "20%",
+					 "render": function ( data, type, full, meta ) {
+						 	var id = full.id;
+						    return '<div class="btn-toolbar justify-content-between"><button ng-click="removeItemGroup('+ id +')" class="btn btn-danger custom-fontsize"><b><i class="fa fa-trash"></i>Remove</b></button><button ng-click="getModifierGroupMenuItem('+ id +')" type="button" data-toggle="modal" data-backdrop="static" data-keyboard="false" data-target="#menuItemModal" class="btn btn-default custom-fontsize"><b><i class="fa fa-trash"></i>Items</b></button></div>'			   
+					 }
+					}
+					],
+					"createdRow": function ( row, data, index ) {
+				        $compile(row)($scope);
+				    }			
 			});
 			
-			$('#staffList_dtable tbody').off('click', 'tr');
-			$('#staffList_dtable tbody').on('click', 'tr', function(evt) {				
-				$scope.action = 'update';
-				$scope.staff = {
-						role:{}
-				}
-				$scope.staff.id = table.row(this).data().id;
+			$('#itemGroup_dtable tbody').off('click', 'tr td:nth-child(-n+3)');
+			$('#itemGroup_dtable tbody').on('click', 'tr td:nth-child(-n+3)', function() {
 				$http({
 					method : 'GET',
 					headers : {'Content-Type' : 'application/json'},
-					url : '${pageContext.request.contextPath}/menu/store/ecpos/staffbyid?store_id='+$scope.store.id + '&&id=' + $scope.staff.id		
+					url : '${pageContext.request.contextPath}/menu/item_group/get_item_group_by_id?id='+table.row(this).data().id			
 				})
 				.then(function(response) {
 					if (response.status == "404") {
-						alert("Unable to find staff detail");
-					} else{
-						$scope.staff.name = response.data.name;
-						$scope.staff.email = response.data.email;
-						$scope.staff.mobilePhone = response.data.mobilePhone;
-						$scope.staff.role.id = response.data.role_id;
-						$scope.staff.username = response.data.username;
-						$scope.staff.password = response.data.password;
-						$scope.staff.isActive = response.data.isActive;
-
-						$('#staffModal').modal('toggle');
+						alert("Unable to find item group detail");
+					} else if(response.status == "200") {
+						console.log(response.data);
+						$scope.menu_item_group.id = response.data.id;
+						$scope.menu_item_group.menu_item_group_name = response.data.menu_item_group_name;
+						$scope.menu_item_group.is_active = response.data.is_active;
+						$scope.action = 'update';
+						$('#createItemGroupModal').modal({backdrop: 'static', keyboard: false});					
 					}
-				});
+				});						
 			});
+			
 		}
 		
-		$(document).ready(function() {	
-			$scope.refreshTable();
+		
+		/* Start assign items modal */
+		$scope.filterList = [{id:1, name:'Filter by Name'},
+			{id:2, name:'Filter by Backend ID'}]
+		
+		// initialize first selected
+		$scope.filterSelected = {id: 1};
+		$scope.itemList = [];
+		$scope.selectedItemList = [];
+		
+		$scope.getModifierGroupMenuItem = function(menu_item_group_id){
+			$scope.menu_item_group_id = menu_item_group_id;
+			
+			$http.get('${pageContext.request.contextPath}/menu/item_group/get_assigned_menu_item_list?menu_item_group_id='+ menu_item_group_id).then(
+					function(response) {					
+						if(response.status == 200){					
+							if(response.data.length == 0){
+								$scope.assign_item_action = 'New';
+							} else {			
+								$scope.assign_item_action = 'Edit';					
+								$scope.selectedItemList = response.data;
+								//Keep Track old data
+								for(var i =0; i<response.data.length; i++){
+									$scope.oldItemList.push(response.data[i]);
+								}
+							}
+						}
+					},
+					function(response) {
+						if(response.status == 400){
+							alert(response.data.response_message);
+						} else {
+							console.log(response.data);
+							alert("Session TIME OUT");
+			 				$(location).attr('href', '${pageContext.request.contextPath}/user');
+						}
+					});
+			
+			  // drag and drop list
+			   var sortable = Sortable.create($('#sortableList')[0], {
+			   		handle: ".fa-reorder",
+			   		scroll: true,
+			   		// Element is chosen
+			   		onChoose: function (/**Event*/evt) {
+	
+			   		},
+			   		// Element dragging started
+			   		onStart: function (/**Event*/evt) {
+	
+			   		},
+			   		// Element dragging ended
+			   		onEnd: function (evt) {
+			   			//changeElementPositionInArray(evt.oldIndex, evt.newIndex);
+			   			move($scope.selectedItemList,evt.oldIndex,evt.newIndex);
+			   		}
+		   		});
+		   	// end drag and drop list	
+		}
+		
+		//Assigned Item Related Operations
+		$scope.submitAssignedItems = function(action_type){		
+				var json_data = JSON.stringify({
+					'menu_item_group_id' : $scope.menu_item_group_id,
+					'item_list' : $scope.selectedItemList
+				});
+
+				if(action_type === 'New'){
+				 	$http
+				 	.post('${pageContext.request.contextPath}/menu/item_group/assign_menu_items', json_data)
+					.then(
+						function(response) {
+							if(response.status == 200){				
+								alert("Successfully assigned menu items.")
+								$scope.getModifierGroupMenuItem($scope.menu_item_group_id);
+								$scope.closeMenuItemModal();
+							}
+						},
+						function(response) {									
+							if(response.status == 400){
+								alert("Unable to assign menu item.");
+							} else {
+								alert("Session TIME OUT");
+				 				$(location)
+								.attr('href',
+										'${pageContext.request.contextPath}/user');
+							}
+						}); 
+				} else if(action_type === 'Edit'){
+					$http
+					.post('${pageContext.request.contextPath}/menu/item_group/reassign_menu_items', json_data)
+					.then(
+							function(response) {
+								if(response.status == 200){		
+									console.log("Success");
+									$scope.closeMenuItemModal();
+								}
+							},
+							function(response) {									
+								if(response.status == 400){
+									alert("Unable to reassign menu item.");
+								} else {
+					 				alert("Session TIME OUT");
+					 				$(location)
+									.attr('href',
+											'${pageContext.request.contextPath}/user');
+								}
+							});
+
+					
+				}
+
+		}
+			
+		$scope.assignItems = function(){	
+			for(var a=0; a<$scope.itemList.length; a++){
+				if($scope.itemList[a].check){
+					$scope.selectedItemList.push(
+						$scope.itemList[a]
+					);
+					
+					$scope.itemList[a].check = false;
+					$scope.itemList[a].isAssigned = true;
+				}
+			}
+			
+			$scope.emptyList = true;
+			for(var a=0; a<$scope.itemList.length; a++){
+				if(!$scope.itemList[a].isAssigned)
+					$scope.emptyList = false;
+			}
+			
+			$('#assignItemsModal').modal('toggle');
+			$('#menuItemModal').modal('toggle');
+		}
+		
+		$scope.unassignItem = function(item_id){
+			for(var a=0; a<$scope.selectedItemList.length; a++){
+					if($scope.selectedItemList[a].id === item_id){			
+						
+						for(var e=0; e<$scope.itemList.length;e++){
+							if($scope.itemList[e].id === $scope.selectedItemList[a].id){
+								$scope.itemList[e].isAssigned = false;
+							}
+						}
+						
+						$scope.selectedItemList.splice($scope.selectedItemList.indexOf($scope.selectedItemList[a]),1);		
+					}
+				}
+		}
+		
+		$scope.unassignAll = function(){
+			$scope.selectedItemList = [];
+		}
+
+		$scope.openAssignItemsModal = function(){
+			$('#menuItemModal').modal('toggle');
+			$('#assignItemsModal').modal({backdrop: 'static', keyboard: false});
+			
+			if($scope.itemList.length == 0){
+				$http({
+					method : 'GET',
+					headers : {'Content-Type' : 'application/json'},
+					url : ('${pageContext.request.contextPath}/menu/menuItem/getAllMenuItemByType?menuItemType=-1')
+				})
+				.then(function(response) {
+					if(response.status == "200") {
+						$scope.itemList = response.data;
+						for(var i=0;i<$scope.itemList.length;i++){
+							$scope.itemList[i].isAssigned = false;
+						}
+						
+						isEdit($scope.itemList);
+						
+						$scope.emptyList = true;
+						for(var a=0; a<$scope.itemList.length; a++){
+							if(!$scope.itemList[a].isAssigned)
+								$scope.emptyList = false;
+						}
+						
+					}
+					else {
+						alert("Cannot Retrieve Item List");
+					}
+				});
+			}
+		}
+		
+		function isEdit(item_list) {
+			if($scope.assign_item_action === 'Edit'){
+				for(var i=0; i<item_list.length;i++){
+					
+					for(var j=0;j<$scope.selectedItemList.length;j++){				
+						if(item_list[i].id === $scope.selectedItemList[j].id){
+							item_list[i].isAssigned = true;
+						}
+						
+					}
+
+				}
+			}
+		}
+		
+		$scope.closeAssignItemsModal = function(){	
+			$('#menuItemModal').modal('toggle');
+			$('#assignItemsModal').modal('toggle');
+			
+			$scope.filterSelected = {id: 1};
+			$('#searchbox-input').val('');
+			
+			for(var i=0;i<$scope.itemList.length;i++){
+				$scope.itemList[i].check = false;
+			}
+		}
+		
+		$scope.clearAssignItemModal = function(){
+			$scope.filterSelected = {id: 1};
+			$('#searchbox-input').val('');
+			
+			$scope.closeMenuItemModal();
+		}
+		
+		$scope.closeMenuItemModal = function(){	 	
+			$('#menuItemModal').modal('hide');
+			
+			$scope.oldItemList = [];
+			$scope.itemList = [];
+			$scope.selectedItemList = [];
+			$scope.menu_item_group_id = 0;
+			$scope.assign_item_action = '';
+		}
+		
+		$scope.selectCard = function(item){
+			if(item.check){
+				item.check=false;
+			}
+			else{
+				item.check=true;
+			}
+		}
+		
+		function move(arr, old_index, new_index) {
+		    while (old_index < 0) {
+		        old_index += arr.length;
+		    }
+		    while (new_index < 0) {
+		        new_index += arr.length;
+		    }
+		    if (new_index >= arr.length) {
+		        var k = new_index - arr.length;
+		        while ((k--) + 1) {
+		            arr.push(undefined);
+		        }
+		    }
+		     arr.splice(new_index, 0, arr.splice(old_index, 1)[0]); 
+		}
+		
+		// case insensitive
+		$.expr[":"].contains = $.expr.createPseudo(function(arg) {
+		    return function( elem ) {
+		        return $(elem).text().toUpperCase().indexOf(arg.toUpperCase()) >= 0;
+		    };
 		});
+		
+		// search input on change
+		$('#searchbox-input').on('input',function(e){				
+		    var filter = $(this).val(); // get the value of the input, which we filter on
+		    //console.log($('.card-container').find(".card-title").innerText());
+		   	if($scope.filterSelected.id==1){
+			    $('.card-container').find(".card-title:not(:contains(" + filter + "))").parentsUntil('.card-container').css('display','none');
+			    $('.card-container').find(".card-title:contains(" + filter + ")").parentsUntil('.card-container').css('display','block');
+		   	}
+		   	else if($scope.filterSelected.id==2){
+		   		$('.card-container').find(".text-info:not(:contains(" + filter + "))").parentsUntil('.card-container').css('display','none');
+			    $('.card-container').find(".text-info:contains(" + filter + ")").parentsUntil('.card-container').css('display','block');
+		   	}
+		});
+		
+		// filter type on change
+		 $scope.filterOnChange = function ($event){		
+	            var filter = $('#searchbox-input').val();
+	            if($scope.filterSelected.id==1){
+				    $('.card-container').find(".card-title:not(:contains(" + filter + "))").parentsUntil('.card-container').css('display','none');
+				    $('.card-container').find(".card-title:contains(" + filter + ")").parentsUntil('.card-container').css('display','block');
+			   	}
+			   	else if($scope.filterSelected.id==2){
+			   		$('.card-container').find(".text-info:not(:contains(" + filter + "))").parentsUntil('.card-container').css('display','none');
+				    $('.card-container').find(".text-info:contains(" + filter + ")").parentsUntil('.card-container').css('display','block');
+			   	}
+		}		
+		/* End assign items modal */
+		
+
 	});
 	
 </script>

@@ -44,6 +44,7 @@ CREATE TABLE menu_item_group
 (
 	id BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,
 	menu_item_group_name NVARCHAR(150) NOT NULL UNIQUE,
+	is_active BIT DEFAULT 1,
 	created_date DATETIME NOT NULL DEFAULT GETDATE()
 );
 

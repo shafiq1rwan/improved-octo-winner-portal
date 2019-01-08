@@ -40,10 +40,9 @@ public class ItemGroupRestController {
 	private DataSource dataSource;	
 	
 	@RequestMapping(value = "/get_all_item_group", method = RequestMethod.GET)
-	public String getAllItemGroup() {
-		JSONArray JARY = new JSONArray();
+	public ResponseEntity<?> getAllItemGroup() {
+		JSONArray jArray = new JSONArray();
 		JSONObject jObject = new JSONObject();
-		JSONObject jObjectResult = new JSONObject();
 		Connection connection = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
@@ -56,16 +55,16 @@ public class ItemGroupRestController {
 			while(rs.next()) {
 				jObject = new JSONObject();
 				jObject.put("id", rs.getLong("id"));
-				jObject.put("name", rs.getString("staff_name"));
-				jObject.put("backend_id", rs.getString("backend_id"));	
-				jObject.put("created_date", rs.getString("created_date"));	
-				JARY.put(jObject);
+				jObject.put("menu_item_group_name", rs.getString("menu_item_group_name"));
+				jObject.put("is_active", rs.getBoolean("is_active"));
+				jObject.put("created_date", rs.getDate("created_date"));
+				jArray.put(jObject);
 			}
 			
-			jObjectResult = new JSONObject();
-			jObjectResult.put("data", JARY);
-		}catch(Exception e) {
-			e.printStackTrace();
+			return ResponseEntity.ok().body(jArray.toString());
+		}catch(Exception ex) {
+			ex.printStackTrace();
+			return ResponseEntity.badRequest().body(ex.getMessage());
 		}
 		finally {
 			if (connection != null) {
@@ -76,76 +75,241 @@ public class ItemGroupRestController {
 				}
 			}
 		}
-		return jObjectResult.toString();
 	}
 	
-	@RequestMapping(value = "/save_menu_item_group", method = RequestMethod.POST)
-	public String saveItemGroup(@RequestBody String formfield, HttpServletRequest request, HttpServletResponse response) {
-		JSONObject jObject = null;
-		JSONObject jObjectResult = new JSONObject();
+	@GetMapping(value = "/get_item_group_by_id", produces = "application/json")
+	public ResponseEntity<?> getItemGroupById(HttpServletRequest request, HttpServletResponse response,
+			@RequestParam("id") Long id) {
+
+		JSONObject jsonResult = new JSONObject();
 		Connection connection = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
-		
+
 		try {
-			jObject = new JSONObject(formfield);
-			if(!jObject.has("backend_id")) {
-				response.setStatus(409);
-				return jObjectResult.put("response_message", "Backend ID not found.").toString();
-			}
-			if(!jObject.has("group_name")) {
-				response.setStatus(409);
-				return jObjectResult.put("response_message", "Group name not found.").toString();
-			}
-			if(!jObject.has("menu_items")) {
-				response.setStatus(409);
-				return jObjectResult.put("response_message", "Menu Item not found.").toString();
-			}
-			//check for duplicate
 			connection = dataSource.getConnection();
-			int existing = checkExistingItemGroup(jObject.getString("backend_id"), connection);
-			if(existing > 0) {
-				response.setStatus(409);
-				return jObjectResult.put("response_message", "There is already an existing Item Group with Backend ID "+jObject.getString("backend_id"))
-						.toString();
-			}else {
-				
-				stmt = connection.prepareStatement("INSERT INTO menu_item_group(backend_id, menu_item_group_name, created_date) "
-						+ "VALUES (?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
-				stmt.setString(1, jObject.getString("backend_id"));
-				stmt.setString(2, jObject.getString("group_name"));
-				stmt.setDate(3, new java.sql.Date(System.currentTimeMillis()));
+			stmt = connection.prepareStatement("SELECT * FROM menu_item_group WHERE id = ?");
+			stmt.setLong(1, id);
+			rs = (ResultSet) stmt.executeQuery();
+
+			if (rs.next()) {
+				jsonResult.put("id", rs.getLong("id"));
+				jsonResult.put("menu_item_group_name", rs.getString("menu_item_group_name"));
+				jsonResult.put("is_active", rs.getBoolean("is_active"));
+				jsonResult.put("created_date", rs.getDate("created_date"));
+			} else {
+				return ResponseEntity.notFound().build();
+			}
+
+			return ResponseEntity.ok().body(jsonResult.toString());
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return ResponseEntity.badRequest().body(ex.getMessage());
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+
+	}
+
+	@PostMapping(value = "/create_item_group", produces = "application/json")
+	public ResponseEntity<?> createItemGroup(HttpServletRequest request, HttpServletResponse response,
+			@RequestBody String data) {
+		Connection connection = null;
+		PreparedStatement stmt = null;
+
+		try {
+			JSONObject jsonItemGroupData = new JSONObject(data);
+			boolean isActive = jsonItemGroupData.isNull("is_active") ? false
+					: jsonItemGroupData.getBoolean("is_active");
+
+			connection = dataSource.getConnection();
+			stmt = connection.prepareStatement(
+					"INSERT INTO menu_item_group(menu_item_group_name, is_active) VALUES (?,?)");
+			stmt.setString(1, jsonItemGroupData.getString("menu_item_group_name"));
+			stmt.setBoolean(2, isActive);
+			int rowAffected = stmt.executeUpdate();
+
+			if (rowAffected == 0) {
+				return ResponseEntity.badRequest().body("Failed To Create Item Group");
+			}
+
+			return ResponseEntity.ok().body(null);
+		} catch (DuplicateKeyException ex) {
+			ex.printStackTrace();
+			return new ResponseEntity<>(HttpStatus.CONFLICT);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return ResponseEntity.badRequest().body(ex.getMessage());
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+
+	}
+
+	@PostMapping(value = "/edit_item_group", produces = "application/json")
+	public ResponseEntity<?> editItemGroup(HttpServletRequest request, HttpServletResponse response,
+			@RequestBody String data) {
+		Connection connection = null;
+		PreparedStatement stmt = null;
+
+		try {
+			JSONObject jsonItemGroupData = new JSONObject(data);		
+			boolean isActive = jsonItemGroupData.isNull("is_active") ? false
+					: jsonItemGroupData.getBoolean("is_active");
+
+			connection = dataSource.getConnection();
+			stmt = connection
+					.prepareStatement("UPDATE menu_item_group SET menu_item_group_name = ?, is_active = ? WHERE id = ?");
+			stmt.setString(1, jsonItemGroupData.getString("menu_item_group_name"));
+			stmt.setBoolean(2, isActive);
+			stmt.setLong(3, jsonItemGroupData.getLong("id"));
+			int rowAffected = stmt.executeUpdate();
+
+			if (rowAffected == 0) {
+				return ResponseEntity.badRequest().body("Failed To Edit Item Group");
+			}
+
+			return ResponseEntity.ok().body(null);
+		} catch (DuplicateKeyException ex) {
+			ex.printStackTrace();
+			return new ResponseEntity<>(HttpStatus.CONFLICT);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return ResponseEntity.badRequest().body(ex.getMessage());
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
+	@DeleteMapping(value = "/delete_item_group", produces = "application/json")
+	public ResponseEntity<?> removeItemGroup(HttpServletRequest request, HttpServletResponse response,
+			@RequestParam("id") Long id) {
+
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		PreparedStatement stmt2 = null;
+		PreparedStatement stmt3 = null;
+
+		try {
+			connection = dataSource.getConnection();
+			stmt = connection.prepareStatement("DELETE FROM menu_item_group WHERE id = ?");
+			stmt.setLong(1, id);
+			int rowAffected = stmt.executeUpdate();
+
+			if (rowAffected == 0) {
+				return ResponseEntity.badRequest().body("Failed To Remove Item Group");
+			} else {
+				// Delete from menu_item_modifier_group
+				stmt3 = connection.prepareStatement("DELETE FROM menu_item_group_sequence WHERE menu_item_group_id = ?");
+				stmt3.setLong(1, id);
+				stmt3.executeUpdate();
+			}
+			return ResponseEntity.ok().body(null);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return ResponseEntity.badRequest().body(ex.getMessage());
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+
+	}
+	
+	@GetMapping(value = "/get_assigned_menu_item_list", produces = "application/json")
+	public ResponseEntity<?> getAssignedMenuItemList(@RequestParam("menu_item_group_id") Long menuItemGroupId, HttpServletRequest request, HttpServletResponse response) {
+		JSONArray jsonMenuItemArray = new JSONArray();
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+
+		try {		
+			connection = dataSource.getConnection();
+			stmt = connection.prepareStatement("SELECT * FROM menu_item a " + 
+					"INNER JOIN menu_item_type_lookup b ON a.menu_item_type = b.menu_item_type_number " + 
+					"INNER JOIN menu_item_group_sequence c ON a.id = c.menu_item_id " + 
+					"WHERE c.menu_item_group_id = ? ");
+			stmt.setLong(1, menuItemGroupId);
+			rs = (ResultSet) stmt.executeQuery();
+
+			while (rs.next()) {
+				JSONObject jsonMenuItemObj = new JSONObject();
+				jsonMenuItemObj.put("id", rs.getLong("id"));
+				jsonMenuItemObj.put("backend_id", rs.getString("backend_id"));
+				jsonMenuItemObj.put("menu_item_name", rs.getString("menu_item_name"));
+				jsonMenuItemObj.put("menu_item_image_path", rs.getString("menu_item_image_path"));
+				jsonMenuItemObj.put("menu_item_base_price", rs.getBigDecimal("menu_item_base_price"));
+				jsonMenuItemObj.put("menu_item_type_name", rs.getString("menu_item_type_name"));			
+				jsonMenuItemArray.put(jsonMenuItemObj);
+			}
+			
+			System.out.println("Existing Set " + jsonMenuItemArray.toString());
+			
+			return ResponseEntity.ok().body(jsonMenuItemArray.toString());
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return ResponseEntity.badRequest().body(null);
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
+	@PostMapping("/assign_menu_items")
+	public ResponseEntity<?> assignMenuItems(HttpServletRequest request, HttpServletResponse response,
+			@RequestBody String data) {
+		Connection connection = null;
+		PreparedStatement stmt = null;
+
+		try {
+			JSONObject jsonObj = new JSONObject(data);
+			JSONArray jsonItemsArray = jsonObj.getJSONArray("item_list");
+			Long menuItemGroupId = jsonObj.getLong("menu_item_group_id");
+			
+			connection = dataSource.getConnection();
+
+			for(int i=0;i<jsonItemsArray.length();i++) {
+				int index = i;
+				JSONObject jsonItemObj = jsonItemsArray.getJSONObject(i);		
+				stmt = connection.prepareStatement("INSERT INTO menu_item_group_sequence (menu_item_group_id, menu_item_id, menu_item_group_sequence) VALUES (?,?,?)");
+				stmt.setLong(1, menuItemGroupId);
+				stmt.setLong(2, jsonItemObj.getLong("id"));
+				stmt.setInt(3, index+1);
 				stmt.executeUpdate();
-				
-				rs = stmt.getGeneratedKeys();
-				if(rs.next()) {
-					System.out.print("Key: " + rs.getLong(1));
-					JSONArray array = jObject.optJSONArray("menu_items");
-					
-					int[] items = new int[array.length()];
-					
-					for(int i = 0; i < array.length(); i++) {
-						items[i] = array.optInt(i);
-					}
-					
-					stmt = null;
-					int i = 1;
-					for(int item_id : items) {
-						stmt = connection.prepareStatement("INSERT INTO menu_item_group_sequence(menu_item_group_id, menu_item_id, menu_item_group_sequence) "
-								+ "VALUES(?, ?, ?)");
-						stmt.setLong(1, rs.getLong(1));
-						stmt.setLong(2, item_id);
-						stmt.setLong(3, i);
-						stmt.executeUpdate();
-						i++;
-					}
-				}
-				
 			}
 			
-		}catch(Exception e) {
-			e.printStackTrace();
-		}finally {
+			return ResponseEntity.ok().body(null);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return ResponseEntity.badRequest().body(null);
+		} finally {
 			if (connection != null) {
 				try {
 					connection.close();
@@ -154,180 +318,42 @@ public class ItemGroupRestController {
 				}
 			}
 		}
-		
-		return jObjectResult.toString();
 	}
 	
-	@RequestMapping(value = "/get_category", method = RequestMethod.GET)
-	public String getAllCategory() {
-		JSONObject jObject = null;
-		JSONArray JARY = new JSONArray();
-		JSONObject jObjectResult = new JSONObject();
+	@PostMapping("/reassign_menu_items")
+	public ResponseEntity<?> reassignMenuItems(HttpServletRequest request, HttpServletResponse response,
+			@RequestBody String data) {
 		Connection connection = null;
 		PreparedStatement stmt = null;
-		ResultSet rs = null;
-		
-		try {
-			connection = dataSource.getConnection();
-			stmt = connection.prepareStatement("SELECT * FROM category WHERE is_active = ?");
-			stmt.setBoolean(1, true);
-			rs = stmt.executeQuery();
-			
-			while(rs.next()) {
-				jObject = new JSONObject();
-				jObject.put("id", rs.getLong("id"));
-				jObject.put("name", rs.getString("category_name"));
-				jObject.put("backend_id", rs.getString("backend_id"));
-				JARY.put(jObject);
-			}
-			jObjectResult.put("data", JARY);
-			
-		}catch(Exception e) {
-			e.printStackTrace();
-		}finally {
-			if (connection != null) {
-				try {
-					connection.close();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}
-		
-		return jObjectResult.toString();
-	}
-	
-	@RequestMapping(value = "/items_by_category/{id}", method = RequestMethod.GET)
-	public String getItemGroupByCategory(@PathVariable long id, HttpServletRequest request, HttpServletResponse response) {
-		JSONObject jObject = null;
-		JSONObject jObjectResult = new JSONObject();
-		JSONArray JARY = new JSONArray();
-		Connection connection = null;
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-		
-		try {
-			if(id <= 0) {
-				response.setStatus(409);
-				return jObjectResult.put("response_message", "Category ID not found").toString();
-			}
+		PreparedStatement stmt2 = null;
+
+		try {			
+			JSONObject jsonObj = new JSONObject(data);
+			JSONArray jsonItemsArray = jsonObj.getJSONArray("item_list");
+			Long menuItemGroupId = jsonObj.getLong("menu_item_group_id");
 			
 			connection = dataSource.getConnection();
-			stmt = connection.prepareStatement("SELECT mi.* FROM menu_item mi INNER JOIN category_menu_item cmi ON mi.menu_item_id = cmi.id "
-					+ "WHERE category_id = ? AND mi.is_active = ?");
-			stmt.setLong(1, id);
-			stmt.setBoolean(2, true);
-			rs = stmt.executeQuery();
-			
-			while(rs.next()) {
-				jObject = new JSONObject();
-				jObject.put("id", rs.getLong("id"));
-				jObject.put("name", rs.getString("menu_item_name"));
-				jObject.put("image", rs.getString("menu_item_image_path"));
-				jObject.put("backend_id", rs.getString("backend_id"));
-				JARY.put(jObject);
-			}
-			jObjectResult.put("data", JARY);
-			
-		}catch(Exception e) {
-			e.printStackTrace();
-		}finally {
-			if (connection != null) {
-				try {
-					connection.close();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}
-		
-		return jObjectResult.toString();
-	}
-	
-	@RequestMapping(value = "/update_item_group", method = RequestMethod.POST)
-	public String updateItemGroup(@RequestBody String formfield, HttpServletRequest request, HttpServletResponse response) {
-		JSONObject jObject = new JSONObject();
-		JSONObject jObjectResult = new JSONObject();
-		Connection connection = null;
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-		
-		try {
-			jObject = new JSONObject(formfield);
-			if(!jObject.has("id")) {
-				response.setStatus(409);
-				return jObjectResult.put("response_message", "Menu Item Group ID not found.").toString();
-			}
-			if(!jObject.has("backend_id")) {
-				response.setStatus(409);
-				return jObjectResult.put("response_message", "Backend ID not found.").toString();
-			}
-			if(!jObject.has("group_name")) {
-				response.setStatus(409);
-				return jObjectResult.put("response_message", "Group name not found.").toString();
-			}
-			if(!jObject.has("item_sequence")) {
-				response.setStatus(408);
-				return jObjectResult.put("response_message", "Item Sequence not found.").toString();
-			}
-			if(!jObject.has("menu_items")) {
-				response.setStatus(409);
-				return jObjectResult.put("response_message", "Menu Item not found.").toString();
-			}
-			
-			connection = dataSource.getConnection();
-			stmt = connection.prepareStatement("UPDATE menu_item_group SET backend_id = ?, menu_item_group_name = ?, menu_item_group_sequence = ? "
-					+ "WHERE id = ?; SELECT SCOPE_IDENTITY();");
-			stmt.setLong(1, jObject.getLong("backend_id"));
-			stmt.setString(2, jObject.getString("group_name"));
-			stmt.setInt(3, jObject.getInt("item_sequence"));
-			stmt.setLong(4, jObject.getLong("id"));
-			rs = stmt.executeQuery();
-			
-			while(rs.next()) {
-				jObject.put("item_group_id", rs.getInt(1));
-			}
-		}catch(Exception e) {
-			e.printStackTrace();
-		}finally {
-			if (connection != null) {
-				try {
-					connection.close();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}
-		
-		return jObject.toString();
-	}
-	
-	@RequestMapping(value = "/remove_item_group/{id}", method = RequestMethod.POST)
-	public String removeItemGroup(@PathVariable long id, HttpServletRequest request, HttpServletResponse response) {
-		JSONObject jObjectResult = new JSONObject();
-		Connection connection = null;
-		PreparedStatement stmt = null;
-		
-		try {
-			connection = dataSource.getConnection();
+
 			stmt = connection.prepareStatement("DELETE FROM menu_item_group_sequence WHERE menu_item_group_id = ?");
-			stmt.setLong(1, id);
-			int affectedRow = stmt.executeUpdate();
-			
-			if(affectedRow != 0) {
-				stmt = null;
-				stmt = connection.prepareStatement("DELETE FROM menu_item_group WHERE id = ?");
-				stmt.setLong(1, id);
-				affectedRow = stmt.executeUpdate();
-				
-				if(affectedRow == 0) {
-					response.setStatus(409);
-					jObjectResult.put("response_message", "Fail to remove item group.").toString();
-				}
+			stmt.setLong(1, menuItemGroupId);
+			stmt.executeUpdate();
+
+			for(int i=0;i<jsonItemsArray.length();i++) {
+				int index = i;
+				JSONObject jsonItemObj = jsonItemsArray.getJSONObject(i);
+				stmt2 = connection.prepareStatement("INSERT INTO menu_item_group_sequence (menu_item_group_id, menu_item_id, menu_item_group_sequence) VALUES (?,?,?)");
+				stmt2.setLong(1, menuItemGroupId);
+				stmt2.setLong(2, jsonItemObj.getLong("id"));
+				stmt2.setInt(3, index+1);			
+				stmt2.executeUpdate();
 			}
-		}catch(Exception e) {
-			e.printStackTrace();
-		}finally {
+			
+			return ResponseEntity.ok().body(null);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			System.out.println("Error at Reassign :" + ex.getMessage());
+			return ResponseEntity.badRequest().body(null);
+		} finally {
 			if (connection != null) {
 				try {
 					connection.close();
@@ -336,76 +362,5 @@ public class ItemGroupRestController {
 				}
 			}
 		}
-		
-		return jObjectResult.toString();
-	}
-	
-	public int checkExistingItemGroup(String backend_id, Connection connection) {
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-		int size = 0;
-		
-		try {
-			stmt = connection.prepareStatement("SELECT * FROM menu_item_group WHERE backend_id = ?");
-			stmt.setString(1, backend_id);
-			rs = stmt.executeQuery();
-			
-			while(rs.next()) {
-				size++;
-			}
-		}catch(Exception e) {
-			e.printStackTrace();
-		}finally {
-			if (connection != null) {
-				try {
-					stmt = null;
-					rs = null;
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}
-		
-		return size;
-	}
-	
-	@RequestMapping(value = "/get_all_item_group_for_combo", method = RequestMethod.GET)
-	public String getAllItemGroupForCombo() {
-		JSONArray JARY = new JSONArray();
-		JSONObject jObject = new JSONObject();
-		JSONObject jObjectResult = new JSONObject();
-		Connection connection = null;
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-		
-		try {
-			connection = dataSource.getConnection();
-			stmt = connection.prepareStatement("SELECT * FROM menu_item_group");
-			rs = (ResultSet) stmt.executeQuery();
-			 
-			while(rs.next()) {
-				jObject = new JSONObject();
-				jObject.put("id", rs.getLong("id"));
-				jObject.put("backend_id", rs.getString("backend_id"));	
-				jObject.put("name", rs.getString("menu_item_group_name"));
-				jObject.put("type", "Group");
-				JARY.put(jObject);
-			}
-			
-			jObjectResult = new JSONObject();
-			jObjectResult.put("data", JARY);
-		}catch(Exception e) {
-			e.printStackTrace();
-		}
-		finally {
-			if (connection != null) {
-				try {
-					connection.close();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}
-		return jObjectResult.toString();
 	}
 }
