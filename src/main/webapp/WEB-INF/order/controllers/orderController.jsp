@@ -25,6 +25,14 @@ jQuery.fn.extend({
 	}
 });
 
+function removeFromArray(array, element) {
+	var index = array.indexOf(element);
+	
+	if (index !== -1) {
+		array.splice(index, 1);
+	}
+}
+
 byodApp.controller('OrderController', function($scope, $http, $routeParams, $timeout) {
 	/*Config Data*/
 	$scope.localeData;
@@ -55,6 +63,7 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 	$scope.isProcessingCartData;
 	$scope.totalItemPrice;
 	$scope.cart = [];
+	$scope.editCartItem;
 	
 	$scope.changeLocale = function(data) {
 		$scope.currentLocale = data;
@@ -70,6 +79,8 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 		$scope.hideFromView("tierSelection");
 		$scope.hideFromView("itemCheckOut");
 		$scope.hideFromView("itemCart");
+		$scope.hideFromView("editItemDetail");
+		$scope.hideFromView("editTierSelection");
 	}
 	$scope.switchToView = function(viewName, param1) {
 		if (viewName == "itemCategory") {
@@ -89,6 +100,11 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 		} else if (viewName == "itemCart") {
 			$scope.getCartTotal();
 			$("div#item-cart-overlay").fadeInFromLeft();
+		} else if (viewName == "editItemDetail") {
+			$("div#edit-item-detail-overlay").fadeInFromLeft();
+		} else if (viewName == "editTierSelection") {
+			$scope.selectedTier = param1;
+			$("div#edit-tier-selection-overlay").fadeInFromTop();
 		}
 	}
 	$scope.hideFromView = function(viewName) {
@@ -125,6 +141,11 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 			$("div#tier-selection-overlay").fadeOutToTop();
 		} else if (viewName == "itemCart") {
 			$("div#item-cart-overlay").fadeOutToLeft();
+		} else if (viewName == "editItemDetail") {
+			$scope.editCartItem = null;
+			$("div#edit-item-detail-overlay").fadeOutToLeft();
+		} else if (viewName == "editTierSelection") {
+			$("div#edit-tier-selection-overlay").fadeOutToTop();
 		}
 	}
 	
@@ -413,7 +434,11 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 			}
 			$scope.isReadyForCart = isAllTierCompleted;
 			if ($scope.isReadyForCart) {
-				$scope.hideFromView("tierSelection");
+				if ($scope.editCartItem) {
+					$scope.hideFromView("editTierSelection");
+				} else {
+					$scope.hideFromView("tierSelection");
+				}
 			} else {
 				if ($scope.selectedTier.tierNumber < $scope.itemComboTierList.length) {
 					var currentTierIndex = $scope.selectedTier.tierNumber - 1;
@@ -434,7 +459,11 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 						if (isAllCompleted) {
 							//Just In Case
 							$scope.isReadyForCart = true;
-							$scope.hideFromView("tierSelection");
+							if ($scope.editCartItem) {
+								$scope.hideFromView("editTierSelection");
+							} else {
+								$scope.hideFromView("tierSelection");
+							}
 						}
 					} else {
 						$scope.selectedTier = $scope.itemComboTierList[currentTierIndex];
@@ -491,7 +520,6 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 			cartObj.modifierData = angular.copy($scope.itemModifierList);
 			
 			$scope.cart.push(cartObj);
-			console.log(cartObj)
 			
 			var dialogOption = {};
 			dialogOption.title = $scope.currentLanguageData.dialog_cart_add_success_title;
@@ -507,12 +535,71 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 			$scope.isProcessingCartData = false;
 		}
 	}
+	$scope.editToCart = function() {
+		if (!$scope.isProcessingCartData) {
+			$scope.isProcessingCartData = true;
+			if ($scope.editCartItem.type == '0') {
+				$scope.editCartItem.quantity = 1;
+			} else {
+				$scope.editCartItem.quantity = $scope.alacarteQuantity;
+			}
+			$scope.editCartItem.totalPrice = $scope.totalItemPrice;
+			$scope.editCartItem.comboData = angular.copy($scope.itemComboTierList);
+			$scope.editCartItem.modifierData = angular.copy($scope.itemModifierList);
+			$scope.getCartTotal();
+			
+			var dialogOption = {};
+			dialogOption.title = $scope.currentLanguageData.dialog_cart_edit_success_title;
+			dialogOption.message = "";
+			dialogOption.button1 = {
+					name: $scope.currentLanguageData.dialog_button_ok,
+					fn: function() {
+						$scope.hideFromView("editItemDetail")
+						$("div#modal-dialog").modal("hide");
+					}
+			}
+			$scope.displayDialog(dialogOption);
+			$scope.isProcessingCartData = false;
+		}
+	}
 	$scope.getCartTotal = function() {
 		var total = 0;
 	    for (var i = 0; i < $scope.cart.length; i++){
 	    	total += parseFloat($scope.cart[i].totalPrice);
 	    }
 	    $scope.cartTotalPrice = total.toFixed(2);
+	}
+	$scope.editCart = function(cartItem) {
+		$scope.editCartItem = cartItem;
+		$scope.selectedItem = angular.copy($scope.editCartItem);
+		$scope.itemComboTierList = $scope.selectedItem.comboData;
+		$scope.itemModifierList = $scope.selectedItem.modifierData;
+		$scope.alacarteQuantity = $scope.selectedItem.quantity;
+		$scope.totalItemPrice = $scope.selectedItem.totalPrice;
+		$scope.isReadyForCart = true;
+		
+		$scope.switchToView("editItemDetail");
+	}
+	$scope.deleteFromCart = function(cartItem) {
+		var dialogOption = {};
+		dialogOption.title = $scope.currentLanguageData.dialog_delete_cart_item_title;
+		dialogOption.message = "";
+		dialogOption.button1 = {
+				name: $scope.currentLanguageData.dialog_button_yes,
+				fn: function() {
+					$scope.displayDialog(dialogOption);
+					removeFromArray($scope.cart, cartItem);
+					$scope.getCartTotal();
+					$("div#modal-dialog").modal("hide");
+				}
+		}
+		dialogOption.button2 = {
+				name: $scope.currentLanguageData.dialog_button_no,
+				fn: function() {
+					$("div#modal-dialog").modal("hide");
+				}
+		}
+		$scope.displayDialog(dialogOption);
 	}
 	
 	/*Dialog Fn*/

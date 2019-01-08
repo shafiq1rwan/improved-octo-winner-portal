@@ -29,8 +29,12 @@ public class LanguagePackCN {
 	public String cart_subtotal;
 	public String cart_checkout;
 	
+	public String edit_item_detail_editCart;
+	
 	public String dialog_reset_cart_title;
 	public String dialog_cart_add_success_title;
+	public String dialog_cart_edit_success_title;
+	public String dialog_delete_cart_item_title;
 	public String dialog_button_ok;
 	public String dialog_button_yes;
 	public String dialog_button_no;
@@ -155,6 +159,12 @@ public class LanguagePackCN {
 	public void setCart_checkout(String cart_checkout) {
 		this.cart_checkout = cart_checkout;
 	}
+	public String getEdit_item_detail_editCart() {
+		return edit_item_detail_editCart;
+	}
+	public void setEdit_item_detail_editCart(String edit_item_detail_editCart) {
+		this.edit_item_detail_editCart = edit_item_detail_editCart;
+	}
 	public String getDialog_reset_cart_title() {
 		return dialog_reset_cart_title;
 	}
@@ -166,6 +176,18 @@ public class LanguagePackCN {
 	}
 	public void setDialog_cart_add_success_title(String dialog_cart_add_success_title) {
 		this.dialog_cart_add_success_title = dialog_cart_add_success_title;
+	}
+	public String getDialog_cart_edit_success_title() {
+		return dialog_cart_edit_success_title;
+	}
+	public void setDialog_cart_edit_success_title(String dialog_cart_edit_success_title) {
+		this.dialog_cart_edit_success_title = dialog_cart_edit_success_title;
+	}
+	public String getDialog_delete_cart_item_title() {
+		return dialog_delete_cart_item_title;
+	}
+	public void setDialog_delete_cart_item_title(String dialog_delete_cart_item_title) {
+		this.dialog_delete_cart_item_title = dialog_delete_cart_item_title;
 	}
 	public String getDialog_button_ok() {
 		return dialog_button_ok;

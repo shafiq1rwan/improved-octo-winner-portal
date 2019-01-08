@@ -21,9 +21,12 @@ language-pack-cn:
   cart_total: "总计"
   cart_subtotal: "小计"
   cart_checkout: "结账"
+  edit_item_detail_editCart: "修改购物车"
   
   dialog_cart_add_success_title: "商品已成功添加到购物车！"
+  dialog_cart_edit_success_title: "商品已成功被修改！"
   dialog_reset_cart_title: "您确定要返回主页而清除购物车吗？"
+  dialog_delete_cart_item_title: "您确定要从购物车中删除该商品吗？"
   dialog_button_ok: "确定"
   dialog_button_yes: "是的"
   dialog_button_no: "不是"

@@ -21,9 +21,12 @@ language-pack-en:
   cart_total: "Total"
   cart_subtotal: "Subtotal"
   cart_checkout: "Checkout"
+  edit_item_detail_editCart: "Edit Cart"
   
   dialog_cart_add_success_title: "Item Added to Cart Successfully!"
+  dialog_cart_edit_success_title: "Item Editted Successfully!"
   dialog_reset_cart_title: "Are you sure you want to clear your cart by returning to main page?"
+  dialog_delete_cart_item_title: "Are you sure you want to delete the item from cart?"
   dialog_button_ok: "OK"
   dialog_button_yes: "Yes"
   dialog_button_no: "No"

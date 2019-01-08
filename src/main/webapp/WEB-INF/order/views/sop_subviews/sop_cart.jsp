@@ -57,11 +57,9 @@
 							<div class="col-12 pl-0 pr-0 row ml-0 mr-0"
 								ng-repeat="modifierGroupData in modifierGroupList">
 								<div class="col-9 pl-0 pr-0 xs-resp-font text-truncate">
-									&nbsp;&nbsp;-{{modifierGroupData.selectedModifier.name}}
-								</div>
+									&nbsp;&nbsp;-{{modifierGroupData.selectedModifier.name}}</div>
 								<div class="col-3 pl-0 pr-0 xs-resp-font text-right">
-									{{priceTag}}{{modifierGroupData.selectedModifier.price}}
-								</div>
+									{{priceTag}}{{modifierGroupData.selectedModifier.price}}</div>
 							</div>
 						</div>
 						<div class="row ml-0 mr-0" ng-if="cartItem.value = '0'"
@@ -99,6 +97,14 @@
 							<div class="col-5 pl-0 pr-0 xs-resp-font text-right">
 								<b>{{priceTag}}{{cartItem.totalPrice}}</b>
 							</div>
+						</div>
+						<div
+							class="row ml-0 mr-0 pt-1 pb-1 pl-1 pr-1 d-flex flex-row justify-content-end">
+							<img class="xl-resp-img mr-3"
+								src="${pageContext.request.contextPath}/assets/images/order/icon/edit_icon.svg"
+								ng-click="editCart(cartItem)"><img class="xl-resp-img"
+								src="${pageContext.request.contextPath}/assets/images/order/icon/delete_icon.svg"
+								ng-click="deleteFromCart(cartItem)">
 						</div>
 					</div>
 					<div class="col-12 cart-item pl-1 pr-1 mb-2">
