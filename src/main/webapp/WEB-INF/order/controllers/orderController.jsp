@@ -77,7 +77,6 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 		$scope.hideFromView("categorySelection");
 		$scope.hideFromView("itemDetail");
 		$scope.hideFromView("tierSelection");
-		$scope.hideFromView("itemCheckOut");
 		$scope.hideFromView("itemCart");
 		$scope.hideFromView("editItemDetail");
 		$scope.hideFromView("editTierSelection");
@@ -631,6 +630,7 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 		}).then(function (response) {
 			if (response != null && response.data != null && response.data.resultCode != null) {
 				if (response.data.resultCode == "00") {
+					console.log(response.data);
 					$scope.menuList = response.data.menuList;
 					$scope.storeName = response.data.storeName;
 					$scope.tableId = $routeParams.tableId;
