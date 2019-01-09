@@ -103,7 +103,7 @@ span.cart-icon {
 </style>
 
 </head>
-<body ng-app="byodApp" class="main-bg">
+<body ng-app="byodApp" class="main-bg" oncontextmenu="return false;">
 	<div class="view-body w-100 h-100" ng-view></div>
 </body>
 

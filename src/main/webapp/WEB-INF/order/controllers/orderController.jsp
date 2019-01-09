@@ -1,27 +1,25 @@
 <script>
-var locationRegex = /^\/store\/\d+\/tn\/\d+$/g
-
 /*Custom JQuery*/
 jQuery.fn.extend({
     fadeInFromLeft: function () {
         $(this).animate({
         	left: "0"
-        }, 300);
+        }, 250);
     },
 	fadeOutToLeft: function () {
 		$(this).animate({
 			left: "-100%"
-        }, 300);
+        }, 250);
 	},
 	fadeInFromTop: function () {
         $(this).animate({
         	top: "0"
-        }, 300);
+        }, 250);
     },
 	fadeOutToTop: function () {
 		$(this).animate({
 			top: "-100%"
-        }, 300);
+        }, 250);
 	}
 });
 
@@ -337,9 +335,16 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 		
 		tierData.itemString = $scope.generateItemString(tierData);
 		
-		if (tierData.selectedQuantity == tierData.quantity && tierData.isModifierCompleted) {
-			tierData.isTierCompleted = true;
-			$scope.checkCartReadiness();
+		if (tierData.selectedQuantity == tierData.quantity) {
+			if (typeof tierData.isModifierCompleted != "undefined") {
+				if (tierData.isModifierCompleted) {
+					tierData.isTierCompleted = true;
+					$scope.checkCartReadiness();
+				}
+			} else {
+				tierData.isTierCompleted = true;
+				$scope.checkCartReadiness();
+			}
 		}
 	}
 	$scope.minusItemQuantity = function(itemData, tierData) {
@@ -630,7 +635,6 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 		}).then(function (response) {
 			if (response != null && response.data != null && response.data.resultCode != null) {
 				if (response.data.resultCode == "00") {
-					console.log(response.data);
 					$scope.menuList = response.data.menuList;
 					$scope.storeName = response.data.storeName;
 					$scope.tableId = $routeParams.tableId;
@@ -681,7 +685,7 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 	
 	/*Loading Function*/
 	$scope.beginLoading = function() {
-		$("div#loading-overlay").slideDown();
+		$("div#loading-overlay").fadeInFromTop();
 		$scope.isLoadingFailed = false;
 		$scope.loadingPercentage = 0;
 		$scope.loadingText = "Loading...";
@@ -690,7 +694,7 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 	$scope.loadSuccess = function() {
 		$scope.loadingPercentage = 100;
 		$scope.loadingText = "Loading Completed.";
-		$timeout(function() {$("div#loading-overlay").slideUp()}, 1000);
+		$timeout(function() {$("div#loading-overlay").fadeOutToTop()}, 1000);
 	}
 	$scope.loadFailed = function(message) {
 		$scope.isLoadingFailed = true;
