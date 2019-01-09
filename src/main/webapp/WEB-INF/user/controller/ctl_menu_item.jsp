@@ -11,6 +11,7 @@
 		$scope.tier_action = '';
 		$scope.reordering_action = false; 
 		$scope.extra_tier_items = [];
+		$scope.upload_image = false;
 		
 		// ==== Add, Modifier Tier Operations ====
 		$scope.tier_item = {};
@@ -356,8 +357,74 @@
 
 		$(document).ready(function() {					
 			$scope.refreshItemMenuGroupTable();
+			
+			$('input[type=file]').change(function(event) {
+				var element = event.target.id;			
+				var _URL = window.URL || window.webkitURL;
+				var file = this.files[0];
+				fileCheck(file);	
+			});
+		    
+			function fileCheck(file) {	
+				if(file)
+					{
+				     var img = new Image(),
+			        	msg, 
+			        	errorFlag = false;
+			        img.src = window.URL.createObjectURL(file);
+			        img.onload = function() {
+		            	var width = img.naturalWidth,
+			                height = img.naturalHeight,
+			                aspectRatio = width/height,
+			                extension = $('#menuItemImage').val().split('.').pop();
+		            	      
+			        	if (['png', 'jpg', 'jpeg'].indexOf(extension) == -1) {
+							msg = 'Make sure that the image is in png / jpg / jpeg format.';
+							errorFlag = true;
+					 	}		          
+			        	else if (file.size > 150000) {
+			        		msg = 'Image file must not exceed 150kb.';
+			        		errorFlag = true;
+						}		          
+			        	else if(aspectRatio<1 || aspectRatio>1.5){
+			        		msg = 'Make sure that the image aspect ratio is within 1:1 to 3:2.';
+			        		errorFlag = true;
+						}	
+			        	else if(width < 300){
+			        		msg = 'Make sure that the image has minimum width of 300px.';
+			        		errorFlag = true;
+						}
+						else if(height < 200){
+							msg = 'Make sure that the image has minimum height of 200px.';
+							errorFlag = true;
+						}
+			          	
+			        	if(errorFlag){        		
+			        		$('#menuItemImage').val('');
+			        		alert(msg);		        		
+			        		return false;
+			        	}
+			        	
+			          	// if successful validation
+			        	var reader = new FileReader();
+			        	reader.readAsDataURL(file); 
+			        	reader.onloadend = function() {
+				       	  	$scope.menu_item.image_path = reader.result;  
+				        	$scope.$apply();
+				        	$scope.upload_image = true;
+			        	}		          
+			        };
+			        
+			        img.onerror = function() {
+			        	msg = 'Invalid image file.';			        	
+			        	alert(msg);
+						return false;
+			        };
+				}				
+				
+			}
 		});
-		
+
 		$scope.setModalType = function(action_type){
 			$scope.action = action_type;
 		}
@@ -375,6 +442,11 @@
 			
 			$scope.reordering_action = false; 
 			$scope.extra_tier_items = [];
+			
+			$('#menuItemImage').val('');
+			
+			$scope.disableInputs = false;
+			$scope.upload_image = false;
 		}
 		
 		//get menu item type
@@ -426,7 +498,6 @@
 					{"data" : "id", "width": "5%"}, 
 					{"data" : "backend_id"},
 					{"data" : "menu_item_name"},
-					{"data" : "menu_item_image_path", "defaultContent": "<i>Not set</i>"},
 					{"data" : "menu_item_base_price", 
 						"render": function(data, type, full, meta){
 							return parseFloat(data).toFixed(2);
@@ -467,11 +538,14 @@
 					],
 					"createdRow": function ( row, data, index ) {
 				        $compile(row)($scope);
-				    }			
+				    }/* ,
+				    "drawCallback": function( settings ) {
+				    	 var api = this.api();
+				    } */
 			});
 			
-			$('#menuItem_dtable tbody').off('click', 'tr td:nth-child(-n+6)');
-			$('#menuItem_dtable tbody').on('click', 'tr td:nth-child(-n+6)', function() {
+			$('#menuItem_dtable tbody').off('click', 'tr td:nth-child(-n+5)');
+			$('#menuItem_dtable tbody').on('click', 'tr td:nth-child(-n+5)', function() {
 				$http({
 					method : 'GET',
 					headers : {'Content-Type' : 'application/json'},
@@ -483,19 +557,18 @@
 					} else if(response.status == "200") {
 						console.log(response.data);
 						$scope.menu_item.id = response.data.id;
-						$scope.menu_item.modifier_group_id = (response.data.modifier_group_id === 0)?undefined: response.data.modifier_group_id;
 						$scope.menu_item.backend_id = response.data.backend_id;
 						$scope.menu_item.menu_item_name = response.data.menu_item_name;
 						$scope.menu_item.menu_item_description = response.data.menu_item_description;
-						$scope.menu_item.menu_item_image_path = response.data.menu_item_image_path;
+						$scope.menu_item.image_path = "${pageContext.request.contextPath}" + response.data.menu_item_image_path;
 						$scope.menu_item.menu_item_base_price = response.data.menu_item_base_price;
 						$scope.menu_item.menu_item_type = response.data.menu_item_type;
 						$scope.menu_item.is_taxable = response.data.is_taxable;			
 						$scope.menu_item.is_discountable = response.data.is_discountable;
-						$scope.menu_item.is_active = response.data.is_active;	
+						$scope.menu_item.is_active = response.data.is_active;
 						$scope.action = 'update';
-						$scope.disableInputs = ($scope.menu_item.menu_item_type == 2);
-						
+						$scope.disableInputs = ($scope.menu_item.menu_item_type == 2);						
+
 						console.log($scope.menu_item);
 						$('#createMenuItemModal').modal('toggle');
 					}
@@ -558,14 +631,13 @@
 					$scope.menu_item.is_taxable = false;
 					//$scope.menu_item.is_discountable = false;
 				}
-				
+
 				var json_data = JSON.stringify({
 					"id": $scope.menu_item.id || null,
-					"modifier_group_id" : $scope.menu_item.modifier_group_id || 0,
 					"menu_item_name": $scope.menu_item.menu_item_name,
 					"menu_item_backend_id" : $scope.menu_item.backend_id,
 					"menu_item_description": $scope.menu_item.menu_item_description || null,
-					"menu_item_image_path": $scope.menu_item.menu_item_image_path || null,
+					"menu_item_image_path": $scope.upload_image?$scope.menu_item.image_path: null,
 					"menu_item_base_price": $scope.menu_item.menu_item_base_price || 0.00,
 					"menu_item_type": $scope.menu_item.menu_item_type || 0,
 					"is_taxable" : $scope.menu_item.is_taxable || false,

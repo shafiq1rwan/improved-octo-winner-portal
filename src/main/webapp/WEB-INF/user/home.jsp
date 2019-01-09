@@ -78,6 +78,8 @@ if it's not present, don't show loader */
 	
 	<link rel="stylesheet" href="${pageContext.request.contextPath}/assets/plugins/datetimepicker/css/tempusdominus-bootstrap-4.min.css" />
 	
+	<script src="${pageContext.request.contextPath}/assets/plugins/angular-select2/js/angular-select2.min.js"></script>
+
 <%-- <link rel="import" href="${pageContext.request.contextPath}/assets/component.html"> --%>
 </head>
 
@@ -100,7 +102,7 @@ if it's not present, don't show loader */
 </body>
 
 <script>
-	var app = angular.module("myApp", [ "ngRoute" ]);
+	var app = angular.module("myApp", ["ngRoute", 'rt.select2']);
 
 	app.config(function($routeProvider) {
 		$routeProvider

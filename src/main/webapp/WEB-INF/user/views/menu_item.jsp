@@ -49,7 +49,6 @@
 													<th>ID</th>
 													<th>Backend ID</th>
 													<th>Name</th>
-													<th>Image Path</th>
 													<th>Price</th>
 													<th>Type</th>
 													<th>Status</th>	
@@ -135,14 +134,14 @@
 
 										</div>																		
 									</div>
-									<div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">		
+							<!-- 		<div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">		
 										<div class="form-group" ng-if="disableInputs">
 											<label for="modifierGroup">Modifer Group</label>
 											<select id="modifierGroup" class="form-control" ng-model="menu_item.modifier_group_id" ng-options="mg.id as mg.modifier_group_name for mg in modifier_groups">
 												<option value="">-- SELECT --</option>
 											</select>																											
 										</div>
-									</div>
+									</div> -->
 								</div>
 							
 								<div class="row">	
@@ -155,13 +154,26 @@
 									</div>
 								</div>								
 								<div class="row">
-									<div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
-										<div class="form-group">
-											<label class="login-label">Image</label>
-											<input class="form-control" type="file" name="files[]" id="categoryImage" multiple="multiple"> 
+									 <div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
+									 	<div class="form-group">
+									 		<img style="max-width:100%;max-height:100%;" ng-show="menu_item.image_path!=null"  ng-src="{{menu_item.image_path}}"/>
+									 	</div>									
+										<div class="form-group">		
+								 			<p>{{menu_item.image_path}}</p>																		
+											<label class="login-label">Image</label> 
+											<input id="menuItemImage" type="file" accept="image/*"/> 
 										</div>
 									</div>
 								</div>	
+								<div class="row">
+									<div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">							
+										<div class="form-group">																	
+											<label>Modifier Groups</label> 
+								<!-- 			<select2 ng-model="obj.field" s2-options="mg.id as mg.modifier_group_name for mg in modifier_groups" options="{ allowClear: true }"></select2> -->
+										</div>
+									</div>
+								</div>
+
 							</div>
 						</div>
 

@@ -6,6 +6,7 @@
 		
 		$scope.category_id = 0;
 		$scope.category = {};
+		$scope.upload_image = false;
 		$scope.action = '';
 		
 		$scope.oldItemList = [];
@@ -20,111 +21,82 @@
 		
 		var group_category_id = $routeParams.id;
 		
-		$scope.setImage = function(param){			
+/* 		$scope.setImage = function(param){			
 			$scope.category.category_image_path = param
 			$scope.category.default_preview = param
-		}
-
+		} */
 		
 		$(document).ready(function() {
 			$scope.refreshCategoryTable();
-		});
-		
-		$('input[type=file]').change(function(event) {
-			var element = event.target.id;			
-			var _URL = window.URL || window.webkitURL;
-			var file = this.files[0];
-			fileCheck(file, element);	
-		});
-		
-		function fileCheck(file, elementName) {		
-			var img;
-			var status = true;
 			
-			if (file.type.indexOf("image") == -1) {
-				alert("Invalid image file.");
-				$('#' + elementName).wrap('<form>').closest('form').get(0).reset();
-				$('#' + elementName).unwrap();
-				$scope.category.category_image_path = null;
-				$scope.category.default_preview = null;
-				$scope.$apply();
-				status = false;
-			}
+			$('input[type=file]').change(function(event) {
+				var element = event.target.id;			
+				var _URL = window.URL || window.webkitURL;
+				var file = this.files[0];
+				fileCheck(file);	
+			});
 			
-			if (file.size > 150000) {
-				alert("Image file must not exceed 150kb.");
-				$('#' + elementName).wrap('<form>').closest('form').get(0).reset();
-				$('#' + elementName).unwrap();
-				$scope.category.category_image_path = null;
-				$scope.category.default_preview = null;
-				$scope.$apply();
-				status = false;
-			}
-
-			if (status && file) {
-				img = new Image();	
-				img.onload = function() {
-					var aspectRatio = this.width / this.height;
-					if(aspectRatio<1 || aspectRatio>1.5){
-						alert("Please make sure that the image aspect ratio is within 1:1 to 3:2");
-						$('#' + elementName).wrap('<form>').closest('form').get(0).reset();
-						$('#' + elementName).unwrap();
-						$scope.category.category_image_path = null;
-						$scope.category.default_preview = null;
-						$scope.$apply();
-						status = false;
-					}		
-					else if(this.width < 300){
-						alert("Please make sure that the image has minimum width of 300px");
-						$('#' + elementName).wrap('<form>').closest('form').get(0).reset();
-						$('#' + elementName).unwrap();
-						$scope.category.category_image_path = null;
-						$scope.category.default_preview = null;
-						$scope.$apply();
-						status = false;
+			function fileCheck(file) {		
+				if(file)
+				{
+			     var img = new Image(),
+		        	msg, 
+		        	errorFlag = false;
+		        img.src = window.URL.createObjectURL(file);
+		        img.onload = function() {
+	            	var width = img.naturalWidth,
+		                height = img.naturalHeight,
+		                aspectRatio = width/height,
+		                extension = $('#categoryImage').val().split('.').pop();
+	            	      
+		        	if (['png', 'jpg', 'jpeg'].indexOf(extension) == -1) {
+						msg = 'Make sure that the image is in png / jpg / jpeg format.';
+						errorFlag = true;
+				 	}		          
+		        	else if (file.size > 150000) {
+		        		msg = 'Image file must not exceed 150kb.';
+		        		errorFlag = true;
+					}		          
+		        	else if(aspectRatio<1 || aspectRatio>1.5){
+		        		msg = 'Make sure that the image aspect ratio is within 1:1 to 3:2.';
+		        		errorFlag = true;
+					}	
+		        	else if(width < 300){
+		        		msg = 'Make sure that the image has minimum width of 300px.';
+		        		errorFlag = true;
 					}
-					else if(this.height < 200){
-						alert("Please make sure that the image has minimum height of 200px");
-						$('#' + elementName).wrap('<form>').closest('form').get(0).reset();
-						$('#' + elementName).unwrap();
-						$scope.category.category_image_path = null;
-						$scope.category.default_preview = null;
-						$scope.$apply();
-						status = false;
+					else if(height < 200){
+						msg = 'Make sure that the image has minimum height of 200px.';
+						errorFlag = true;
 					}
-					
-					if(status){
-						var reader = new FileReader();
-						reader.readAsDataURL(file);
-						reader.onload = function() {			
-							if (elementName === "categoryImage")
-							{
-								console.log("Image Onload here")
-								$scope.category.category_image_path = reader.result;
-								$scope.category.default_preview = reader.result; 
-								$scope.$apply();
-							}
-						}
-						reader.onerror = function(error) {
-							console.log("Error Reader");
-						}
-					}
-					
-				}
-				
-				img.onerror = function() {
-					alert("Invalid image file.");
-					$('#' + elementName).wrap('<form>').closest('form').get(0).reset();
-					$('#' + elementName).unwrap();
-					$scope.category.category_image_path = null;
-					$scope.category.default_preview = null;
-					$scope.$apply();
+		          	
+		        	if(errorFlag){        		
+		        		$('#categoryImage').val('');
+		        		alert(msg);		        		
+		        		return false;
+		        	}
+		        	
+		          	// if successful validation
+		        	var reader = new FileReader();
+		        	reader.readAsDataURL(file); 
+		        	reader.onloadend = function() {
+			       	  	$scope.category.image_path = reader.result;  
+			        	$scope.$apply();
+			        	$scope.upload_image = true;
+		        	}		          
 		        };
 		        
-				img.src = URL.createObjectURL(file);
-			}
+		        img.onerror = function() {
+		        	msg = 'Invalid image file.';			        	
+		        	alert(msg);
+					return false;
+		        };
+			}				
+			
 		}
-		
+				
+		});
+
 		$scope.setModalType = function(action_type){
 			$scope.action = action_type;
 		}
@@ -132,7 +104,6 @@
 		$scope.createCategory = function(){			
 			
 			if($scope.category.category_name == null 
-				
 					|| $scope.category.category_name == '' 
 					){
 			} else {
@@ -140,7 +111,7 @@
 					group_category_id : group_category_id,
 					category_name : $scope.category.category_name,
 					category_description : $scope.category.category_description || null,
-					category_image_path : $scope.category.category_image_path || null,
+					category_image_path : $scope.category.image_path || null,
 					is_active : $scope.category.is_active
 				});
 
@@ -247,11 +218,9 @@
 						$scope.category.id = response.data.id;
 						$scope.category.category_name = response.data.category_name;
 						$scope.category.category_description = response.data.category_description;
-						$scope.category.category_image_path = response.data.category_image_path;
+						$scope.category.image_path = "${pageContext.request.contextPath}" + response.data.category_image_path;
 						$scope.category.is_active = response.data.is_active;
 						$scope.action = 'update';					
-						$scope.category.default_preview = "${pageContext.request.contextPath}" + response.data.category_image_path;					
-						//$('#previewImage').attr('src', previewDefault);		
 						$('#createCategoryModal').modal('toggle');
 					}
 				});
@@ -299,7 +268,7 @@
 					id : $scope.category.id,
 					category_name : $scope.category.category_name,
 					category_description : $scope.category.category_description || null,
-					category_image_path : $scope.category.category_image_path || null,
+					category_image_path : $scope.upload_image?$scope.category.image_path:null,
 					is_active : $scope.category.is_active
 				});
 				
@@ -352,9 +321,9 @@
 			$scope.action = '';
 			$scope.category_menu_item = [];
 			
-			//$('#previewImage').attr('src', "");
 			$('#categoryImage').val('');
-			//previewDefault = '';
+			
+			$scope.upload_image = false;
 		}
 		
 		//Assigned Item Related Operations

@@ -57,12 +57,12 @@
 											<thead>
 												<tr>
 													<th></th>
-													<th></th>
+													<!-- <th></th> -->
 													<th>Name</th>
 													<th>Type</th>
 													<th>Price</th>
 													<th>Action</th>
-													<th></th>
+													<!-- <th></th> -->
 												</tr>
 											</thead>
 											<tbody>

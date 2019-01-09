@@ -81,12 +81,12 @@
 					"order" : [ [ 0, "asc" ] ] ,
 					"columns" : [ 
 						{"data" : "sequence", "visible": false},
-					  	{
+					/*   	{
 			                "orderable":      false,
 			                "data":           "type",
 			                "defaultContent": "",
 			                "className": function(data,type,row){if(data != null && data != 'item') return "details-control";} 
-			            },
+			            }, */
 						{"data" : "name"},
 						{"data" : "type", "defaultContent": ""},
 						{"data" : "price", "defaultContent": "N/A", 
@@ -99,8 +99,8 @@
 								var id = full.combo_item_detail_id;
 							 	return '<div class="btn-toolbar justify-content-between"><button ng-click="removeComboDetail('+ id +')" class="btn btn-danger custom-fontsize"><b><i class="fa fa-trash"></i>Remove</b></button></div>';	
 						 }
-						},
-						{"data" : "menu_items", "defaultContent": "", "visible": false}
+						}/* ,
+						{"data" : "menu_items", "defaultContent": "", "visible": false} */
 						],
 						"createdRow": function ( row, data, index ) {
 					        $compile(row)($scope);
