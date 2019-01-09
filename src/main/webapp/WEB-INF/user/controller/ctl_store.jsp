@@ -6,6 +6,7 @@
 		$scope.store = {
 				ecpos:true
 		};
+		$scope.uploadImage = false;
 		
 		$scope.modalType = function(action){
 			$scope.action = action;	
@@ -95,7 +96,7 @@
 					store_currency : $scope.store.currency,
 					store_table_count: $scope.store.tableCount, 
 					is_publish: $scope.store.isPublish==null?false:$scope.store.isPublish,
-					store_logo_path: $scope.store.imagePath,
+					store_logo_path: $scope.uploadImage?$scope.store.imagePath: null,
 					store_start_operating_time: $scope.store.operatingStartTime,
 					store_end_operating_time: $scope.store.operatingEndTime,
 					store_ecpos : $scope.store.ecpos
@@ -146,9 +147,10 @@
 					ecpos:true
 			};
 			// reset image
-			$('#previewImage').attr('src', "");
+			/* $('#previewImage').attr('src', "");
+			previewDefault = ''; */
 			$('#storeImage').val('');
-			previewDefault = '';
+			$scope.uploadImage = false;
 			
 			$('#operatingStartTime').datetimepicker('clear');
 			$('#operatingStartTime').datetimepicker('destroy');
@@ -223,7 +225,7 @@
 					} else if(response.status == "200") {
 						console.log(response.data);
 						$scope.store.name = response.data.store_name;
-						//$scope.store.imagePath = response.data.store_logo_path;
+						$scope.store.imagePath = "${pageContext.request.contextPath}" + response.data.store_logo_path;					
 						$scope.store.address = response.data.location.store_address;
 						$scope.store.country = response.data.location.store_country;
 						$scope.store.longitude = response.data.location.store_longitude;
@@ -234,9 +236,6 @@
 						$scope.store.operatingStartTime = response.data.store_start_operating_time;
 						$scope.store.operatingEndTime = response.data.store_end_operating_time;
 						$scope.store.ecpos = response.data.store_ecpos;
-						
-						previewDefault = "${pageContext.request.contextPath}" + response.data.store_logo_path;					
-						$('#previewImage').attr('src', previewDefault);
 						
 						 $('#operatingStartTime').datetimepicker({
 							    defaultDate: moment($scope.store.operatingStartTime, "HH:mm:ss"),
@@ -264,90 +263,83 @@
 		
 		$(document).ready(function() {				
 			$scope.refreshTable();		
-
-			
+		
 			$('input[type=file]').change(function(event) {
 				var element = event.target.id;			
-				var reader = new FileReader();
 				var _URL = window.URL || window.webkitURL;
 				var file = this.files[0];
-				var check = fileCheck(file, element);
-				if (check == false) {
-					return false;
-				}
-				
-				reader.readAsDataURL(file);
-				reader.onload = function() {
-					if (element === "storeImage")
-						$scope.store.imagePath = reader.result;
-					console.log($scope.store.imagePath);
-					$('#previewImage').attr('src', reader.result);
-				}
-				reader.onerror = function(error) {
-				}
+				verifyFileUpload(file);
 			});
 			
-			function fileCheck(file, elementName) {
-				var img;
-				if (file.type.indexOf("image") == -1) {
-					alert("Invalid image file.");
-					$('#' + elementName).wrap('<form>').closest('form').get(0).reset();
-					$('#' + elementName).unwrap();
-					$('#previewImage').attr('src', previewDefault);
-					$scope.store.imagePath = null;
-					return false;
-				}
-				
-				if (file.size > 150000) {
-					alert("Image file must not exceed 150kb.");
-					$('#' + elementName).wrap('<form>').closest('form').get(0).reset();
-					$('#' + elementName).unwrap();
-					$('#previewImage').attr('src', previewDefault);
-					$scope.store.imagePath = null;
-					return false;
-				}
-
+			function verifyFileUpload(file){  
 				if (file) {
-					img = new Image();
-					img.onload = function() {
-						var aspectRatio = this.width / this.height;
-						if(aspectRatio<1 || aspectRatio>1.5){
-							alert("Please make sure that the image aspect ratio is within 1:1 to 3:2");
-							$('#' + elementName).wrap('<form>').closest('form').get(0).reset();
-							$('#' + elementName).unwrap();
-							$('#previewImage').attr('src', previewDefault);
-							$scope.store.imagePath = null;
-							return false;
-						}		
-						else if(this.width < 300){
-							alert("Please make sure that the image has minimum width of 300px");
-							$('#' + elementName).wrap('<form>').closest('form').get(0).reset();
-							$('#' + elementName).unwrap();
-							$('#previewImage').attr('src', previewDefault);
-							$scope.store.imagePath = null;
-							return false;
+			        var img = new Image(),
+			        	msg, 
+			        	errorFlag = false;
+			        img.src = window.URL.createObjectURL(file);
+			        img.onload = function() {
+		            	var width = img.naturalWidth,
+			                height = img.naturalHeight,
+			                aspectRatio = width/height;
+			                
+			        	if (file.type.indexOf("image") == -1) {
+							msg = 'Invalid image file.';
+							errorFlag = true;
+					 	}		          
+			        	else if (file.size > 150000) {
+			        		msg = 'Image file must not exceed 150kb.';
+			        		errorFlag = true;
+						}		          
+			        	else if(aspectRatio<1 || aspectRatio>1.5){
+			        		msg = 'Make sure that the image aspect ratio is within 1:1 to 3:2.';
+			        		errorFlag = true;
+						}	
+			        	else if(width < 300){
+			        		msg = 'Make sure that the image has minimum width of 300px.';
+			        		errorFlag = true;
 						}
-						else if(this.height < 200){
-							alert("Please make sure that the image has minimum height of 200px");
-							$('#' + elementName).wrap('<form>').closest('form').get(0).reset();
-							$('#' + elementName).unwrap();
-							$('#previewImage').attr('src', previewDefault);
-							$scope.store.imagePath = null;
-							return false;
+						else if(height < 200){
+							msg = 'Make sure that the image has minimum height of 200px.';
+							errorFlag = true;
 						}
-					}
-					
-					img.onerror = function() {
-						alert("Invalid image file.");
-						$('#' + elementName).wrap('<form>').closest('form').get(0).reset();
-						$('#' + elementName).unwrap();
-						$('#previewImage').attr('src', previewDefault);
-						$scope.store.imagePath = null;
+			          	
+			        	if(errorFlag){
+			        		$('#storeImage').val('');
+				        	swal({
+								  title: "Error",
+								  text: msg,
+								  icon: "warning",
+								  dangerMode: true,
+								});
+							focus($('#storeImage'));
+							return false;
+			        	}
+			        	
+			          	// if successful validation
+			        	var reader = new FileReader();
+			        	reader.readAsDataURL(file); 
+			        	reader.onloadend = function() {
+				       	  	$scope.store.imagePath = reader.result;  
+				        	$scope.$apply();
+				        	$scope.uploadImage = true;
+			        	}		          
+			        };
+			        
+			        img.onerror = function() {
+			        	msg = 'Invalid image file.';			        	
+			        	$('#storeImage').val('');
+			        	swal({
+							  title: "Error",
+							  text: msg,
+							  icon: "warning",
+							  dangerMode: true,
+							});
+						focus($('#storeImage'));
 						return false;
 			        };
-					img.src = URL.createObjectURL(file);
-				}
-			};
+			    }
+			}
+
 		} ); 
 
 	});

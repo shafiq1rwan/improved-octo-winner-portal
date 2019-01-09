@@ -152,7 +152,7 @@
 						<div class="row">
 							 <div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
 							 	<div class="form-group">
-							 		<img style="max-width:100%;max-height:100%;" id="previewImage" />	
+							 		<img style="max-width:100%;max-height:100%;" ng-show="store.imagePath!=null" ng-src="{{store.imagePath}}" />	
 							 	</div>									
 								<div class="form-group">																							
 									<label class="login-label">Image</label> 
