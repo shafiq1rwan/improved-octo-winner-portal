@@ -280,10 +280,11 @@
 			        img.onload = function() {
 		            	var width = img.naturalWidth,
 			                height = img.naturalHeight,
-			                aspectRatio = width/height;
-			                
-			        	if (file.type.indexOf("image") == -1) {
-							msg = 'Invalid image file.';
+			                aspectRatio = width/height,
+			                extension = $('#storeImage').val().split('.').pop();
+		            	      
+			        	if (['png', 'jpg', 'jpeg'].indexOf(extension) == -1) {
+							msg = 'Make sure that the image is in png / jpg / jpeg format.';
 							errorFlag = true;
 					 	}		          
 			        	else if (file.size > 150000) {
