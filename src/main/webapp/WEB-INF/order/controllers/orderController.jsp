@@ -1,28 +1,4 @@
 <script>
-/*Custom JQuery*/
-jQuery.fn.extend({
-    fadeInFromLeft: function () {
-        $(this).animate({
-        	left: "0"
-        }, 250);
-    },
-	fadeOutToLeft: function () {
-		$(this).animate({
-			left: "-100%"
-        }, 250);
-	},
-	fadeInFromTop: function () {
-        $(this).animate({
-        	top: "0"
-        }, 250);
-    },
-	fadeOutToTop: function () {
-		$(this).animate({
-			top: "-100%"
-        }, 250);
-	}
-});
-
 function removeFromArray(array, element) {
 	var index = array.indexOf(element);
 	
@@ -81,27 +57,27 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 	}
 	$scope.switchToView = function(viewName, param1) {
 		if (viewName == "itemCategory") {
-			$("div#item-category-overlay").fadeInFromLeft();
+			$("div#item-category-overlay").fadeIn(300);
 		} else if (viewName == "itemList") {
 			$scope.selectedCategory = param1;
-			$("div#item-list-overlay").fadeInFromLeft();
+			$("div#item-list-overlay").fadeIn(300);
 		} else if (viewName == "categorySelection") {
-			$("div#category-selection-overlay").fadeInFromTop();
+			$("div#category-selection-overlay").fadeIn(300);
 		} else if (viewName == "itemDetail") {
 			$scope.selectedItem = param1;
 			$scope.generateItemDetails($scope.selectedItem);
-			$("div#item-detail-overlay").fadeInFromLeft();
+			$("div#item-detail-overlay").fadeIn(300);
 		} else if (viewName == "tierSelection") {
 			$scope.selectedTier = param1;
-			$("div#tier-selection-overlay").fadeInFromTop();
+			$("div#tier-selection-overlay").fadeIn(300);
 		} else if (viewName == "itemCart") {
 			$scope.getCartTotal();
-			$("div#item-cart-overlay").fadeInFromLeft();
+			$("div#item-cart-overlay").fadeIn(300);
 		} else if (viewName == "editItemDetail") {
-			$("div#edit-item-detail-overlay").fadeInFromLeft();
+			$("div#edit-item-detail-overlay").fadeIn(300);
 		} else if (viewName == "editTierSelection") {
 			$scope.selectedTier = param1;
-			$("div#edit-tier-selection-overlay").fadeInFromTop();
+			$("div#edit-tier-selection-overlay").fadeIn(300);
 		}
 	}
 	$scope.hideFromView = function(viewName) {
@@ -114,7 +90,7 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 						name: $scope.currentLanguageData.dialog_button_yes,
 						fn: function() {
 							$scope.cart = [];
-							$("div#item-category-overlay").fadeOutToLeft();
+							$("div#item-category-overlay").fadeOut(300);
 							$("div#modal-dialog").modal("hide");
 						}
 				}
@@ -126,23 +102,23 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 				}
 				$scope.displayDialog(dialogOption);
 			} else {
-				$("div#item-category-overlay").fadeOutToLeft();
+				$("div#item-category-overlay").fadeOut(300);
 			}
 		} else if (viewName == "itemList") {
-			$("div#item-list-overlay").fadeOutToLeft();
+			$("div#item-list-overlay").fadeOut(300);
 		} else if (viewName == "categorySelection") {
-			$("div#category-selection-overlay").fadeOutToTop();
+			$("div#category-selection-overlay").fadeOut(300);
 		} else if (viewName == "itemDetail") {
-			$("div#item-detail-overlay").fadeOutToLeft();
+			$("div#item-detail-overlay").fadeOut(300);
 		} else if (viewName == "tierSelection") {
-			$("div#tier-selection-overlay").fadeOutToTop();
+			$("div#tier-selection-overlay").fadeOut(300);
 		} else if (viewName == "itemCart") {
-			$("div#item-cart-overlay").fadeOutToLeft();
+			$("div#item-cart-overlay").fadeOut(300);
 		} else if (viewName == "editItemDetail") {
 			$scope.editCartItem = null;
-			$("div#edit-item-detail-overlay").fadeOutToLeft();
+			$("div#edit-item-detail-overlay").fadeOut(300);
 		} else if (viewName == "editTierSelection") {
-			$("div#edit-tier-selection-overlay").fadeOutToTop();
+			$("div#edit-tier-selection-overlay").fadeOut(300);
 		}
 	}
 	
@@ -685,7 +661,7 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 	
 	/*Loading Function*/
 	$scope.beginLoading = function() {
-		$("div#loading-overlay").fadeInFromTop();
+		$("div#loading-overlay").slideDown(300);
 		$scope.isLoadingFailed = false;
 		$scope.loadingPercentage = 0;
 		$scope.loadingText = "Loading...";
@@ -694,7 +670,7 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 	$scope.loadSuccess = function() {
 		$scope.loadingPercentage = 100;
 		$scope.loadingText = "Loading Completed.";
-		$timeout(function() {$("div#loading-overlay").fadeOutToTop()}, 1000);
+		$timeout(function() {$("div#loading-overlay").slideUp(300)}, 1000);
 	}
 	$scope.loadFailed = function(message) {
 		$scope.isLoadingFailed = true;
@@ -708,7 +684,10 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 	}
 	
 	/*Init Function*/
-	$scope.backToLanding();
-	$scope.beginLoading();
+	angular.element(document).ready(function () {
+		$("body").show();
+		$scope.beginLoading();
+		$scope.backToLanding();
+    });
 });
 </script>

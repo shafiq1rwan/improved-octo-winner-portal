@@ -8,132 +8,131 @@
 				</button>
 			</div>
 		</div>
-		<div class="body-content scrollable-y">
+		<div class="body-content">
 			<div class="h-100 d-flex flex-column">
-				<div class="align-self-center">
-					<img class="max-img-height" src="{{selectedItem.path}}"
-						alt="{{selectedItem.name}}">
-				</div>
-				<div
-					class="w-100 flex-fill card d-flex flex-column align-self-center">
-					<div class="w-100 align-self-center text-center">
-						<span class="text-limiter lg-resp-font"><b>{{selectedItem.name}}</b></span>
-					</div>
-					<div class="w-100 align-self-center text-center">
-						<span class="text-limiter three-liner xs-resp-font">{{selectedItem.description}}</span>
-					</div>
-					<hr class="ml-1 mr-1">
-					<div class="flex-fill scrollable-y pb-2">
-						<div class="row ml-0 mr-0">
-							<div
-								class="col-8 col-sm-8 col-md-8 col-lg-9 col-xl-9 d-flex flex-row pr-0">
-								<div
-									class="w-100 align-self-center text-limiter two-liner sm-resp-font">
-									<b ng-show="selectedItem.type == 0">{{currentLanguageData.item_detail_comboPrice}}</b>
-									<b ng-show="selectedItem.type == 1">{{currentLanguageData.item_detail_alacartePrice}}</b>
-								</div>
-							</div>
-							<div
-								class="col-4 col-sm-4 col-md-4 col-lg-3 col-xl-3 d-flex flex-row pl-0">
-								<div
-									class="w-100 align-self-center flex-fill d-flex flex-column">
-									<div class="text-right text-nowrap sm-resp-font">{{priceTag}}{{selectedItem.price}}</div>
-								</div>
-							</div>
+				<div class="w-100 flex-fill d-flex flex-column align-self-center">
+					<div
+						class="w-100 flex-fill card d-flex flex-column align-self-center scrollable-y">
+						<img class="max-img-height" src="{{selectedItem.path}}"
+							alt="{{selectedItem.name}}">
+						<div class="w-100 align-self-center text-center">
+							<span class="text-limiter lg-resp-font"><b>{{selectedItem.name}}</b></span>
 						</div>
-						<div class="w-100" ng-show="selectedItem.type != '0'">
-							<hr class="ml-3 mr-3">
+						<div class="w-100 align-self-center text-center">
+							<span class="text-limiter three-liner xs-resp-font">{{selectedItem.description}}</span>
+						</div>
+						<hr class="ml-1 mr-1">
+						<div class="flex-fill pb-2">
 							<div class="row ml-0 mr-0">
 								<div
-									class="col-8 col-sm-8 col-md-8 col-lg-9 col-xl-9 d-flex flex-column pr-0">
-									<div class="text-limiter two-liner sm-resp-font">
-										<b>{{currentLanguageData.item_detail_quantity}}</b>
+									class="col-8 col-sm-8 col-md-8 col-lg-9 col-xl-9 d-flex flex-row pr-0">
+									<div
+										class="w-100 align-self-center text-limiter two-liner sm-resp-font">
+										<b ng-show="selectedItem.type == 0">{{currentLanguageData.item_detail_comboPrice}}</b>
+										<b ng-show="selectedItem.type == 1">{{currentLanguageData.item_detail_alacartePrice}}</b>
 									</div>
 								</div>
 								<div
 									class="col-4 col-sm-4 col-md-4 col-lg-3 col-xl-3 d-flex flex-row pl-0">
 									<div
 										class="w-100 align-self-center flex-fill d-flex flex-column">
+										<div class="text-right text-nowrap sm-resp-font">{{priceTag}}{{selectedItem.price}}</div>
+									</div>
+								</div>
+							</div>
+							<div class="w-100" ng-show="selectedItem.type != '0'">
+								<hr class="ml-3 mr-3">
+								<div class="row ml-0 mr-0">
+									<div
+										class="col-8 col-sm-8 col-md-8 col-lg-9 col-xl-9 d-flex flex-column pr-0">
+										<div class="text-limiter two-liner sm-resp-font">
+											<b>{{currentLanguageData.item_detail_quantity}}</b>
+										</div>
+									</div>
+									<div
+										class="col-4 col-sm-4 col-md-4 col-lg-3 col-xl-3 d-flex flex-row pl-0">
+										<div
+											class="w-100 align-self-center flex-fill d-flex flex-column">
+											<div class="row ml-0 mr-0">
+												<div class="col-4 pl-0 pr-0 text-center">
+													<img class="md-resp-img"
+														ng-click="minusAlacarteQuantity(selectedItem)"
+														src="${pageContext.request.contextPath}/assets/images/order/icon/minus_icon.svg" />
+												</div>
+												<div class="col-4 pl-0 pr-0 text-center">
+													<span class="sm-resp-font">{{alacarteQuantity}}</span>
+												</div>
+												<div class="col-4 pl-0 pr-0 text-center">
+													<img class="md-resp-img"
+														ng-click="addAlacarteQuantity(selectedItem)"
+														src="${pageContext.request.contextPath}/assets/images/order/icon/plus_icon.svg" />
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+								<hr class="ml-1 mr-1"
+									ng-show="itemModifierList && itemModifierList.modifierGroupData.length > 0">
+								<div class="row ml-0 mr-0">
+									<div class="col-12"
+										ng-repeat="modifierGroupList in itemModifierList.modifierGroupData">
 										<div class="row ml-0 mr-0">
-											<div class="col-4 pl-0 pr-0 text-center">
-												<img class="md-resp-img"
-													ng-click="minusAlacarteQuantity(selectedItem)"
-													src="${pageContext.request.contextPath}/assets/images/order/icon/minus_icon.svg" />
+											<div class="col-12 pl-0 pr-0 text-truncate">
+												<b>{{selectedItem.name}}&nbsp;{{$index + 1}}</b>
 											</div>
-											<div class="col-4 pl-0 pr-0 text-center">
-												<span class="sm-resp-font">{{alacarteQuantity}}</span>
-											</div>
-											<div class="col-4 pl-0 pr-0 text-center">
-												<img class="md-resp-img"
-													ng-click="addAlacarteQuantity(selectedItem)"
-													src="${pageContext.request.contextPath}/assets/images/order/icon/plus_icon.svg" />
+										</div>
+										<div class="row ml-0 mr-0"
+											ng-repeat="modifierGroupData in modifierGroupList">
+											<div class="col-6 pl-0 pr-0 text-truncate">{{modifierGroupData.name}}</div>
+											<div class="col-6 pl-0 pr-0">
+												<select class="form-control xs-resp-font pt-0 pb-0"
+													ng-model="modifierGroupData.selectedModifier"
+													ng-change="updateAlacarteModifierData(modifierGroupData)">
+													<option
+														ng-repeat="modifierData in modifierGroupData.modifierList"
+														ng-value="modifierData">{{modifierData.name}} (+{{priceTag}}{{modifierData.price}})</option>
+												</select>
 											</div>
 										</div>
 									</div>
 								</div>
 							</div>
-							<hr class="ml-1 mr-1"
-								ng-show="itemModifierList && itemModifierList.modifierGroupData.length > 0">
-							<div class="row ml-0 mr-0">
-								<div class="col-12"
-									ng-repeat="modifierGroupList in itemModifierList.modifierGroupData">
-									<div class="row ml-0 mr-0">
-										<div class="col-12 pl-0 pr-0 text-truncate">
-											<b>{{selectedItem.name}}&nbsp;{{$index + 1}}</b>
-										</div>
-									</div>
-									<div class="row ml-0 mr-0"
-										ng-repeat="modifierGroupData in modifierGroupList">
-										<div class="col-6 pl-0 pr-0 text-truncate">{{modifierGroupData.name}}</div>
-										<div class="col-6 pl-0 pr-0">
-											<select class="form-control xs-resp-font pt-0 pb-0"
-												ng-model="modifierGroupData.selectedModifier"
-												ng-change="updateAlacarteModifierData(modifierGroupData)">
-												<option
-													ng-repeat="modifierData in modifierGroupData.modifierList"
-													ng-value="modifierData">{{modifierData.name}} (+{{priceTag}}{{modifierData.price}})</option>
-											</select>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-						<div class="w-100" ng-show="selectedItem.type = '0'"
-							ng-repeat="comboTier in itemComboTierList">
-							<hr class="ml-3 mr-3">
-							<div class="row ml-0 mr-0">
-								<div
-									class="col-8 col-sm-8 col-md-8 col-lg-9 col-xl-9 d-flex flex-column pr-0">
-									<div class="text-limiter two-liner sm-resp-font"
-										ng-class="{'tier-completed': comboTier.isTierCompleted}">
-										<b>{{comboTier.name}}</b>
-									</div>
-									<div class="text-limiter two-liner resp-font">
-										<span>{{comboTier.itemString}}</span>
-									</div>
-								</div>
-								<div
-									class="col-4 col-sm-4 col-md-4 col-lg-3 col-xl-3 d-flex flex-row pl-0">
+							<div class="w-100" ng-show="selectedItem.type = '0'"
+								ng-repeat="comboTier in itemComboTierList">
+								<hr class="ml-3 mr-3">
+								<div class="row ml-0 mr-0">
 									<div
-										class="w-100 align-self-center flex-fill d-flex flex-column">
-										<div class="text-right text-nowrap sm-resp-font"
-											ng-show="comboTier.isTierCompleted">
-											<button class="btn btn-primary btn-main sm-resp-font"
-												type="button"
-												ng-click="switchToView('editTierSelection', comboTier)">{{priceTag}}{{comboTier.totalPrice}}</button>
+										class="col-8 col-sm-8 col-md-8 col-lg-9 col-xl-9 d-flex flex-column pr-0">
+										<div class="text-limiter two-liner sm-resp-font"
+											ng-class="{'tier-completed': comboTier.isTierCompleted}">
+											<b>{{comboTier.name}}</b>
 										</div>
-										<div class="text-right text-nowrap sm-resp-font"
-											ng-show="!comboTier.isTierCompleted">
-											<button class="btn btn-primary btn-main sm-resp-font"
-												type="button"
-												ng-click="switchToView('editTierSelection', comboTier)">{{currentLanguageData.item_detail_select}}&nbsp;&gt;</button>
+										<div class="text-limiter two-liner resp-font">
+											<span>{{comboTier.itemString}}</span>
+										</div>
+									</div>
+									<div
+										class="col-4 col-sm-4 col-md-4 col-lg-3 col-xl-3 d-flex flex-row pl-0">
+										<div
+											class="w-100 align-self-center flex-fill d-flex flex-column">
+											<div class="text-right text-nowrap sm-resp-font"
+												ng-show="comboTier.isTierCompleted">
+												<button class="btn btn-primary btn-main sm-resp-font"
+													type="button"
+													ng-click="switchToView('editTierSelection', comboTier)">{{priceTag}}{{comboTier.totalPrice}}</button>
+											</div>
+											<div class="text-right text-nowrap sm-resp-font"
+												ng-show="!comboTier.isTierCompleted">
+												<button class="btn btn-primary btn-main sm-resp-font"
+													type="button"
+													ng-click="switchToView('editTierSelection', comboTier)">{{currentLanguageData.item_detail_select}}&nbsp;&gt;</button>
+											</div>
 										</div>
 									</div>
 								</div>
 							</div>
 						</div>
 					</div>
-					<hr class="ml-1 mr-1 mt-1 mb-1">
 					<div class="mt-2 mb-2">
 						<div class="row ml-0 mr-0">
 							<div
