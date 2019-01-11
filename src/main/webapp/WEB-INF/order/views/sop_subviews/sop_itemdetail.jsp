@@ -13,8 +13,10 @@
 				<div class="w-100 flex-fill d-flex flex-column align-self-center">
 					<div
 						class="w-100 flex-fill card d-flex flex-column align-self-center scrollable-y">
-						<img class="max-img-height" src="{{selectedItem.path}}"
-							alt="{{selectedItem.name}}">
+						<div class="w-100 align-self-center text-center">
+							<img class="max-img-height" src="{{selectedItem.path}}"
+								alt="{{selectedItem.name}}">
+						</div>
 						<div class="w-100 align-self-center text-center">
 							<span class="text-limiter lg-resp-font"><b>{{selectedItem.name}}</b></span>
 						</div>
