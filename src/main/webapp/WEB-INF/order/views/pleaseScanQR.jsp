@@ -1,4 +1,9 @@
 <html>
+<script>
+$(document).ready(function() {
+	$("body").show();
+});
+</script>
 <body>
 	<div class="h-100 w-100 d-flex flex-column justify-content-center">
 		<div class="d-flex flex-row justify-content-center">
