@@ -118,6 +118,57 @@ public class ModifierGroupRestController {
 		}
 
 	}
+	
+	@GetMapping(value = "/get_assigne_modifier_groups_by_item_id", produces = "application/json")
+	public ResponseEntity<?> getAssignedModifierGroupsByItemId(HttpServletRequest request, HttpServletResponse response,
+			@RequestParam("menuItemId") Long menuItemId) {
+
+		JSONArray jsonAssignedModifierGroupArray = new JSONArray();
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+
+		try {
+			connection = dataSource.getConnection();
+			stmt = connection.prepareStatement("SELECT * FROM (" + 
+					"SELECT b.menu_item_modifier_group_sequence AS sequence_id, a.* FROM modifier_group a " + 
+					"INNER JOIN menu_item_modifier_group b ON a.id = b.modifier_group_id WHERE b.menu_item_id = ? " + 
+					"UNION " + 
+					"SELECT 9999 AS sequence_id, a.* FROM modifier_group a " + 
+					"LEFT JOIN menu_item_modifier_group b ON a.id = b.modifier_group_id " + 
+					"WHERE b.modifier_group_id IS NULL " + 
+					") AS A " + 
+					"ORDER BY sequence_id");
+			stmt.setLong(1, menuItemId);
+			rs = (ResultSet) stmt.executeQuery();
+
+			while (rs.next()) {
+				JSONObject jsonObj = new JSONObject();
+				jsonObj.put("id", rs.getLong("id"));
+				jsonObj.put("sequence_id", rs.getInt("sequence_id"));
+				jsonObj.put("modifier_group_name", rs.getString("modifier_group_name"));
+				jsonObj.put("is_active", rs.getBoolean("is_active"));
+				
+				jsonAssignedModifierGroupArray.put(jsonObj);
+			}
+			
+			System.out.println(jsonAssignedModifierGroupArray.toString());
+
+			return ResponseEntity.ok().body(jsonAssignedModifierGroupArray.toString());
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return ResponseEntity.badRequest().body(ex.getMessage());
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+
+	}
 
 	@PostMapping(value = "/create_modifier_group", produces = "application/json")
 	public ResponseEntity<?> createModifierGroup(HttpServletRequest request, HttpServletResponse response,

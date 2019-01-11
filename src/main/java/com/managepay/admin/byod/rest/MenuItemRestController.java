@@ -12,6 +12,7 @@ import javax.sql.DataSource;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -267,6 +268,7 @@ public class MenuItemRestController {
 		try {
 			System.out.println(data);
 			JSONObject jsonMenuItemData = new JSONObject(data);
+			JSONArray modifierGroupArray = jsonMenuItemData.getJSONArray("assigned_modifier_group");
 
 			String imagePath = jsonMenuItemData.isNull("menu_item_image_path") ? null
 					: byodUtil.saveImageFile("imgMI", jsonMenuItemData.getString("menu_item_image_path"), null);      
@@ -286,19 +288,34 @@ public class MenuItemRestController {
 			stmt.setBoolean(8, jsonMenuItemData.getBoolean("is_discountable"));
 			
 			keyRs = (ResultSet) stmt.executeQuery();
-/*			if (keyRs.next()) {
-				if (jsonMenuItemData.getLong("modifier_group_id") != 0) {
-					int sequence = getModiferGroupSequence(jsonMenuItemData.getLong("modifier_group_id")) + 1;
+		
+			
+			if (keyRs.next()) {
+				
+				System.out.println("Keys: " + keyRs.getLong(1));
+				
+				if (modifierGroupArray.length() != 0 && jsonMenuItemData.getInt("menu_item_type") != 2) {
+					int[] modifierGroups = new int[modifierGroupArray.length()];
+					
+					for (int i = 0; i < modifierGroupArray.length(); i++) {
+						int  modifierGroupId = Integer.parseInt(modifierGroupArray.optString(i));
+						modifierGroups[i] = modifierGroupId;
+					}
+
 					stmt2 = connection.prepareStatement(
-							"INSERT INTO modifier_item_sequence (modifier_group_id, menu_item_id, modifier_item_sequence) VALUES (?,?,?)");
-					stmt2.setLong(1, jsonMenuItemData.getLong("modifier_group_id"));
-					stmt2.setLong(2, keyRs.getLong(1));
-					stmt2.setInt(3, sequence);
-					stmt2.executeUpdate();
+							"INSERT INTO  menu_item_modifier_group(menu_item_id , modifier_group_id, menu_item_modifier_group_sequence) VALUES (?,?,?)");
+					
+					for(int j =0; j< modifierGroups.length;j++) {
+						int index = j+1;
+						stmt2.setLong(1, keyRs.getLong(1));
+						stmt2.setLong(2, modifierGroups[j]);
+						stmt2.setInt(3, index);
+						stmt2.executeUpdate();
+					}
 				}
 			} else {
 				throw new Exception("Cannot Create Menu Item!");
-			}*/
+			}
 			return ResponseEntity.ok(null);
 		} catch (SQLServerException ex) {
 			ex.printStackTrace();
@@ -317,11 +334,15 @@ public class MenuItemRestController {
 		}
 	}
 
-	private int getModiferGroupSequence(Long modifierGroupId) {
-		return jdbcTemplate.queryForObject(
-				"SELECT TOP 1 modifier_item_sequence FROM modifier_item_sequence WHERE modifier_group_id = ? ORDER BY modifier_item_sequence DESC",
-				new Object[] { modifierGroupId }, Integer.class);
-	}
+/*	private int getMenuItemModiferGroupSequence(Long menuItemId) {
+		try {
+			return jdbcTemplate.queryForObject(
+					"SELECT TOP 1 menu_item_modifier_group_sequence FROM menu_item_modifier_group WHERE menu_item_id = ? ORDER BY menu_item_modifier_group_sequence DESC",
+					new Object[] { menuItemId }, Integer.class);
+		} catch(DataAccessException ex) {
+			return 0;
+		}
+	}*/
 
 	@PostMapping(value = "/editMenuItem", produces = "application/json")
 	public ResponseEntity<?> editMenuItem(HttpServletRequest request, HttpServletResponse response,
