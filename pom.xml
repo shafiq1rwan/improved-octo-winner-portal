@@ -3,13 +3,13 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.managepay.admin</groupId>
+	<groupId>my.com.byod</groupId>
 	<artifactId>byod</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<packaging>jar</packaging>
+	<packaging>war</packaging>
 
 	<name>byod</name>
-	<description>BYOD</description>
+	<description>BYOD Project</description>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
@@ -22,8 +22,8 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>1.8</java.version>
-
-		<start-class>com.managepay.main_startup</start-class>
+		
+		<start-class>my.com.byod.main_startup</start-class>
 	</properties>
 
 	<dependencies>
