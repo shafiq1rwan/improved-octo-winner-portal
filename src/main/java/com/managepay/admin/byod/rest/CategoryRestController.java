@@ -38,6 +38,9 @@ public class CategoryRestController {
 
 	@Autowired
 	private ByodUtil byodUtil;
+	
+	@Autowired
+	private GroupCategoryRestController groupCategoryRestController;
 
 	@GetMapping(value = { "/get_all_category" }, produces = "application/json")
 	public String getAllCategory(HttpServletRequest request, HttpServletResponse response) {
@@ -208,10 +211,9 @@ public class CategoryRestController {
 						: jsonCategoryData.getString("category_description");
 				String imagePath = jsonCategoryData.isNull("category_image_path") ? null
 						: byodUtil.saveImageFile("imgC",jsonCategoryData.getString("category_image_path"), null);
-				
+				String sqlStatement = "INSERT into category(group_category_id, category_name, category_description, category_image_path, category_sequence, is_active) VALUES (?, ?, ?, ?, ?, ?);";
 				connection = dataSource.getConnection();
-				stmt = connection.prepareStatement(
-						"INSERT into category(group_category_id, category_name, category_description, category_image_path, category_sequence, is_active) VALUES (?,?,?,?,?,?)");
+				stmt = connection.prepareStatement(sqlStatement);
 				stmt.setLong(1, jsonCategoryData.getLong("group_category_id"));
 				stmt.setString(2, jsonCategoryData.getString("category_name"));
 				stmt.setString(3, description);
@@ -219,6 +221,18 @@ public class CategoryRestController {
 				stmt.setInt(5, getCategorySequenceNumber(jsonCategoryData.getLong("group_category_id")) + 1);
 				stmt.setBoolean(6, jsonCategoryData.getBoolean("is_active"));
 				stmt.executeUpdate();
+				
+				// logging to file	
+				String [] parameters = {
+						String.valueOf(jsonCategoryData.getLong("group_category_id")),
+						jsonCategoryData.getString("category_name")==null?"null":"'"+jsonCategoryData.getString("category_name")+"'",
+						description==null?"null":"'"+description+"'",
+						imagePath==null?"null":"'"+imagePath+"'",
+						String.valueOf(getCategorySequenceNumber(jsonCategoryData.getLong("group_category_id")) + 1),
+						String.valueOf(jsonCategoryData.getBoolean("is_active"))};
+				
+				groupCategoryRestController.logActionToFile(connection, sqlStatement, parameters, jsonCategoryData.getInt("group_category_id"));
+				
 			} else {
 				response.setStatus(404);
 				return null;
@@ -263,14 +277,27 @@ public class CategoryRestController {
 						: byodUtil.saveImageFile("imgC",jsonCategoryData.getString("category_image_path"), null);
 				
 				connection = dataSource.getConnection();
-				stmt = connection.prepareStatement(
-						"UPDATE category SET category_name = ?, category_description = ?, category_image_path =?, is_active = ? WHERE id = ?");
+				String sqlStatement = "UPDATE category SET category_name = ?, category_description = ?, category_image_path = ?, is_active = ? WHERE id = ?;";
+				stmt = connection.prepareStatement(sqlStatement);
 				stmt.setString(1, jsonCategoryData.getString("category_name"));
 				stmt.setString(2, description);
 				stmt.setString(3, imagePath);
 				stmt.setBoolean(4, jsonCategoryData.getBoolean("is_active"));
 				stmt.setLong(5, jsonCategoryData.getLong("id"));
 				stmt.executeUpdate();
+				
+				// logging to file	
+				String [] parameters = {
+						jsonCategoryData.getString("category_name")==null?"null":"'"+jsonCategoryData.getString("category_name")+"'",
+						description==null?"null":"'"+description+"'",
+						imagePath==null?"null":"'"+imagePath+"'",
+						String.valueOf(jsonCategoryData.getBoolean("is_active")),
+						String.valueOf(jsonCategoryData.getLong("id"))};
+				
+				groupCategoryRestController.logActionToFile(connection, sqlStatement, parameters, jsonCategoryData.getInt("group_category_id"));
+				
+				
+				
 			} else {
 				response.setStatus(404);
 				return null;
