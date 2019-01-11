@@ -13,6 +13,8 @@
 		$scope.extra_tier_items = [];
 		$scope.upload_image = false;
 		
+		$scope.assinged_modifier_groups = [];
+		
 		// ==== Add, Modifier Tier Operations ====
 		$scope.tier_item = {};
 		
@@ -357,7 +359,28 @@
 
 		$(document).ready(function() {					
 			$scope.refreshItemMenuGroupTable();
-			
+
+			$("#modifierGroup").select2({
+				  placeholder: 'Select an option',
+				  selectOnClose: false,
+				  width: '100%'
+			}).on('select2:select', function(e){
+/*  		 	      var id = e.params.data.id;
+			      var option = $(e.target).children('[value='+id+']');
+			      option.detach();
+			      $(e.target).append(option).change(); */
+			      
+				$scope.assinged_modifier_groups.push();
+			      
+			}).on('select2:unselect', function(e){
+			      $scope.assinged_modifier_groups
+			}).on("select2:selecting", function(e) { 
+				//console.log("Inside selection");
+			}).on("change", function(e) { 
+				//console.log("Change Me");
+				//console.log($("#modifierGroup").val());
+			});
+	
 			$('input[type=file]').change(function(event) {
 				var element = event.target.id;			
 				var _URL = window.URL || window.webkitURL;
@@ -447,6 +470,12 @@
 			
 			$scope.disableInputs = false;
 			$scope.upload_image = false;
+			
+			$("#modifierGroup").val([]).trigger("change");
+			console.log("End");
+			console.log($("#modifierGroup").val());
+			
+			$scope.assinged_modifier_groups = [];
 		}
 		
 		//get menu item type
@@ -567,12 +596,46 @@
 						$scope.menu_item.is_discountable = response.data.is_discountable;
 						$scope.menu_item.is_active = response.data.is_active;
 						$scope.action = 'update';
-						$scope.disableInputs = ($scope.menu_item.menu_item_type == 2);						
-
+						$scope.disableInputs = ($scope.menu_item.menu_item_type == 2);
+						
+						getAssignedModifierGroup(response.data.id);
+						
 						console.log($scope.menu_item);
 						$('#createMenuItemModal').modal('toggle');
+
 					}
 				});
+			});
+		}
+		
+		function getAssignedModifierGroup(menu_item_id){
+			$http
+			.get(
+				'${pageContext.request.contextPath}/menu/modifier_group/get_assigne_modifier_groups_by_item_id?menuItemId='+menu_item_id)
+			.then(
+				function(response) {		
+					//$scope.modifier_groups = response.data;
+					
+			 	 	for(var i=0;i<response.data.length;i++){
+				 		//$scope.assinged_modifier_groups[i] = $scope.modifier_groups[i].id;
+				 		if(response.data[i].sequence_id != 9999){
+				 			$scope.assinged_modifier_groups[i] = response.data[i].id;
+				 		}
+					} 
+				 	console.log($scope.assinged_modifier_groups.map(String));
+					$("#modifierGroup").val($scope.assinged_modifier_groups.map(String)).trigger("change");
+
+					console.log($("#modifierGroup").val());
+					
+					
+					
+					
+					
+					console.log("Ge: " + $scope.modifier_groups);
+					
+				},
+				function(response) {
+					console.log("Cannot Retrive Modifier Group!");
 			});
 		}
 		
@@ -614,7 +677,11 @@
 		}
 		
 	 	$scope.performMenuItemOperations = function(action_type){	
-			if($scope.menu_item.menu_item_name == null || 
+			
+	 		console.log("Selected List");
+	 		console.log($("#modifierGroup").val()); 
+	 		
+	 		 if($scope.menu_item.menu_item_name == null || 
 					$scope.menu_item.menu_item_base_price == null ||
 					$scope.menu_item.backend_id == null ||
 					$scope.menu_item.menu_item_name == '' ||
@@ -641,11 +708,12 @@
 					"menu_item_base_price": $scope.menu_item.menu_item_base_price || 0.00,
 					"menu_item_type": $scope.menu_item.menu_item_type || 0,
 					"is_taxable" : $scope.menu_item.is_taxable || false,
-					"is_discountable": $scope.menu_item.is_discountable || false
+					"is_discountable": $scope.menu_item.is_discountable || false,
+					"assigned_modifier_group" : $("#modifierGroup").val()
 				});
 				
 				console.log(json_data);
-								
+						
 				$http
 				.post(
 						menu_item_url, json_data)

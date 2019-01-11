@@ -215,6 +215,7 @@
 					if (response.status == "404") {
 						alert("Unable to find category detail");
 					} else if(response.status == "200") {
+						$scope.category.group_category_id = response.data.group_category_id;
 						$scope.category.id = response.data.id;
 						$scope.category.category_name = response.data.category_name;
 						$scope.category.category_description = response.data.category_description;
@@ -269,7 +270,8 @@
 					category_name : $scope.category.category_name,
 					category_description : $scope.category.category_description || null,
 					category_image_path : $scope.upload_image?$scope.category.image_path:null,
-					is_active : $scope.category.is_active
+					is_active : $scope.category.is_active,
+					group_category_id : $scope.category.group_category_id
 				});
 				
 				console.log(postdata);

@@ -168,8 +168,25 @@
 								<div class="row">
 									<div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">							
 										<div class="form-group">																	
-											<label>Modifier Groups</label> 
-								<!-- 			<select2 ng-model="obj.field" s2-options="mg.id as mg.modifier_group_name for mg in modifier_groups" options="{ allowClear: true }"></select2> -->
+											<label for="modifierGroup">Modifier Groups</label> 
+											<div class="pull-right">
+												<button></button>
+											</div>
+											<div ng-if="">
+												Group Sequence: {{}}
+											</div>
+											
+											 	<select id="modifierGroup" multiple="multiple" class="form-control">
+													<option></option>
+													<option ng-repeat = "mg in modifier_groups" value ="{{mg.id}}">{{mg.modifier_group_name}}</option>
+												</select>	 
+												
+												
+										<!-- 	  	<select id="modifierGroup" multiple="multiple">
+												   <option></option>
+												  <option value="AL">Alabama</option>
+												  <option value="WY">Wyoming</option>
+												</select> -->
 										</div>
 									</div>
 								</div>
