@@ -69,12 +69,12 @@
 					            action: function ( e, dt, node, config ) {        	
 					            	table.button(0).enable();
 					            	table.rowReorder.enable();
-					            	table.column(5).visible(false);
+					            	table.column(4).visible(false);
 					            }
 					        }
-					    ],
+					    ], 
 					"destroy" : true,
-			 		"rowReorder": { "selector": 'td:nth-child(2)',"enable": false,"dataSrc":'sequence', "update": true},
+			 		"rowReorder": { "selector": 'td:nth-child(-n+3)',"enable": false,"dataSrc":'sequence', "update": true},
 				    "scrollY": 180,
 			        "paging": false,
 			        "searching": false, 
@@ -176,7 +176,7 @@
 		//Refresh Combo Item or Menu Item Group Table
 		$scope.refreshComboItemTable = function(combo_items){
 			
-			console.log(combo_items.data);
+			console.log(combo_items);
 			
 	 		combo_item_table = $('#comboItem_dtable').DataTable({
 				"data" : combo_items.data,
@@ -210,13 +210,10 @@
 		$scope.changeComboItemType = function(type){			
 			var combo_item_url = '${pageContext.request.contextPath}/menu';
 			
-			if(type === 'MI'){
+			if(type === 'MI')
 				combo_item_url += '/menuItem/getAllAlaCartMenuItem'
-			} else if(type === 'G'){
+			else if(type === 'G')
 				combo_item_url += '/item_group/get_all_item_group_for_combo'
-			}
-			
-			console.log(combo_item_url);
 			
 			$http
 			.get(
@@ -225,7 +222,6 @@
 			.then(
 				function(response) {
 					$scope.combo_items = response.data;
-					console.log($scope.combo_items);
 					$scope.refreshComboItemTable($scope.combo_items);
 				},
 				function(response) {
@@ -324,8 +320,9 @@
 
 			return item_holder; 
 		}
-		
-	 	$scope.resetModal = function(){		
+
+	 	$scope.resetModal = function(){	 
+	 		$('.nav-item a[href="#mi"]').tab('show');
 	 		combo_item_table.rows().deselect().draw();
 		} 
 		

@@ -197,4 +197,12 @@ public class UserLoginRestController {
 		model.setViewName("/user/views/combo");
 		return model;
 	}
+	
+	//Assign Modifier
+	@RequestMapping(value = {"/views/assignModifier/{id}"}, method = RequestMethod.GET)
+	public ModelAndView viewAssignModifier(@PathVariable("id") long id) {
+		ModelAndView model = new ModelAndView();
+		model.setViewName("/user/views/assign_modifier");
+		return model;
+	}
 }

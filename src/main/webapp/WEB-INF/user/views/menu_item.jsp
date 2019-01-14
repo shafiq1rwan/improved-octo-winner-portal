@@ -6,6 +6,11 @@
 	border-left: 2px solid #FF851B;
 }
 
+#modifierGroupSequence li{
+	display: inline;
+    margin-right: 8px;
+}
+
 </style>
 <body class="adminbody">
 
@@ -169,11 +174,15 @@
 									<div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">							
 										<div class="form-group">																	
 											<label for="modifierGroup">Modifier Groups</label> 
-											<div class="pull-right">
-												<button></button>
-											</div>
-											<div ng-if="">
-												Group Sequence: {{}}
+											<div style="width:80%">
+												Group Sequence: 
+												<ul id="modifierGroupSequence">
+													<li style="border: 2px solid cyan;border-radius: 5px; padding:0px 2px 0px 2px;" ng-repeat="mg in assinged_modifier_groups">
+														{{mg.text}}
+														
+													</li>
+												</ul>
+										
 											</div>
 											
 											 	<select id="modifierGroup" multiple="multiple" class="form-control">

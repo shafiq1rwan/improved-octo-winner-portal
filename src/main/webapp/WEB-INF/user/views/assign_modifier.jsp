@@ -20,7 +20,7 @@
 								<h1 class="main-title float-left"><a ng-href="${pageContext.request.contextPath}/user/#!Router_menu_item"><i class="fa fa-chevron-left"></i></a> &nbsp;Combo Setting</h1>
 								<ol class="breadcrumb float-right">
 									<li class="breadcrumb-item"><a ng-href="${pageContext.request.contextPath}/user/#!Router_menu_item">Menu Item</a></li>
-									<li class="breadcrumb-item active">Combo</li>
+									<li class="breadcrumb-item active">Assign Modifier</li>
 								</ol>
 								<div class="clearfix"></div>
 							</div>
@@ -31,38 +31,27 @@
 						<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
 							<div class="card mb-3">
 								<div class="card-header d-flex flex-row justify-content-between">
-									<h3>Combo List</h3>
+									<h3>Assigned Modifier Group</h3>
 																		
-									<button type="button" ng-show="combo_details.length > 0"
+									<button type="button" ng-click="getUnassignedModifierGroup()"
 										class="btn btn-social pull-right btn-primary bg-aqua"
-										data-toggle="modal" data-target="#comboItemSelectionModal" 
-										ng-click="changeComboItemType('MI')">
+										data-toggle="modal" data-target="#modifierGroupSelectionModal">
 										<span class="btn-label"><i class="fa fa-plus"></i></span>
-										Assign Item/Item Group
+										Assign Modifier Group
 									</button>
 	
 								</div>
 								<div class="card-body">
-											
-								  <ul class="nav nav-tabs" role="tablist">
-								    <li class="nav-item" ng-repeat="combo_detail in combo_details">
-								      <a class="nav-link" ng-class="{'active': $first}" data-toggle="tab" ng-click="changeTableData(combo_detail.id)">{{combo_detail.name}}</a>
-								    </li>
-								  </ul>
 
 									<div class="table-responsive" style="margin-top:10px;">
-										<table id="combo_dtable"
+										<table id="assignedModifierGroup_dtable"
 											class="table table-bordered table-hover display"
 											style="width: 100%">
 											<thead>
 												<tr>
-													<th></th>
-													<!-- <th></th> -->
+													<th>Sequence</th>
 													<th>Name</th>
-													<th>Type</th>
-													<th>Price</th>
 													<th>Action</th>
-													<!-- <th></th> -->
 												</tr>
 											</thead>
 											<tbody>
@@ -84,15 +73,15 @@
 		
 		
 		
-			<!-- Combo Item Selection Modal -->
-		<div class="modal fade" id="comboItemSelectionModal" role="dialog"
-			aria-labelledby="comboItemSelectionModal" aria-hidden="true">
+			<!-- Modifier Group Selection Modal -->
+		<div class="modal fade" id="modifierGroupSelectionModal" role="dialog"
+			aria-labelledby="modifierGroupSelectionModal" aria-hidden="true">
 			<div class="modal-dialog modal-lg">
 				<div class="modal-content">
-					<form id="comboItemSelectionForm" method="POST" accept-charset="UTF-8"
+					<form id="modifierGroupSelectionForm" method="POST" accept-charset="UTF-8"
 						role="form" class="form-signin">
 						<div class="modal-header">
-							<h5 class="modal-title">Item Selection</h5>
+							<h5 class="modal-title">Modifier Group Selection</h5>
 							<button type="button" class="close" data-dismiss="modal"
 								ng-click="resetModal()" aria-label="Close">
 								<span aria-hidden="true">&times;</span>
@@ -101,28 +90,16 @@
 
 						<div class="modal-body">
 							<div class="form-section">
-
-							  <ul class="nav nav-pills" role="tablist">
-							    <li class="nav-item">
-							      <a class="nav-link active" data-toggle="pill" href="#mi" ng-click="changeComboItemType('MI')">Menu Item</a>
-							    </li>
-							    <li class="nav-item">
-							      <a class="nav-link" data-toggle="pill" href="#g" ng-click="changeComboItemType('G')">Item Group</a>
-							    </li>
-							  </ul>
-		
 								<div class="row">
 									<div class="col-12 col-md-12 col-sm-12 col-xs-12">
 										<div class="">
 											<table class="table table-bordered table-hover display nowrap" 
-											 id="comboItem_dtable" style="width: 100%">
+											 id="modifierGroup_dtable" style="width: 100%">
 												<thead>
 													<tr>
 														<th></th>
 														<th>Id</th>
-														<th>Name</th>	
-														<th>Price</th>
-														<th></th>
+														<th>Name</th>
 													</tr>
 												</thead>
 												<tbody>
@@ -137,7 +114,7 @@
 						</div>
 
 						<div class="modal-footer">
-							<button class="btn btn-primary" type="submit" ng-click="addItemOrGroup()">Add</button>			
+							<button class="btn btn-primary" type="submit" ng-click="assignModifierGroups()">Add</button>			
 						</div>
 					</form>
 

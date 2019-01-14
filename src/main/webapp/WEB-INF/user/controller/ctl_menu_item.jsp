@@ -370,17 +370,28 @@
 			      option.detach();
 			      $(e.target).append(option).change(); */
 			      
-				$scope.assinged_modifier_groups.push();
-			      
+			     var json_data = {
+					id : e.params.data.id,
+					text : e.params.data.text
+			     }
+
+				$scope.assinged_modifier_groups.push(json_data);
+			    $scope.$apply();
 			}).on('select2:unselect', function(e){
-			      $scope.assinged_modifier_groups
+			    
+				var index = $scope.assinged_modifier_groups.map(x => {
+					  return x.id;
+				}).indexOf(e.params.data.id);
+
+			    $scope.assinged_modifier_groups.splice(index, 1);
+			    $scope.$apply();
 			}).on("select2:selecting", function(e) { 
-				//console.log("Inside selection");
 			}).on("change", function(e) { 
-				//console.log("Change Me");
-				//console.log($("#modifierGroup").val());
 			});
-	
+			
+			var el = document.getElementById("modifierGroupSequence");
+			console.log("Hi Element : " + el);
+
 			$('input[type=file]').change(function(event) {
 				var element = event.target.id;			
 				var _URL = window.URL || window.webkitURL;
@@ -447,7 +458,7 @@
 				
 			}
 		});
-
+	    
 		$scope.setModalType = function(action_type){
 			$scope.action = action_type;
 		}
@@ -556,6 +567,7 @@
 						 	var menu_item_type = full.menu_item_type;
 						 	switch(menu_item_type){
 							 	case 0:
+							 		return '<div class="btn-group"><a ng-href="${pageContext.request.contextPath}/user/#!Router_assign_modifier/'+ id +'" class="btn btn-info p-1 custom-fontsize"><b><i class="fa fa-bars"></i> Modifier Groups</b></a></div>';	 
 							 	case 2:
 							 	 	return '';	 
 							 		break;
@@ -598,7 +610,10 @@
 						$scope.action = 'update';
 						$scope.disableInputs = ($scope.menu_item.menu_item_type == 2);
 						
-						getAssignedModifierGroup(response.data.id);
+						var el = document.getElementById("modifierGroupSequence");
+						console.log("Hi Element : " + el);
+						
+						//getAssignedModifierGroup(response.data.id);
 						
 						console.log($scope.menu_item);
 						$('#createMenuItemModal').modal('toggle');
@@ -625,14 +640,7 @@
 				 	console.log($scope.assinged_modifier_groups.map(String));
 					$("#modifierGroup").val($scope.assinged_modifier_groups.map(String)).trigger("change");
 
-					console.log($("#modifierGroup").val());
-					
-					
-					
-					
-					
 					console.log("Ge: " + $scope.modifier_groups);
-					
 				},
 				function(response) {
 					console.log("Cannot Retrive Modifier Group!");

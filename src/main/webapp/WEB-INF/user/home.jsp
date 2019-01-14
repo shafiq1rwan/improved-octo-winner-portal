@@ -221,6 +221,15 @@ if it's not present, don't show loader */
 			resolve : {
 		       	checkSession:checkSession
 		       }
+		})
+		.when('/Router_assign_modifier/:id',{
+			templateUrl : function(params){
+				return '${pageContext.request.contextPath}/user/views/assignModifier/'+ params.id
+			},
+			controller : "ctl_assign_modifier",
+			resolve : {
+		       	checkSession:checkSession
+		    }
 		});
 	});
 	
@@ -286,5 +295,6 @@ if it's not present, don't show loader */
 <jsp:include page="/WEB-INF/user/controller/ctl_item_group.jsp" />
 <jsp:include page="/WEB-INF/user/controller/ctl_menu_item.jsp" />
 <jsp:include page="/WEB-INF/user/controller/ctl_combo.jsp" />
+<jsp:include page="/WEB-INF/user/controller/ctl_assign_modifier.jsp" />
 <!-- *****************************ANGULAR JS CONTROLLER***************************** -->
 </html>
