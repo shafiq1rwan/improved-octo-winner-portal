@@ -253,6 +253,36 @@ INSERT INTO backend_sequence([id], [backend_sequence_code], [backend_sequence_na
 INSERT INTO backend_sequence([id], [backend_sequence_code], [backend_sequence_name], [backend_sequence], [modified_date]) VALUES(7, 'MQF','Menu Query File', 0,GETDATE());
 INSERT INTO backend_sequence([id], [backend_sequence_code], [backend_sequence_name], [backend_sequence], [modified_date]) VALUES(8, 'MIF','Menu Image File', 0,GETDATE());
 
+CREATE TABLE display_period
+(
+	id BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,
+	display_period_name NVARCHAR(150) NOT NULL UNIQUE,
+	display_period_day NVARCHAR(5) NOT NULL,
+	display_period_start_time TIME NOT NULL,
+	display_period_end_time TIME NOT NULL
+);
+
+CREATE TABLE promotional_period
+(
+	id BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,
+	promo_period_name NVARCHAR(150) NOT NULL UNIQUE,
+	promo_period_start_time TIME NOT NULL,
+	promo_period_end_time TIME NOT NULL,
+	promo_period_start_date DATE NOT NULL,
+	promo_period_end_date DATE NOT NULL
+);
+
+CREATE TABLE menu_item_display_period
+(
+	menu_item_id BIGINT NOT NULL,
+	display_period_id BIGINT NOT NULL
+);
+
+CREATE TABLE menu_item_promo_period
+(
+	menu_item_id BIGINT NOT NULL,
+	promo_period_id BIGINT NOT NULL
+);
 
 /*Drop all Table*/
 --DROP TABLE group_category;
@@ -278,3 +308,7 @@ INSERT INTO backend_sequence([id], [backend_sequence_code], [backend_sequence_na
 --DROP TABLE device_type_lookup;
 --DROP TABLE status_lookup;
 --DROP TABLE backend_sequence;
+--DROP TABLE display_period;
+--DROP TABLE promotional_period;
+--DROP TABLE menu_item_display_period;
+--DROP TABLE menu_item_promo_period;
