@@ -265,13 +265,10 @@ public class MenuItemRestController {
 			@RequestBody String data) {
 		Connection connection = null;
 		PreparedStatement stmt = null;
-		PreparedStatement stmt2 = null;
-		ResultSet keyRs = null;
 
 		try {
 			System.out.println(data);
 			JSONObject jsonMenuItemData = new JSONObject(data);
-			JSONArray modifierGroupArray = jsonMenuItemData.getJSONArray("assigned_modifier_group");
 
 			String imagePath = jsonMenuItemData.isNull("menu_item_image_path") ? null
 					: byodUtil.saveImageFile("imgMI", jsonMenuItemData.getString("menu_item_image_path"), null);      
@@ -279,7 +276,7 @@ public class MenuItemRestController {
 					: jsonMenuItemData.getString("menu_item_description");
 
 			connection = dataSource.getConnection();
-			String sqlStatement = "INSERT INTO menu_item(backend_id, menu_item_name, menu_item_description, menu_item_image_path, menu_item_base_price, menu_item_type,is_taxable, is_discountable) VALUES(?, ?, ?, ?, ?, ?, ?, ?); SELECT SCOPE_IDENTITY();";
+			String sqlStatement = "INSERT INTO menu_item(backend_id, menu_item_name, menu_item_description, menu_item_image_path, menu_item_base_price, menu_item_type,is_taxable, is_discountable) VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
 			stmt = connection.prepareStatement(sqlStatement);
 			stmt.setString(1, jsonMenuItemData.getString("menu_item_backend_id"));
 			stmt.setString(2, jsonMenuItemData.getString("menu_item_name"));
@@ -290,7 +287,7 @@ public class MenuItemRestController {
 			stmt.setBoolean(7, jsonMenuItemData.getBoolean("is_taxable"));
 			stmt.setBoolean(8, jsonMenuItemData.getBoolean("is_discountable"));
 			
-			keyRs = (ResultSet) stmt.executeQuery();
+			int rowAffected = stmt.executeUpdate();
 			
 			// logging to file	
 			String [] parameters = {
@@ -304,39 +301,9 @@ public class MenuItemRestController {
 					String.valueOf(jsonMenuItemData.getBoolean("is_discountable"))};		
 			groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, imagePath, 1);
 			
-			if (keyRs.next()) {
-				
-				System.out.println("Keys: " + keyRs.getLong(1));
-				
-				if (modifierGroupArray.length() != 0 && jsonMenuItemData.getInt("menu_item_type") != 2) {
-					int[] modifierGroups = new int[modifierGroupArray.length()];
-					
-					for (int i = 0; i < modifierGroupArray.length(); i++) {
-						int  modifierGroupId = Integer.parseInt(modifierGroupArray.optString(i));
-						modifierGroups[i] = modifierGroupId;
-					}
-
-					stmt2 = connection.prepareStatement(
-							"INSERT INTO  menu_item_modifier_group(menu_item_id , modifier_group_id, menu_item_modifier_group_sequence) VALUES (?,?,?)");
-					
-					for(int j =0; j< modifierGroups.length;j++) {
-						int index = j+1;
-						stmt2.setLong(1, keyRs.getLong(1));
-						stmt2.setLong(2, modifierGroups[j]);
-						stmt2.setInt(3, index);
-						stmt2.executeUpdate();
-						
-						// logging to file	
-						String [] parameters2 = {
-								String.valueOf(keyRs.getLong(1)),
-								String.valueOf(modifierGroups[j]),
-								String.valueOf(index)};		
-						groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters2, null, 0);
-					}
-				}
-			} else {
+			if (rowAffected == 0)
 				throw new Exception("Cannot Create Menu Item!");
-			}
+	
 			return ResponseEntity.ok(null);
 		} catch (SQLServerException ex) {
 			ex.printStackTrace();
@@ -355,22 +322,11 @@ public class MenuItemRestController {
 		}
 	}
 
-/*	private int getMenuItemModiferGroupSequence(Long menuItemId) {
-		try {
-			return jdbcTemplate.queryForObject(
-					"SELECT TOP 1 menu_item_modifier_group_sequence FROM menu_item_modifier_group WHERE menu_item_id = ? ORDER BY menu_item_modifier_group_sequence DESC",
-					new Object[] { menuItemId }, Integer.class);
-		} catch(DataAccessException ex) {
-			return 0;
-		}
-	}*/
-
 	@PostMapping(value = "/editMenuItem", produces = "application/json")
 	public ResponseEntity<?> editMenuItem(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody String data) {
 		Connection connection = null;
 		PreparedStatement stmt = null;
-		PreparedStatement stmt2 = null;
 		String [] parameters = null;
 		
 		try {
@@ -381,6 +337,8 @@ public class MenuItemRestController {
 						: byodUtil.saveImageFile("imgMI", jsonMenuItemData.getString("menu_item_image_path"), null); 
 				String description = jsonMenuItemData.isNull("menu_item_description") ? null
 						: jsonMenuItemData.getString("menu_item_description");
+				
+				System.out.println(data);
 				
 				connection = dataSource.getConnection();
 				String sqlStatement = ""; 
@@ -491,26 +449,6 @@ public class MenuItemRestController {
 					e.printStackTrace();
 				}
 			}
-		}
-	}
-
-	private int checkDuplicateMenuItemName(String menuItemName) {
-		try {
-			return jdbcTemplate.queryForObject("SELECT COUNT(menu_item_name) WHERE menu_item_name = ?",
-					new Object[] { menuItemName }, Integer.class);
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			return 0;
-		}
-	}
-
-	private int checkDuplicateMenuItemNameWithId(String menuItemName, Long id) {
-		try {
-			return jdbcTemplate.queryForObject("SELECT COUNT(menu_item_name) WHERE menu_item_name = ? AND id = ?",
-					new Object[] { menuItemName, id }, Integer.class);
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			return 0;
 		}
 	}
 

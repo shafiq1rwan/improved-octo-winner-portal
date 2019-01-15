@@ -119,7 +119,7 @@
 									<div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">	
 										<div class="form-group">
 											<label for="menuItemBasePrice">Price</label>
-    										<input type="number" class="form-control" id="menuItemBasePrice" ng-model = "menu_item.menu_item_base_price" min="0" required/>
+    										<input type="number" class="form-control" id="menuItemBasePrice" ng-model = "menu_item.menu_item_base_price" min="0" placeholder="0.00" required/>
 										</div>			
 										
 										<div class="form-group">
@@ -170,7 +170,7 @@
 										</div>
 									</div>
 								</div>	
-								<div class="row">
+						<!-- 		<div class="row">
 									<div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">							
 										<div class="form-group">																	
 											<label for="modifierGroup">Modifier Groups</label> 
@@ -190,15 +190,9 @@
 													<option ng-repeat = "mg in modifier_groups" value ="{{mg.id}}">{{mg.modifier_group_name}}</option>
 												</select>	 
 												
-												
-										<!-- 	  	<select id="modifierGroup" multiple="multiple">
-												   <option></option>
-												  <option value="AL">Alabama</option>
-												  <option value="WY">Wyoming</option>
-												</select> -->
 										</div>
 									</div>
-								</div>
+								</div> -->
 
 							</div>
 						</div>

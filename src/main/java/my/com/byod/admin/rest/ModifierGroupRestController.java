@@ -120,7 +120,7 @@ public class ModifierGroupRestController {
 
 	}
 
-	@GetMapping(value = "/get_assigne_modifier_groups_by_item_id", produces = "application/json")
+/*	@GetMapping(value = "/get_assigne_modifier_groups_by_item_id", produces = "application/json")
 	public ResponseEntity<?> getAssignedModifierGroupsByItemId(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam("menuItemId") Long menuItemId) {
 
@@ -166,7 +166,7 @@ public class ModifierGroupRestController {
 			}
 		}
 
-	}
+	}*/
 
 	@PostMapping(value = "/create_modifier_group", produces = "application/json")
 	public ResponseEntity<?> createModifierGroup(HttpServletRequest request, HttpServletResponse response,

@@ -12,17 +12,13 @@
 		$scope.reordering_action = false; 
 		$scope.extra_tier_items = [];
 		$scope.upload_image = false;
-		
-		$scope.assinged_modifier_groups = [];
-		
+			
 		// ==== Add, Modifier Tier Operations ====
 		$scope.tier_item = {};
 		
 		$scope.addNewTier = function(){	
 			$('#comboSettingModal').modal('toggle');
 			$('#tierModal').modal({backdrop: 'static', keyboard: false});
-			
-			console.log("hry "+ $scope.menu_item_id);
 		}
 
 		$scope.createNewTier = function(){
@@ -274,101 +270,18 @@
 		     arr.splice(new_index, 0, arr.splice(old_index, 1)[0]); 
 		}
 	    
-	/*     $scope.createNewTier = function(){
-	    	
-	    	if($scope.tierNumber == null || $scope.tierNumber == '' || $scope.tierNumber <= 0){
-
-	    	} else {
-	    		var listItems = $("#sortableList li");
-		    	var tierItemList = [];
-		    	listItems.each(function(idx, li) {
-		    	    var product = $(li);
-					console.log(product.attr('id'));
-				
-		    	    // and the rest of your code
-		    	    var tierItem = {
-		    	    		"menu_item_id":$scope.menu_item_id,
-		    	    		"combo_detail_name": $scope.tierItems[idx].name,
-		    	    		"combo_detail_quantity": $scope.tierItems[idx].quantity
-		    	    }; 	    
-		    	    console.log(tierItem);    	    
-		    	    tierItemList.push(tierItem);  
-		    	});    	
-		    	
-		    	if(tierItemList.length >0){
-			    	createTierData(tierItemList);
-		    	} else {
-		    		alert("Please fill in Tier Info");
-		    	}
-
-	    	}
-	    } */
-	    
-	    
-/*  	    function createTierData(tierItemList){	    	
-	    	var json_data = JSON.stringify(
-	    			tierItemList
-			);
-			
-			console.log(json_data);
-							
-		 	$http
-			.post(
-				'${pageContext.request.contextPath}/menu/combo/createComboDetail', json_data)
-			.then(
-					function(response) {			
-						$scope.resetModal();	
-						$('#comboSettingModal').modal('toggle');
-					},
-					function(response) {
-						alert("Session TIME OUT");
-						$(location)
-								.attr('href',
-										'${pageContext.request.contextPath}/user');
-					}); 
-	    }  */
-	    
-	/*     $scope.editExistingTier = function(){
-	    	
- 	    	var json_data = JSON.stringify({
-	    		'menu_item_id': $scope.menu_item_id,
-	    		'tier_items': $scope.tierItems
-	    	}); 
-	    		    	
-	    	console.log(json_data);
-	    	
-	      	$http
-			.post(
-				'${pageContext.request.contextPath}/menu/combo/editComboDetail', json_data)
-			.then(
-					function(response) {			
-						$scope.resetModal();	
-						$('#comboSettingModal').modal('toggle');
-
-				 		if(response.status == '400')
-							alert(response.data);
-					},
-					function(response) {
-						alert("Session TIME OUT");
-						$(location)
-								.attr('href',
-										'${pageContext.request.contextPath}/user');
-					}); 
-	    	
-	    } */
-
 		$(document).ready(function() {					
 			$scope.refreshItemMenuGroupTable();
 
-			$("#modifierGroup").select2({
+		/* 	$("#modifierGroup").select2({
 				  placeholder: 'Select an option',
 				  selectOnClose: false,
 				  width: '100%'
 			}).on('select2:select', function(e){
-/*  		 	      var id = e.params.data.id;
+  		 	      var id = e.params.data.id;
 			      var option = $(e.target).children('[value='+id+']');
 			      option.detach();
-			      $(e.target).append(option).change(); */
+			      $(e.target).append(option).change(); 
 			      
 			     var json_data = {
 					id : e.params.data.id,
@@ -387,10 +300,10 @@
 			    $scope.$apply();
 			}).on("select2:selecting", function(e) { 
 			}).on("change", function(e) { 
-			});
+			}); */
 			
-			var el = document.getElementById("modifierGroupSequence");
-			console.log("Hi Element : " + el);
+			/* var el = document.getElementById("modifierGroupSequence");
+			console.log("Hi Element : " + el); */
 
 			$('input[type=file]').change(function(event) {
 				var element = event.target.id;			
@@ -480,13 +393,7 @@
 			$('#menuItemImage').val('');
 			
 			$scope.disableInputs = false;
-			$scope.upload_image = false;
-			
-			$("#modifierGroup").val([]).trigger("change");
-			console.log("End");
-			console.log($("#modifierGroup").val());
-			
-			$scope.assinged_modifier_groups = [];
+			$scope.upload_image = false;		
 		}
 		
 		//get menu item type
@@ -533,6 +440,7 @@
 					}
 				},
 				destroy : true,
+				stateSave: true,
 				"order" : [ [ 0, "asc" ] ] ,
 				"columns" : [ 
 					{"data" : "id", "width": "5%"}, 
@@ -550,16 +458,11 @@
 						 return result.menu_item_type_name;
 					 }
 					},
-					{"data" : "is_active", "width" : "5%", 
+					{"data" : "is_active", "width" : "5%" , 
 					 "render": function(data, type, full, meta){		 
 						 var id = full.id;				 
-			 		  	 if(full.is_active)
-			 				$('.switch>#'+id).prop("checked", true);
-				 		 else
-					 		$('.switch>#'+id).prop("checked", false);
-		 
 						 return '<div class="input-group"><label class="switch"><input ng-click="updateMenuItemStatus('+ full.is_active +','+id +')" type="checkbox" class="info" id="'+ id +'"><span class="slider round"></span></label></div>';
-					 } 
+					 }
 					},		
 					{"data": "id", "width": "20%",
 					 "render": function ( data, type, full, meta ) {
@@ -578,13 +481,22 @@
 					}
 					],
 					"createdRow": function ( row, data, index ) {
-				        $compile(row)($scope);
-				    }/* ,
-				    "drawCallback": function( settings ) {
+						$compile(row)($scope);
+				    },
+				    "drawCallback": function() {
 				    	 var api = this.api();
-				    } */
+				    	 var result_data = api.rows().data();
+				    	 
+				 		for (var i = 0; i < result_data.count(); i++) {
+				 	       if(result_data[i].is_active) {
+					        	$('td .switch>#'+ result_data[i].id).prop("checked", true);
+					        } else{
+					        	$('td .switch>#'+ result_data[i].id).prop("checked", false);
+					        } 
+						}
+				    }
 			});
-			
+		
 			$('#menuItem_dtable tbody').off('click', 'tr td:nth-child(-n+5)');
 			$('#menuItem_dtable tbody').on('click', 'tr td:nth-child(-n+5)', function() {
 				$http({
@@ -610,8 +522,8 @@
 						$scope.action = 'update';
 						$scope.disableInputs = ($scope.menu_item.menu_item_type == 2);
 						
-						var el = document.getElementById("modifierGroupSequence");
-						console.log("Hi Element : " + el);
+						/* var el = document.getElementById("modifierGroupSequence");
+						console.log("Hi Element : " + el); */
 						
 						//getAssignedModifierGroup(response.data.id);
 						
@@ -623,7 +535,7 @@
 			});
 		}
 		
-		function getAssignedModifierGroup(menu_item_id){
+/* 		function getAssignedModifierGroup(menu_item_id){
 			$http
 			.get(
 				'${pageContext.request.contextPath}/menu/modifier_group/get_assigne_modifier_groups_by_item_id?menuItemId='+menu_item_id)
@@ -645,7 +557,7 @@
 				function(response) {
 					console.log("Cannot Retrive Modifier Group!");
 			});
-		}
+		} */
 		
 		$scope.updateMenuItemStatus = function(status, id){
 			
@@ -716,8 +628,8 @@
 					"menu_item_base_price": $scope.menu_item.menu_item_base_price || 0.00,
 					"menu_item_type": $scope.menu_item.menu_item_type || 0,
 					"is_taxable" : $scope.menu_item.is_taxable || false,
-					"is_discountable": $scope.menu_item.is_discountable || false,
-					"assigned_modifier_group" : $("#modifierGroup").val()
+					"is_discountable": $scope.menu_item.is_discountable || false
+					/* "assigned_modifier_group" : $("#modifierGroup").val() */
 				});
 				
 				console.log(json_data);
