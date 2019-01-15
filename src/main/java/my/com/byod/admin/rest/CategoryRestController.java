@@ -230,9 +230,8 @@ public class CategoryRestController {
 						description==null?"null":"'"+description+"'",
 						imagePath==null?"null":"'"+imagePath+"'",
 						String.valueOf(getCategorySequenceNumber(jsonCategoryData.getLong("group_category_id")) + 1),
-						String.valueOf(jsonCategoryData.getBoolean("is_active"))};
-				
-				groupCategoryRestController.logActionToFile(connection, sqlStatement, parameters, jsonCategoryData.getInt("group_category_id"));
+						String.valueOf(jsonCategoryData.getBoolean("is_active"))};	
+				groupCategoryRestController.logActionToFile(connection, sqlStatement, parameters, jsonCategoryData.getLong("group_category_id"), imagePath, 1);
 				
 			} else {
 				response.setStatus(404);
@@ -293,11 +292,8 @@ public class CategoryRestController {
 						description==null?"null":"'"+description+"'",
 						imagePath==null?"null":"'"+imagePath+"'",
 						String.valueOf(jsonCategoryData.getBoolean("is_active")),
-						String.valueOf(jsonCategoryData.getLong("id"))};
-				
-				groupCategoryRestController.logActionToFile(connection, sqlStatement, parameters, jsonCategoryData.getInt("group_category_id"));
-				
-				
+						String.valueOf(jsonCategoryData.getLong("id"))};			
+				groupCategoryRestController.logActionToFile(connection, sqlStatement, parameters, jsonCategoryData.getLong("group_category_id"), imagePath, 1);		
 				
 			} else {
 				response.setStatus(404);
@@ -334,10 +330,12 @@ public class CategoryRestController {
 		PreparedStatement stmt = null;
 
 		try {
-			JSONArray jsonCategorySequenceArray = new JSONArray(data);
+			JSONObject jsonObjForm = new JSONObject(data);
+			Long group_category_id =  jsonObjForm.getLong("group_category_id");		
+			JSONArray jsonCategorySequenceArray = jsonObjForm.getJSONArray("array");
+			String sqlStatement = "UPDATE category SET category_sequence = ? WHERE id = ?;";
 			connection = dataSource.getConnection();
-			stmt = connection.prepareStatement(
-					"UPDATE category SET category_sequence = ? WHERE id = ?");
+			stmt = connection.prepareStatement(sqlStatement);
 			
 			for(int i=0;i<jsonCategorySequenceArray.length();i++) {
 				int index = i + 1;
@@ -345,6 +343,12 @@ public class CategoryRestController {
 				stmt.setInt(1, index);
 				stmt.setLong(2, jsonObj.getLong("id"));
 				stmt.executeUpdate();
+				
+				// logging to file	
+				String [] parameters = {
+						String.valueOf(index),
+						String.valueOf(jsonObj.getLong("id"))};			
+				groupCategoryRestController.logActionToFile(connection, sqlStatement, parameters, group_category_id, null, 0);					
 			}
 			return ResponseEntity.ok(null);
 		}
@@ -368,21 +372,45 @@ public class CategoryRestController {
 		JSONObject jsonResult = new JSONObject();
 		Connection connection = null;
 		PreparedStatement stmt = null;
+		ResultSet rs = null;
 
 		try {
+			Long group_category_id = null;
 			connection = dataSource.getConnection();
-			stmt = connection.prepareStatement("DELETE FROM category WHERE id = ?");
+			// get group_category_id
+			stmt = connection.prepareStatement("SELECT a.id FROM group_category a "
+					+ "INNER JOIN category b ON a.id = b.group_category_id "
+					+ "WHERE b.id = ? ");
+			stmt.setLong(1, id);
+			rs = stmt.executeQuery();
+			if(rs.next()) {
+				group_category_id = rs.getLong("id");
+			}	
+			
+			String sqlStatement = "DELETE FROM category WHERE id = ?;";
+			stmt = connection.prepareStatement(sqlStatement);
 			stmt.setLong(1, id);
 			int categoryRowAffected = stmt.executeUpdate();
+			
+			// logging to file	
+			String [] parameters = {
+					String.valueOf(id)};		
+			groupCategoryRestController.logActionToFile(connection, sqlStatement, parameters, group_category_id, null, 0);	
 
 			if (categoryRowAffected == 0) {
 				response.setStatus(400);
 				jsonResult.put("response_message", "Category Encountered Error While Perform Deletion!");
 				return jsonResult.toString();
 			} else {
-				stmt = connection.prepareStatement("DELETE FROM category_menu_item WHERE category_id = ?");
+				sqlStatement = "DELETE FROM category_menu_item WHERE category_id = ?;";
+				stmt = connection.prepareStatement(sqlStatement);
 				stmt.setLong(1, id);
 				stmt.executeUpdate();
+				
+				// logging to file	
+				String [] parameters2 = {
+						String.valueOf(id)};		
+				groupCategoryRestController.logActionToFile(connection, sqlStatement, parameters2, group_category_id, null, 0);	
 			}
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -442,22 +470,30 @@ public class CategoryRestController {
 			@RequestBody String data) {
 		Connection connection = null;
 		PreparedStatement stmt = null;
-
 		try {
 			JSONObject jsonObj = new JSONObject(data);
 			JSONArray jsonItemsArray = jsonObj.getJSONArray("item_list");
 			Long categoryId = jsonObj.getLong("category_id");
+			Long group_category_id = jsonObj.getLong("group_category_id");
 			
 			connection = dataSource.getConnection();
-
+			String sqlStatement = "INSERT INTO category_menu_item (category_id, menu_item_id, category_menu_item_sequence) VALUES (?, ?, ?);";
+			
 			for(int i=0;i<jsonItemsArray.length();i++) {
 				int index = i;
 				JSONObject jsonItemObj = jsonItemsArray.getJSONObject(i);		
-				stmt = connection.prepareStatement("INSERT INTO category_menu_item (category_id, menu_item_id, category_menu_item_sequence) VALUES (?,?,?)");
+				stmt = connection.prepareStatement(sqlStatement);
 				stmt.setLong(1, categoryId);
 				stmt.setLong(2, jsonItemObj.getLong("id"));
 				stmt.setInt(3, index+1);
 				stmt.executeUpdate();
+				
+				// logging to file	
+				String [] parameters = {
+						String.valueOf(categoryId),
+						String.valueOf(jsonItemObj.getLong("id")),
+						String.valueOf(index+1)};		
+				groupCategoryRestController.logActionToFile(connection, sqlStatement, parameters, group_category_id, null, 0);
 			}
 			
 			return ResponseEntity.ok().body(null);
@@ -486,21 +522,37 @@ public class CategoryRestController {
 			JSONObject jsonObj = new JSONObject(data);
 			JSONArray jsonItemsArray = jsonObj.getJSONArray("item_list");
 			Long categoryId = jsonObj.getLong("category_id");
+			Long group_category_id = jsonObj.getLong("group_category_id");
 			
 			connection = dataSource.getConnection();
-
-			stmt = connection.prepareStatement("DELETE FROM category_menu_item WHERE category_id = ?");
+			String sqlStatement = "DELETE FROM category_menu_item WHERE category_id = ?;";
+			
+			stmt = connection.prepareStatement(sqlStatement);
 			stmt.setLong(1, categoryId);
 			stmt.executeUpdate();
-
+			
+			// logging to file	
+			String [] parameters = {
+					String.valueOf(categoryId)
+					};		
+			groupCategoryRestController.logActionToFile(connection, sqlStatement, parameters, group_category_id, null, 0);
+			
 			for(int i=0;i<jsonItemsArray.length();i++) {
 				int index = i;
 				JSONObject jsonItemObj = jsonItemsArray.getJSONObject(i);
-				stmt2 = connection.prepareStatement("INSERT INTO category_menu_item (category_id, menu_item_id, category_menu_item_sequence) VALUES (?,?,?)");
+				sqlStatement = "INSERT INTO category_menu_item (category_id, menu_item_id, category_menu_item_sequence) VALUES (?, ?, ?);";
+				stmt2 = connection.prepareStatement(sqlStatement);
 				stmt2.setLong(1, categoryId);
 				stmt2.setLong(2, jsonItemObj.getLong("id"));
 				stmt2.setInt(3, index+1);			
 				stmt2.executeUpdate();
+				
+				// logging to file	
+				String [] parameters2 = {
+						String.valueOf(categoryId),
+						String.valueOf(jsonItemObj.getLong("id")),
+						String.valueOf(index+1)};		
+				groupCategoryRestController.logActionToFile(connection, sqlStatement, parameters2, group_category_id, null, 0);
 			}
 			
 			return ResponseEntity.ok().body(null);

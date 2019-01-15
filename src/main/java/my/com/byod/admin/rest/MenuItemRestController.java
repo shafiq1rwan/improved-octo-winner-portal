@@ -12,7 +12,6 @@ import javax.sql.DataSource;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,7 +40,10 @@ public class MenuItemRestController {
 
 	@Autowired
 	private ByodUtil byodUtil;
-
+	
+	@Autowired
+	private GroupCategoryRestController groupCategoryRestController;
+	
 	@GetMapping(value = "/getMenuItemType", produces = "application/json")
 	public ResponseEntity<?> getMenuItemType(HttpServletRequest request, HttpServletResponse response) {
 		JSONArray jsonMenuItemTypeArray = new JSONArray();
@@ -277,8 +279,8 @@ public class MenuItemRestController {
 					: jsonMenuItemData.getString("menu_item_description");
 
 			connection = dataSource.getConnection();
-			stmt = connection.prepareStatement(
-					"INSERT INTO menu_item(backend_id, menu_item_name, menu_item_description, menu_item_image_path, menu_item_base_price, menu_item_type,is_taxable, is_discountable) VALUES(?,?,?,?,?,?,?,?); SELECT SCOPE_IDENTITY();");
+			String sqlStatement = "INSERT INTO menu_item(backend_id, menu_item_name, menu_item_description, menu_item_image_path, menu_item_base_price, menu_item_type,is_taxable, is_discountable) VALUES(?, ?, ?, ?, ?, ?, ?, ?); SELECT SCOPE_IDENTITY();";
+			stmt = connection.prepareStatement(sqlStatement);
 			stmt.setString(1, jsonMenuItemData.getString("menu_item_backend_id"));
 			stmt.setString(2, jsonMenuItemData.getString("menu_item_name"));
 			stmt.setString(3, description);
@@ -289,7 +291,18 @@ public class MenuItemRestController {
 			stmt.setBoolean(8, jsonMenuItemData.getBoolean("is_discountable"));
 			
 			keyRs = (ResultSet) stmt.executeQuery();
-		
+			
+			// logging to file	
+			String [] parameters = {
+					jsonMenuItemData.getString("menu_item_backend_id"),
+					jsonMenuItemData.getString("menu_item_name")==null?"null":"'"+jsonMenuItemData.getString("menu_item_name")+"'",
+					description==null?"null":"'"+description+"'",
+					imagePath==null?"null":"'"+imagePath+"'",
+					String.valueOf(jsonMenuItemData.getDouble("menu_item_base_price")),
+					String.valueOf(jsonMenuItemData.getInt("menu_item_type")),
+					String.valueOf(jsonMenuItemData.getBoolean("is_taxable")),
+					String.valueOf(jsonMenuItemData.getBoolean("is_discountable"))};		
+			groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, imagePath, 1);
 			
 			if (keyRs.next()) {
 				
@@ -312,6 +325,13 @@ public class MenuItemRestController {
 						stmt2.setLong(2, modifierGroups[j]);
 						stmt2.setInt(3, index);
 						stmt2.executeUpdate();
+						
+						// logging to file	
+						String [] parameters2 = {
+								String.valueOf(keyRs.getLong(1)),
+								String.valueOf(modifierGroups[j]),
+								String.valueOf(index)};		
+						groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters2, null, 0);
 					}
 				}
 			} else {
@@ -351,6 +371,7 @@ public class MenuItemRestController {
 		Connection connection = null;
 		PreparedStatement stmt = null;
 		PreparedStatement stmt2 = null;
+		String [] parameters = null;
 		
 		try {
 			JSONObject jsonMenuItemData = new JSONObject(data);
@@ -362,15 +383,14 @@ public class MenuItemRestController {
 						: jsonMenuItemData.getString("menu_item_description");
 				
 				connection = dataSource.getConnection();
-				
+				String sqlStatement = ""; 
 				if(imagePath == null) {
-					stmt = connection.prepareStatement(
-							"UPDATE menu_item SET backend_id = ?, menu_item_name = ?, menu_item_description =?, menu_item_base_price = ?, menu_item_type = ?, is_taxable = ? , is_discountable = ? WHERE id = ?");
+					sqlStatement = "UPDATE menu_item SET backend_id = ?, menu_item_name = ?, menu_item_description =?, menu_item_base_price = ?, menu_item_type = ?, is_taxable = ? , is_discountable = ? WHERE id = ?;";
 				} else {
-					stmt = connection.prepareStatement(
-							"UPDATE menu_item SET backend_id = ?, menu_item_name = ?, menu_item_description =?, menu_item_base_price = ?, menu_item_type = ?, is_taxable = ? , is_discountable = ?, menu_item_image_path = ? WHERE id = ?");
+					sqlStatement = "UPDATE menu_item SET backend_id = ?, menu_item_name = ?, menu_item_description =?, menu_item_base_price = ?, menu_item_type = ?, is_taxable = ? , is_discountable = ?, menu_item_image_path = ? WHERE id = ?;";
 				}
-
+				
+				stmt = connection.prepareStatement(sqlStatement);
 				stmt.setString(1, jsonMenuItemData.getString("menu_item_backend_id"));
 				stmt.setString(2, jsonMenuItemData.getString("menu_item_name"));
 				stmt.setString(3, description);
@@ -381,11 +401,36 @@ public class MenuItemRestController {
 				
 				if(imagePath == null) {
 					stmt.setLong(8, jsonMenuItemData.getLong("id"));
+					
+					// logging to file	
+					parameters = new String[] {
+							jsonMenuItemData.getString("menu_item_backend_id"),
+							jsonMenuItemData.getString("menu_item_name")==null?"null":"'"+jsonMenuItemData.getString("menu_item_name")+"'",
+							description==null?"null":"'"+description+"'",
+							String.valueOf(jsonMenuItemData.getDouble("menu_item_base_price")),
+							String.valueOf(jsonMenuItemData.getInt("menu_item_type")),
+							String.valueOf(jsonMenuItemData.getBoolean("is_taxable")),
+							String.valueOf(jsonMenuItemData.getBoolean("is_discountable")),
+							String.valueOf(jsonMenuItemData.getLong("id"))};	
 				} else {
 					stmt.setString(8, imagePath);
 					stmt.setLong(9, jsonMenuItemData.getLong("id"));
+					
+					// logging to file
+					parameters = new String[] {
+							jsonMenuItemData.getString("menu_item_backend_id"),
+							jsonMenuItemData.getString("menu_item_name")==null?"null":"'"+jsonMenuItemData.getString("menu_item_name")+"'",
+							description==null?"null":"'"+description+"'",
+							String.valueOf(jsonMenuItemData.getDouble("menu_item_base_price")),
+							String.valueOf(jsonMenuItemData.getInt("menu_item_type")),
+							String.valueOf(jsonMenuItemData.getBoolean("is_taxable")),
+							String.valueOf(jsonMenuItemData.getBoolean("is_discountable")),
+							imagePath};	
 				}
 				int rowAffected = stmt.executeUpdate();
+				
+				// logging to file	
+				groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, imagePath, 1);
 				
 				if (rowAffected == 0) {
 					throw new Exception("Cannot Edit Menu Item.");
@@ -419,11 +464,18 @@ public class MenuItemRestController {
 
 		try {
 			connection = dataSource.getConnection();
+			String sqlStatement = "UPDATE menu_item SET is_active = 0 WHERE id = ?;";
 			// stmt = connection.prepareStatement("DELETE FROM menu_item WHERE id = ?");
-			stmt = connection.prepareStatement("UPDATE menu_item SET is_active = 0 WHERE id = ?");
+			stmt = connection.prepareStatement(sqlStatement);
 			stmt.setLong(1, id);
 			int categoryRowAffected = stmt.executeUpdate();
-
+			
+			// logging to file	
+			String [] parameters = {
+					String.valueOf(id)
+					};		
+			groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0);
+			
 			if (categoryRowAffected == 0) {
 				return ResponseEntity.badRequest().body(null);
 			}
@@ -473,11 +525,18 @@ public class MenuItemRestController {
 			JSONObject jsonMenuItemData = new JSONObject(data);
 			if (jsonMenuItemData.has("id") && jsonMenuItemData.has("active_status")) {
 				connection = dataSource.getConnection();
-				stmt = connection.prepareStatement("UPDATE menu_item SET is_active = ? WHERE id = ?");
+				String sqlStatement = "UPDATE menu_item SET is_active = ? WHERE id = ?;";
+				stmt = connection.prepareStatement(sqlStatement);
 				stmt.setBoolean(1, !jsonMenuItemData.getBoolean("active_status"));
 				stmt.setLong(2, jsonMenuItemData.getLong("id"));
 				int rowAffected = stmt.executeUpdate();
-
+				
+				// logging to file	
+				String [] parameters = {
+						String.valueOf(!jsonMenuItemData.getBoolean("active_status")),
+						String.valueOf(jsonMenuItemData.getLong("id"))};		
+				groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0);
+				
 				if (rowAffected == 0)
 					throw new Exception();
 

@@ -1,13 +1,16 @@
 package my.com.byod.admin.rest;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -40,6 +43,9 @@ public class GroupCategoryRestController {
 	
 	@Value("${menu-path}")
 	private String filePath;
+	
+	@Value("${upload-path}")
+	private String imagePath;
 	
 	@Autowired
 	private DataSource dataSource;
@@ -392,7 +398,7 @@ public class GroupCategoryRestController {
 	}
 	
 	@GetMapping(value ="/publish_menu",produces = "application/json")
-	public ResponseEntity<?> publishMenu( @RequestParam("group_category_id") int groupCategoryId, HttpServletRequest request, HttpServletResponse response) {
+	public ResponseEntity<?> publishMenu( @RequestParam("group_category_id") Long groupCategoryId, HttpServletRequest request, HttpServletResponse response) {
 		Connection connection = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
@@ -438,6 +444,8 @@ public class GroupCategoryRestController {
 			}
 			result = new JSONObject();
 			result.put("menuList", categoryList);
+			
+			extractImageList(connection, groupCategoryId);
 			
 			// write to json file
 			String fileName = byodUtil.createUniqueBackendId("MF");
@@ -500,7 +508,7 @@ public class GroupCategoryRestController {
 
 	}
 	
-	private JSONArray getCategoryListByGroupCategoryID(Connection connection, int groupCategoryID) throws Exception {
+	private JSONArray getCategoryListByGroupCategoryID(Connection connection, Long groupCategoryID) throws Exception {
 		JSONArray categoryList = new JSONArray();
 		
 		String sqlStatement = null;
@@ -509,7 +517,7 @@ public class GroupCategoryRestController {
 		try {
 			sqlStatement = "SELECT id, category_name, category_image_path FROM category WHERE group_category_id = ? AND is_active = 1 ORDER BY category_sequence ASC";
 			ps1 = connection.prepareStatement(sqlStatement);
-			ps1.setInt(1, groupCategoryID);
+			ps1.setLong(1, groupCategoryID);
 			rs1 = ps1.executeQuery();
 
 			while (rs1.next()) {
@@ -763,10 +771,19 @@ public class GroupCategoryRestController {
 		return modifierGroupList;
 	}
 	
-	public boolean logActionToFile(Connection connection, String query, String[] parameters, int groupCategoryId) throws Exception {
+	/*private boolean saveMenuQueryFile(Connection connection) throws Exception {
+		
+	}*/
+	
+	public boolean logActionToFile(Connection connection, String query, String[] parameters, Long groupCategoryId, String imageName, int saveType) throws Exception {
+		// saveType for imageName
+		// 0 - Nothing
+		// 1 - Save
+		// 2 - Delete
 		
 		String sqlStatement = "";
 		String tmpQueryFilePath = "";
+		String menuImgFilePath = "";
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		
@@ -783,40 +800,45 @@ public class GroupCategoryRestController {
 			
 			System.out.println(query);
 			
-			sqlStatement = "SELECT tmp_query_file_path FROM group_category WHERE id = ? ";
+			sqlStatement = "SELECT tmp_query_file_path, menu_img_file_path FROM group_category WHERE id = ? ";
 			stmt = connection.prepareStatement(sqlStatement);
-			stmt.setInt(1, groupCategoryId);
+			stmt.setLong(1, groupCategoryId);
 			rs = stmt.executeQuery();
 			
 			if(rs.next()) {
 				tmpQueryFilePath = rs.getString("tmp_query_file_path");
+				menuImgFilePath = rs.getString("menu_img_file_path");
 				if(tmpQueryFilePath == null) {
-					stmt.close();
 					tmpQueryFilePath = byodUtil.createUniqueBackendId("TQF");
-					sqlStatement = "UPDATE group_category SET tmp_query_file_path = ? WHERE id = ? ";
-					stmt = connection.prepareStatement(sqlStatement);
-					stmt.setString(1, tmpQueryFilePath);
-					stmt.setInt(2, groupCategoryId);
-					stmt.executeUpdate();
 				}
-			}
-			
-			// write to txt file
-			File checkdir = new File(filePath);
-			checkdir.mkdirs();
+				
+				// write to txt file
+				File checkdir = new File(filePath);
+				checkdir.mkdirs();
 
-			File checkFile = new File(filePath, tmpQueryFilePath + ".txt");
-			if (checkFile.exists()) {	
-				// append to existing file
-				Writer output = new BufferedWriter(new FileWriter(checkFile, true));
-	            output.write(query);
-	            output.close();
-			} else {
-				// new file
-				Writer output = new BufferedWriter(new FileWriter(checkFile));
-	            output.write(query);
-	            output.close();
-			}        
+				File checkFile = new File(filePath, tmpQueryFilePath + ".txt");
+				if (checkFile.exists()) {	
+					// append to existing file
+					Writer output = new BufferedWriter(new FileWriter(checkFile, true));
+		            output.write(query);
+		            output.close();
+				} else {
+					// new file
+					Writer output = new BufferedWriter(new FileWriter(checkFile));
+					output.write("USE byod;\r\n");
+		            output.write(query);
+		            output.close();
+				} 
+				sqlStatement = "UPDATE group_category SET tmp_query_file_path = ? WHERE id = ? ";
+				stmt.close();
+				stmt = connection.prepareStatement(sqlStatement);
+				stmt.setString(1, tmpQueryFilePath);
+				stmt.setLong(2, groupCategoryId);
+				stmt.executeUpdate();
+				
+				if(imageName!=null && !imageName.equals(""))
+					logImageFile(connection, menuImgFilePath, imageName, saveType, groupCategoryId);
+			}       
 		}catch (Exception ex) {
 			throw ex;
 		} finally {
@@ -830,15 +852,22 @@ public class GroupCategoryRestController {
 		return true;
 	}
 	
-	/*public boolean logActionToAllFiles(Connection connection, String query, String[] parameters) throws Exception {
+	public boolean logActionToAllFiles(Connection connection, String query, String[] parameters, String imageName, int saveType) throws Exception {
+		// saveType for imageName
+		// 0 - Nothing
+		// 1 - Save
+		// 2 - Delete
 		
 		String sqlStatement = "";
 		String tmpQueryFilePath = "";
 		PreparedStatement stmt = null;
 		PreparedStatement stmt2 = null;
+		PreparedStatement stmt3 = null;
 		ResultSet rs = null;
+		Long groupCategoryId;
+		String menuImgFilePath = "";
 		
-		try {
+		try {	
 			System.out.println(query);
 			System.out.println(parameters.length);
 			
@@ -851,49 +880,199 @@ public class GroupCategoryRestController {
 			
 			System.out.println(query);
 			
-			sqlStatement = "SELECT tmp_query_file_path FROM group_category ";
+			sqlStatement = "SELECT id, tmp_query_file_path, menu_img_file_path FROM group_category ";
 			stmt = connection.prepareStatement(sqlStatement);
 			rs = stmt.executeQuery();
 			
 			while(rs.next()) {
+				groupCategoryId = rs.getLong("id");
 				tmpQueryFilePath = rs.getString("tmp_query_file_path");
+				menuImgFilePath = rs.getString("menu_img_file_path");
+				
 				if(tmpQueryFilePath == null) {
-					stmt.close();
 					tmpQueryFilePath = byodUtil.createUniqueBackendId("TQF");
-					sqlStatement = "UPDATE group_category SET tmp_query_file_path = ? WHERE id = ? ";
-					stmt = connection.prepareStatement(sqlStatement);
-					stmt.setString(1, tmpQueryFilePath);
-					stmt.setInt(2, groupCategoryId);
-					stmt.executeUpdate();
 				}
-			}
-			
-			// write to txt file
-			File checkdir = new File(filePath);
-			checkdir.mkdirs();
+				// write to txt file
+				File checkdir = new File(filePath);
+				checkdir.mkdirs();
 
-			File checkFile = new File(filePath, tmpQueryFilePath + ".txt");
-			if (checkFile.exists()) {	
-				// append to existing file
-				Writer output = new BufferedWriter(new FileWriter(checkFile, true));
-	            output.write(query);
-	            output.close();
-			} else {
-				// new file
-				Writer output = new BufferedWriter(new FileWriter(checkFile));
-	            output.write(query);
-	            output.close();
-			}        
+				File checkFile = new File(filePath, tmpQueryFilePath + ".txt");
+				if (checkFile.exists()) {	
+					// append to existing file
+					Writer output = new BufferedWriter(new FileWriter(checkFile, true));
+		            output.write(query);
+		            output.close();
+				} else {
+					// new file
+					Writer output = new BufferedWriter(new FileWriter(checkFile));
+					output.write("USE byod;\r\n");
+		            output.write(query);
+		            output.close();
+				}
+				sqlStatement = "UPDATE group_category SET tmp_query_file_path = ? WHERE id = ? ";
+				stmt2 = connection.prepareStatement(sqlStatement);
+				stmt2.setString(1, tmpQueryFilePath);
+				stmt2.setLong(2, groupCategoryId);
+				stmt2.executeUpdate();
+				
+				if(imageName!=null && !imageName.equals(""))
+					logImageFile(connection, menuImgFilePath, imageName, saveType, groupCategoryId);
+			}       
 		}catch (Exception ex) {
 			throw ex;
 		} finally {
 			if (stmt != null) {
 				stmt.close();
 			}
+			if (stmt2 != null) {
+				stmt2.close();
+			}
+			if (stmt3 != null) {
+				stmt3.close();
+			}
 			if (rs != null) {
 				rs.close();
 			}
 		}
 		return true;
-	}*/
+	}
+	
+	public void logImageFile(Connection connection, String menuImgFilePath, String imageName, int saveType, Long groupCategoryId) throws Exception  {
+		// saveType for imageName
+		// 0 - Nothing
+		// 1 - Save
+		// 2 - Delete
+		String sqlStatement = "";
+		PreparedStatement stmt = null;
+		
+		try {
+			// write to image file
+			if(menuImgFilePath==null) {
+				menuImgFilePath = byodUtil.createUniqueBackendId("MIF");
+			}
+			File checkdir = new File(filePath);
+			checkdir.mkdirs();
+			JSONObject writeResult = new JSONObject();
+			ArrayList<String> imageList = new ArrayList<String>();
+			File checkFile = new File(filePath, menuImgFilePath + ".json");
+			if (checkFile.exists()) {
+				// read file
+				BufferedReader br = new BufferedReader(new FileReader(checkFile));
+				try {
+				    StringBuilder sb = new StringBuilder();
+				    String line = br.readLine();
+
+				    while (line != null) {
+				        sb.append(line);
+				        sb.append(System.lineSeparator());
+				        line = br.readLine();
+				    }
+				    String everything = sb.toString();
+				    JSONObject jsonFile = new JSONObject(everything);						
+				    JSONArray imageArray = jsonFile.getJSONArray("imageList");
+				    for(int i = 0; i < imageArray.length(); i++)
+				    	imageList.add(imageArray.getString(i));
+				} finally {
+				    br.close();
+				}
+				
+				Writer output = new BufferedWriter(new FileWriter(checkFile));
+				if(saveType==1) {
+					// append image file
+					if(!imageList.contains(imageName))
+						imageList.add(imageName);	
+				}else if(saveType==2) {
+					// delete image file
+					if(imageList.contains(imageName))
+						imageList.remove(imageName);
+				}
+				writeResult.put("imageList", imageList);					
+	            output.write(writeResult.toString());
+	            output.close();
+			} else {
+				// new file
+				Writer output = new BufferedWriter(new FileWriter(checkFile));
+				imageList.add(imageName);
+				writeResult.put("imageList", imageList);	
+	            output.write(writeResult.toString());
+	            output.close();
+			}
+			
+			sqlStatement = "UPDATE group_category SET menu_img_file_path = ? WHERE id = ? ";
+			stmt = connection.prepareStatement(sqlStatement);
+			stmt.setString(1, menuImgFilePath);
+			stmt.setLong(2, groupCategoryId);
+			stmt.executeUpdate();
+		
+		}catch(Exception ex) {
+			throw ex;
+		} finally {
+			if (stmt != null) {
+				stmt.close();
+			}
+		}
+	}
+	
+	private void extractImageList(Connection connection, Long groupCategoryId) throws Exception {
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		String menuImgFilePath = "";
+		try {
+			String sqlStatement = "SELECT * FROM group_category WHERE id = ?;";
+			stmt = connection.prepareStatement(sqlStatement);
+			stmt.setLong(1, groupCategoryId);
+			rs = stmt.executeQuery();
+			if(rs.next()) {
+				menuImgFilePath = rs.getString("menu_img_file_path");
+			}
+			ArrayList<String> imageList = new ArrayList<String>();
+			File checkFile = new File(filePath, menuImgFilePath + ".json");
+			if (checkFile.exists()) {
+				// read file
+				BufferedReader br = new BufferedReader(new FileReader(checkFile));
+				try {
+				    StringBuilder sb = new StringBuilder();
+				    String line = br.readLine();
+
+				    while (line != null) {
+				        sb.append(line);
+				        sb.append(System.lineSeparator());
+				        line = br.readLine();
+				    }
+				    String everything = sb.toString();
+				    JSONObject jsonFile = new JSONObject(everything);						
+				    JSONArray imageArray = jsonFile.getJSONArray("imageList");
+				    for(int i = 0; i < imageArray.length(); i++)
+				    	imageList.add(imageArray.getString(i));
+				} finally {
+				    br.close();
+				}
+				
+				for(int a = 0; a < imageList.size(); a++) {
+					File source = new File(imagePath, imageList.get(a));
+					if(source.exists()) {
+						// copy image files
+						File dest = new File(filePath, imageList.get(a));
+						try {
+							//FileUtils.copyDirectory(source, dest);
+							
+						}catch(Exception e) {
+							e.printStackTrace();
+						}
+					}
+				}
+				
+			} else {
+				// no image file
+				System.out.println("No image file to be published");
+			}
+			
+		}catch(Exception ex) {
+			throw ex;
+		} finally {
+			if (stmt != null) {
+				stmt.close();
+			}
+		}
+	}
 }

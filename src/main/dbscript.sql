@@ -2,7 +2,12 @@ CREATE TABLE group_category
 (
 	id BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,
 	group_category_name NVARCHAR(50) NOT NULL UNIQUE,
-	created_date DATETIME NOT NULL DEFAULT GETDATE()
+	created_date DATETIME NOT NULL DEFAULT GETDATE(),
+	menu_file_path nvarchar(150),
+	menu_query_file_path nvarchar(150),
+	tmp_query_file_path nvarchar(150),
+	menu_img_file_path nvarchar(150),
+	last_publish_date DATETIME
 );
 
 CREATE TABLE category
@@ -243,6 +248,11 @@ INSERT INTO backend_sequence([id], [backend_sequence_code], [backend_sequence_na
 INSERT INTO backend_sequence([id], [backend_sequence_code], [backend_sequence_name], [backend_sequence], [modified_date]) VALUES(2, 'imgS','Store Image',0,GETDATE());
 INSERT INTO backend_sequence([id], [backend_sequence_code], [backend_sequence_name], [backend_sequence], [modified_date]) VALUES(3, 'imgMI','Menu Item Image', 0,GETDATE());
 INSERT INTO backend_sequence([id], [backend_sequence_code], [backend_sequence_name], [backend_sequence], [modified_date]) VALUES(4, 'imgC','Category Image', 0,GETDATE());
+INSERT INTO backend_sequence([id], [backend_sequence_code], [backend_sequence_name], [backend_sequence], [modified_date]) VALUES(5, 'MF','Menu File', 0,GETDATE());
+INSERT INTO backend_sequence([id], [backend_sequence_code], [backend_sequence_name], [backend_sequence], [modified_date]) VALUES(6, 'TQF','Temporary Query File', 0,GETDATE());
+INSERT INTO backend_sequence([id], [backend_sequence_code], [backend_sequence_name], [backend_sequence], [modified_date]) VALUES(7, 'MQF','Menu Query File', 0,GETDATE());
+INSERT INTO backend_sequence([id], [backend_sequence_code], [backend_sequence_name], [backend_sequence], [modified_date]) VALUES(8, 'MIF','Menu Image File', 0,GETDATE());
+
 
 /*Drop all Table*/
 --DROP TABLE group_category;

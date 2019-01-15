@@ -259,7 +259,12 @@
 				
 				category_holder.push(json_data);
 			}
-			return category_holder; 
+			var result = {
+					group_category_id: group_category_id,
+					array: category_holder
+					}
+			
+			return result; 
 		}
 		
 		$scope.updateCategory = function(){
@@ -331,6 +336,7 @@
 		//Assigned Item Related Operations
 		$scope.submitAssignedItems = function(action_type){		
 				var json_data = JSON.stringify({
+					'group_category_id' : group_category_id,
 					'category_id' : $scope.category_id,
 					'item_list' : $scope.selectedItemList
 				});
