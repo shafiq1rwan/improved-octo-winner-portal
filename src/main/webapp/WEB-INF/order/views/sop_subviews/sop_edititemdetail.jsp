@@ -30,8 +30,8 @@
 									class="col-8 col-sm-8 col-md-8 col-lg-9 col-xl-9 d-flex flex-row pr-0">
 									<div
 										class="w-100 align-self-center text-limiter two-liner sm-resp-font">
-										<b ng-show="selectedItem.type == 0">{{currentLanguageData.item_detail_comboPrice}}</b>
-										<b ng-show="selectedItem.type == 1">{{currentLanguageData.item_detail_alacartePrice}}</b>
+										<b ng-show="selectedItem.type == 1">{{currentLanguageData.item_detail_comboPrice}}</b>
+										<b ng-show="selectedItem.type == 0">{{currentLanguageData.item_detail_alacartePrice}}</b>
 									</div>
 								</div>
 								<div
@@ -42,7 +42,7 @@
 									</div>
 								</div>
 							</div>
-							<div class="w-100" ng-show="selectedItem.type != '0'">
+							<div class="w-100" ng-show="selectedItem.type != '1'">
 								<hr class="ml-3 mr-3">
 								<div class="row ml-0 mr-0">
 									<div
@@ -99,7 +99,7 @@
 									</div>
 								</div>
 							</div>
-							<div class="w-100" ng-show="selectedItem.type = '0'"
+							<div class="w-100" ng-show="selectedItem.type = '1'"
 								ng-repeat="comboTier in itemComboTierList">
 								<hr class="ml-3 mr-3">
 								<div class="row ml-0 mr-0">

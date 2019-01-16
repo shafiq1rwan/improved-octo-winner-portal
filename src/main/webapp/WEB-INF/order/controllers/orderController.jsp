@@ -136,7 +136,7 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 		$scope.alacarteQuantity = 0;
 		$scope.totalItemPrice = "0.00";
 		
-		if (data.type == "0") {
+		if (data.type == "1") {
 			$scope.totalItemPrice = data.price;
 			$scope.itemComboTierList = [];
 			var tierStep = 1;
@@ -489,7 +489,7 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 		if (!$scope.isProcessingCartData) {
 			$scope.isProcessingCartData = true;
 			var cartObj = angular.copy($scope.selectedItem);
-			if (cartObj.type == '0') {
+			if (cartObj.type == '1') {
 				cartObj.quantity = 1;
 			} else {
 				cartObj.quantity = $scope.alacarteQuantity;
@@ -518,7 +518,7 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 	$scope.editToCart = function() {
 		if (!$scope.isProcessingCartData) {
 			$scope.isProcessingCartData = true;
-			if ($scope.editCartItem.type == '0') {
+			if ($scope.editCartItem.type == '1') {
 				$scope.editCartItem.quantity = 1;
 			} else {
 				$scope.editCartItem.quantity = $scope.alacarteQuantity;
