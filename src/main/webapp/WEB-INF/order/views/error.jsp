@@ -13,6 +13,6 @@ $(document).ready(function() {
 <body>
 	<h1>Opss! Something went wrong!</h1>
 	<h2>Please try again later</h2>
-	<a href="/">Go Home</a>
+	<a href="/order">Go Home</a>
 </body>
 </html>
