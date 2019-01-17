@@ -3,6 +3,8 @@ package my.com.byod.admin.rest;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -11,11 +13,16 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
+import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -404,13 +411,42 @@ public class GroupCategoryRestController {
 		ResultSet rs = null;
 		String sqlStatement = "";
 		JSONObject result = null;
+		boolean firstPublish = false;
+		String tmpImgFilePath = null;
+		String tmpQueryFilePath = null;
+		String menuImgFilePath = null;
+		String menuQueryFilePath = null;
+		String menuFilePath = null;
+		Long versionCount = null;
 		
 		try {
 			connection = dataSource.getConnection();
 			
-			JSONArray categoryList = getCategoryListByGroupCategoryID(connection, groupCategoryId);
+			JSONObject groupCategoryInfo = getGroupCategoryInfoByID(connection, groupCategoryId);
+			if(groupCategoryInfo.getLong("publish_version_id")==0) {
+				// first time publish menu
+				firstPublish = true;
+				versionCount = (long) 1;
+		
+				if(groupCategoryInfo.has("tmp_img_file_path"))
+					tmpImgFilePath = groupCategoryInfo.getString("tmp_img_file_path");
+				else 
+					tmpImgFilePath = byodUtil.createUniqueBackendId("TIF");
+			}
+			else {
+				versionCount = groupCategoryInfo.getLong("version_count")+1;
+				if(groupCategoryInfo.has("tmp_img_file_path"))
+					tmpImgFilePath = groupCategoryInfo.getString("tmp_img_file_path");
+			}
+			
+			// not first time publish menu and no query action performed
+			if(!firstPublish && !checkTmpQueryFileExist(connection, groupCategoryInfo)) {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Previously published menu is already the latest version menu."); 
+			}
+			
+			JSONArray categoryList = getCategoryListByGroupCategoryID(connection, groupCategoryId, tmpImgFilePath, firstPublish);
 			for (int categoryIndex = 0; categoryIndex < categoryList.length(); categoryIndex++) {
-				JSONArray itemList = getMenuItemListByCategoryID(connection, Integer.parseInt(categoryList.getJSONObject(categoryIndex).getString("id")));
+				JSONArray itemList = getMenuItemListByCategoryID(connection, Integer.parseInt(categoryList.getJSONObject(categoryIndex).getString("id")), groupCategoryId, tmpImgFilePath, firstPublish);
 				for (int itemIndex = 0; itemIndex < itemList.length(); itemIndex++) {
 					JSONArray comboList = new JSONArray();
 					JSONArray alacarteModifierList = new JSONArray();
@@ -422,11 +458,11 @@ public class GroupCategoryRestController {
 							JSONArray tierItemList = new JSONArray();
 							for (int comboDetailIndex = 0; comboDetailIndex < comboDetailList.length(); comboDetailIndex++) {
 								if (!comboDetailList.getJSONObject(comboDetailIndex).isNull("menuItemID") && comboDetailList.getJSONObject(comboDetailIndex).getString("menuItemID") != null) {
-									JSONObject menuItem = getMenuItemDataByMenuItemID(connection, Integer.parseInt(comboDetailList.getJSONObject(comboDetailIndex).getString("menuItemID")));
+									JSONObject menuItem = getMenuItemDataByMenuItemID(connection, Integer.parseInt(comboDetailList.getJSONObject(comboDetailIndex).getString("menuItemID")), groupCategoryId, tmpImgFilePath, firstPublish);
 									menuItem.put("modifierGroupList", getModifierListByMenuItemID(connection, Integer.parseInt(menuItem.getString("id"))));
 									tierItemList.put(menuItem);
 								} else {
-									tierItemList = getMenuItemListByItemGroupID(connection, Integer.parseInt(comboDetailList.getJSONObject(comboDetailIndex).getString("menuItemGroupID")));
+									tierItemList = getMenuItemListByItemGroupID(connection, Integer.parseInt(comboDetailList.getJSONObject(comboDetailIndex).getString("menuItemGroupID")), groupCategoryId, tmpImgFilePath, firstPublish);
 									for (int tierIndex = 0; tierIndex < tierItemList.length(); tierIndex++) {
 										tierItemList.getJSONObject(tierIndex).put("modifierGroupList", getModifierListByMenuItemID(connection, Integer.parseInt(tierItemList.getJSONObject(tierIndex).getString("id"))));
 									}
@@ -445,39 +481,21 @@ public class GroupCategoryRestController {
 			result = new JSONObject();
 			result.put("menuList", categoryList);
 			
-			extractImageList(connection, groupCategoryId);
+			menuFilePath = createMenuFile(result);
+			// get new info after logging tmp image file
+			groupCategoryInfo = getGroupCategoryInfoByID(connection, groupCategoryId);		
+			menuImgFilePath = extractImageList(connection, tmpImgFilePath, menuFilePath);
 			
-			// write to json file
-			String fileName = byodUtil.createUniqueBackendId("MF");
-			try {
-				boolean checker = false;
-				File checkdir = new File(filePath);
-				checkdir.mkdirs();
-
-				do {
-					File checkFile = new File(filePath, fileName + ".json");
-					if (checkFile.exists()) {
-						checker = true;
-						fileName = byodUtil.createUniqueBackendId("MF");;
-					} else {
-						checker = false;
-					}
-				} while (checker);
-				
-				File file = new File(filePath, fileName + ".json");
-				Writer output = new BufferedWriter(new FileWriter(file));
-                output.write(result.toString());
-                output.close();
-                
-			} catch (IOException ex) {
-				ex.printStackTrace();
-			}
+			if(groupCategoryInfo.has("tmp_query_file_path"))
+				tmpQueryFilePath = groupCategoryInfo.getString("tmp_query_file_path");
 			
-			int count = 1;
-			sqlStatement = "UPDATE group_category SET menu_file_path = ?, last_publish_date = GETDATE() WHERE id = ? ";
+			menuQueryFilePath = extractQueryFile(connection, tmpQueryFilePath, menuFilePath);		
+			Long publishVersionId = updatePublishVersion(connection, groupCategoryId, versionCount, menuFilePath, menuQueryFilePath, menuImgFilePath);
+			
+			sqlStatement = "UPDATE group_category SET publish_version_id = ? WHERE id = ? ";
 			stmt = connection.prepareStatement(sqlStatement);
-			stmt.setString(count++, fileName);
-			stmt.setLong(count++, groupCategoryId);
+			stmt.setLong(1, publishVersionId);
+			stmt.setLong(2, groupCategoryId);
 			int rowAffected = stmt.executeUpdate();
 			if(rowAffected==0) {
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Failed to publish menu.");
@@ -508,7 +526,49 @@ public class GroupCategoryRestController {
 
 	}
 	
-	private JSONArray getCategoryListByGroupCategoryID(Connection connection, Long groupCategoryID) throws Exception {
+	private JSONObject getGroupCategoryInfoByID(Connection connection, Long groupCategoryID) throws Exception {
+		JSONObject groupCategoryInfo = null;
+		
+		String sqlStatement = null;
+		PreparedStatement ps1 = null;
+		ResultSet rs1 = null;
+		try {
+			sqlStatement = "SELECT a.group_category_name, a.created_date, a.publish_version_id, a.tmp_query_file_path, a.tmp_img_file_path, b.version_count, b.menu_file_path, b.menu_query_file_path, b.menu_img_file_path, b.publish_date FROM group_category a "
+					+ "LEFT JOIN publish_version b ON a.publish_version_id = b.id "
+					+ "WHERE a.id = ?;";
+			ps1 = connection.prepareStatement(sqlStatement);
+			ps1.setLong(1, groupCategoryID);
+			rs1 = ps1.executeQuery();
+
+			if (rs1.next()) {
+				groupCategoryInfo = new JSONObject();
+				groupCategoryInfo.put("group_category_name", rs1.getString("group_category_name"));
+				groupCategoryInfo.put("created_date",  rs1.getString("created_date"));
+				groupCategoryInfo.put("publish_version_id", rs1.getLong("publish_version_id"));
+				groupCategoryInfo.put("tmp_query_file_path",  rs1.getString("tmp_query_file_path"));
+				groupCategoryInfo.put("version_count", rs1.getString("version_count"));
+				groupCategoryInfo.put("tmp_img_file_path",  rs1.getString("tmp_img_file_path"));
+				groupCategoryInfo.put("menu_file_path",  rs1.getString("menu_file_path"));
+				groupCategoryInfo.put("menu_query_file_path",  rs1.getString("menu_query_file_path"));
+				groupCategoryInfo.put("menu_img_file_path",  rs1.getString("menu_img_file_path"));
+				groupCategoryInfo.put("publish_date",  rs1.getString("publish_date"));
+				System.out.println(groupCategoryInfo.toString());
+			}
+		} catch (Exception ex) {
+			throw ex;
+		} finally {
+			if (rs1 != null) {
+				rs1.close();
+			}
+			if (ps1 != null) {
+				ps1.close();
+			}
+		}
+		
+		return groupCategoryInfo;
+	}
+	
+	private JSONArray getCategoryListByGroupCategoryID(Connection connection, Long groupCategoryID, String tmpImgFilePath, boolean firstPublish) throws Exception {
 		JSONArray categoryList = new JSONArray();
 		
 		String sqlStatement = null;
@@ -527,6 +587,10 @@ public class GroupCategoryRestController {
 				categoryItem.put("path",  rs1.getString("category_image_path"));
 
 				categoryList.put(categoryItem);
+				
+				// first time publish menu
+				/*if(firstPublish && rs1.getString("category_image_path")!=null && !rs1.getString("category_image_path").equals(""))
+					logImageFile(connection, tmpImgFilePath, rs1.getString("category_image_path"), 1, groupCategoryID);*/
 			}
 		} catch (Exception ex) {
 			throw ex;
@@ -542,7 +606,7 @@ public class GroupCategoryRestController {
 		return categoryList;
 	}
 	
-	private JSONArray getMenuItemListByCategoryID(Connection connection, int categoryID) throws Exception {
+	private JSONArray getMenuItemListByCategoryID(Connection connection, int categoryID, Long groupCategoryID, String tmpImgFilePath, boolean firstPublish) throws Exception {
 		JSONArray menuList = new JSONArray();
 		
 		String sqlStatement = null;
@@ -564,6 +628,10 @@ public class GroupCategoryRestController {
 				menuItem.put("price", String.format("%.2f", rs1.getDouble("menu_item_base_price")));
 
 				menuList.put(menuItem);
+				
+				// first time publish menu
+				/*if(firstPublish && rs1.getString("menu_item_image_path")!=null && !rs1.getString("menu_item_image_path").equals(""))
+					logImageFile(connection, tmpImgFilePath, rs1.getString("menu_item_image_path"), 1, groupCategoryID);*/
 			}
 		} catch (Exception ex) {
 			throw ex;
@@ -646,7 +714,7 @@ public class GroupCategoryRestController {
 		return menuList;
 	}
 	
-	private JSONObject getMenuItemDataByMenuItemID(Connection connection, int menuItemID) throws Exception {
+	private JSONObject getMenuItemDataByMenuItemID(Connection connection, int menuItemID, Long groupCategoryID, String tmpImgFilePath, boolean firstPublish) throws Exception {
 		JSONObject menuItem = new JSONObject();
 		
 		String sqlStatement = null;
@@ -663,6 +731,11 @@ public class GroupCategoryRestController {
 			menuItem.put("name", rs1.getString("menu_item_name"));
 			menuItem.put("path", rs1.getString("menu_item_image_path"));
 			menuItem.put("price", rs1.getString("menu_item_base_price"));
+			
+			// first time publish menu
+			/*if(firstPublish && rs1.getString("menu_item_image_path")!=null && !rs1.getString("menu_item_image_path").equals(""))
+				logImageFile(connection, tmpImgFilePath, rs1.getString("menu_item_image_path"), 1, groupCategoryID);*/
+			
 		} catch (Exception ex) {
 			throw ex;
 		} finally {
@@ -677,7 +750,7 @@ public class GroupCategoryRestController {
 		return menuItem;
 	}
 	
-	private JSONArray getMenuItemListByItemGroupID(Connection connection, int itemGroupID) throws Exception {
+	private JSONArray getMenuItemListByItemGroupID(Connection connection, int itemGroupID, Long groupCategoryID, String tmpImgFilePath, boolean firstPublish) throws Exception {
 		JSONArray menuItemList = new JSONArray();
 		
 		String sqlStatement = null;
@@ -697,6 +770,10 @@ public class GroupCategoryRestController {
 				menuItem.put("price", rs1.getString("menu_item_base_price"));
 
 				menuItemList.put(menuItem);
+				
+				// first time publish menu
+				/*if(firstPublish && rs1.getString("menu_item_image_path")!=null && !rs1.getString("menu_item_image_path").equals(""))
+					logImageFile(connection, tmpImgFilePath, rs1.getString("menu_item_image_path"), 1, groupCategoryID);*/
 			}
 		} catch (Exception ex) {
 			throw ex;
@@ -771,11 +848,39 @@ public class GroupCategoryRestController {
 		return modifierGroupList;
 	}
 	
-	/*private boolean saveMenuQueryFile(Connection connection) throws Exception {
-		
-	}*/
+	private String createMenuFile(JSONObject result){
+		// write to json file
+		String menuFilePath = byodUtil.createUniqueBackendId("MF");
+		try {
+			boolean checker = false;
+			File checkdir = new File(filePath);
+			checkdir.mkdirs();
+
+			do {
+				File checkFile = new File(filePath+menuFilePath);
+				if (checkFile.exists()) {
+					System.out.println("duplicate");
+					checker = true;
+					menuFilePath = byodUtil.createUniqueBackendId("MF");;
+				} else {
+					checker = false;
+					checkFile.mkdirs();
+				}
+			} while (checker);
+			
+			File file = new File(filePath+menuFilePath, menuFilePath + ".json");
+			Writer output = new BufferedWriter(new FileWriter(file));
+            output.write(result.toString());
+            output.close();
+            
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		}
+		return menuFilePath;
+	}
 	
-	public boolean logActionToFile(Connection connection, String query, String[] parameters, Long groupCategoryId, String imageName, int saveType) throws Exception {
+	
+	public void logActionToFile(Connection connection, String query, String[] parameters, Long groupCategoryId, String imageName, int saveType) throws Exception {
 		// saveType for imageName
 		// 0 - Nothing
 		// 1 - Save
@@ -783,9 +888,10 @@ public class GroupCategoryRestController {
 		
 		String sqlStatement = "";
 		String tmpQueryFilePath = "";
-		String menuImgFilePath = "";
+		String tmpImgFilePath = "";
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
+		Long publishVersionId = null;
 		
 		try {
 			System.out.println(query);
@@ -800,14 +906,20 @@ public class GroupCategoryRestController {
 			
 			System.out.println(query);
 			
-			sqlStatement = "SELECT tmp_query_file_path, menu_img_file_path FROM group_category WHERE id = ? ";
+			sqlStatement = "SELECT publish_version_id, tmp_query_file_path, tmp_img_file_path FROM group_category "
+					+ "WHERE id = ? ";
 			stmt = connection.prepareStatement(sqlStatement);
 			stmt.setLong(1, groupCategoryId);
 			rs = stmt.executeQuery();
 			
-			if(rs.next()) {
+			if(rs.next()) {	
+				publishVersionId = rs.getLong("publish_version_id");
+				// never publish menu before, no need to log
+				if(publishVersionId==0)
+					return;
+				
 				tmpQueryFilePath = rs.getString("tmp_query_file_path");
-				menuImgFilePath = rs.getString("menu_img_file_path");
+				tmpImgFilePath = rs.getString("tmp_img_file_path");
 				if(tmpQueryFilePath == null) {
 					tmpQueryFilePath = byodUtil.createUniqueBackendId("TQF");
 				}
@@ -837,7 +949,7 @@ public class GroupCategoryRestController {
 				stmt.executeUpdate();
 				
 				if(imageName!=null && !imageName.equals(""))
-					logImageFile(connection, menuImgFilePath, imageName, saveType, groupCategoryId);
+					logImageFile(connection, tmpImgFilePath, imageName, saveType, groupCategoryId);
 			}       
 		}catch (Exception ex) {
 			throw ex;
@@ -849,10 +961,9 @@ public class GroupCategoryRestController {
 				rs.close();
 			}
 		}
-		return true;
 	}
 	
-	public boolean logActionToAllFiles(Connection connection, String query, String[] parameters, String imageName, int saveType) throws Exception {
+	public void logActionToAllFiles(Connection connection, String query, String[] parameters, String imageName, int saveType) throws Exception {
 		// saveType for imageName
 		// 0 - Nothing
 		// 1 - Save
@@ -860,12 +971,12 @@ public class GroupCategoryRestController {
 		
 		String sqlStatement = "";
 		String tmpQueryFilePath = "";
+		String tmpImgFilePath = "";
 		PreparedStatement stmt = null;
 		PreparedStatement stmt2 = null;
-		PreparedStatement stmt3 = null;
 		ResultSet rs = null;
-		Long groupCategoryId;
-		String menuImgFilePath = "";
+		Long groupCategoryId = null;
+		Long publishVersionId = null;
 		
 		try {	
 			System.out.println(query);
@@ -880,14 +991,20 @@ public class GroupCategoryRestController {
 			
 			System.out.println(query);
 			
-			sqlStatement = "SELECT id, tmp_query_file_path, menu_img_file_path FROM group_category ";
+			sqlStatement = "SELECT id, publish_version_id, tmp_query_file_path, tmp_img_file_path FROM group_category ";
 			stmt = connection.prepareStatement(sqlStatement);
 			rs = stmt.executeQuery();
 			
 			while(rs.next()) {
 				groupCategoryId = rs.getLong("id");
+				publishVersionId = rs.getLong("publish_version_id");
+				
+				// never publish menu before, no need to log
+				if(publishVersionId==0)
+					continue;
+				
 				tmpQueryFilePath = rs.getString("tmp_query_file_path");
-				menuImgFilePath = rs.getString("menu_img_file_path");
+				tmpImgFilePath = rs.getString("tmp_img_file_path");
 				
 				if(tmpQueryFilePath == null) {
 					tmpQueryFilePath = byodUtil.createUniqueBackendId("TQF");
@@ -916,7 +1033,7 @@ public class GroupCategoryRestController {
 				stmt2.executeUpdate();
 				
 				if(imageName!=null && !imageName.equals(""))
-					logImageFile(connection, menuImgFilePath, imageName, saveType, groupCategoryId);
+					logImageFile(connection, tmpImgFilePath, imageName, saveType, groupCategoryId);
 			}       
 		}catch (Exception ex) {
 			throw ex;
@@ -927,17 +1044,13 @@ public class GroupCategoryRestController {
 			if (stmt2 != null) {
 				stmt2.close();
 			}
-			if (stmt3 != null) {
-				stmt3.close();
-			}
 			if (rs != null) {
 				rs.close();
 			}
 		}
-		return true;
 	}
 	
-	public void logImageFile(Connection connection, String menuImgFilePath, String imageName, int saveType, Long groupCategoryId) throws Exception  {
+	public void logImageFile(Connection connection, String tmpImgFilePath, String imageName, int saveType, Long groupCategoryId) throws Exception  {
 		// saveType for imageName
 		// 0 - Nothing
 		// 1 - Save
@@ -947,14 +1060,14 @@ public class GroupCategoryRestController {
 		
 		try {
 			// write to image file
-			if(menuImgFilePath==null) {
-				menuImgFilePath = byodUtil.createUniqueBackendId("MIF");
+			if(tmpImgFilePath==null) {
+				tmpImgFilePath = byodUtil.createUniqueBackendId("TIF");
 			}
 			File checkdir = new File(filePath);
 			checkdir.mkdirs();
 			JSONObject writeResult = new JSONObject();
 			ArrayList<String> imageList = new ArrayList<String>();
-			File checkFile = new File(filePath, menuImgFilePath + ".json");
+			File checkFile = new File(filePath, tmpImgFilePath + ".json");
 			if (checkFile.exists()) {
 				// read file
 				BufferedReader br = new BufferedReader(new FileReader(checkFile));
@@ -998,9 +1111,9 @@ public class GroupCategoryRestController {
 	            output.close();
 			}
 			
-			sqlStatement = "UPDATE group_category SET menu_img_file_path = ? WHERE id = ? ";
+			sqlStatement = "UPDATE group_category SET tmp_img_file_path = ? WHERE id = ? ";
 			stmt = connection.prepareStatement(sqlStatement);
-			stmt.setString(1, menuImgFilePath);
+			stmt.setString(1, tmpImgFilePath);
 			stmt.setLong(2, groupCategoryId);
 			stmt.executeUpdate();
 		
@@ -1013,66 +1126,170 @@ public class GroupCategoryRestController {
 		}
 	}
 	
-	private void extractImageList(Connection connection, Long groupCategoryId) throws Exception {
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-		String menuImgFilePath = "";
-		try {
-			String sqlStatement = "SELECT * FROM group_category WHERE id = ?;";
-			stmt = connection.prepareStatement(sqlStatement);
-			stmt.setLong(1, groupCategoryId);
-			rs = stmt.executeQuery();
-			if(rs.next()) {
-				menuImgFilePath = rs.getString("menu_img_file_path");
-			}
-			ArrayList<String> imageList = new ArrayList<String>();
-			File checkFile = new File(filePath, menuImgFilePath + ".json");
-			if (checkFile.exists()) {
-				// read file
-				BufferedReader br = new BufferedReader(new FileReader(checkFile));
-				try {
-				    StringBuilder sb = new StringBuilder();
-				    String line = br.readLine();
+	private String extractImageList(Connection connection, String tmpImgFilePath, String menuFilePath) throws Exception {
+		String menuImgFilePath = null;
+		try {		
+			if(tmpImgFilePath!=null && !tmpImgFilePath.equals("")) {
 
-				    while (line != null) {
-				        sb.append(line);
-				        sb.append(System.lineSeparator());
-				        line = br.readLine();
-				    }
-				    String everything = sb.toString();
-				    JSONObject jsonFile = new JSONObject(everything);						
-				    JSONArray imageArray = jsonFile.getJSONArray("imageList");
-				    for(int i = 0; i < imageArray.length(); i++)
-				    	imageList.add(imageArray.getString(i));
-				} finally {
-				    br.close();
-				}
-				
-				for(int a = 0; a < imageList.size(); a++) {
-					File source = new File(imagePath, imageList.get(a));
-					if(source.exists()) {
-						// copy image files
-						File dest = new File(filePath, imageList.get(a));
-						try {
-							//FileUtils.copyDirectory(source, dest);
-							
-						}catch(Exception e) {
-							e.printStackTrace();
+				ArrayList<String> imageList = new ArrayList<String>();
+				File checkFile = new File(filePath, tmpImgFilePath + ".json");
+				if (checkFile.exists()) {
+					// read file
+					BufferedReader br = new BufferedReader(new FileReader(checkFile));
+					try {
+					    StringBuilder sb = new StringBuilder();
+					    String line = br.readLine();
+	
+					    while (line != null) {
+					        sb.append(line);
+					        sb.append(System.lineSeparator());
+					        line = br.readLine();
+					    }
+					    String everything = sb.toString();
+					    JSONObject jsonFile = new JSONObject(everything);						
+					    JSONArray imageArray = jsonFile.getJSONArray("imageList");
+					    for(int i = 0; i < imageArray.length(); i++)
+					    	imageList.add(imageArray.getString(i));
+					} finally {
+					    br.close();
+					}
+					
+					/*for(int a = 0; a < imageList.size(); a++) {
+						File source = new File(imagePath, imageList.get(a));
+						if(source.exists()) {
+							// copy image files
+							File dest = new File(filePath + menuFilePath ,imageList.get(a));
+							try {
+								FileUtils.copyFile(source, dest);
+							}catch(Exception e) {
+								e.printStackTrace();
+							}
+						}
+					}*/
+					
+					// zipping images
+					//List<String> srcFiles = Arrays.asList("test1.txt", "test2.txt");
+					menuImgFilePath = byodUtil.createUniqueBackendId("MIF");
+					FileOutputStream fos = new FileOutputStream(filePath + menuFilePath + "/" + menuImgFilePath+".zip");
+					ZipOutputStream zipOut = new ZipOutputStream(fos);
+					for (String srcFile : imageList) {
+						File fileToZip = new File(imagePath, srcFile);
+						if(fileToZip.exists()) {
+							FileInputStream fis = new FileInputStream(fileToZip);
+							ZipEntry zipEntry = new ZipEntry(fileToZip.getName());
+							zipOut.putNextEntry(zipEntry);		
+							byte[] bytes = new byte[1024];
+							int length;
+							while((length = fis.read(bytes)) >= 0) {
+								zipOut.write(bytes, 0, length);
+							}
+							fis.close();
 						}
 					}
+					zipOut.close();
+					fos.close();
+					
+					// copy image json file
+					File dest = new File(filePath + menuFilePath, menuImgFilePath + ".json");
+					try {
+						FileUtils.copyFile(checkFile, dest);
+					}catch(Exception e) {
+						e.printStackTrace();
+					}
+					// delete image json file
+					checkFile.delete();
+					
+				} else {
+					// no image file
+					System.out.println("No image file to be published");
 				}
-				
-			} else {
-				// no image file
-				System.out.println("No image file to be published");
 			}
 			
 		}catch(Exception ex) {
 			throw ex;
+		}
+		return menuImgFilePath;
+	}
+	
+	private String extractQueryFile(Connection connection, String tmpQueryFilePath, String menuFilePath) throws Exception {
+		String menuQueryFilePath = null;
+		try {
+			if(tmpQueryFilePath!=null && !tmpQueryFilePath.equals("")) {
+				
+				File checkFile = new File(filePath, tmpQueryFilePath + ".txt");
+				if (checkFile.exists()) {
+					menuQueryFilePath = byodUtil.createUniqueBackendId("MQF");
+					// copy query file
+					File dest = new File(filePath + menuFilePath, menuQueryFilePath + ".txt");
+					try {
+						FileUtils.copyFile(checkFile, dest);
+					}catch(Exception e) {
+						e.printStackTrace();
+					}
+					
+					// delete query file
+					checkFile.delete();
+			
+				} else {
+					// no query file
+					System.out.println("No query file to be published");
+				}
+			}
+			
+		}catch(Exception ex) {
+			throw ex;
+		}
+		return menuQueryFilePath;
+	}
+	
+	private boolean checkTmpQueryFileExist(Connection connection, JSONObject groupCategoryInfo) throws Exception {
+		String tmpQueryFilePath = "";
+		boolean flag = false;
+		try {
+			if(groupCategoryInfo.has("tmp_query_file_path")) {
+				tmpQueryFilePath = groupCategoryInfo.getString("tmp_query_file_path");
+				File checkFile = new File(filePath, tmpQueryFilePath + ".txt");
+				if (checkFile.exists()) {
+					flag = true;
+				} 
+			}
+			
+		}catch(Exception ex) {
+			throw ex;
+		}
+		return flag;
+	}
+	
+	private Long updatePublishVersion(Connection connection, Long groupCategoryId, Long versionCount, String menuFilePath, String menuQueryFilePath, String menuImgFilePath ) throws Exception {
+		String sqlStatement = "";
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		Long publishVersionId = null;
+
+		try {		
+			sqlStatement = "INSERT INTO publish_version (group_category_id, version_count, menu_file_path, menu_query_file_path, menu_img_file_path, publish_date) VALUES (?, ?, ?, ?, ?, GETDATE()); SELECT SCOPE_IDENTITY();";
+			stmt = connection.prepareStatement(sqlStatement);
+			stmt.setLong(1, groupCategoryId);
+			stmt.setLong(2, versionCount);
+			stmt.setString(3, menuFilePath);
+			stmt.setString(4, menuQueryFilePath);
+			stmt.setString(5, menuImgFilePath);
+			rs = stmt.executeQuery();
+			if(rs.next()) {
+				publishVersionId = rs.getLong(1);
+			}
+			
+		}catch (Exception ex) {
+			throw ex;
 		} finally {
+			if (rs != null) {
+				rs.close();
+			}
 			if (stmt != null) {
 				stmt.close();
 			}
 		}
+		return publishVersionId;
 	}
+	
 }

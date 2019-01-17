@@ -42,6 +42,9 @@ public class ModifierGroupRestController {
 
 	@Autowired
 	private ByodUtil byodUtil;
+	
+	@Autowired
+	private GroupCategoryRestController groupCategoryRestController;
 
 	@GetMapping(value = "/get_all_modifier_group", produces = "application/json")
 	public ResponseEntity<?> getAllModifierGroup(HttpServletRequest request, HttpServletResponse response) {
@@ -180,12 +183,19 @@ public class ModifierGroupRestController {
 					: jsonModifierGroupData.getBoolean("is_active");
 
 			connection = dataSource.getConnection();
+			String sqlStatement = "INSERT INTO modifier_group(modifier_group_name, is_active) VALUES (?, ?);";
 			stmt = connection
-					.prepareStatement("INSERT INTO modifier_group(modifier_group_name, is_active) VALUES (?,?)");
+					.prepareStatement(sqlStatement);
 			stmt.setString(1, jsonModifierGroupData.getString("modifier_group_name"));
 			stmt.setBoolean(2, isActive);
 			int rowAffected = stmt.executeUpdate();
-
+			
+			// logging to file	
+			String [] parameters = {
+					jsonModifierGroupData.getString("modifier_group_name"),
+					String.valueOf(isActive)};		
+			groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0);
+			
 			if (rowAffected == 0) {
 				return ResponseEntity.badRequest().body("Failed To Create Modifier Group");
 			}
@@ -221,13 +231,21 @@ public class ModifierGroupRestController {
 					: jsonModifierGroupData.getBoolean("is_active");
 
 			connection = dataSource.getConnection();
+			String sqlStatement = "UPDATE modifier_group SET modifier_group_name = ?, is_active = ? WHERE id = ?;";
 			stmt = connection
-					.prepareStatement("UPDATE modifier_group SET modifier_group_name = ?, is_active = ? WHERE id = ?");
+					.prepareStatement(sqlStatement);
 			stmt.setString(1, jsonModifierGroupData.getString("modifier_group_name"));
 			stmt.setBoolean(2, isActive);
 			stmt.setLong(3, jsonModifierGroupData.getLong("id"));
 			int rowAffected = stmt.executeUpdate();
-
+			
+			// logging to file	
+			String [] parameters = {
+					jsonModifierGroupData.getString("modifier_group_name"),
+					String.valueOf(isActive),
+					String.valueOf(jsonModifierGroupData.getLong("id"))};		
+			groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0);
+			
 			if (rowAffected == 0) {
 				return ResponseEntity.badRequest().body("Failed To Edit Modifer Group");
 			}
@@ -262,17 +280,29 @@ public class ModifierGroupRestController {
 
 		try {
 			connection = dataSource.getConnection();
-			stmt = connection.prepareStatement("DELETE FROM modifier_group WHERE id = ?");
+			String sqlStatement = "DELETE FROM modifier_group WHERE id = ?;";
+			stmt = connection.prepareStatement(sqlStatement);
 			stmt.setLong(1, id);
 			int rowAffected = stmt.executeUpdate();
+			
+			// logging to file	
+			String [] parameters = {
+					String.valueOf(id)};		
+			groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0);
 
 			if (rowAffected == 0) {
 				return ResponseEntity.badRequest().body("Failed To Remove Modifer Group");
 			} else {
 				// Delete from menu_item_modifier_group
-				stmt3 = connection.prepareStatement("DELETE FROM menu_item_modifier_group WHERE modifier_group_id = ?");
+				sqlStatement = "DELETE FROM menu_item_modifier_group WHERE modifier_group_id = ?;";
+				stmt3 = connection.prepareStatement(sqlStatement);
 				stmt3.setLong(1, id);
 				stmt3.executeUpdate();
+				
+				// logging to file	
+				String [] parameters2 = {
+						String.valueOf(id)};		
+				groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters2, null, 0);
 			}
 			return ResponseEntity.ok().body(null);
 		} catch (Exception ex) {
@@ -347,16 +377,23 @@ public class ModifierGroupRestController {
 			Long modifierGroupId = jsonObj.getLong("modifier_group_id");
 
 			connection = dataSource.getConnection();
+			String sqlStatement = "INSERT INTO modifier_item_sequence (modifier_group_id, menu_item_id, modifier_item_sequence) VALUES (?, ?, ?);";
 
 			for (int i = 0; i < jsonItemsArray.length(); i++) {
 				int index = i;
 				JSONObject jsonItemObj = jsonItemsArray.getJSONObject(i);
-				stmt = connection.prepareStatement(
-						"INSERT INTO modifier_item_sequence (modifier_group_id, menu_item_id, modifier_item_sequence) VALUES (?,?,?)");
+				stmt = connection.prepareStatement(sqlStatement);
 				stmt.setLong(1, modifierGroupId);
 				stmt.setLong(2, jsonItemObj.getLong("id"));
 				stmt.setInt(3, index + 1);
 				stmt.executeUpdate();
+				
+				// logging to file	
+				String [] parameters = {
+						String.valueOf(modifierGroupId),
+						String.valueOf(jsonItemObj.getLong("id")),
+						String.valueOf(index + 1)};		
+				groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0);
 			}
 
 			return ResponseEntity.ok().body(null);
@@ -387,20 +424,33 @@ public class ModifierGroupRestController {
 			Long modifierGroupId = jsonObj.getLong("modifier_group_id");
 
 			connection = dataSource.getConnection();
-
-			stmt = connection.prepareStatement("DELETE FROM modifier_item_sequence WHERE modifier_group_id = ?");
+			String sqlStatement = "DELETE FROM modifier_item_sequence WHERE modifier_group_id = ?;";
+			
+			stmt = connection.prepareStatement(sqlStatement);
 			stmt.setLong(1, modifierGroupId);
 			stmt.executeUpdate();
+			
+			// logging to file	
+			String [] parameters = {
+					String.valueOf(modifierGroupId)};		
+			groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0);
 
 			for (int i = 0; i < jsonItemsArray.length(); i++) {
 				int index = i;
 				JSONObject jsonItemObj = jsonItemsArray.getJSONObject(i);
-				stmt2 = connection.prepareStatement(
-						"INSERT INTO modifier_item_sequence (modifier_group_id, menu_item_id, modifier_item_sequence) VALUES (?,?,?)");
+				sqlStatement = "INSERT INTO modifier_item_sequence (modifier_group_id, menu_item_id, modifier_item_sequence) VALUES (?, ?, ?);";
+				stmt2 = connection.prepareStatement(sqlStatement);
 				stmt2.setLong(1, modifierGroupId);
 				stmt2.setLong(2, jsonItemObj.getLong("id"));
 				stmt2.setInt(3, index + 1);
 				stmt2.executeUpdate();
+				
+				// logging to file	
+				String [] parameters2 = {
+						String.valueOf(modifierGroupId),
+						String.valueOf(jsonItemObj.getLong("id")),
+						String.valueOf(index + 1)};		
+				groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters2, null, 0);
 			}
 
 			return ResponseEntity.ok().body(null);
@@ -517,16 +567,24 @@ public class ModifierGroupRestController {
 
 			connection = dataSource.getConnection();
 			connection.setAutoCommit(false);
+			String sqlStatement = "INSERT INTO menu_item_modifier_group (menu_item_id, modifier_group_id, menu_item_modifier_group_sequence) VALUES (?, ?, ?);";
 
 			for (int i = 0; i < jsonModifierGroupsArray.length(); i++) {
 				int index = i + 1;
 				JSONObject jsonModifierGroupsObj = jsonModifierGroupsArray.getJSONObject(i);
-				stmt = connection.prepareStatement(
-						"INSERT INTO menu_item_modifier_group (menu_item_id, modifier_group_id, menu_item_modifier_group_sequence) VALUES (?,?,?)");
+				stmt = connection.prepareStatement(sqlStatement);
 				stmt.setLong(1, menuItemId);
 				stmt.setLong(2, jsonModifierGroupsObj.getLong("id"));
 				stmt.setInt(3, index);
 				stmt.executeUpdate();
+				
+				// logging to file	
+				String [] parameters = {
+						String.valueOf(menuItemId),
+						String.valueOf(jsonModifierGroupsObj.getLong("id")),
+						String.valueOf(index)};		
+				groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0);
+				
 				connection.commit();
 			}
 
@@ -561,12 +619,19 @@ public class ModifierGroupRestController {
 		try {
 
 			connection = dataSource.getConnection();
+			String sqlStatement = "DELETE FROM menu_item_modifier_group WHERE menu_item_id = ? AND modifier_group_id = ?;";
 			stmt = connection.prepareStatement(
 					"DELETE FROM menu_item_modifier_group WHERE menu_item_id = ? AND modifier_group_id = ?");
 			stmt.setLong(1, menuItemId);
 			stmt.setLong(2, modifierGroupId);
 			int rowAffected = stmt.executeUpdate();
-
+			
+			// logging to file	
+			String [] parameters = {
+					String.valueOf(menuItemId),
+					String.valueOf(modifierGroupId)};		
+			groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0);
+			
 			if (rowAffected == 0) {
 				return ResponseEntity.badRequest().body("Failed To Remove Assigned Modifer");
 			}
@@ -600,20 +665,34 @@ public class ModifierGroupRestController {
 
 			connection = dataSource.getConnection();
 			connection.setAutoCommit(false);
-
-			stmt = connection.prepareStatement("DELETE FROM menu_item_modifier_group WHERE menu_item_id = ?");
+			String sqlStatement = "DELETE FROM menu_item_modifier_group WHERE menu_item_id = ?;";
+			
+			stmt = connection.prepareStatement(sqlStatement);
 			stmt.setLong(1, menuItemId);
 			stmt.executeUpdate();
+			
+			// logging to file	
+			String [] parameters = {
+					String.valueOf(menuItemId)};		
+			groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0);
 
 			for (int i = 0; i < jsonModifierGroupsArray.length(); i++) {
 				int index = i;
 				JSONObject jsonModifierGroupsObj = jsonModifierGroupsArray.getJSONObject(i);
-				stmt2 = connection.prepareStatement(
-						"INSERT INTO menu_item_modifier_group (menu_item_id, modifier_group_id, menu_item_modifier_group_sequence) VALUES (?,?,?)");
+				sqlStatement = "INSERT INTO menu_item_modifier_group (menu_item_id, modifier_group_id, menu_item_modifier_group_sequence) VALUES (? ,? ,?);";
+				stmt2 = connection.prepareStatement(sqlStatement);
 				stmt2.setLong(1, menuItemId);
 				stmt2.setLong(2, jsonModifierGroupsObj.getLong("id"));
 				stmt2.setInt(3, index + 1);
 				stmt2.executeUpdate();
+				
+				// logging to file	
+				String [] parameters2 = {
+						String.valueOf(menuItemId),
+						String.valueOf(jsonModifierGroupsObj.getLong("id")),
+						String.valueOf(index + 1)};		
+				groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters2, null, 0);			
+				
 				connection.commit();
 			}
 

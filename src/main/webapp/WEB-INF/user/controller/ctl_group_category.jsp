@@ -232,9 +232,16 @@
 			})
 			.then(function(response) {
 				console.log(response.data);
+				swal("Successfully published menu", {
+					icon: "success",
+				});
 			}, function(response){
-				console.log(response.data)
-				alert("Unknown Error Occured While Obtaining Store List");
+				swal({
+					  title: "Failed to publish menu",
+					  text: response.data,
+					  icon: "warning",
+					  dangerMode: true,
+					});
 			});
 		}
 

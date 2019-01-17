@@ -3,9 +3,6 @@ package my.com.byod.admin.rest;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.Calendar;
-import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -14,14 +11,11 @@ import javax.sql.DataSource;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,15 +23,15 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import my.com.byod.admin.entity.Store;
-import my.com.byod.admin.service.StoreService;
-
 @RestController
 @RequestMapping("/menu/item_group")
 public class ItemGroupRestController {
 
 	@Autowired
-	private DataSource dataSource;	
+	private DataSource dataSource;
+	
+	@Autowired
+	private GroupCategoryRestController groupCategoryRestController;
 	
 	@RequestMapping(value = "/get_all_item_group", method = RequestMethod.GET)
 	public ResponseEntity<?> getAllItemGroup() {
@@ -129,11 +123,18 @@ public class ItemGroupRestController {
 					: jsonItemGroupData.getBoolean("is_active");
 
 			connection = dataSource.getConnection();
-			stmt = connection.prepareStatement(
-					"INSERT INTO menu_item_group(menu_item_group_name, is_active) VALUES (?,?)");
+			String sqlStatement = "INSERT INTO menu_item_group(menu_item_group_name, is_active) VALUES (?, ?);";
+			stmt = connection.prepareStatement(sqlStatement);
 			stmt.setString(1, jsonItemGroupData.getString("menu_item_group_name"));
 			stmt.setBoolean(2, isActive);
+				
 			int rowAffected = stmt.executeUpdate();
+			
+			// logging to file	
+			String [] parameters = {
+					jsonItemGroupData.getString("menu_item_group_name")==null?"null":"'"+jsonItemGroupData.getString("menu_item_group_name")+"'",
+					String.valueOf(isActive)};		
+			groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0);
 
 			if (rowAffected == 0) {
 				return ResponseEntity.badRequest().body("Failed To Create Item Group");
@@ -170,13 +171,21 @@ public class ItemGroupRestController {
 					: jsonItemGroupData.getBoolean("is_active");
 
 			connection = dataSource.getConnection();
+			String sqlStatement = "UPDATE menu_item_group SET menu_item_group_name = ?, is_active = ? WHERE id = ?;";
 			stmt = connection
-					.prepareStatement("UPDATE menu_item_group SET menu_item_group_name = ?, is_active = ? WHERE id = ?");
+					.prepareStatement(sqlStatement);
 			stmt.setString(1, jsonItemGroupData.getString("menu_item_group_name"));
 			stmt.setBoolean(2, isActive);
 			stmt.setLong(3, jsonItemGroupData.getLong("id"));
 			int rowAffected = stmt.executeUpdate();
-
+			
+			// logging to file	
+			String [] parameters = {
+					jsonItemGroupData.getString("menu_item_group_name")==null?"null":"'"+jsonItemGroupData.getString("menu_item_group_name")+"'",
+					String.valueOf(isActive),
+					String.valueOf(jsonItemGroupData.getLong("id"))};		
+			groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0);
+			
 			if (rowAffected == 0) {
 				return ResponseEntity.badRequest().body("Failed To Edit Item Group");
 			}
@@ -210,17 +219,29 @@ public class ItemGroupRestController {
 
 		try {
 			connection = dataSource.getConnection();
-			stmt = connection.prepareStatement("DELETE FROM menu_item_group WHERE id = ?");
+			String sqlStatement = "DELETE FROM menu_item_group WHERE id = ?;";
+			stmt = connection.prepareStatement(sqlStatement);
 			stmt.setLong(1, id);
 			int rowAffected = stmt.executeUpdate();
+			
+			// logging to file	
+			String [] parameters = {
+					String.valueOf(id)};		
+			groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0);
 
 			if (rowAffected == 0) {
 				return ResponseEntity.badRequest().body("Failed To Remove Item Group");
 			} else {
 				// Delete from menu_item_modifier_group
-				stmt3 = connection.prepareStatement("DELETE FROM menu_item_group_sequence WHERE menu_item_group_id = ?");
+				sqlStatement = "DELETE FROM menu_item_group_sequence WHERE menu_item_group_id = ?;";
+				stmt3 = connection.prepareStatement(sqlStatement);
 				stmt3.setLong(1, id);
 				stmt3.executeUpdate();
+				
+				// logging to file	
+				String [] parameters2 = {
+						String.valueOf(id)};		
+				groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters2, null, 0);
 			}
 			return ResponseEntity.ok().body(null);
 		} catch (Exception ex) {
@@ -294,15 +315,23 @@ public class ItemGroupRestController {
 			Long menuItemGroupId = jsonObj.getLong("menu_item_group_id");
 			
 			connection = dataSource.getConnection();
+			String sqlStatement = "INSERT INTO menu_item_group_sequence (menu_item_group_id, menu_item_id, menu_item_group_sequence) VALUES (?, ?, ?);";
 
 			for(int i=0;i<jsonItemsArray.length();i++) {
 				int index = i;
 				JSONObject jsonItemObj = jsonItemsArray.getJSONObject(i);		
-				stmt = connection.prepareStatement("INSERT INTO menu_item_group_sequence (menu_item_group_id, menu_item_id, menu_item_group_sequence) VALUES (?,?,?)");
+				stmt = connection.prepareStatement(sqlStatement);
 				stmt.setLong(1, menuItemGroupId);
 				stmt.setLong(2, jsonItemObj.getLong("id"));
 				stmt.setInt(3, index+1);
 				stmt.executeUpdate();
+				
+				// logging to file	
+				String [] parameters = {
+						String.valueOf(menuItemGroupId),
+						String.valueOf(jsonItemObj.getLong("id")),
+						String.valueOf(index+1)};		
+				groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0);
 			}
 			
 			return ResponseEntity.ok().body(null);
@@ -333,19 +362,33 @@ public class ItemGroupRestController {
 			Long menuItemGroupId = jsonObj.getLong("menu_item_group_id");
 			
 			connection = dataSource.getConnection();
-
-			stmt = connection.prepareStatement("DELETE FROM menu_item_group_sequence WHERE menu_item_group_id = ?");
+			String sqlStatement = "DELETE FROM menu_item_group_sequence WHERE menu_item_group_id = ?;";
+			
+			stmt = connection.prepareStatement(sqlStatement);
 			stmt.setLong(1, menuItemGroupId);
 			stmt.executeUpdate();
+			
+			// logging to file	
+			String [] parameters = {
+					String.valueOf(menuItemGroupId)};		
+			groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0);
 
 			for(int i=0;i<jsonItemsArray.length();i++) {
 				int index = i;
 				JSONObject jsonItemObj = jsonItemsArray.getJSONObject(i);
-				stmt2 = connection.prepareStatement("INSERT INTO menu_item_group_sequence (menu_item_group_id, menu_item_id, menu_item_group_sequence) VALUES (?,?,?)");
+				sqlStatement = "INSERT INTO menu_item_group_sequence (menu_item_group_id, menu_item_id, menu_item_group_sequence) VALUES (?, ?, ?);";
+				stmt2 = connection.prepareStatement(sqlStatement);
 				stmt2.setLong(1, menuItemGroupId);
 				stmt2.setLong(2, jsonItemObj.getLong("id"));
 				stmt2.setInt(3, index+1);			
 				stmt2.executeUpdate();
+				
+				// logging to file	
+				String [] parameters2 = {
+						String.valueOf(menuItemGroupId),
+						String.valueOf(jsonItemObj.getLong("id")),
+						String.valueOf(index+1)};		
+				groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters2, null, 0);
 			}
 			
 			return ResponseEntity.ok().body(null);

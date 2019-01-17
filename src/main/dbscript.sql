@@ -3,11 +3,9 @@ CREATE TABLE group_category
 	id BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,
 	group_category_name NVARCHAR(50) NOT NULL UNIQUE,
 	created_date DATETIME NOT NULL DEFAULT GETDATE(),
-	menu_file_path nvarchar(150),
-	menu_query_file_path nvarchar(150),
+	publish_version_id bigint,
 	tmp_query_file_path nvarchar(150),
-	menu_img_file_path nvarchar(150),
-	last_publish_date DATETIME
+	tmp_img_file_path nvarchar(150)
 );
 
 CREATE TABLE category
@@ -234,6 +232,18 @@ CREATE TABLE backend_sequence
 	modified_date DATE NOT NULL DEFAULT GETDATE()
 );
 
+CREATE TABLE publish_version
+(
+	id BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,
+	group_category_id bigInt NOT NULL,
+	version_count bigint NOT NULL,  
+	menu_file_path nvarchar(150),
+	menu_query_file_path nvarchar(150),
+	menu_img_file_path nvarchar(150),
+	publish_date DATETIME NOT NULL DEFAULT GETDATE()
+);
+
+
 INSERT INTO status_lookup (id, name) VALUES (1, 'PENDING')
 INSERT INTO status_lookup (id, name) VALUES (2, 'ACTIVE')
 INSERT INTO status_lookup (id, name) VALUES (3, 'INACTIVE')
@@ -251,7 +261,8 @@ INSERT INTO backend_sequence([id], [backend_sequence_code], [backend_sequence_na
 INSERT INTO backend_sequence([id], [backend_sequence_code], [backend_sequence_name], [backend_sequence], [modified_date]) VALUES(5, 'MF','Menu File', 0,GETDATE());
 INSERT INTO backend_sequence([id], [backend_sequence_code], [backend_sequence_name], [backend_sequence], [modified_date]) VALUES(6, 'TQF','Temporary Query File', 0,GETDATE());
 INSERT INTO backend_sequence([id], [backend_sequence_code], [backend_sequence_name], [backend_sequence], [modified_date]) VALUES(7, 'MQF','Menu Query File', 0,GETDATE());
-INSERT INTO backend_sequence([id], [backend_sequence_code], [backend_sequence_name], [backend_sequence], [modified_date]) VALUES(8, 'MIF','Menu Image File', 0,GETDATE());
+INSERT INTO backend_sequence([id], [backend_sequence_code], [backend_sequence_name], [backend_sequence], [modified_date]) VALUES(8, 'TIF','Temporary Image File', 0,GETDATE());
+INSERT INTO backend_sequence([id], [backend_sequence_code], [backend_sequence_name], [backend_sequence], [modified_date]) VALUES(9, 'MIF','Menu Image File', 0,GETDATE());
 
 CREATE TABLE display_period
 (
@@ -308,6 +319,7 @@ CREATE TABLE menu_item_promo_period
 --DROP TABLE device_type_lookup;
 --DROP TABLE status_lookup;
 --DROP TABLE backend_sequence;
+--DROP TABLE publish_version;
 --DROP TABLE display_period;
 --DROP TABLE promotional_period;
 --DROP TABLE menu_item_display_period;
