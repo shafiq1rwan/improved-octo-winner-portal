@@ -14,6 +14,7 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -63,11 +64,9 @@ public class MenuItemRestController {
 
 				jsonMenuItemTypeArray.put(jsonMenuItemTypeObj);
 			}
-
-			return ResponseEntity.ok().body(jsonMenuItemTypeArray.toString());
 		} catch (Exception ex) {
 			ex.printStackTrace();
-			return ResponseEntity.badRequest().body(null);
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Internal Server Error");
 		} finally {
 			if (connection != null) {
 				try {
@@ -77,17 +76,17 @@ public class MenuItemRestController {
 				}
 			}
 		}
+		return ResponseEntity.ok().body(jsonMenuItemTypeArray.toString());
 	}
 
 	@GetMapping(value = "/getAllMenuItem", produces = "application/json")
-	public String getAllMenuItem(HttpServletRequest request, HttpServletResponse response) {
+	public ResponseEntity<?> getAllMenuItem(HttpServletRequest request, HttpServletResponse response) {
 		JSONArray jsonMenuItemArray = new JSONArray();
 		Connection connection = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 
 		try {
-
 			connection = dataSource.getConnection();
 			stmt = connection.prepareStatement("SELECT * FROM menu_item");
 			rs = (ResultSet) stmt.executeQuery();
@@ -111,6 +110,7 @@ public class MenuItemRestController {
 			}
 		} catch (Exception ex) {
 			ex.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Internal Server Error");
 		} finally {
 			if (connection != null) {
 				try {
@@ -120,7 +120,7 @@ public class MenuItemRestController {
 				}
 			}
 		}
-		return jsonMenuItemArray.toString();
+		return ResponseEntity.ok().body(jsonMenuItemArray.toString());
 	}
 
 	@GetMapping(value = "/getAllMenuItemByType", produces = "application/json")
@@ -162,10 +162,9 @@ public class MenuItemRestController {
 
 				jsonMenuItemArray.put(jsonMenuItemObj);
 			}
-			return ResponseEntity.ok().body(jsonMenuItemArray.toString());
 		} catch (Exception ex) {
 			ex.printStackTrace();
-			return ResponseEntity.badRequest().body(null);
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Internal Server Error");
 		} finally {
 			if (connection != null) {
 				try {
@@ -175,6 +174,7 @@ public class MenuItemRestController {
 				}
 			}
 		}
+		return ResponseEntity.ok().body(jsonMenuItemArray.toString());
 	}
 
 	@GetMapping(value = "/getAllAlaCartMenuItem", produces = "application/json")
@@ -201,11 +201,9 @@ public class MenuItemRestController {
 				jsonMenuItemArray.put(jsonMenuItemObj);
 			}
 			jsonResult.put("data", jsonMenuItemArray);
-			System.out.println(jsonResult.toString());
-			return ResponseEntity.ok().body(jsonResult.toString());
 		} catch (Exception ex) {
 			ex.printStackTrace();
-			return ResponseEntity.badRequest().body(null);
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Internal Server Error");
 		} finally {
 			if (connection != null) {
 				try {
@@ -215,10 +213,11 @@ public class MenuItemRestController {
 				}
 			}
 		}
+		return ResponseEntity.ok().body(jsonResult.toString());
 	}
 
 	@GetMapping(value = "/getMenuItemById", produces = "application/json")
-	public String getMenuItemById(HttpServletRequest request, HttpServletResponse response,
+	public ResponseEntity<?> getMenuItemById(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam("id") Long id) {
 		JSONObject jsonResult = new JSONObject();
 		Connection connection = null;
@@ -243,11 +242,11 @@ public class MenuItemRestController {
 				jsonResult.put("is_discountable", rs.getBoolean("is_discountable"));
 				jsonResult.put("created_date", rs.getDate("created_date"));
 			} else {
-				response.setStatus(404);
-				jsonResult.put("response_message", "Menu Item not found!");
+				return ResponseEntity.notFound().build();
 			}
 		} catch (Exception ex) {
 			ex.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Internal Server Error");
 		} finally {
 			if (connection != null) {
 				try {
@@ -257,7 +256,7 @@ public class MenuItemRestController {
 				}
 			}
 		}
-		return jsonResult.toString();
+		return ResponseEntity.ok().body(jsonResult.toString());
 	}
 
 	@PostMapping(value = "/createMenuItem", produces = "application/json")
@@ -265,9 +264,9 @@ public class MenuItemRestController {
 			@RequestBody String data) {
 		Connection connection = null;
 		PreparedStatement stmt = null;
+		//ResponseEntity<String> responseEntity = ResponseEntity.badRequest().body(null);
 
 		try {
-			System.out.println(data);
 			JSONObject jsonMenuItemData = new JSONObject(data);
 
 			String imagePath = jsonMenuItemData.isNull("menu_item_image_path") ? null
@@ -301,16 +300,14 @@ public class MenuItemRestController {
 					String.valueOf(jsonMenuItemData.getBoolean("is_discountable"))};		
 			groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, imagePath, 1);
 			
-			if (rowAffected == 0)
-				throw new Exception("Cannot Create Menu Item!");
-	
-			return ResponseEntity.ok(null);
+			if (rowAffected == 0) {
+				return ResponseEntity.badRequest().contentType(MediaType.TEXT_PLAIN).body("Cannot create menu item");
+			}
 		} catch (SQLServerException ex) {
-			ex.printStackTrace();
-			return new ResponseEntity<>(HttpStatus.CONFLICT);
+			return ResponseEntity.status(HttpStatus.CONFLICT).contentType(MediaType.TEXT_PLAIN).body("Duplication Backend Id Found");
 		} catch (Exception ex) {
 			ex.printStackTrace();
-			return ResponseEntity.badRequest().body(ex.getMessage());
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Internal Server Error");
 		} finally {
 			if (connection != null) {
 				try {
@@ -320,6 +317,7 @@ public class MenuItemRestController {
 				}
 			}
 		}
+		return new ResponseEntity<>(HttpStatus.CREATED);
 	}
 
 	@PostMapping(value = "/editMenuItem", produces = "application/json")
@@ -337,9 +335,7 @@ public class MenuItemRestController {
 						: byodUtil.saveImageFile("imgMI", jsonMenuItemData.getString("menu_item_image_path"), null); 
 				String description = jsonMenuItemData.isNull("menu_item_description") ? null
 						: jsonMenuItemData.getString("menu_item_description");
-				
-				System.out.println(data);
-				
+
 				connection = dataSource.getConnection();
 				String sqlStatement = ""; 
 				if(imagePath == null) {
@@ -391,17 +387,16 @@ public class MenuItemRestController {
 				groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, imagePath, 1);
 				
 				if (rowAffected == 0) {
-					throw new Exception("Cannot Edit Menu Item.");
-				} 
-				return ResponseEntity.ok(null);
+					return ResponseEntity.badRequest().contentType(MediaType.TEXT_PLAIN).body("Cannot create menu item");
+				}
 			} else {
-				return ResponseEntity.notFound().build();
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).contentType(MediaType.TEXT_PLAIN).body("Menu Item Not Found");
 			}
-		} catch (DuplicateKeyException ex) {
-			return new ResponseEntity<>(HttpStatus.CONFLICT);
+		} catch (SQLServerException ex) {
+			return ResponseEntity.status(HttpStatus.CONFLICT).contentType(MediaType.TEXT_PLAIN).body("Duplication Backend Id Found");
 		} catch (Exception ex) {
 			ex.printStackTrace();
-			return ResponseEntity.badRequest().body(ex.getMessage());
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Internal Server Error");
 		} finally {
 			if (connection != null) {
 				try {
@@ -411,6 +406,7 @@ public class MenuItemRestController {
 				}
 			}
 		}
+		return ResponseEntity.ok(null);
 	}
 
 	// TODO delete associated item from menu_item_group and modifier_group
@@ -423,7 +419,6 @@ public class MenuItemRestController {
 		try {
 			connection = dataSource.getConnection();
 			String sqlStatement = "UPDATE menu_item SET is_active = 0 WHERE id = ?;";
-			// stmt = connection.prepareStatement("DELETE FROM menu_item WHERE id = ?");
 			stmt = connection.prepareStatement(sqlStatement);
 			stmt.setLong(1, id);
 			int categoryRowAffected = stmt.executeUpdate();
@@ -435,12 +430,11 @@ public class MenuItemRestController {
 			groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0);
 			
 			if (categoryRowAffected == 0) {
-				return ResponseEntity.badRequest().body(null);
+				return ResponseEntity.badRequest().contentType(MediaType.TEXT_PLAIN).body("Cannot delete menu item");
 			}
-			return ResponseEntity.ok(null);
 		} catch (Exception ex) {
 			ex.printStackTrace();
-			return ResponseEntity.badRequest().body(ex.getMessage());
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Internal Server Error"); 
 		} finally {
 			if (connection != null) {
 				try {
@@ -450,12 +444,12 @@ public class MenuItemRestController {
 				}
 			}
 		}
+		return ResponseEntity.ok(null);
 	}
 
 	@PostMapping(value = "/updateMenuItemActiveStatus", produces = "application/json")
 	public ResponseEntity<?> updateMenuItemActiveStatus(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody String data) {
-
 		Connection connection = null;
 		PreparedStatement stmt = null;
 
@@ -476,15 +470,13 @@ public class MenuItemRestController {
 				groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0);
 				
 				if (rowAffected == 0)
-					throw new Exception();
-
-				return ResponseEntity.ok(null);
+					return ResponseEntity.badRequest().body("Cannot update menu item active status");
 			} else {
-				return ResponseEntity.notFound().build();
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).contentType(MediaType.TEXT_PLAIN).body("Menu item not found");
 			}
 		} catch (Exception ex) {
 			ex.printStackTrace();
-			return ResponseEntity.badRequest().body(ex.getMessage());
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Internal Server Error"); 
 		} finally {
 			if (connection != null) {
 				try {
@@ -494,7 +486,7 @@ public class MenuItemRestController {
 				}
 			}
 		}
-
+		return ResponseEntity.ok(null);
 	}
 
 	@GetMapping(value = "/getMenuItemByCategory", produces = "application/json")
@@ -522,13 +514,9 @@ public class MenuItemRestController {
 				jsonMenuItemObj.put("menu_item_type_name", rs.getString("menu_item_type_name"));
 				jsonMenuItemArray.put(jsonMenuItemObj);
 			}
-
-			System.out.println("Existing Set " + jsonMenuItemArray.toString());
-
-			return ResponseEntity.ok().body(jsonMenuItemArray.toString());
 		} catch (Exception ex) {
 			ex.printStackTrace();
-			return ResponseEntity.badRequest().body(null);
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error"); 
 		} finally {
 			if (connection != null) {
 				try {
@@ -538,6 +526,7 @@ public class MenuItemRestController {
 				}
 			}
 		}
+		return ResponseEntity.ok().body(jsonMenuItemArray.toString());
 	}
 
 	@GetMapping(value = "/getMenuItemWithoutDuplication", produces = "application/json")
@@ -566,10 +555,9 @@ public class MenuItemRestController {
 				jsonMenuItemArray.put(jsonMenuItemObj);
 			}
 
-			return ResponseEntity.ok().body(jsonMenuItemArray.toString());
 		} catch (Exception ex) {
 			ex.printStackTrace();
-			return ResponseEntity.badRequest().body(null);
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error"); 
 		} finally {
 			if (connection != null) {
 				try {
@@ -579,6 +567,7 @@ public class MenuItemRestController {
 				}
 			}
 		}
+		return ResponseEntity.ok().body(jsonMenuItemArray.toString());
 	}
 
 }

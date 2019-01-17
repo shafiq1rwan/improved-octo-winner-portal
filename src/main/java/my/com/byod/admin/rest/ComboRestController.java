@@ -18,6 +18,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -91,12 +93,13 @@ public class ComboRestController {
 				stmt.setString(2, jsonComboDetailData.getString("combo_detail_name"));
 				stmt.setInt(3, jsonComboDetailData.getInt("combo_detail_quantity"));
 				stmt.setInt(4, checkComboDetailSequence(jsonComboDetailData.getLong("menu_item_id"))+ 1);
-				stmt.executeUpdate();
-			
-			return ResponseEntity.ok(null);
+				int rowAffected = stmt.executeUpdate();
+				
+				if(rowAffected == 0)
+					return ResponseEntity.badRequest().contentType(MediaType.TEXT_PLAIN).body("Cannot create combo detail");
 		} catch (Exception ex) {
 			ex.printStackTrace();
-			return ResponseEntity.badRequest().body(ex.getMessage());
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Internal Server Error");
 		} finally {
 			if (connection != null) {
 				try {
@@ -106,6 +109,7 @@ public class ComboRestController {
 				}
 			}
 		}
+		return ResponseEntity.ok(null);
 	}
 	
 	private int checkComboDetailSequence(Long menu_item_id) {
@@ -140,12 +144,10 @@ public class ComboRestController {
 				jsonComboDetailObj.put("order", rs.getInt("combo_detail_sequence"));
 
 				jsonComboDetailArray.put(jsonComboDetailObj);
-			}
-
-			return ResponseEntity.ok(jsonComboDetailArray.toString());
+			}	
 		} catch (Exception ex) {
 			ex.printStackTrace();
-			return ResponseEntity.badRequest().body(ex.getMessage());
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Internal Server Error");
 		} finally {
 			if (connection != null) {
 				try {
@@ -154,7 +156,8 @@ public class ComboRestController {
 					e.printStackTrace();
 				}
 			}
-		}
+		}	
+		return ResponseEntity.ok(jsonComboDetailArray.toString());
 	}
 	
 	@GetMapping(value = "/getComboDetailById", produces = "application/json")
@@ -177,12 +180,12 @@ public class ComboRestController {
 				jsonResult.put("menu_item_id", rs.getLong("menu_item_id"));
 				jsonResult.put("name", rs.getString("combo_detail_name"));
 				jsonResult.put("quantity", rs.getInt("combo_detail_quantity"));
+			} else {
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).contentType(MediaType.TEXT_PLAIN).body("Combo detail not found");
 			}
-
-			return ResponseEntity.ok(jsonResult.toString());
 		} catch (Exception ex) {
 			ex.printStackTrace();
-			return ResponseEntity.badRequest().body(ex.getMessage());
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Internal Server Error");
 		} finally {
 			if (connection != null) {
 				try {
@@ -192,6 +195,7 @@ public class ComboRestController {
 				}
 			}
 		}
+		return ResponseEntity.ok(jsonResult.toString());
 	}
 
 	@PostMapping(value = "/editComboDetail", produces = "application/json")
@@ -208,12 +212,14 @@ public class ComboRestController {
 				stmt.setString(1, jsonComboDetailData.getString("combo_detail_name"));
 				stmt.setInt(2, jsonComboDetailData.getInt("combo_detail_quantity"));
 				stmt.setLong(3, jsonComboDetailData.getLong("id"));
-				stmt.executeUpdate();
-
-			return ResponseEntity.ok(null);
+				int affectedRow = stmt.executeUpdate();
+				
+				if(affectedRow == 0) {
+					return ResponseEntity.badRequest().body("Cannot update combo detail");
+				}
 		} catch (Exception ex) {
 			ex.printStackTrace();
-			return ResponseEntity.badRequest().body(ex.getMessage());
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Internal Server Error");
 		} finally {
 			if (connection != null) {
 				try {
@@ -223,6 +229,7 @@ public class ComboRestController {
 				}
 			}
 		}
+		return ResponseEntity.ok(null);
 	}
 	
 	@PostMapping(value = "/editComboDetailSequence", produces = "application/json")
@@ -238,13 +245,14 @@ public class ComboRestController {
 			JSONArray jsonComboDetailArray = jsonComboDetailData.getJSONArray("tier_items");
 			
 			connection = dataSource.getConnection();
-			
+			connection.setAutoCommit(false);
+
 			//Blank all Sequence
 			stmt = connection.prepareStatement(
 						"UPDATE combo_detail SET combo_detail_sequence = 0 WHERE menu_item_id = ?");
 			stmt.setLong(1, menuItemId);
 			stmt.executeUpdate();
-			
+
 			//Reassign All Sequence
 			stmt2 = connection.prepareStatement("UPDATE combo_detail SET combo_detail_sequence = ? WHERE id = ?");
 			for(int i=0;i<jsonComboDetailArray.length();i++) {
@@ -252,22 +260,30 @@ public class ComboRestController {
 				JSONObject jsonObj = jsonComboDetailArray.getJSONObject(i);	
 				stmt2.setLong(1, index);
 				stmt2.setLong(2, jsonObj.getLong("id"));
-				stmt2.executeUpdate();		
+				stmt2.executeUpdate();
 			}
-			
-			return ResponseEntity.ok(null);
+			connection.commit();
 		} catch (Exception ex) {
 			ex.printStackTrace();
-			return ResponseEntity.badRequest().body(ex.getMessage());
+			if (connection != null) {
+				try {
+					connection.rollback();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Internal Server Error");
 		} finally {
 			if (connection != null) {
 				try {
+					connection.setAutoCommit(true);
 					connection.close();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 		}
+		return ResponseEntity.ok(null);
 	}
 
 	// TODO delete combo detail item
@@ -285,18 +301,16 @@ public class ComboRestController {
 			int deletedRow = stmt.executeUpdate();
 
 			if (deletedRow == 0) {
-				return ResponseEntity.badRequest().body(null);
+				return ResponseEntity.badRequest().contentType(MediaType.TEXT_PLAIN).body("Cannot delete combo detail");
 			} else {			
 				stmt = connection.prepareStatement("DELETE FROM combo_item_detail WHERE combo_detail_id = ?");
 				stmt.setLong(1, id);
 				stmt.executeUpdate();
 				// may change
 			}
-
-			return ResponseEntity.ok(null);
 		} catch (Exception ex) {
 			ex.printStackTrace();
-			return ResponseEntity.badRequest().body(ex.getMessage());
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Internal Server Error");
 		} finally {
 			if (connection != null) {
 				try {
@@ -306,7 +320,7 @@ public class ComboRestController {
 				}
 			}
 		}
-
+		return ResponseEntity.ok(null);
 	}
 
 	// =============== Combo Item Details =========================
@@ -336,10 +350,9 @@ public class ComboRestController {
 
 				jsonComboItemDetailArray.put(jsonComboItemDetailObj);
 			}
-			return ResponseEntity.ok(jsonComboItemDetailArray.toString());
 		} catch (Exception ex) {
 			ex.printStackTrace();
-			return ResponseEntity.badRequest().body(ex.getMessage());
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Internal Server Error");
 		} finally {
 			if (connection != null) {
 				try {
@@ -349,6 +362,7 @@ public class ComboRestController {
 				}
 			}
 		}
+		return ResponseEntity.ok(jsonComboItemDetailArray.toString());
 	}
 
 	@PostMapping(value = "/createComboItemDetail", produces = "application/json")
@@ -357,44 +371,62 @@ public class ComboRestController {
 		Connection connection = null;
 		PreparedStatement stmt = null;
 
-		try {
-			
-			System.out.println(data);
-			
+		try {		
 			JSONObject jsonComboItemDetail = new JSONObject(data);
 			JSONArray jsonComboItemDetailArray = jsonComboItemDetail.getJSONArray("item_arrays");
 
 			connection = dataSource.getConnection();
-
+			connection.setAutoCommit(false);
+			
+			String InsertionSql = "INSERT INTO combo_item_detail(combo_detail_id, menu_item_id, menu_item_group_id, combo_item_detail_sequence) VALUES (?,?,?,?)";
+			for(int count=0; count<jsonComboItemDetailArray.length() -1;count++) {
+				InsertionSql += ",(?,?,?,?)";
+			}
+			
+			System.out.println(InsertionSql);
+			stmt = connection.prepareStatement(InsertionSql);
+			int index = 0;
+			
 			for (int i = 0; i < jsonComboItemDetailArray.length(); i++) {
-				JSONObject jsonComboItemDetailObj = jsonComboItemDetailArray.getJSONObject(i);
-				stmt = connection.prepareStatement(
-						"INSERT INTO combo_item_detail(combo_detail_id, menu_item_id, menu_item_group_id, combo_item_detail_sequence) VALUES (?,?,?,?)");
-				stmt.setLong(1, jsonComboItemDetail.getLong("combo_detail_id"));
+				JSONObject jsonComboItemDetailObj = jsonComboItemDetailArray.getJSONObject(i);	
+				stmt.setLong(++index, jsonComboItemDetail.getLong("combo_detail_id"));
 
 				if (jsonComboItemDetailObj.getString("type").equals("Item")) {
-					stmt.setLong(2, jsonComboItemDetailObj.getLong("id"));
-					stmt.setLong(3, 0);
+					stmt.setLong(++index, jsonComboItemDetailObj.getLong("id"));
+					stmt.setLong(++index, 0);
 				} else if (jsonComboItemDetailObj.getString("type").equals("Group")) {
-					stmt.setLong(2, 0);
-					stmt.setLong(3, jsonComboItemDetailObj.getLong("id"));
+					stmt.setLong(++index, 0);
+					stmt.setLong(++index, jsonComboItemDetailObj.getLong("id"));
 				}
-				stmt.setInt(4, getComboItemDetailSequence(jsonComboItemDetail.getLong("combo_detail_id"))+1);
-				stmt.executeUpdate();
+				stmt.setInt(++index, getComboItemDetailSequence(jsonComboItemDetail.getLong("combo_detail_id"))+(i+1));
+				System.out.println("Index count: " + index);
 			}
-			return ResponseEntity.ok(null);
+			
+			stmt.executeUpdate();
+			System.out.println("Index Result: " + index);
+			
+			connection.commit();
 		} catch (Exception ex) {
 			ex.printStackTrace();
-			return ResponseEntity.badRequest().body(ex.getMessage());
+			if (connection != null) {
+				try {
+					connection.rollback();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Internal Server Error");
 		} finally {
 			if (connection != null) {
 				try {
+					connection.setAutoCommit(true);
 					connection.close();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 		}
+		return ResponseEntity.ok(null);
 	}
 
 	private int getComboItemDetailSequence(long comboDetailId) {		
@@ -413,9 +445,9 @@ public class ComboRestController {
 		PreparedStatement stmt = null;
 
 		try {
-			// JSONObject jsonComboItemDetail = new JSONObject(data);
 			JSONArray jsonComboItemDetailArray = new JSONArray(data);
 			connection = dataSource.getConnection();
+			connection.setAutoCommit(false);
 
 			for (int i = 0; i < jsonComboItemDetailArray.length(); i++) {
 				JSONObject jsonComboItemDetailObj = jsonComboItemDetailArray.getJSONObject(i);
@@ -425,20 +457,29 @@ public class ComboRestController {
 				stmt.setLong(2, jsonComboItemDetailObj.getLong("id"));
 				stmt.executeUpdate();
 			}
-
-			return ResponseEntity.ok(null);
+			
+			connection.commit();
 		} catch (Exception ex) {
 			ex.printStackTrace();
-			return ResponseEntity.badRequest().body(ex.getMessage());
+			if (connection != null) {
+				try {
+					connection.rollback();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Internal Server Error");
 		} finally {
 			if (connection != null) {
 				try {
+					connection.setAutoCommit(true);
 					connection.close();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 		}
+		return ResponseEntity.ok(null);
 	}
 
 	@DeleteMapping(value = "/deleteComboItemDetail", produces = "application/json")
@@ -454,12 +495,10 @@ public class ComboRestController {
 			int deletedRow = stmt.executeUpdate();
 
 			if (deletedRow == 0)
-				return ResponseEntity.badRequest().body(null);
-
-			return ResponseEntity.ok(null);
+				return ResponseEntity.badRequest().contentType(MediaType.TEXT_PLAIN).body("Cannot delete combo item detail");	
 		} catch (Exception ex) {
 			ex.printStackTrace();
-			return ResponseEntity.badRequest().body(ex.getMessage());
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Internal Server Error");
 		} finally {
 			if (connection != null) {
 				try {
@@ -469,6 +508,7 @@ public class ComboRestController {
 				}
 			}
 		}
+		return ResponseEntity.ok(null);
 	}
 
 	@GetMapping(value = "/getMenuItemAndItemGroupInCombo", produces = "application/json")
@@ -478,7 +518,7 @@ public class ComboRestController {
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		ResultSet rs2 = null;
-		ResultSet rs3 = null;
+		//ResultSet rs3 = null;
 
 		try {
 			List<JSONObject> menuItemAndGroupJsonList = new ArrayList<>();
@@ -515,14 +555,14 @@ public class ComboRestController {
 				jsonMenuItemGroupObj.put("price", "");
 				jsonMenuItemGroupObj.put("sequence", rs2.getInt("combo_item_detail_sequence"));
 
-				stmt = connection.prepareStatement(
+/*				stmt = connection.prepareStatement(
 						"SELECT mi.* FROM menu_item mi INNER JOIN menu_item_group_sequence migs ON mi.id = migs.menu_item_id WHERE migs.menu_item_group_id = ? ORDER BY migs.menu_item_group_sequence");
 				stmt.setLong(1, rs2.getLong("id"));
-				rs3 = (ResultSet) stmt.executeQuery();
+				rs3 = (ResultSet) stmt.executeQuery();*/
 
-				JSONArray jsonItemGroupMenuItemArray = new JSONArray();
+				/*JSONArray jsonItemGroupMenuItemArray = new JSONArray();*/
 
-				while (rs3.next()) {
+			/*	while (rs3.next()) {
 					JSONObject jsonMenuItemObj = new JSONObject();
 					jsonMenuItemObj.put("id", rs3.getLong("id"));
 					jsonMenuItemObj.put("name", rs3.getString("menu_item_name"));
@@ -531,7 +571,7 @@ public class ComboRestController {
 					jsonItemGroupMenuItemArray.put(jsonMenuItemObj);
 				}
 
-				jsonMenuItemGroupObj.put("menu_items", jsonItemGroupMenuItemArray);
+				jsonMenuItemGroupObj.put("menu_items", jsonItemGroupMenuItemArray);*/
 
 				menuItemAndGroupJsonList.add(jsonMenuItemGroupObj);
 			}
@@ -548,10 +588,11 @@ public class ComboRestController {
 				return compare;
 			});
 			JSONArray jsonMenuItemAndGroupArray = new JSONArray(menuItemAndGroupJsonList);
+			System.out.println("Returned Result: " + jsonMenuItemAndGroupArray.toString());
 			return ResponseEntity.ok(jsonMenuItemAndGroupArray.toString());
 		} catch (Exception ex) {
 			ex.printStackTrace();
-			return ResponseEntity.badRequest().body(ex.getMessage());
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Internal Server Error");
 		} finally {
 			if (connection != null) {
 				try {
@@ -561,7 +602,6 @@ public class ComboRestController {
 				}
 			}
 		}
-
 	}
 
 }

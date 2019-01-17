@@ -39,16 +39,12 @@
 					'${pageContext.request.contextPath}/menu/combo/createComboDetail', json_data)
 				.then(
 					function(response) {	
-						if(response.status == '200'){
-							$scope.resetNewTierModal();
-							$('#tierModal').modal('toggle');		
-							$scope.openComboSetting($scope.menu_item_id);
-						} else if(response.status == '400'){
-							alert("Cannot Add Tier Item");
-						}			
+						$scope.resetNewTierModal();
+						$('#tierModal').modal('toggle');		
+						$scope.openComboSetting($scope.menu_item_id);	
 					},
 					function(response) {
-						alert("Cannot Add Tier Item");
+						alert(response.data);
 				});
 			}
 		}
@@ -68,19 +64,14 @@
 			.get(
 				'${pageContext.request.contextPath}/menu/combo/getComboDetailById?id='+ id)
 			.then(
-				function(response) {	
-					if(response.status == '200'){		
+				function(response) {			
 						$scope.tier_item = response.data;
 						
 						$('#comboSettingModal').modal('toggle');
 						$('#tierModal').modal('toggle');
-						
-					} else if(response.status == '400'){
-						alert("Cannot Retrieve Existing Tier Data");
-					}			
 				},
 				function(response) {
-					alert("Cannot Retrieve Existing Tier Data");
+					alert(response.data);
 			});	
 		}
 		
@@ -98,16 +89,12 @@
 					'${pageContext.request.contextPath}/menu/combo/editComboDetail', json_data)
 				.then(
 					function(response) {	
-						if(response.status == '200'){
-							$scope.resetNewTierModal();
-							$('#tierModal').modal('toggle');		
-							$scope.openComboSetting($scope.menu_item_id);
-						} else if(response.status == '400'){
-							alert("Cannot Edit Existing Tier Item");
-						}			
+						$scope.resetNewTierModal();
+						$('#tierModal').modal('toggle');		
+						$scope.openComboSetting($scope.menu_item_id);	
 					},
 					function(response) {
-						alert("Cannot Edit Existing Tier Item");
+						alert(response.data);
 				});
 			}
 		}
@@ -118,14 +105,10 @@
 				'${pageContext.request.contextPath}/menu/combo/deleteComboDetail?id='+id)
 			.then(
 				function(response) {	
-					if(response.status == '200'){	
-						$scope.openComboSetting($scope.menu_item_id);
-					} else if(response.status == '400'){
-						alert("Cannot Delete Tier Item");
-					}			
+					$scope.openComboSetting($scope.menu_item_id);
 				},
 				function(response) {
-					alert("Cannot Delete Existing Tier Item");
+					alert(response.data);
 			});
 		}
 		
@@ -139,8 +122,7 @@
 			} */
 		}
 		
-		$scope.saveReordering = function(){
-			
+		$scope.saveReordering = function(){	
 			var json_data = JSON.stringify({
 				'menu_item_id': $scope.menu_item_id,
 				'tier_items' : $scope.tierItems
@@ -154,18 +136,13 @@
 			.then(
 				function(response) {		
 					$scope.extra_tier_items = [];
-					$scope.reordering_action = false;	
-			
-					if(response.status == '200'){				
-						$scope.openComboSetting($scope.menu_item_id);
-					} else if(response.status == '400'){
-						alert("Cannot Reorder Tier Item");
-					}			
+					$scope.reordering_action = false;
+					$scope.openComboSetting($scope.menu_item_id);
 				},
 				function(response) {
 					$scope.extra_tier_items = [];
-					$scope.reordering_action = false;
-					alert("Cannot Reorder Tier Item");
+					$scope.reordering_action = false;				
+					alert(response.data);
 			});
 		}
 
@@ -181,40 +158,6 @@
 			$scope.openComboSetting($scope.menu_item_id);
 		}
 		
-			
-/* 		 $scope.updateTier = function() {
-			
-			if($scope.tierNumber==null || $scope.tierNumber==0 || $scope.tierNumber==''){
-				alert('Tier Number cannot be zero');
-				$scope.tierNumber = 0;
-		 		$scope.tierItems = [];
-				$scope.oldTierNumber = 0;
-			}
-			else{	
-				var count = 0;
-				if($scope.tierNumber>$scope.oldTierNumber){
-					count= $scope.tierNumber - $scope.oldTierNumber;
-					for(var a=$scope.oldTierNumber; a< $scope.oldTierNumber+count; a++){
-				    	  var item = {
-				    			  id : null,
-				    			  name:"test"+a,
-				    			  quantity: 0
-				    	  }
-				    	  $scope.tierItems.push(item);
-				    }
-				}
-				else if($scope.tierNumber < $scope.oldTierNumber){
-					count = $scope.oldTierNumber - $scope.tierNumber;
-					for(var a=0; a< count; a++){
-				    	  $scope.tierItems.splice($scope.tierNumber, count);
-				    }
-				}
-			      console.log($scope.tierItems);
-
-			}
-			$scope.oldTierNumber = $scope.tierNumber;	
-	    };  */
-	    
 	 	// open combo setting modal
 		$scope.openComboSetting = function(menu_item_id){
 			$scope.menu_item_id = menu_item_id;
@@ -243,12 +186,15 @@
 				'${pageContext.request.contextPath}/menu/combo/getComboDetailByMenuItemId?menuItemId='+ menu_item_id)
 			.then(
 				function(response) {			
-					if(response.status == '200'){
-						$scope.tierItems = response.data;
-					}
+					$scope.tierItems = response.data;
 				},
-				function(response) {
-					alert("Cannot Retrive Combo Detail!");
+				function(response) {		
+					swal({
+						  title: "Error",
+						  text: response.data,
+						  icon: "warning",
+						  dangerMode: true,
+					});
 			});
 
 			$('#comboSettingModal').modal({backdrop: 'static', keyboard: false});
@@ -272,38 +218,6 @@
 	    
 		$(document).ready(function() {					
 			$scope.refreshItemMenuGroupTable();
-
-		/* 	$("#modifierGroup").select2({
-				  placeholder: 'Select an option',
-				  selectOnClose: false,
-				  width: '100%'
-			}).on('select2:select', function(e){
-  		 	      var id = e.params.data.id;
-			      var option = $(e.target).children('[value='+id+']');
-			      option.detach();
-			      $(e.target).append(option).change(); 
-			      
-			     var json_data = {
-					id : e.params.data.id,
-					text : e.params.data.text
-			     }
-
-				$scope.assinged_modifier_groups.push(json_data);
-			    $scope.$apply();
-			}).on('select2:unselect', function(e){
-			    
-				var index = $scope.assinged_modifier_groups.map(x => {
-					  return x.id;
-				}).indexOf(e.params.data.id);
-
-			    $scope.assinged_modifier_groups.splice(index, 1);
-			    $scope.$apply();
-			}).on("select2:selecting", function(e) { 
-			}).on("change", function(e) { 
-			}); */
-			
-			/* var el = document.getElementById("modifierGroupSequence");
-			console.log("Hi Element : " + el); */
 
 			$('input[type=file]').change(function(event) {
 				var element = event.target.id;			
@@ -401,14 +315,16 @@
 		.get(
 			'${pageContext.request.contextPath}/menu/menuItem/getMenuItemType')
 		.then(
-			function(response) {			
-			/* 		$scope.menu_item_types = response.data.filter(function (el) {
-						  return el.menu_item_type_id != 1;
-					}); */	
+			function(response) {	
 				$scope.menu_item_types = response.data;
 			},
 			function(response) {
-				alert("Cannot Retrive Menu Item Type!");
+				swal({
+					  title: "Error",
+					  text: response.data,
+					  icon: "warning",
+					  dangerMode: true,
+				});
 		});
 		
 		//get modifier group
@@ -416,16 +332,19 @@
 		.get(
 			'${pageContext.request.contextPath}/menu/modifier_group/get_all_modifier_group')
 		.then(
-			function(response) {			
+			function(response) {
 				$scope.modifier_groups = response.data;
-				console.log($scope.modifier_groups);
 			},
 			function(response) {
-				alert("Cannot Retrive Modifier Group!");
+				swal({
+					  title: "Error",
+					  text: response.data,
+					  icon: "warning",
+					  dangerMode: true,
+				});
 		});
 					
-		$scope.refreshItemMenuGroupTable = function(){
-			
+		$scope.refreshItemMenuGroupTable = function(){		
 			var table = $('#menuItem_dtable').DataTable({
 				"ajax" : {
 					"url" : "${pageContext.request.contextPath}/menu/menuItem/getAllMenuItem",
@@ -439,8 +358,9 @@
 						}
 					}
 				},
-				destroy : true,
-				stateSave: true,
+				"processing": true,
+				"destroy" : true,
+				"stateSave": true,
 				"order" : [ [ 0, "asc" ] ] ,
 				"columns" : [ 
 					{"data" : "id", "width": "5%"}, 
@@ -505,10 +425,16 @@
 					url : '${pageContext.request.contextPath}/menu/menuItem/getMenuItemById?id='+table.row(this).data().id			
 				})
 				.then(function(response) {
-					if (response.status == "404") {
-						alert("Unable to find menu group detail");
+					if (response.status == "404") {						
+						swal({
+							  title: "Error",
+							  text: response.data,
+							  icon: "warning",
+							  dangerMode: true,
+						});
 					} else if(response.status == "200") {
 						console.log(response.data);
+						
 						$scope.menu_item.id = response.data.id;
 						$scope.menu_item.backend_id = response.data.backend_id;
 						$scope.menu_item.menu_item_name = response.data.menu_item_name;
@@ -521,46 +447,14 @@
 						$scope.menu_item.is_active = response.data.is_active;
 						$scope.action = 'update';
 						$scope.disableInputs = ($scope.menu_item.menu_item_type == 2);
-						
-						/* var el = document.getElementById("modifierGroupSequence");
-						console.log("Hi Element : " + el); */
-						
-						//getAssignedModifierGroup(response.data.id);
-						
-						console.log($scope.menu_item);
-						$('#createMenuItemModal').modal('toggle');
 
+						$('#createMenuItemModal').modal('toggle');
 					}
 				});
 			});
 		}
 		
-/* 		function getAssignedModifierGroup(menu_item_id){
-			$http
-			.get(
-				'${pageContext.request.contextPath}/menu/modifier_group/get_assigne_modifier_groups_by_item_id?menuItemId='+menu_item_id)
-			.then(
-				function(response) {		
-					//$scope.modifier_groups = response.data;
-					
-			 	 	for(var i=0;i<response.data.length;i++){
-				 		//$scope.assinged_modifier_groups[i] = $scope.modifier_groups[i].id;
-				 		if(response.data[i].sequence_id != 9999){
-				 			$scope.assinged_modifier_groups[i] = response.data[i].id;
-				 		}
-					} 
-				 	console.log($scope.assinged_modifier_groups.map(String));
-					$("#modifierGroup").val($scope.assinged_modifier_groups.map(String)).trigger("change");
-
-					console.log("Ge: " + $scope.modifier_groups);
-				},
-				function(response) {
-					console.log("Cannot Retrive Modifier Group!");
-			});
-		} */
-		
 		$scope.updateMenuItemStatus = function(status, id){
-			
 			var reply = confirm("Do you want to change the menu item status ?");
 			
 			if(reply){	
@@ -574,21 +468,10 @@
 					'${pageContext.request.contextPath}/menu/menuItem/updateMenuItemActiveStatus',post_data)
 				.then(
 					function(response) {
-						
-						if(response.status == '200'){
-							$scope.refreshItemMenuGroupTable();
-						}
-						else if(response.status == '404'){
-							alert('Missing data for updating status!');
-							$('.switch>#'+id).prop("checked", status);
-						}
-						else if(response.status == '400'){
-							alert('Fail to change the menu item status!');
-							$('.switch>#'+id).prop("checked", status);
-						}
+						$scope.refreshItemMenuGroupTable();
 					},
 					function(response) {
-						alert('Fail to change the menu item status!');
+						alert(response.data);
 						$('.switch>#'+id).prop("checked", status);
 				}); 
 			} else {
@@ -596,16 +479,13 @@
 			}
 		}
 		
-	 	$scope.performMenuItemOperations = function(action_type){	
-			
-	 		console.log("Selected List");
-	 		console.log($("#modifierGroup").val()); 
-	 		
+	 	$scope.performMenuItemOperations = function(action_type){
 	 		 if($scope.menu_item.menu_item_name == null || 
 					$scope.menu_item.menu_item_base_price == null ||
 					$scope.menu_item.backend_id == null ||
 					$scope.menu_item.menu_item_name == '' ||
-					$scope.menu_item.menu_item_base_price < 0 || $scope.menu_item.backend_id == ''){
+					$scope.menu_item.menu_item_base_price < 0 || $scope.menu_item.backend_id == '' ||
+					$scope.menu_item.menu_item_type == null){
 			} else{			
 				var menu_item_url = '${pageContext.request.contextPath}/menu/menuItem/';
 				
@@ -615,8 +495,8 @@
 					menu_item_url += 'editMenuItem';
 				
 				if($scope.menu_item.menu_item_type === 2){
-					$scope.menu_item.is_taxable = false;
-					//$scope.menu_item.is_discountable = false;
+					//$scope.menu_item.is_taxable = false;
+					$scope.menu_item.is_discountable = false;
 				}
 
 				var json_data = JSON.stringify({
@@ -629,9 +509,9 @@
 					"menu_item_type": $scope.menu_item.menu_item_type || 0,
 					"is_taxable" : $scope.menu_item.is_taxable || false,
 					"is_discountable": $scope.menu_item.is_discountable || false
-					/* "assigned_modifier_group" : $("#modifierGroup").val() */
 				});
 				
+				console.log("Submitted Data");
 				console.log(json_data);
 						
 				$http
@@ -641,43 +521,38 @@
 						function(response) {			
 							$scope.resetModal();	
 							$('#createMenuItemModal').modal('toggle');
-							
-							if(response.status == 200)
-								$scope.refreshItemMenuGroupTable();
-							else if(response.status == 409)
-								alert("Duplication Found");
-							else if(response.status == 404)
-								alert("Menu Item Id not Found!");
-							else if(resposne.status == 400)
-								alert(response.data);
+							$scope.refreshItemMenuGroupTable();
 						},
 						function(response) {
-							alert("Session TIME OUT");
-							$(location)
-									.attr('href',
-											'${pageContext.request.contextPath}/user');
+					 		if(response.status == '403'){
+								alert("Session TIME OUT");
+								$(location)
+										.attr('href',
+												'${pageContext.request.contextPath}/user');
+							} else {
+								alert(response.data);
+							} 
 						});
-
 			}
-		} 
+		}
 		
 		$scope.removeMenuItem = function(id){
 			$http
 			.delete(
 				'${pageContext.request.contextPath}/menu/menuItem/deleteMenuItem?id='+id)
 			.then(
-				function(response) {			
-					if(response.status == 200){
-						$scope.refreshItemMenuGroupTable();
-					} else if(response.status == 400){
-						alert("Cannot Remove menu Item");
-					}
-				},
 				function(response) {
-					alert("Session TIME OUT");
-					$(location)
-							.attr('href',
-									'${pageContext.request.contextPath}/user');
+						$scope.refreshItemMenuGroupTable();
+				},
+				function(response) {	
+			 		if(response.status == '403'){
+						alert("Session TIME OUT");
+						$(location)
+								.attr('href',
+										'${pageContext.request.contextPath}/user');
+					} else {
+						alert(response.data);
+					} 
 			});
 		}
 		

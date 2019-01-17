@@ -21,7 +21,7 @@
 					$scope.refreshComboDetailTable($scope.combo_details[0].id);
 				},
 				function(response) {
-					alert("Cannot Retrive Combo Item!");
+					alert(response.data);
 			}); 
 		});
 
@@ -39,6 +39,9 @@
 		
 		//Main Datatable for displaying Combo Item Detail
 		$scope.refreshComboDetailTable = function(combo_detail_id){
+				
+				console.log("My detail data: " + combo_detail_id);
+				
 				table = $('#combo_dtable').DataTable({
 					"ajax" : {
 					    "processing": true,
@@ -81,12 +84,6 @@
 					"order" : [ [ 0, "asc" ] ] ,
 					"columns" : [ 
 						{"data" : "sequence", "visible": false},
-					/*   	{
-			                "orderable":      false,
-			                "data":           "type",
-			                "defaultContent": "",
-			                "className": function(data,type,row){if(data != null && data != 'item') return "details-control";} 
-			            }, */
 						{"data" : "name"},
 						{"data" : "type", "defaultContent": ""},
 						{"data" : "price", "defaultContent": "N/A", 
@@ -99,61 +96,27 @@
 								var id = full.combo_item_detail_id;
 							 	return '<div class="btn-toolbar justify-content-between"><button ng-click="removeComboDetail('+ id +')" class="btn btn-danger custom-fontsize"><b><i class="fa fa-trash"></i>Remove</b></button></div>';	
 						 }
-						}/* ,
-						{"data" : "menu_items", "defaultContent": "", "visible": false} */
+						}
 						],
 						"createdRow": function ( row, data, index ) {
 					        $compile(row)($scope);
-					    }			
+					    }
 				});
-				
-				
-				  // Add event listener for opening and closing details
-			    $('#combo_dtable tbody').on('click', 'td.details-control', function () {
-			        var tr = $(this).closest('tr');
-			        var row = table.row( tr );
-			 
-			        if ( row.child.isShown() ) {
-			            // This row is already open - close it
-			            row.child.hide();
-			            tr.removeClass('shown');
-			        }
-			        else {
-			            // Open this row
-			            row.child(format(row.menu_items)).show();
-			            tr.addClass('shown');
-			        }
-			    } );
-				  
-				 
-		/* 	    table.on('row-reorder', function ( e, details, changes ) {			    	
-		 	    	for(var i=0, ien=details.length ; i<ien ; i++){
-			            var rowData = table.row(details[i].node).data();
-			            console.log(rowData);
-
-
-			    	}  
-
-			    });    */
 		}
 		
-		
 		$scope.editComboItemSequence = function(items){
-				
 			$http
 			.post(
 				'${pageContext.request.contextPath}/menu/combo/editComboItemDetail',items)
 			.then(
 				function(response) {
-					console.log("Success");
 					$scope.refreshComboDetailTable($scope.detail_id);
 				},
 				function(response) {
-					alert("Cannot Reorder Combo Item Details!");
+					alert(response.data);
 			}); 
 		}
 
-	
 	 	$scope.changeTableData = function(id) {
 	 		$scope.detail_id = id;
 	 		$scope.refreshComboDetailTable(id);
@@ -168,11 +131,10 @@
 					$scope.refreshComboDetailTable($scope.detail_id);
 				},
 				function(response) {
-					alert("Cannot Delete Item in Combo Detail");
+					alert(response.data);
 			});  
 		}
 		
-
 		//Refresh Combo Item or Menu Item Group Table
 		$scope.refreshComboItemTable = function(combo_items){
 			
@@ -222,10 +184,11 @@
 			.then(
 				function(response) {
 					$scope.combo_items = response.data;
+					console.log("data: "+ $scope.combo_items);
 					$scope.refreshComboItemTable($scope.combo_items);
 				},
 				function(response) {
-					alert("Cannot Retrive Combo Items!");
+					alert(response.data);
 			}); 
 		}
 
@@ -268,6 +231,8 @@
  	 			'combo_detail_id': $scope.detail_id,
  	 			'item_arrays':item_group_list
  	 		});
+ 	 		
+ 	 		console.log('submitted data: ' + json_data);
 
 			$http
 			.post(
@@ -280,7 +245,8 @@
 					$scope.refreshComboDetailTable($scope.detail_id);
 				},
 				function(response) {
-					alert("Cannot Add Into Combo Tier!");
+					//var response_data = response.data || 'Error occured when adding item or group';
+					alert(response.data);
 			});  
 		}
 		
@@ -299,25 +265,21 @@
 				
 				item_holder.push(json_data);
 			}
-
 			return item_holder; 
 		}
 		
-		function getAllComboDetailItemWithSequence(){
-			
+		function getAllComboDetailItemWithSequence(){	
 			var items = table.rows().data();
-			
 	 		var item_holder = [];
 
 			for (var i = 0; i < items.count(); i++) {
 				var json_data = {
 					'sequence': items[i].sequence,
 					'id': items[i].combo_item_detail_id
-				};
-				
+				};		
 				item_holder.push(json_data);
 			}
-
+			console.log("My Overall Item: " + item_holder);
 			return item_holder; 
 		}
 
@@ -325,7 +287,6 @@
 	 		$('.nav-item a[href="#mi"]').tab('show');
 	 		combo_item_table.rows().deselect().draw();
 		} 
-		
 		
 	});
 	

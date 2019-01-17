@@ -139,14 +139,6 @@
 
 										</div>																		
 									</div>
-							<!-- 		<div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">		
-										<div class="form-group" ng-if="disableInputs">
-											<label for="modifierGroup">Modifer Group</label>
-											<select id="modifierGroup" class="form-control" ng-model="menu_item.modifier_group_id" ng-options="mg.id as mg.modifier_group_name for mg in modifier_groups">
-												<option value="">-- SELECT --</option>
-											</select>																											
-										</div>
-									</div> -->
 								</div>
 							
 								<div class="row">	
@@ -169,30 +161,7 @@
 											<input id="menuItemImage" type="file" accept="image/*"/> 
 										</div>
 									</div>
-								</div>	
-						<!-- 		<div class="row">
-									<div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">							
-										<div class="form-group">																	
-											<label for="modifierGroup">Modifier Groups</label> 
-											<div style="width:80%">
-												Group Sequence: 
-												<ul id="modifierGroupSequence">
-													<li style="border: 2px solid cyan;border-radius: 5px; padding:0px 2px 0px 2px;" ng-repeat="mg in assinged_modifier_groups">
-														{{mg.text}}
-														
-													</li>
-												</ul>
-										
-											</div>
-											
-											 	<select id="modifierGroup" multiple="multiple" class="form-control">
-													<option></option>
-													<option ng-repeat = "mg in modifier_groups" value ="{{mg.id}}">{{mg.modifier_group_name}}</option>
-												</select>	 
-												
-										</div>
-									</div>
-								</div> -->
+								</div>
 
 							</div>
 						</div>
