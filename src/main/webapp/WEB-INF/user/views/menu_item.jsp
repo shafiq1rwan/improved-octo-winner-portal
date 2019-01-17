@@ -39,6 +39,7 @@
 									<button type="button"
 										class="btn btn-social pull-right btn-primary bg-aqua"
 										data-toggle="modal" data-target="#createMenuItemModal" 
+										data-keyboard="false" data-backdrop="static"
 										ng-click="setModalType('create')">
 										<span class="btn-label"><i class="fa fa-plus"></i></span>
 										Create Menu Item
@@ -119,7 +120,7 @@
 									<div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">	
 										<div class="form-group">
 											<label for="menuItemBasePrice">Price</label>
-    										<input type="number" class="form-control" id="menuItemBasePrice" ng-model = "menu_item.menu_item_base_price" min="0" placeholder="0.00" required/>
+    										<input type="number" class="form-control" id="menuItemBasePrice" ng-model = "menu_item.menu_item_base_price" min="0" step="0.01" placeholder="0.00" required/>
 										</div>			
 										
 										<div class="form-group">
@@ -155,8 +156,7 @@
 									 	<div class="form-group">
 									 		<img style="max-width:100%;max-height:100%;" ng-show="menu_item.image_path!=null"  ng-src="{{menu_item.image_path}}"/>
 									 	</div>									
-										<div class="form-group">		
-								 			<p>{{menu_item.image_path}}</p>																		
+										<div class="form-group">																	
 											<label class="login-label">Image</label> 
 											<input id="menuItemImage" type="file" accept="image/*"/> 
 										</div>

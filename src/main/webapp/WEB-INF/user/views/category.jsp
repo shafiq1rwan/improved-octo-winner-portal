@@ -26,7 +26,7 @@
 						<div class="card mb-3">
 							<div class="card-header d-flex flex-row justify-content-between">
 								<h3>Category List</h3>								
-								<button type="button" class="btn btn-social pull-right btn-primary bg-aqua" data-toggle="modal" data-target="#createCategoryModal" ng-click="category.is_active = true; setModalType('create')">
+								<button type="button" class="btn btn-social pull-right btn-primary bg-aqua" data-toggle="modal" data-target="#createCategoryModal" data-keyboard="false" data-backdrop="static" ng-click="category.is_active = true; setModalType('create')">
 									<span class="btn-label"><i class="fa fa-plus"></i></span> Create Category
 								</button>								
 							</div>	
@@ -71,18 +71,22 @@
 		      <div class="modal-body">		       									  
 					<div class="form-section">
 						<div class="row">
-							<div class="col-8 col-sm-8 col-md-8 col-lg-8 col-xl-8">
-								<div class="form-group">
-									<label class="login-label">Name</label>
-									<input class="form-control" name="categoryName" placeholder="Name" ng-model="category.category_name" type="text" required> 
-								</div>
-							</div>
-							
-							<div class="col-4 col-sm-4 col-md-4 col-lg-4 col-xl-4">
-								<div class="form-group">
-									<label class="login-label">Active</label>
-									<input class="form-control" name="categoryStatus" ng-model="category.is_active" type="checkbox"> 
-								</div>
+							<div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
+									<div class="form-row">
+										<div class="form-group col-md-8">
+											<label class="login-label">Name</label>
+											<input class="form-control" name="categoryName" placeholder="Name" ng-model="category.category_name" type="text" required> 
+										</div>
+									</div>
+									
+									<div class="form-row">
+										<div class="form-group col-md-8">
+											<div class="custom-control custom-checkbox">
+												<input type="checkbox" class="custom-control-input" id="customCheck1" name="categoryStatus" ng-model="category.is_active"> 
+												<label class="custom-control-label" for="customCheck1">Active</label>
+											</div>
+										</div>
+									</div>
 							</div>
 						</div>	
 						
@@ -145,7 +149,7 @@
 										  <li class="list-group-item pl-0 pr-0 pt-1 pb-1" ng-repeat="item in selectedItemList">
 										  <div class="d-flex flex-row">
 								  			<div class="p-1">
-								  			    <img  style="width:75px; height:75px;" src="{pageContext.request.contextPath}/{{item.menu_item_image_path}}" class="rounded-circle" />  				
+								  			    <img  style="width:75px; height:75px;" src="{{item.menu_item_image_path}}" class="rounded-circle" />  				
 								  			</div>
 								  			<div class="pl-3 pt-2 pr-2 pb-2 flex-grow-1  border-left">				  		
 							  					<h5 class="card-title">

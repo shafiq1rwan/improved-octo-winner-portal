@@ -12,6 +12,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -31,6 +32,9 @@ import my.com.byod.admin.util.ByodUtil;
 @RequestMapping("/menu/category")
 public class CategoryRestController {
 
+	@Value("${upload-path}")
+	private String filePath;
+	
 	@Autowired
 	private DataSource dataSource;
 
@@ -148,7 +152,7 @@ public class CategoryRestController {
 				jsonResult.put("group_category_id", rs.getLong("group_category_id"));
 				jsonResult.put("category_name", rs.getString("category_name"));
 				jsonResult.put("category_description", rs.getString("category_description"));
-				jsonResult.put("category_image_path", rs.getString("category_image_path"));
+				jsonResult.put("category_image_path", filePath + rs.getString("category_image_path"));
 				jsonResult.put("category_sequence", rs.getInt("category_sequence"));
 				jsonResult.put("is_active", rs.getBoolean("is_active"));
 				jsonResult.put("created_date", rs.getDate("created_date"));
@@ -194,7 +198,6 @@ public class CategoryRestController {
 		return jsonResult.toString();
 	}
 
-	// TODO add image path
 	@PostMapping("/create_category")
 	public String createCategory(HttpServletRequest request, HttpServletResponse response, @RequestBody String data) {
 		JSONObject jsonResult = new JSONObject();
@@ -202,8 +205,6 @@ public class CategoryRestController {
 		PreparedStatement stmt = null;
 
 		try {
-			System.out.println("ReMe");
-			System.out.println(data);
 			
 			JSONObject jsonCategoryData = new JSONObject(data);
 			if (jsonCategoryData.has("group_category_id") && jsonCategoryData.has("category_name")) {
@@ -260,7 +261,6 @@ public class CategoryRestController {
 		return jsonResult.toString();
 	}
 
-	// TODO edit image path
 	@PostMapping(value = "/edit_category",produces = "application/json")
 	public String editCategory(HttpServletRequest request, HttpServletResponse response, @RequestBody String data) {
 		JSONObject jsonResult = new JSONObject();
@@ -277,13 +277,24 @@ public class CategoryRestController {
 						: byodUtil.saveImageFile("imgC",jsonCategoryData.getString("category_image_path"), null);
 				
 				connection = dataSource.getConnection();
-				String sqlStatement = "UPDATE category SET category_name = ?, category_description = ?, category_image_path = ?, is_active = ? WHERE id = ?;";
+				String sqlStatement = "";
+				
+				if(imagePath == null)
+					sqlStatement = "UPDATE category SET category_name = ?, category_description = ?, is_active = ? WHERE id = ?;";
+				else
+					sqlStatement = "UPDATE category SET category_name = ?, category_description = ?, is_active = ?, category_image_path = ? WHERE id = ?;";
+					
 				stmt = connection.prepareStatement(sqlStatement);
 				stmt.setString(1, jsonCategoryData.getString("category_name"));
 				stmt.setString(2, description);
-				stmt.setString(3, imagePath);
-				stmt.setBoolean(4, jsonCategoryData.getBoolean("is_active"));
-				stmt.setLong(5, jsonCategoryData.getLong("id"));
+				stmt.setBoolean(3, jsonCategoryData.getBoolean("is_active"));
+				
+				if(imagePath == null) {
+					stmt.setLong(4, jsonCategoryData.getLong("id"));
+				} else {
+					stmt.setString(4, imagePath);
+					stmt.setLong(5, jsonCategoryData.getLong("id"));
+				}
 				stmt.executeUpdate();
 				
 				// logging to file	

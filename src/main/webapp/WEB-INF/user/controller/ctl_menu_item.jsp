@@ -486,7 +486,16 @@
 					$scope.menu_item.menu_item_name == '' ||
 					$scope.menu_item.menu_item_base_price < 0 || $scope.menu_item.backend_id == '' ||
 					$scope.menu_item.menu_item_type == null){
-			} else{			
+			} else if(action_type =='create' && $scope.menu_item.image_path == null || action_type =='create' && $scope.menu_item.image_path ==''){
+				swal({
+					  title: "Error",
+					  text: "Please upload an image",
+					  icon: "warning",
+					  dangerMode: true,
+					});
+				focus($('#menuItemImage'));
+			}
+	 		 else{			
 				var menu_item_url = '${pageContext.request.contextPath}/menu/menuItem/';
 				
 				if(action_type === 'create')

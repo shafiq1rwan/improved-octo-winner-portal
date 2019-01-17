@@ -106,7 +106,16 @@
 			if($scope.category.category_name == null 
 					|| $scope.category.category_name == '' 
 					){
-			} else {
+			} else if($scope.category.image_path == null || $scope.category.image_path == '') {
+				swal({
+					  title: "Error",
+					  text: "Please upload an image",
+					  icon: "warning",
+					  dangerMode: true,
+					});
+				focus($('#categoryImage'));
+			}
+			else {
 				var postdata = JSON.stringify ({
 					group_category_id : group_category_id,
 					category_name : $scope.category.category_name,
@@ -176,7 +185,7 @@
 				        }
 				    ],
 				destroy : true,
-		 		"rowReorder": { "selector": 'td:nth-child(2)',"enable": false,"dataSrc":"category_sequence", "update": true},
+		 		"rowReorder": { "selector": 'td:nth-child(-n+2)',"enable": false,"dataSrc":"category_sequence", "update": true},
 				"order" : [ [ 0, "asc" ] ] ,
 				"columns" : [ 
 					{"data" : "category_sequence", "visible": false, "searchable": false}, 
@@ -279,7 +288,7 @@
 					group_category_id : $scope.category.group_category_id
 				});
 				
-				console.log(postdata);
+				console.log("Update Category Data: " + postdata);
 				
 				 $http({
 						method : 'POST',
@@ -534,6 +543,11 @@
 							} else {			
 								$scope.assign_item_action = 'Edit';					
 								$scope.selectedItemList = response.data;
+								
+								for(var a=0; a<response.data.length;a++){
+									$scope.selectedItemList[a].menu_item_image_path = "${pageContext.request.contextPath}" + response.data[a].menu_item_image_path;
+								}
+								
 								//Keep Track old data
 								for(var i =0; i<response.data.length; i++){
 									$scope.oldItemList.push(response.data[i]);

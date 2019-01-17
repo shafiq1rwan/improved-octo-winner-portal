@@ -12,6 +12,7 @@ import javax.sql.DataSource;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -33,6 +34,9 @@ import my.com.byod.admin.util.ByodUtil;
 @RequestMapping("/menu/menuItem")
 public class MenuItemRestController {
 
+	@Value("${upload-path}")
+	private String filePath;
+	
 	@Autowired
 	private DataSource dataSource;
 
@@ -151,7 +155,7 @@ public class MenuItemRestController {
 				jsonMenuItemObj.put("modifier_group_id", rs.getLong("modifier_group_id"));
 				jsonMenuItemObj.put("menu_item_name", rs.getString("menu_item_name"));
 				jsonMenuItemObj.put("menu_item_description", rs.getString("menu_item_description"));
-				jsonMenuItemObj.put("menu_item_image_path", rs.getString("menu_item_image_path"));
+				jsonMenuItemObj.put("menu_item_image_path", filePath+rs.getString("menu_item_image_path"));
 				jsonMenuItemObj.put("menu_item_base_price", rs.getBigDecimal("menu_item_base_price"));
 				jsonMenuItemObj.put("menu_item_type", rs.getInt("menu_item_type"));
 				jsonMenuItemObj.put("menu_item_type_name", rs.getString("menu_item_type_name"));
@@ -235,7 +239,7 @@ public class MenuItemRestController {
 				jsonResult.put("backend_id", rs.getString("backend_id"));
 				jsonResult.put("menu_item_name", rs.getString("menu_item_name"));
 				jsonResult.put("menu_item_description", rs.getString("menu_item_description"));
-				jsonResult.put("menu_item_image_path", rs.getString("menu_item_image_path"));
+				jsonResult.put("menu_item_image_path", filePath + rs.getString("menu_item_image_path"));
 				jsonResult.put("menu_item_base_price", rs.getBigDecimal("menu_item_base_price"));
 				jsonResult.put("menu_item_type", rs.getInt("menu_item_type"));
 				jsonResult.put("is_taxable", rs.getBoolean("is_taxable"));
@@ -281,7 +285,7 @@ public class MenuItemRestController {
 			stmt.setString(2, jsonMenuItemData.getString("menu_item_name"));
 			stmt.setString(3, description);
 			stmt.setString(4, imagePath);
-			stmt.setBigDecimal(5, new BigDecimal(jsonMenuItemData.getDouble("menu_item_base_price")));
+			stmt.setBigDecimal(5, BigDecimal.valueOf(jsonMenuItemData.getDouble("menu_item_base_price")));
 			stmt.setInt(6, jsonMenuItemData.getInt("menu_item_type"));
 			stmt.setBoolean(7, jsonMenuItemData.getBoolean("is_taxable"));
 			stmt.setBoolean(8, jsonMenuItemData.getBoolean("is_discountable"));
@@ -328,9 +332,10 @@ public class MenuItemRestController {
 		String [] parameters = null;
 		
 		try {
+			System.out.println(data);
+			
 			JSONObject jsonMenuItemData = new JSONObject(data);
 			if (jsonMenuItemData.has("menu_item_name") && jsonMenuItemData.has("id")) {
-
 				String imagePath = jsonMenuItemData.isNull("menu_item_image_path") ? null
 						: byodUtil.saveImageFile("imgMI", jsonMenuItemData.getString("menu_item_image_path"), null); 
 				String description = jsonMenuItemData.isNull("menu_item_description") ? null
@@ -348,7 +353,7 @@ public class MenuItemRestController {
 				stmt.setString(1, jsonMenuItemData.getString("menu_item_backend_id"));
 				stmt.setString(2, jsonMenuItemData.getString("menu_item_name"));
 				stmt.setString(3, description);
-				stmt.setBigDecimal(4, new BigDecimal(jsonMenuItemData.getDouble("menu_item_base_price")));
+				stmt.setBigDecimal(4, BigDecimal.valueOf(jsonMenuItemData.getDouble("menu_item_base_price")));
 				stmt.setInt(5, jsonMenuItemData.getInt("menu_item_type"));
 				stmt.setBoolean(6, jsonMenuItemData.getBoolean("is_taxable"));
 				stmt.setBoolean(7, jsonMenuItemData.getBoolean("is_discountable"));
@@ -393,6 +398,7 @@ public class MenuItemRestController {
 				return ResponseEntity.status(HttpStatus.NOT_FOUND).contentType(MediaType.TEXT_PLAIN).body("Menu Item Not Found");
 			}
 		} catch (SQLServerException ex) {
+			ex.printStackTrace();
 			return ResponseEntity.status(HttpStatus.CONFLICT).contentType(MediaType.TEXT_PLAIN).body("Duplication Backend Id Found");
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -509,7 +515,7 @@ public class MenuItemRestController {
 				jsonMenuItemObj.put("id", rs.getLong("id"));
 				jsonMenuItemObj.put("backend_id", rs.getString("backend_id"));
 				jsonMenuItemObj.put("menu_item_name", rs.getString("menu_item_name"));
-				jsonMenuItemObj.put("menu_item_image_path", rs.getString("menu_item_image_path"));
+				jsonMenuItemObj.put("menu_item_image_path", filePath + rs.getString("menu_item_image_path"));
 				jsonMenuItemObj.put("menu_item_base_price", rs.getBigDecimal("menu_item_base_price"));
 				jsonMenuItemObj.put("menu_item_type_name", rs.getString("menu_item_type_name"));
 				jsonMenuItemArray.put(jsonMenuItemObj);
