@@ -13,6 +13,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -48,7 +50,7 @@ public class CategoryRestController {
 	private GroupCategoryRestController groupCategoryRestController;
 
 	@GetMapping(value = { "/get_all_category" }, produces = "application/json")
-	public String getAllCategory(HttpServletRequest request, HttpServletResponse response) {
+	public ResponseEntity<?> getAllCategory(HttpServletRequest request, HttpServletResponse response) {
 		JSONArray jsonCategoryArray = new JSONArray();
 		Connection connection = null;
 		PreparedStatement stmt = null;
@@ -76,6 +78,7 @@ public class CategoryRestController {
 
 		} catch (Exception ex) {
 			ex.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Internal Server Error");
 		} finally {
 			if (connection != null) {
 				try {
@@ -85,11 +88,11 @@ public class CategoryRestController {
 				}
 			}
 		}
-		return jsonCategoryArray.toString();
+		return ResponseEntity.ok(jsonCategoryArray.toString());
 	}
 
 	@GetMapping(value = { "/get_all_category_by_group_category_id" }, produces = "application/json")
-	public String getAllCategoryByGroupCategoryId(HttpServletRequest request, HttpServletResponse response,
+	public ResponseEntity<?> getAllCategoryByGroupCategoryId(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam("group_category_id") Long groupCategoryId) {
 		JSONArray jsonCategoryArray = new JSONArray();
 		Connection connection = null;
@@ -119,6 +122,7 @@ public class CategoryRestController {
 
 		} catch (Exception ex) {
 			ex.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Internal Server Error");
 		} finally {
 			if (connection != null) {
 				try {
@@ -128,11 +132,11 @@ public class CategoryRestController {
 				}
 			}
 		}
-		return jsonCategoryArray.toString();
+		return ResponseEntity.ok(jsonCategoryArray.toString());
 	}
 
 	@GetMapping(value = { "/get_category_by_id" }, produces = "application/json")
-	public String getCategoryById(HttpServletRequest request, HttpServletResponse response,
+	public ResponseEntity<?> getCategoryById(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam("id") Long id) {
 		JSONObject jsonResult = new JSONObject();
 		JSONArray jsonArray = new JSONArray();
@@ -182,10 +186,11 @@ public class CategoryRestController {
 
 				jsonResult.put("menu_items", jsonArray);
 			} else {
-				response.setStatus(404);
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).contentType(MediaType.TEXT_PLAIN).body("Unable to find category detail");
 			}
 		} catch (Exception ex) {
 			ex.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Internal Server Error");
 		} finally {
 			if (connection != null) {
 				try {
@@ -195,12 +200,11 @@ public class CategoryRestController {
 				}
 			}
 		}
-		return jsonResult.toString();
+		return ResponseEntity.ok(jsonResult.toString());
 	}
 
 	@PostMapping("/create_category")
-	public String createCategory(HttpServletRequest request, HttpServletResponse response, @RequestBody String data) {
-		JSONObject jsonResult = new JSONObject();
+	public ResponseEntity<?> createCategory(HttpServletRequest request, HttpServletResponse response, @RequestBody String data) {
 		Connection connection = null;
 		PreparedStatement stmt = null;
 
@@ -235,20 +239,14 @@ public class CategoryRestController {
 				groupCategoryRestController.logActionToFile(connection, sqlStatement, parameters, jsonCategoryData.getLong("group_category_id"), imagePath, 1);
 				
 			} else {
-				response.setStatus(404);
-				return null;
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).contentType(MediaType.TEXT_PLAIN).body("Category name not available");
 			}
 		} catch (SQLServerException ex) {
 			ex.printStackTrace();
-			response.setStatus(409);
-			try {
-				jsonResult.put("response_message", "Duplicate Category Name Found!");
-				return jsonResult.toString();
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
+			return ResponseEntity.status(HttpStatus.CONFLICT).contentType(MediaType.TEXT_PLAIN).body("Duplicate category name");
 		} catch (Exception ex) {
 			ex.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Internal Server Error");
 		} finally {
 			if (connection != null) {
 				try {
@@ -258,14 +256,14 @@ public class CategoryRestController {
 				}
 			}
 		}
-		return jsonResult.toString();
+		return ResponseEntity.ok(null);
 	}
 
 	@PostMapping(value = "/edit_category",produces = "application/json")
-	public String editCategory(HttpServletRequest request, HttpServletResponse response, @RequestBody String data) {
-		JSONObject jsonResult = new JSONObject();
+	public ResponseEntity<?> editCategory(HttpServletRequest request, HttpServletResponse response, @RequestBody String data) {
 		Connection connection = null;
 		PreparedStatement stmt = null;
+		String [] parameters = null;
 
 		try {
 			JSONObject jsonCategoryData = new JSONObject(data);
@@ -291,38 +289,38 @@ public class CategoryRestController {
 				
 				if(imagePath == null) {
 					stmt.setLong(4, jsonCategoryData.getLong("id"));
+					
+					parameters = new String []{
+							jsonCategoryData.getString("category_name")==null?"null":"'"+jsonCategoryData.getString("category_name")+"'",
+							description==null?"null":"'"+description+"'",
+							String.valueOf(jsonCategoryData.getBoolean("is_active")),
+							String.valueOf(jsonCategoryData.getLong("id"))};
+					
 				} else {
 					stmt.setString(4, imagePath);
 					stmt.setLong(5, jsonCategoryData.getLong("id"));
+					
+					// logging to file	
+					parameters = new String []{
+							jsonCategoryData.getString("category_name")==null?"null":"'"+jsonCategoryData.getString("category_name")+"'",
+							description==null?"null":"'"+description+"'",
+							imagePath==null?"null":"'"+imagePath+"'",
+							String.valueOf(jsonCategoryData.getBoolean("is_active")),
+							String.valueOf(jsonCategoryData.getLong("id"))};
 				}
 				stmt.executeUpdate();
-				
-				// logging to file	
-				String [] parameters = {
-						jsonCategoryData.getString("category_name")==null?"null":"'"+jsonCategoryData.getString("category_name")+"'",
-						description==null?"null":"'"+description+"'",
-						imagePath==null?"null":"'"+imagePath+"'",
-						String.valueOf(jsonCategoryData.getBoolean("is_active")),
-						String.valueOf(jsonCategoryData.getLong("id"))};			
-				groupCategoryRestController.logActionToFile(connection, sqlStatement, parameters, jsonCategoryData.getLong("group_category_id"), imagePath, 1);		
-				
+				groupCategoryRestController.logActionToFile(connection, sqlStatement, parameters, jsonCategoryData.getLong("group_category_id"), imagePath, 1);			
 			} else {
-				response.setStatus(404);
-				return null;
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).contentType(MediaType.TEXT_PLAIN).body("Category name not available");
 			}
 		}
 		catch (SQLServerException ex) {
 			ex.printStackTrace();
-			response.setStatus(409);
-			try {
-				jsonResult.put("response_message", "Duplicate Category Name Found!");
-				return jsonResult.toString();
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
+			return ResponseEntity.status(HttpStatus.CONFLICT).contentType(MediaType.TEXT_PLAIN).body("Duplicate category name");
 		}
 		catch (Exception ex) {
 			ex.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Internal Server Error");
 		} finally {
 			if (connection != null) {
 				try {
@@ -332,7 +330,7 @@ public class CategoryRestController {
 				}
 			}
 		}
-		return jsonResult.toString();
+		return ResponseEntity.ok(null);
 	}
 	
 	@PostMapping(value = "/edit_category_sequence",produces = "application/json")
@@ -344,8 +342,10 @@ public class CategoryRestController {
 			JSONObject jsonObjForm = new JSONObject(data);
 			Long group_category_id =  jsonObjForm.getLong("group_category_id");		
 			JSONArray jsonCategorySequenceArray = jsonObjForm.getJSONArray("array");
+			
 			String sqlStatement = "UPDATE category SET category_sequence = ? WHERE id = ?;";
 			connection = dataSource.getConnection();
+			connection.setAutoCommit(false);
 			stmt = connection.prepareStatement(sqlStatement);
 			
 			for(int i=0;i<jsonCategorySequenceArray.length();i++) {
@@ -360,27 +360,35 @@ public class CategoryRestController {
 						String.valueOf(index),
 						String.valueOf(jsonObj.getLong("id"))};			
 				groupCategoryRestController.logActionToFile(connection, sqlStatement, parameters, group_category_id, null, 0);					
-			}
-			return ResponseEntity.ok(null);
+			}		
+			connection.commit();	
 		}
 		catch (Exception ex) {
 			ex.printStackTrace();
-			return ResponseEntity.badRequest().body(ex.getMessage());
+			if (connection != null) {
+				try {
+					connection.rollback();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Internal Server Error");
 		} finally {
 			if (connection != null) {
 				try {
+					connection.setAutoCommit(true);
 					connection.close();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 		}
+		return ResponseEntity.ok(null);
 	}
 
 	@DeleteMapping("/delete_category")
-	public String deleteCategory(HttpServletRequest request, HttpServletResponse response,
+	public ResponseEntity<?> deleteCategory(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam("id") Long id) {
-		JSONObject jsonResult = new JSONObject();
 		Connection connection = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
@@ -409,9 +417,7 @@ public class CategoryRestController {
 			groupCategoryRestController.logActionToFile(connection, sqlStatement, parameters, group_category_id, null, 0);	
 
 			if (categoryRowAffected == 0) {
-				response.setStatus(400);
-				jsonResult.put("response_message", "Category Encountered Error While Perform Deletion!");
-				return jsonResult.toString();
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Cannot delete category");
 			} else {
 				sqlStatement = "DELETE FROM category_menu_item WHERE category_id = ?;";
 				stmt = connection.prepareStatement(sqlStatement);
@@ -425,6 +431,7 @@ public class CategoryRestController {
 			}
 		} catch (Exception ex) {
 			ex.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Internal Server Error");
 		} finally {
 			if (connection != null) {
 				try {
@@ -434,7 +441,7 @@ public class CategoryRestController {
 				}
 			}
 		}
-		return jsonResult.toString();
+		return ResponseEntity.ok(null);
 	}
 
 	private int getCategorySequenceNumber(Long groupCategoryId) {
@@ -476,6 +483,7 @@ public class CategoryRestController {
 		}
 	}
 	
+	//TODO need change
 	@PostMapping("/assign_menu_item_to_category")
 	public ResponseEntity<?> assignMenuItemToCategory(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody String data) {
@@ -488,16 +496,25 @@ public class CategoryRestController {
 			Long group_category_id = jsonObj.getLong("group_category_id");
 			
 			connection = dataSource.getConnection();
-			String sqlStatement = "INSERT INTO category_menu_item (category_id, menu_item_id, category_menu_item_sequence) VALUES (?, ?, ?);";
+			connection.setAutoCommit(false);
 			
+			String sqlStatement = "INSERT INTO category_menu_item (category_id, menu_item_id, category_menu_item_sequence) VALUES (?, ?, ?)";
+			
+			for(int count=0; count<jsonItemsArray.length() -1;count++) {
+				sqlStatement += ",(?,?,?)";
+			}
+			
+			stmt = connection.prepareStatement(sqlStatement);
+			int insertionIndex = 0;
+
 			for(int i=0;i<jsonItemsArray.length();i++) {
 				int index = i;
 				JSONObject jsonItemObj = jsonItemsArray.getJSONObject(i);		
-				stmt = connection.prepareStatement(sqlStatement);
-				stmt.setLong(1, categoryId);
-				stmt.setLong(2, jsonItemObj.getLong("id"));
-				stmt.setInt(3, index+1);
-				stmt.executeUpdate();
+				stmt.setLong(++insertionIndex, categoryId);
+				stmt.setLong(++insertionIndex, jsonItemObj.getLong("id"));
+				stmt.setInt(++insertionIndex, index+1);
+				//System.out.println("Test Insertion Index :" + insertionIndex);
+				//System.out.println("Test index :" + index);
 				
 				// logging to file	
 				String [] parameters = {
@@ -506,22 +523,32 @@ public class CategoryRestController {
 						String.valueOf(index+1)};		
 				groupCategoryRestController.logActionToFile(connection, sqlStatement, parameters, group_category_id, null, 0);
 			}
-			
-			return ResponseEntity.ok().body(null);
+			stmt.executeUpdate();
+			connection.commit();
 		} catch (Exception ex) {
 			ex.printStackTrace();
-			return ResponseEntity.badRequest().body(null);
+			if (connection != null) {
+				try {
+					connection.rollback();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Internal Server Error");
 		} finally {
 			if (connection != null) {
 				try {
+					connection.setAutoCommit(true);
 					connection.close();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 		}
+		return ResponseEntity.ok().body(null);
 	}
 	
+	//TODO need change
 	@PostMapping("/reassign_menu_item_to_category")
 	public ResponseEntity<?> reassignMenuItemToCategory(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody String data) {
@@ -536,51 +563,75 @@ public class CategoryRestController {
 			Long group_category_id = jsonObj.getLong("group_category_id");
 			
 			connection = dataSource.getConnection();
+			
 			String sqlStatement = "DELETE FROM category_menu_item WHERE category_id = ?;";
 			
 			stmt = connection.prepareStatement(sqlStatement);
 			stmt.setLong(1, categoryId);
-			stmt.executeUpdate();
-			
-			// logging to file	
-			String [] parameters = {
-					String.valueOf(categoryId)
-					};		
-			groupCategoryRestController.logActionToFile(connection, sqlStatement, parameters, group_category_id, null, 0);
-			
-			for(int i=0;i<jsonItemsArray.length();i++) {
-				int index = i;
-				JSONObject jsonItemObj = jsonItemsArray.getJSONObject(i);
-				sqlStatement = "INSERT INTO category_menu_item (category_id, menu_item_id, category_menu_item_sequence) VALUES (?, ?, ?);";
-				stmt2 = connection.prepareStatement(sqlStatement);
-				stmt2.setLong(1, categoryId);
-				stmt2.setLong(2, jsonItemObj.getLong("id"));
-				stmt2.setInt(3, index+1);			
-				stmt2.executeUpdate();
-				
+			int rowAffected = stmt.executeUpdate();
+
+			if(rowAffected == 0) {
+				return ResponseEntity.badRequest().contentType(MediaType.TEXT_PLAIN).body("Cannot reassign menu item");
+			} else {
 				// logging to file	
-				String [] parameters2 = {
-						String.valueOf(categoryId),
-						String.valueOf(jsonItemObj.getLong("id")),
-						String.valueOf(index+1)};		
-				groupCategoryRestController.logActionToFile(connection, sqlStatement, parameters2, group_category_id, null, 0);
+				String [] parameters = {
+						String.valueOf(categoryId)
+						};		
+				groupCategoryRestController.logActionToFile(connection, sqlStatement, parameters, group_category_id, null, 0);
 			}
 			
-			return ResponseEntity.ok().body(null);
+			if(jsonItemsArray.length() > 0) {
+				connection.setAutoCommit(false);
+				
+				sqlStatement = "INSERT INTO category_menu_item (category_id, menu_item_id, category_menu_item_sequence) VALUES (?, ?, ?)";
+				for(int count=0; count<jsonItemsArray.length() -1;count++) {
+					sqlStatement += ",(?,?,?)";
+				}
+				
+				stmt2 = connection.prepareStatement(sqlStatement);
+				int insertionIndex = 0;
+
+				for(int i=0;i<jsonItemsArray.length();i++) {
+					int index = i;
+					JSONObject jsonItemObj = jsonItemsArray.getJSONObject(i);
+					stmt2.setLong(++insertionIndex, categoryId);
+					stmt2.setLong(++insertionIndex, jsonItemObj.getLong("id"));
+					stmt2.setInt(++insertionIndex, index+1);
+					
+					System.out.println("Test Insertion Index :" + insertionIndex);
+					System.out.println("Test index :" + index);
+					
+					// logging to file	
+					String [] parameters2 = {
+							String.valueOf(categoryId),
+							String.valueOf(jsonItemObj.getLong("id")),
+							String.valueOf(index+1)};		
+					groupCategoryRestController.logActionToFile(connection, sqlStatement, parameters2, group_category_id, null, 0);
+				}		
+				stmt2.executeUpdate();
+				connection.commit();
+			}
 		} catch (Exception ex) {
 			ex.printStackTrace();
-			System.out.println("Error at Reassign :" + ex.getMessage());
-			return ResponseEntity.badRequest().body(null);
+			if (connection != null) {
+				try {
+					connection.rollback();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Internal Server Error");
 		} finally {
 			if (connection != null) {
 				try {
+					connection.setAutoCommit(true);
 					connection.close();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 		}
+		return ResponseEntity.ok(null);
 	}
-
 
 }

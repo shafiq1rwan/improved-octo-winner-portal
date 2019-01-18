@@ -140,9 +140,11 @@
 						$scope.resetModal();
 						$('#createCategoryModal').modal('toggle');
 						
-						if(response.status == 409){
+						if(response.status == '403'){
 							alert("Session TIME OUT");
 							$(location).attr('href','${pageContext.request.contextPath}/admin');	
+						} else {
+							alert(response.data);
 						}
 				});
 			}
@@ -222,7 +224,7 @@
 				})
 				.then(function(response) {
 					if (response.status == "404") {
-						alert("Unable to find category detail");
+						alert(response.data);
 					} else if(response.status == "200") {
 						$scope.category.group_category_id = response.data.group_category_id;
 						$scope.category.id = response.data.id;
@@ -246,9 +248,7 @@
 					data : category_list
 				})
 				.then(function(response) {
-						if(response.status == '200'){
-							$scope.refreshCategoryTable();
-						}
+						$scope.refreshCategoryTable();
 				}, function(response) {
 						alert('Session TIME OUT');
 						$(location).attr('href','${pageContext.request.contextPath}/admin');	
@@ -304,9 +304,11 @@
 							$scope.resetModal();
 							$('#createCategoryModal').modal('toggle');
 							
-							if(response.status == 409){
+							if(response.status == '403' || response.status == '500'){
 								alert("Session TIME OUT");
 								$(location).attr('href','${pageContext.request.contextPath}/admin');	
+							} else {
+								alert(response.data);
 							}
 					});
 			}
@@ -321,8 +323,8 @@
 							$scope.refreshCategoryTable();
 					},
 					function(response) {									
-						if(resposne.status == 400){
-							alert(response.data.response_message);
+						if(resposne.status == '400'){
+							alert(response.data);
 						} else {
 							alert("Session TIME OUT");
 							$(location)
@@ -356,22 +358,16 @@
 					.post(
 							'${pageContext.request.contextPath}/menu/category/assign_menu_item_to_category', json_data)
 					.then(
-							function(response) {
-								if(response.status == 200){				
+							function(response) {			
 									alert("Successfully assigned menu items.")
 									$scope.getCategoryMenuItem($scope.category_id);
 									$scope.closeMenuItemModal();
-								}
 							},
 							function(response) {									
-								if(response.status == 400){
-									alert("Unable to assign menu item.");
-								} else {
 									alert("Session TIME OUT");
 					 				$(location)
 									.attr('href',
 											'${pageContext.request.contextPath}/user');
-								}
 							}); 
 				} else if(action_type === 'Edit'){
 	
@@ -379,15 +375,13 @@
 					.post(
 							'${pageContext.request.contextPath}/menu/category/reassign_menu_item_to_category', json_data)
 					.then(
-							function(response) {
-								if(response.status == 200){		
+							function(response) {	
 									console.log("Success");
 									$scope.closeMenuItemModal();
-								}
 							},
 							function(response) {									
-								if(response.status == 400){
-									alert("Unable to reassign menu item.");
+								if(response.status == '400'){
+									alert(response.data);
 								} else {
 					 				alert("Session TIME OUT");
 					 				$(location)
@@ -395,8 +389,6 @@
 											'${pageContext.request.contextPath}/user');
 								}
 							});
-
-					
 				}
 
 		}
@@ -536,8 +528,7 @@
 					'${pageContext.request.contextPath}/menu/menuItem/getMenuItemByCategory?categoryId='+ category_id)
 			.then(
 					function(response) {
-						
-						if(response.status == 200){					
+						if(response.status == '200'){					
 							if(response.data.length == 0){
 								$scope.assign_item_action = 'New';
 							} else {			
@@ -556,15 +547,11 @@
 						}
 					},
 					function(response) {									
-						if(response.status == 400){
-							alert(response.data.response_message);
-						} else {
 							console.log(response.data);
 							alert("Session TIME OUT");
 			 				$(location)
 							.attr('href',
 									'${pageContext.request.contextPath}/user');
-						}
 					});
 			
 			  // drag and drop list
