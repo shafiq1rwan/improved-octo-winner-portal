@@ -450,7 +450,7 @@ public class GroupCategoryRestController {
 				for (int itemIndex = 0; itemIndex < itemList.length(); itemIndex++) {
 					JSONArray comboList = new JSONArray();
 					JSONArray alacarteModifierList = new JSONArray();
-					if (itemList.getJSONObject(itemIndex).getString("type").equals("0")) {
+					if (itemList.getJSONObject(itemIndex).getString("type").equals("1")) {
 						comboList = getComboDetailListByComboOverheadID(connection, Integer.parseInt(itemList.getJSONObject(itemIndex).getString("id")));
 						for (int comboIndex = 0; comboIndex < comboList.length(); comboIndex++) {
 							JSONArray comboDetailList = getComboDetailItemListByComboDetailID(connection, Integer.parseInt(comboList.getJSONObject(comboIndex).getString("id")));
@@ -470,7 +470,7 @@ public class GroupCategoryRestController {
 							}
 							comboList.getJSONObject(comboIndex).put("itemList", tierItemList);
 						}
-					} else if (itemList.getJSONObject(itemIndex).getString("type").equals("1")) {
+					} else if (itemList.getJSONObject(itemIndex).getString("type").equals("0")) {
 						alacarteModifierList = getModifierListByMenuItemID(connection, Integer.parseInt(itemList.getJSONObject(itemIndex).getString("id")));
 					}
 					itemList.getJSONObject(itemIndex).put("comboList", comboList);
