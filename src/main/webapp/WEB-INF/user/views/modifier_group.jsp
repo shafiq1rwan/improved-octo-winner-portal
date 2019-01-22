@@ -130,7 +130,7 @@
 									<li class="list-group-item pl-0 pr-0 pt-1 pb-1" ng-repeat="item in selectedItemList">
 										<div class="d-flex flex-row">
 								  			<div class="p-1">
-								  				<img  style="width:75px; height:75px;" src="{pageContext.request.contextPath}/{{item.menu_item_image_path}}" class="rounded-circle" />  				
+								  				<img  style="width:75px; height:75px;" src="{{item.menu_item_image_path}}" class="rounded-circle" />  				
 								  			</div>
 								  			<div class="pl-3 pt-2 pr-2 pb-2 flex-grow-1  border-left">				  		
 							  					<h5 class="card-title">

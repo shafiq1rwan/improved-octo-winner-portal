@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -333,9 +334,17 @@ public class MenuItemRestController {
 		
 		try {
 			System.out.println(data);
-			
 			JSONObject jsonMenuItemData = new JSONObject(data);
 			if (jsonMenuItemData.has("menu_item_name") && jsonMenuItemData.has("id")) {
+				
+				int existingMenuItemType = checkingExistingMenuItemType(jsonMenuItemData.getLong("id"));
+				
+				if(existingMenuItemType != -1 && existingMenuItemType != jsonMenuItemData.getInt("menu_item_type")) {			
+					if(checkingAlreadyAssigned(jsonMenuItemData.getLong("id"))>0){
+						return ResponseEntity.badRequest().contentType(MediaType.TEXT_PLAIN).body("Please unassigned first before performing type modification");
+					}
+				}
+
 				String imagePath = jsonMenuItemData.isNull("menu_item_image_path") ? null
 						: byodUtil.saveImageFile("imgMI", jsonMenuItemData.getString("menu_item_image_path"), null); 
 				String description = jsonMenuItemData.isNull("menu_item_description") ? null
@@ -397,10 +406,12 @@ public class MenuItemRestController {
 			} else {
 				return ResponseEntity.status(HttpStatus.NOT_FOUND).contentType(MediaType.TEXT_PLAIN).body("Menu Item Not Found");
 			}
-		} catch (SQLServerException ex) {
+		} 
+		catch (SQLServerException ex) {
 			ex.printStackTrace();
 			return ResponseEntity.status(HttpStatus.CONFLICT).contentType(MediaType.TEXT_PLAIN).body("Duplication Backend Id Found");
-		} catch (Exception ex) {
+		}
+		catch (Exception ex) {
 			ex.printStackTrace();
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Internal Server Error");
 		} finally {
@@ -574,6 +585,34 @@ public class MenuItemRestController {
 			}
 		}
 		return ResponseEntity.ok().body(jsonMenuItemArray.toString());
+	}
+	
+	//Used in edit mode
+	private int checkingAlreadyAssigned(Long menuItemId) {
+		
+		String sqlQuery = "SELECT COUNT(*) FROM "
+				+ "(SELECT mi.* FROM menu_item mi INNER JOIN combo_item_detail cid ON mi.id = cid.menu_item_id UNION "
+				+ "SELECT mi.* FROM menu_item mi INNER JOIN menu_item_group_sequence migs ON mi.id =migs.menu_item_id UNION "
+				+ "SELECT mi.* FROM menu_item mi INNER JOIN modifier_item_sequence mis ON mi.id = mis.menu_item_id) AS a "
+				+ "WHERE a.id = ?";
+		try {
+			return jdbcTemplate.queryForObject(sqlQuery, new Object[] {menuItemId}, Integer.class);
+		} catch(Exception ex) {
+			ex.printStackTrace();
+			return 0;
+		}
+	}
+	
+	private int checkingExistingMenuItemType(Long menuItemId) {
+		int existingItemType = 0;
+
+		try {
+			existingItemType = jdbcTemplate.queryForObject("SELECT menu_item_type FROM menu_item WHERE id = ?", new Object[] {menuItemId}, Integer.class);
+		} catch(Exception ex) {
+			existingItemType = -1;
+		}
+		
+		return existingItemType;
 	}
 
 }

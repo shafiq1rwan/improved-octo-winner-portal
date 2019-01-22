@@ -170,7 +170,12 @@
 								$scope.assign_item_action = 'New';
 							} else {			
 								$scope.assign_item_action = 'Edit';					
-								$scope.selectedItemList = response.data;
+								$scope.selectedItemList = response.data;			
+								
+								for(var a=0; a<response.data.length;a++){
+									$scope.selectedItemList[a].menu_item_image_path = "${pageContext.request.contextPath}" + response.data[a].menu_item_image_path;
+								}
+								
 								//Keep Track old data
 								for(var i =0; i<response.data.length; i++){
 									$scope.oldItemList.push(response.data[i]);

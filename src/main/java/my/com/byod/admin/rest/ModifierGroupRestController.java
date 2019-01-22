@@ -14,6 +14,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +35,9 @@ import my.com.byod.admin.util.ByodUtil;
 @RequestMapping("/menu/modifier_group")
 public class ModifierGroupRestController {
 
+	@Value("${upload-path}")
+	private String filePath;
+	
 	@Autowired
 	private DataSource dataSource;
 
@@ -333,7 +337,7 @@ public class ModifierGroupRestController {
 			stmt = connection.prepareStatement("SELECT * FROM menu_item a "
 					+ "INNER JOIN menu_item_type_lookup b ON a.menu_item_type = b.menu_item_type_number "
 					+ "INNER JOIN modifier_item_sequence c ON a.id = c.menu_item_id "
-					+ "WHERE c.modifier_group_id = ? ");
+					+ "WHERE c.modifier_group_id = ? AND a.is_active = 1");
 			stmt.setLong(1, modifierGroupId);
 			rs = (ResultSet) stmt.executeQuery();
 
@@ -342,7 +346,7 @@ public class ModifierGroupRestController {
 				jsonMenuItemObj.put("id", rs.getLong("id"));
 				jsonMenuItemObj.put("backend_id", rs.getString("backend_id"));
 				jsonMenuItemObj.put("menu_item_name", rs.getString("menu_item_name"));
-				jsonMenuItemObj.put("menu_item_image_path", rs.getString("menu_item_image_path"));
+				jsonMenuItemObj.put("menu_item_image_path", filePath + rs.getString("menu_item_image_path"));
 				jsonMenuItemObj.put("menu_item_base_price", rs.getBigDecimal("menu_item_base_price"));
 				jsonMenuItemObj.put("menu_item_type_name", rs.getString("menu_item_type_name"));
 				jsonMenuItemArray.put(jsonMenuItemObj);
