@@ -35,8 +35,8 @@ import my.com.byod.admin.util.ByodUtil;
 @RequestMapping("/menu/store")
 public class StoreRestController {
 	
-	@Value("${upload-path}")
-	private String filePath;
+	@Value("${get-upload-path}")
+	private String displayFilePath;
 	
 	@Autowired
 	private StoreService storeService;
@@ -55,7 +55,7 @@ public class StoreRestController {
 	public ResponseEntity<List<Store>> findAllStore() {
 		List<Store> stores = storeService.findAllStore();
 		for(Store store: stores) {
-			store.setLogoPath(filePath + store.getLogoPath());
+			store.setLogoPath(displayFilePath + store.getLogoPath());
 		}
 		return new ResponseEntity<List<Store>>(stores, HttpStatus.OK);
 	}
@@ -65,7 +65,7 @@ public class StoreRestController {
 		Store existingStore = storeService.findStoreById(id);
 		if (existingStore.getId() == 0)
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		existingStore.setLogoPath(filePath + existingStore.getLogoPath());
+		existingStore.setLogoPath(displayFilePath + existingStore.getLogoPath());
 		return new ResponseEntity<Store>(existingStore, HttpStatus.OK);
 	}
 

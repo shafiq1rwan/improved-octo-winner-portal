@@ -13,8 +13,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -37,6 +35,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -515,6 +514,49 @@ public class GroupCategoryRestController {
 		
 	}
 	
+	@RequestMapping(value = "/syncMenu", method = { RequestMethod.POST })
+	public String getMenuData(HttpServletRequest request, HttpServletResponse response,
+			@RequestParam(value = "storeId", required = true) Long storeId, 
+			@RequestParam(value = "versionCount", required = true) Long versionCount) {
+		// need identifier for ecpos or kiosk
+		
+		// sync menu
+		Connection connection = null;
+		String menuFile = null;
+		JSONObject result = new JSONObject();;
+		try {
+			connection = dataSource.getConnection();
+			
+			if(versionCount==0) {
+				// first time get menu
+				menuFile = getLatestMenuFile(connection, storeId);
+				if(menuFile!=null) {
+					result.put("menuFile", menuFile); 
+				}
+				else {
+					result.put("resultCode", "02");
+					result.put("resultMessage", "Never publish menu before");
+				}
+			}
+			
+			JSONArray versionArray = getVersionUpdates(connection, versionCount, storeId);			
+			if(versionArray.length()!=0) {
+				result.put("versionSync", versionArray);
+				result.put("resultCode", "00");
+			}
+			else {
+				// up-to-date
+				System.out.println("The current version of menu is up-to-date");
+				result.put("resultCode", "01");
+				result.put("resultMessage", "Current menu is the latest version");
+			}
+			
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+		
+		return result.toString();
+	}
 
 	private int checkDuplicateGroupCategoryName(String groupCategoryName) {
 		return jdbcTemplate.queryForObject("SELECT COUNT(group_category_name) FROM group_category WHERE group_category_name = ?", new Object[] {groupCategoryName}, Integer.class);
@@ -534,7 +576,7 @@ public class GroupCategoryRestController {
 		ResultSet rs1 = null;
 		try {
 			sqlStatement = "SELECT a.group_category_name, a.created_date, a.publish_version_id, a.tmp_query_file_path, a.tmp_img_file_path, b.version_count, b.menu_file_path, b.menu_query_file_path, b.menu_img_file_path, b.publish_date FROM group_category a "
-					+ "LEFT JOIN publish_version b ON a.publish_version_id = b.id "
+					+ "LEFT JOIN publish_version b ON a.publish_version_id = b.id AND b.group_category_id = a.id "
 					+ "WHERE a.id = ?;";
 			ps1 = connection.prepareStatement(sqlStatement);
 			ps1.setLong(1, groupCategoryID);
@@ -1290,6 +1332,78 @@ public class GroupCategoryRestController {
 			}
 		}
 		return publishVersionId;
+	}
+	
+	private String getLatestMenuFile(Connection connection, Long storeId) throws Exception {
+		String sqlStatement = null;
+		PreparedStatement ps1 = null;
+		ResultSet rs1 = null;
+		String result = null;
+		try {
+			connection = dataSource.getConnection();
+			sqlStatement = "SELECT c.* FROM store a " + 
+					"INNER JOIN group_category b ON a.group_category_id = b.id " + 
+					"INNER JOIN publish_version c ON c.id = b.publish_version_id AND c.group_category_id = b.id " +
+					"WHERE a.id = ? ";
+			ps1 = connection.prepareStatement(sqlStatement);
+			ps1.setLong(1, storeId);
+			rs1 = ps1.executeQuery();
+
+			if (rs1.next()) {
+				result = rs1.getString("menu_file_path");
+			}
+			
+		} catch (Exception ex) {
+			throw ex;
+		} finally {
+			if (rs1 != null) {
+				rs1.close();
+			}
+			if (ps1 != null) {
+				ps1.close();
+			}
+		}
+		return result;
+	}
+	
+	private JSONArray getVersionUpdates(Connection connection, Long versionCount, Long storeId) throws Exception {
+		String sqlStatement = null;
+		PreparedStatement ps1 = null;
+		ResultSet rs1 = null;
+		JSONArray versionArray = new JSONArray();
+		try {
+			connection = dataSource.getConnection();
+			sqlStatement = "SELECT c.* FROM store a " + 
+					"INNER JOIN group_category b ON a.group_category_id = b.id " + 
+					"INNER JOIN publish_version c ON c.id IN ( " + 
+					"SELECT id FROM publish_version WHERE group_category_id = b.id AND version_count > ?) AND c.group_category_id = b.id " +
+					"WHERE a.id = ? " + 
+					"ORDER BY c.version_count ASC ";
+			ps1 = connection.prepareStatement(sqlStatement);
+			ps1.setLong(1, versionCount);
+			ps1.setLong(2, storeId);
+			rs1 = ps1.executeQuery();
+
+			while (rs1.next()) {
+				JSONObject jsonObject = new JSONObject();
+				jsonObject.put("version_count", "version_count");
+				//jsonObject.put("menu_file_path", "menu_file_path");
+				jsonObject.put("menu_query_file_path", "menu_query_file_path");
+				jsonObject.put("menu_img_file_path", "menu_img_file_path");
+				versionArray.put(jsonObject);
+			}
+			
+		} catch (Exception ex) {
+			throw ex;
+		} finally {
+			if (rs1 != null) {
+				rs1.close();
+			}
+			if (ps1 != null) {
+				ps1.close();
+			}
+		}
+		return versionArray;
 	}
 	
 }

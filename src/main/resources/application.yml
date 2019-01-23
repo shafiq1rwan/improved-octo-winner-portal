@@ -30,7 +30,9 @@ spring:
     password: MPay@1234
     
 upload-path: byod-img/
+get-upload-path: /byod-img/
 menu-path: byod-menu/
+get-menu-path: /byod-menu/
 
 ---
 

@@ -35,8 +35,8 @@ import my.com.byod.admin.util.ByodUtil;
 @RequestMapping("/menu/modifier_group")
 public class ModifierGroupRestController {
 
-	@Value("${upload-path}")
-	private String filePath;
+	@Value("${get-upload-path}")
+	private String displayFilePath;
 	
 	@Autowired
 	private DataSource dataSource;
@@ -346,7 +346,7 @@ public class ModifierGroupRestController {
 				jsonMenuItemObj.put("id", rs.getLong("id"));
 				jsonMenuItemObj.put("backend_id", rs.getString("backend_id"));
 				jsonMenuItemObj.put("menu_item_name", rs.getString("menu_item_name"));
-				jsonMenuItemObj.put("menu_item_image_path", filePath + rs.getString("menu_item_image_path"));
+				jsonMenuItemObj.put("menu_item_image_path", displayFilePath + rs.getString("menu_item_image_path"));
 				jsonMenuItemObj.put("menu_item_base_price", rs.getBigDecimal("menu_item_base_price"));
 				jsonMenuItemObj.put("menu_item_type_name", rs.getString("menu_item_type_name"));
 				jsonMenuItemArray.put(jsonMenuItemObj);

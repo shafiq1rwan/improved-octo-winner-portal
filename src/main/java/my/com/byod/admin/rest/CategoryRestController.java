@@ -37,6 +37,9 @@ public class CategoryRestController {
 	@Value("${upload-path}")
 	private String filePath;
 	
+	@Value("${get-upload-path}")
+	private String displayFilePath;
+	
 	@Autowired
 	private DataSource dataSource;
 
@@ -156,7 +159,7 @@ public class CategoryRestController {
 				jsonResult.put("group_category_id", rs.getLong("group_category_id"));
 				jsonResult.put("category_name", rs.getString("category_name"));
 				jsonResult.put("category_description", rs.getString("category_description"));
-				jsonResult.put("category_image_path", filePath + rs.getString("category_image_path"));
+				jsonResult.put("category_image_path", displayFilePath + rs.getString("category_image_path"));
 				jsonResult.put("category_sequence", rs.getInt("category_sequence"));
 				jsonResult.put("is_active", rs.getBoolean("is_active"));
 				jsonResult.put("created_date", rs.getDate("created_date"));
