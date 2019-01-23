@@ -5,7 +5,7 @@
 			<div class="align-self-center">
 				<button type="button" ng-click="hideFromView('itemCart')"
 					class="empty-btn">
-					<span class="md-resp-font back-icon"></span>
+					<i class="fas fa-chevron-left main-text-color xl-resp-font"></i>
 				</button>
 			</div>
 			<div
@@ -99,12 +99,9 @@
 							</div>
 						</div>
 						<div
-							class="row ml-0 mr-0 pt-1 pb-1 pl-1 pr-1 d-flex flex-row justify-content-end">
-							<img class="xl-resp-img mr-3"
-								src="${pageContext.request.contextPath}/assets/images/order/icon/edit_icon.svg"
-								ng-click="editCart(cartItem)"><img class="xl-resp-img"
-								src="${pageContext.request.contextPath}/assets/images/order/icon/delete_icon.svg"
-								ng-click="deleteFromCart(cartItem)">
+							class="row ml-0 mr-0 pt-1 pb-1 pl-1 pr-1 d-flex flex-row justify-content-end md-resp-font">
+							<i class="fas fa-edit mr-2" ng-click="editCart(cartItem)"></i>
+							<i class="fas fa-trash-alt mr-2" ng-click="deleteFromCart(cartItem)"></i>
 						</div>
 					</div>
 					<div class="col-12 cart-item pl-1 pr-1 mb-2">

@@ -44,21 +44,11 @@
 												class="col-3 col-sm-3 col-md-3 col-lg-2 col-xl-2 pl-0 pr-0 xs-resp-font text-limiter">+{{priceTag}}{{itemData.price}}</div>
 											<div
 												class="col-3 col-sm-3 col-md-3 col-lg-2 col-xl-2 pl-0 pr-0 text-right text-nowrap">
-												<div class="row ml-0 mr-0">
-													<div class="col-4 pl-0 pr-0 text-center">
-														<img class="md-resp-img"
-															ng-click="minusItemQuantity(itemData, selectedTier)"
-															src="${pageContext.request.contextPath}/assets/images/order/icon/minus_icon.svg" />
-													</div>
-													<div class="col-4 pl-0 pr-0 text-center">
-														<span class="sm-resp-font">{{itemData.selectedQuantity}}</span>
-													</div>
-													<div class="col-4 pl-0 pr-0 text-center">
-														<img class="md-resp-img"
-															ng-click="addItemQuantity(itemData, selectedTier)"
-															src="${pageContext.request.contextPath}/assets/images/order/icon/plus_icon.svg" />
-													</div>
-												</div>
+												<span class="sm-resp-font"> <i
+													class="fas fa-minus-circle minus-color md-resp-font"
+													ng-click="minusItemQuantity(itemData, selectedTier)"></i>&nbsp;{{itemData.selectedQuantity}}&nbsp;<i
+													class="fas fa-plus-circle plus-color md-resp-font"
+													ng-click="addItemQuantity(itemData, selectedTier)"></i></span>
 											</div>
 										</div>
 										<div class="row ml-0 mr-0"

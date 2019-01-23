@@ -33,16 +33,12 @@
 					src="${pageContext.request.contextPath}${applicationData.getLandingLogoPath()}">
 				<div
 					class="align-self-center d-flex flex-row justify-content-center">
-					<img class="align-self-center xs-resp-img"
-						src="${pageContext.request.contextPath}/assets/images/order/icon/store_icon.svg">
-					<span class="align-self-center xs-resp-font">&nbsp;{{currentLanguageData.landing_storeName}}</span>
+					<span class="align-self-center xs-resp-font"><i class="fas fa-store"></i>&nbsp;{{currentLanguageData.landing_storeName}}</span>
 				</div>
 				<span class="align-self-center md-resp-font font-weight-bold">{{storeName}}</span>
 				<div
 					class="align-self-center d-flex flex-row justify-content-center">
-					<img class="align-self-center xs-resp-img"
-						src="${pageContext.request.contextPath}/assets/images/order/icon/table_icon.svg">
-					<span class="align-self-center xs-resp-font">&nbsp;{{currentLanguageData.landing_table}}</span>
+					<span class="align-self-center xs-resp-font"><i class="fas fa-concierge-bell"></i>&nbsp;{{currentLanguageData.landing_table}}</span>
 				</div>
 				<span class="align-self-center md-resp-font font-weight-bold">{{tableId}}</span>
 				<div class="align-self-center">
@@ -52,9 +48,8 @@
 			</div>
 			<div id="landing-footer-content"
 				class="d-flex flex-row justify-content-center">
-				<span class="align-self-center xs-resp-font">Powered By&nbsp;</span>
-				<img class="align-self-center xs-resp-img"
-					src="${pageContext.request.contextPath}/assets/images/order/logo/mpay_poweredby_logo.png">
+				<span class="align-self-center resp-font">Powered By&nbsp;<img class="font-size-img"
+					src="${pageContext.request.contextPath}/assets/images/order/logo/mpay_poweredby_logo.png"></span>
 			</div>
 		</div>
 	</div>

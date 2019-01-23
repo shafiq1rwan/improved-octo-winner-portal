@@ -4,7 +4,7 @@
 			<div class="align-self-center">
 				<button type="button" ng-click="hideFromView('itemDetail')"
 					class="empty-btn">
-					<span class="md-resp-font back-icon"></span>
+					<i class="fas fa-chevron-left main-text-color xl-resp-font"></i>
 				</button>
 			</div>
 		</div>
@@ -55,21 +55,11 @@
 										class="col-4 col-sm-4 col-md-4 col-lg-3 col-xl-3 d-flex flex-row pl-0">
 										<div
 											class="w-100 align-self-center flex-fill d-flex flex-column">
-											<div class="row ml-0 mr-0">
-												<div class="col-4 pl-0 pr-0 text-center">
-													<img class="md-resp-img"
-														ng-click="minusAlacarteQuantity(selectedItem)"
-														src="${pageContext.request.contextPath}/assets/images/order/icon/minus_icon.svg" />
-												</div>
-												<div class="col-4 pl-0 pr-0 text-center">
-													<span class="sm-resp-font">{{alacarteQuantity}}</span>
-												</div>
-												<div class="col-4 pl-0 pr-0 text-center">
-													<img class="md-resp-img"
-														ng-click="addAlacarteQuantity(selectedItem)"
-														src="${pageContext.request.contextPath}/assets/images/order/icon/plus_icon.svg" />
-												</div>
-											</div>
+											<span class="sm-resp-font text-right"> <i
+												class="fas fa-minus-circle minus-color md-resp-font"
+												ng-click="minusAlacarteQuantity(selectedItem)"></i>&nbsp;{{alacarteQuantity}}&nbsp;<i
+												class="fas fa-plus-circle plus-color md-resp-font"
+												ng-click="addAlacarteQuantity(selectedItem)"></i></span>
 										</div>
 									</div>
 								</div>
