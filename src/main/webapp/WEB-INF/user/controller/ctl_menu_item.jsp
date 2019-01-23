@@ -247,8 +247,8 @@
 			        		msg = 'Image file must not exceed 150kb.';
 			        		errorFlag = true;
 						}		          
-			        	else if(aspectRatio<1 || aspectRatio>1.5){
-			        		msg = 'Make sure that the image aspect ratio is within 1:1 to 3:2.';
+			        	else if(aspectRatio<1 || aspectRatio>2){
+			        		msg = 'Make sure that the image aspect ratio is within 1:1 to 2:1.';
 			        		errorFlag = true;
 						}	
 			        	else if(width < 300){
