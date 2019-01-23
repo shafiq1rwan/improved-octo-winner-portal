@@ -7,6 +7,10 @@
 .springBeans
 .sts4-cache
 
+### File Path ###
+/byod-img/
+/byod-menu/
+
 ### IntelliJ IDEA ###
 .idea
 *.iws
