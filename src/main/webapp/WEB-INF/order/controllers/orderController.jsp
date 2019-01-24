@@ -11,6 +11,7 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 	/*Config Data*/
 	$scope.localeData;
 	$scope.languageData;
+	$scope.imagePath;
 	$scope.menuList;
 	$scope.priceTag;
 	$scope.storeName;
@@ -615,6 +616,7 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 					$scope.storeName = response.data.storeName;
 					$scope.tableId = $routeParams.tableId;
 					$scope.priceTag = response.data.priceTag;
+					$scope.imagePath = response.data.imagePath;
 					
 					$scope.loadLanguageData();
 				} else {

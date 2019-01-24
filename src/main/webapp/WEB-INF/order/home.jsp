@@ -19,7 +19,7 @@
 <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/plugins/bootstrap-4.1.3/css/bootstrap-grid.min.css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/plugins/bootstrap-4.1.3/css/bootstrap-reboot.min.css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/order/main.css">
-<link rel="stylesheet" href="${pageContext.request.contextPath}/assets/plugins/fontawesome-5.6.3/css/all.min.css">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/assets/plugins/fontawesome-pro-5.6.1/css/all.css">
 
 <link rel="shortcut icon" type="image/png" href="${pageContext.request.contextPath}${applicationData.getShortcutLogoPath()}" />
 

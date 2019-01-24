@@ -15,7 +15,7 @@
 			<div class="align-self-center mr-1">
 				<button type="button" ng-click="switchToView('itemCart')"
 					class="empty-btn badge-btn">
-					<i class="fas fa-shopping-cart main-text-color xl-resp-font"></i> <span
+					<i class="fal fa-shopping-cart main-text-color xl-resp-font"></i> <span
 						class="badge badge-pill badge-danger xxs-resp-font ng-binding">{{cart.length}}</span>
 				</button>
 			</div>
@@ -27,7 +27,7 @@
 						class="col-6 col-sm-6 col-md-4 col-lg-4 col-xl-3 sub-card-container"
 						ng-repeat="data in selectedCategory.itemList">
 						<div class="card" ng-click="switchToView('itemDetail', data)">
-							<img class="max-img-height card-img-top" ng-src="{{data.path}}"
+							<img class="max-img-height card-img-top" ng-src="${pageContext.request.contextPath}{{imagePath}}{{data.path}}"
 								alt="{{data.name}}">
 							<div class="main-color main-text-color text-center sm-resp-font">
 								<b>{{priceTag}}{{data.price}}</b>

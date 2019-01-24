@@ -14,7 +14,7 @@
 					<div
 						class="w-100 flex-fill card d-flex flex-column align-self-center scrollable-y">
 						<div class="w-100 align-self-center text-center">
-							<img class="max-img-height" src="{{selectedItem.path}}"
+							<img class="max-img-height" src="${pageContext.request.contextPath}{{imagePath}}{{selectedItem.path}}"
 								alt="{{selectedItem.name}}">
 						</div>
 						<div class="w-100 align-self-center text-center">

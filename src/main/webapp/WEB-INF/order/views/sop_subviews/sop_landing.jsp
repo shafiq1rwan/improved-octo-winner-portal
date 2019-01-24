@@ -33,12 +33,12 @@
 					src="${pageContext.request.contextPath}${applicationData.getLandingLogoPath()}">
 				<div
 					class="align-self-center d-flex flex-row justify-content-center">
-					<span class="align-self-center xs-resp-font"><i class="fas fa-store"></i>&nbsp;{{currentLanguageData.landing_storeName}}</span>
+					<span class="align-self-center xs-resp-font"><i class="fas fa-store-alt"></i>&nbsp;{{currentLanguageData.landing_storeName}}</span>
 				</div>
 				<span class="align-self-center md-resp-font font-weight-bold">{{storeName}}</span>
 				<div
 					class="align-self-center d-flex flex-row justify-content-center">
-					<span class="align-self-center xs-resp-font"><i class="fas fa-concierge-bell"></i>&nbsp;{{currentLanguageData.landing_table}}</span>
+					<span class="align-self-center xs-resp-font"><i class="fas fa-utensils"></i>&nbsp;{{currentLanguageData.landing_table}}</span>
 				</div>
 				<span class="align-self-center md-resp-font font-weight-bold">{{tableId}}</span>
 				<div class="align-self-center">
