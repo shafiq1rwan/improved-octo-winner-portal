@@ -49,7 +49,7 @@ if it's not present, don't show loader */
 	<link href="${pageContext.request.contextPath}/assets/plugins/bootstrap-4.1.3/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
 	
 	<!-- Font Awesome CSS -->
-	<link href="${pageContext.request.contextPath}/assets/plugins/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+	<link rel="stylesheet" href="${pageContext.request.contextPath}/assets/plugins/fontawesome-pro-5.6.1/css/all.css">
 	
 	<!-- Custom CSS -->
 	<link href="${pageContext.request.contextPath}/assets/css/byodadmin/style.css" rel="stylesheet" type="text/css" />
@@ -230,6 +230,15 @@ if it's not present, don't show loader */
 			resolve : {
 		       	checkSession:checkSession
 		    }
+		})
+		.when('/Router_user',{
+			templateUrl : function(params){
+				return '${pageContext.request.contextPath}/user/views/userMgmt'
+			},
+			controller : "ctl_user",
+			resolve : {
+		       	checkSession:checkSession
+		    }
 		});
 	});
 	
@@ -296,5 +305,6 @@ if it's not present, don't show loader */
 <jsp:include page="/WEB-INF/user/controller/ctl_menu_item.jsp" />
 <jsp:include page="/WEB-INF/user/controller/ctl_combo.jsp" />
 <jsp:include page="/WEB-INF/user/controller/ctl_assign_modifier.jsp" />
+<jsp:include page="/WEB-INF/user/controller/ctl_user.jsp" />
 <!-- *****************************ANGULAR JS CONTROLLER***************************** -->
 </html>

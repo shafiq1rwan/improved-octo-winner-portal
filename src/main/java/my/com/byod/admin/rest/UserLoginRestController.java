@@ -205,4 +205,12 @@ public class UserLoginRestController {
 		model.setViewName("/user/views/assign_modifier");
 		return model;
 	}
+	
+	// User
+	@RequestMapping(value = { "/views/userMgmt" }, method = RequestMethod.GET)
+	public ModelAndView viewUsers() {
+		ModelAndView model = new ModelAndView();
+		model.setViewName("/user/views/user");
+		return model;
+	}
 }

@@ -9,31 +9,33 @@
 		<ul>
 
 				<li class="submenu">
-					<a class="active" href="#"><i class="fa fa-fw fa-bars"></i><span> Dashboard </span> </a>
+					<a class="active" href="#"><i class="far fa-bars"></i><span> Dashboard </span> </a>
                    </li>
                 
                 <li class="submenu">
-                       <a href="${pageContext.request.contextPath}/user/#!Router_store"><i class="fa fa-fw fa-building"></i><span> Store</span> </a>
+                       <a href="${pageContext.request.contextPath}/user/#!Router_store"><i class="far fa-building"></i><span> Store</span> </a>
                 </li>
                 
                 <li class="submenu">
-                       <a href="${pageContext.request.contextPath}/user/#!Router_group_category"><i class="fa fa-fw fa-sitemap"></i><span> Group Category</span> </a>
+                       <a href="${pageContext.request.contextPath}/user/#!Router_group_category"><i class="far fa-sitemap"></i><span> Group Category</span> </a>
                 </li>
                 
                 <li class="submenu">
-                       <a href="${pageContext.request.contextPath}/user/#!Router_menu_item"><i class="fa fa-fw fa-shopping-cart"></i><span> Menu Item</span> </a>
+                       <a href="${pageContext.request.contextPath}/user/#!Router_menu_item"><i class="far fa-shopping-cart"></i><span> Menu Item</span> </a>
                 </li>			
 									
                  <li class="submenu">
-                     <a href="#" ng-click="$event.preventDefault()"><i class="fa fa-fw fa-tv"></i> <span> Management </span> <span class="menu-arrow"></span></a>
+                     <a href="#" ng-click="$event.preventDefault()"><i class="far fa-tv"></i> <span> Management </span> <span class="far menu-arrow"></span></a>
                          <ul class="list-unstyled">
-                             <li><a href="${pageContext.request.contextPath}/user/#!Router_item_group">Item Group</a></li>
-                             <li><a href="${pageContext.request.contextPath}/user/#!Router_modifier_group">Modifier Group</a></li>
+                             <li><a href="${pageContext.request.contextPath}/user/#!Router_item_group"><i class="far fa-ball-pile"></i>Item Group</a></li>
+                             <li><a href="${pageContext.request.contextPath}/user/#!Router_modifier_group"><i class="far fa-layer-group"></i>Modifier Group</a></li>
                          </ul>
                  </li>
-                 
                  <li class="submenu">
-                       <a href="${pageContext.request.contextPath}/user/#!Router_combo/1"><i class="fa fa-fw fa-area-chart"></i><span> Setting </span> </a>
+                       <a href="${pageContext.request.contextPath}/user/#!Router_user"><i class="far fa-users"></i><span> User Configuration </span> </a>
+                </li>	
+                 <li class="submenu">
+                       <a href="${pageContext.request.contextPath}/user/#!Router_combo/1"><i class="far fa-cog"></i><span> Setting </span> </a>
                 </li>	
            </ul>
 

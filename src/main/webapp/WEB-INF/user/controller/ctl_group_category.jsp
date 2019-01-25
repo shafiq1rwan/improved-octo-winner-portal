@@ -147,7 +147,7 @@
 				"columns" : [ 
 					{"data" : "id", "width": "5%"}, 
 					{"data" : "group_category_name"},
-					{"data": "id", "width": "25%",
+					{"data": "id", "width": "27%",
 					 "render": function ( data, type, full, meta ) {
 						 	var id = full.id;
 						    return '<div class="btn-toolbar justify-content-start"><a ng-href= "${pageContext.request.contextPath}/user/#!Router_group_category_category/'+id+'" class="btn btn-outline-info p-1 custom-fontsize"><i class="fa fa-edit"></i> Edit Category</a><button class="btn btn-outline-danger p-1 custom-fontsize" ng-click="publishMenu('+id+')"><i class="fa fa-upload"></i> Publish Menu</button></div>'			   
