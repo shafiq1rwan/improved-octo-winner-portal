@@ -40,7 +40,7 @@
 								</div>
 								<div class="card-body">
 									<div class="table-responsive">
-										<table id="itemGroup_dtable" class="table table-bordered table-hover display" style="width: 100%">
+										<table id="itemGroup_dtable" class="table table-bordered table-hover display nowrap" style="width: 100%">
 											<thead>
 												<tr>
 													<th>ID</th>

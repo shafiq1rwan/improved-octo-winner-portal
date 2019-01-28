@@ -132,7 +132,7 @@
 					                <div class="input-group date" id="operatingStartTime" data-target-input="nearest">
 					                    <input type="text" class="form-control datetimepicker-input" data-target="#operatingStartTime"/>
 					                    <div class="input-group-append" data-target="#operatingStartTime" data-toggle="datetimepicker">
-					                        <div class="input-group-text"><i class="fa fa-clock-o"></i></div>
+					                        <div class="input-group-text"><i class="far fa-clock"></i></div>
 					                    </div>
 					                </div>
 					            </div>
@@ -143,7 +143,7 @@
 					                <div class="input-group date" id="operatingEndTime" data-target-input="nearest">
 					                    <input type="text" class="form-control datetimepicker-input" data-target="#operatingEndTime"/>
 					                    <div class="input-group-append" data-target="#operatingEndTime" data-toggle="datetimepicker">
-					                        <div class="input-group-text"><i class="fa fa-clock-o"></i></div>
+					                        <div class="input-group-text"><i class="far fa-clock"></i></div>
 					                    </div>
 					                </div>
 					            </div>

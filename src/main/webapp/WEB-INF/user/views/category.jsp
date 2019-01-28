@@ -10,10 +10,9 @@
 				<div class="row">
 						<div class="col-xl-12">
 								<div class="breadcrumb-holder">
-	                                    <h1 class="main-title float-left"><a ng-href="${pageContext.request.contextPath}/user/#!Router_group_category"><i class="fa fa-chevron-left"></i></a> &nbsp;Category</h1>
+	                                    <h1 class="main-title float-left"><a ng-href="${pageContext.request.contextPath}/user/#!Router_group_category"><i class="fa fa-chevron-left"></i></a> &nbsp;Category List</h1>
 	                                    <ol class="breadcrumb float-right">
-											<li class="breadcrumb-item">Home</li>
-											<li class="breadcrumb-item">Group Category</li>
+											<li class="breadcrumb-item"><a href="${pageContext.request.contextPath}/user/#!Router_group_category">Group Category</a></li>
 											<li class="breadcrumb-item active">Category</li>
 	                                    </ol>
 	                                    <div class="clearfix"></div>

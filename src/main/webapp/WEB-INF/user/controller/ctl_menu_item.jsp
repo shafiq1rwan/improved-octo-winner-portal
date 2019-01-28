@@ -390,12 +390,12 @@
 						 	var menu_item_type = full.menu_item_type;
 						 	switch(menu_item_type){
 							 	case 0:
-							 		return '<div class="btn-group"><a ng-href="${pageContext.request.contextPath}/user/#!Router_assign_modifier/'+ id +'" class="btn btn-info p-1 custom-fontsize"><b><i class="fa fa-bars"></i> Modifier Groups</b></a></div>';	 
+							 		return '<div class="d-flex justify-content-start"><a ng-href="${pageContext.request.contextPath}/user/#!Router_assign_modifier/'+ id +'" class="btn btn-outline-secondary p-1 custom-fontsize"><i class="far fa-bars"></i> Modifier Groups</a></div>';	 
 							 	case 2:
 							 	 	return '';	 
 							 		break;
 							 	case 1:
-							 		return '<div class="btn-group"><button ng-click="openComboSetting('+ id +')" class="btn btn-info p-1 custom-fontsize"><b><i class="fa fa-edit"></i> Combo Setting</b></button><a ng-href="${pageContext.request.contextPath}/user/#!Router_combo/'+ id +'" class="btn btn-danger p-1 custom-fontsize"><b><i class="fa fa-bars"></i> Manage Tier</b></a></div>';	
+							 		return '<div class="d-flex justify-content-start"><button ng-click="openComboSetting('+ id +')" class="btn btn-outline-info p-1 custom-fontsize"><i class="far fa-edit"></i> Combo Setting</button><a ng-href="${pageContext.request.contextPath}/user/#!Router_combo/'+ id +'" class="btn btn-outline-danger p-1 custom-fontsize"><i class="far fa-bars"></i> Manage Tier</a></div>';	
 						 	}
 					 }
 					}

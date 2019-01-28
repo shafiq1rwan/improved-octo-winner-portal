@@ -26,7 +26,6 @@ overflow-y: auto;
 							<div class="breadcrumb-holder">
 								<h1 class="main-title float-left">Group Category List</h1>
 								<ol class="breadcrumb float-right">
-									<li class="breadcrumb-item">Home</li>
 									<li class="breadcrumb-item active">Group Category</li>
 								</ol>
 								<div class="clearfix"></div>
@@ -50,7 +49,7 @@ overflow-y: auto;
 								<div class="card-body">
 									<div class="table-responsive">
 										<table id="groupCategory_dtable"
-											class="table table-bordered table-hover display"
+											class="table table-bordered table-hover display nowrap"
 											style="width: 100%">
 											<thead>
 												<tr>

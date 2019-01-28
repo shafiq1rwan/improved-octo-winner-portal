@@ -151,11 +151,11 @@ public class UserLoginRestController {
 		return model;
 	}
 	
-	// Menu Dashboard
-	@RequestMapping(value = { "/views/menuDashboard" }, method = RequestMethod.GET)
+	// Dashboard
+	@RequestMapping(value = { "/views/dashboard" }, method = RequestMethod.GET)
 	public ModelAndView viewMenuDashboard() {
 		ModelAndView model = new ModelAndView();
-		model.setViewName("/user/views/menu_dashboard");
+		model.setViewName("/user/views/dashboard");
 		return model;
 	}
 	
@@ -206,11 +206,19 @@ public class UserLoginRestController {
 		return model;
 	}
 	
-	// User
+	// User Management
 	@RequestMapping(value = { "/views/userMgmt" }, method = RequestMethod.GET)
 	public ModelAndView viewUsers() {
 		ModelAndView model = new ModelAndView();
 		model.setViewName("/user/views/user");
+		return model;
+	}
+	
+	// Setting
+	@RequestMapping(value = { "/views/setting" }, method = RequestMethod.GET)
+	public ModelAndView viewSetting() {
+		ModelAndView model = new ModelAndView();
+		model.setViewName("/user/views/setting");
 		return model;
 	}
 }

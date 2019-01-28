@@ -3,7 +3,7 @@
 
 	<!-- LOGO -->
        <div class="headerbar-left">
-		<a href="index.html" class="logo"><img alt="Logo" src="${pageContext.request.contextPath}/assets/images/byodadmin/logo/logo.png" /> <span>Admin</span></a>
+		<a href="${pageContext.request.contextPath}/user/#!Router_dashboard" class="logo"><img alt="Logo" src="${pageContext.request.contextPath}/assets/images/byodadmin/logo/logo.png" /> <span>Admin</span></a>
        </div>
 
        <nav class="navbar-custom">

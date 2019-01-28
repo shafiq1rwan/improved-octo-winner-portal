@@ -139,9 +139,9 @@ if it's not present, don't show loader */
 		       	checkSession:checkSession
 		       }
 		})
-		.when("/Router_menu_dashboard", {
-			templateUrl : "${pageContext.request.contextPath}/user/views/menuDashboard",
-			controller : "ctl_menu_dashboard",
+		.when("/Router_dashboard", {
+			templateUrl : "${pageContext.request.contextPath}/user/views/dashboard",
+			controller : "ctl_dashboard",
 			resolve : {
 		       	checkSession:checkSession
 		       }
@@ -239,6 +239,15 @@ if it's not present, don't show loader */
 			resolve : {
 		       	checkSession:checkSession
 		    }
+		})
+		.when('/Router_setting',{
+			templateUrl : function(params){
+				return '${pageContext.request.contextPath}/user/views/setting'
+			},
+			controller : "ctl_setting",
+			resolve : {
+		       	checkSession:checkSession
+		    }
 		});
 	});
 	
@@ -306,5 +315,7 @@ if it's not present, don't show loader */
 <jsp:include page="/WEB-INF/user/controller/ctl_combo.jsp" />
 <jsp:include page="/WEB-INF/user/controller/ctl_assign_modifier.jsp" />
 <jsp:include page="/WEB-INF/user/controller/ctl_user.jsp" />
+<jsp:include page="/WEB-INF/user/controller/ctl_dashboard.jsp" />
+<jsp:include page="/WEB-INF/user/controller/ctl_setting.jsp" />
 <!-- *****************************ANGULAR JS CONTROLLER***************************** -->
 </html>
