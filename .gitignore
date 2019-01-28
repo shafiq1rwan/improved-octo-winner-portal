@@ -10,6 +10,7 @@
 ### File Path ###
 /byod-img/
 /byod-menu/
+/logger/
 
 ### IntelliJ IDEA ###
 .idea

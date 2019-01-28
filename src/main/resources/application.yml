@@ -33,6 +33,7 @@ upload-path: byod-img/
 get-upload-path: /byod-img/
 menu-path: byod-menu/
 get-menu-path: /byod-menu/
+log-path: logger
 
 ---
 

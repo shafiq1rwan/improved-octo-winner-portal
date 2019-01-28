@@ -1,11 +1,8 @@
 package my.com.byod.order.rest;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.Writer;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -26,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
+import my.com.byod.logger.Logger;
 import my.com.byod.order.configuration.ErrorConfiguration;
 import my.com.byod.order.configuration.LanguageConfiguration;
 
@@ -43,9 +41,14 @@ public class Order_RestController {
 
 	@Autowired
 	private ErrorConfiguration errorConfiguration;
+	
+	@Autowired
+	private Logger logger;
 
 	@Autowired
 	DataSource dataSource;
+	
+	private static final String folName = "byodFE";
 
 	@RequestMapping(value = "/order/getLanguagePack", method = { RequestMethod.POST })
 	public String GetStoreName(HttpServletRequest request, HttpServletResponse response) {
@@ -77,7 +80,7 @@ public class Order_RestController {
 			resultCode = "00";
 			resultMessage = "Success";
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.writeError(e, folName);
 		} finally {
 			try {
 				result.put("resultCode", resultCode);
@@ -93,6 +96,10 @@ public class Order_RestController {
 	public String getMenuData(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam(value = "storeId", required = true) String storeId,
 			@RequestParam(value = "tableId", required = true) String tableId) {
+		String storeLog = "--Get Store Data Begin--" + System.lineSeparator();
+		storeLog += "Store ID: " + storeId + System.lineSeparator();
+		storeLog += "Table ID: " + tableId + System.lineSeparator();
+		
 		JSONObject result = new JSONObject();
 		Connection connection = null;
 		String sqlStatement = null;
@@ -159,8 +166,11 @@ public class Order_RestController {
 			rs1.close();
 			ps1.close();
 		} catch (Exception e) {
+			storeLog += "Error Occurred. Refer err log.";
 			e.printStackTrace();
 		} finally {
+			storeLog += "--Get Store Data End--";
+			logger.writeActivity(storeLog, folName);
 			if (connection != null) {
 				try {
 					connection.close();
