@@ -166,10 +166,10 @@ public class Order_RestController {
 			rs1.close();
 			ps1.close();
 		} catch (Exception e) {
-			storeLog += "Error Occurred. Refer err log.";
-			e.printStackTrace();
+			storeLog += "Error Occurred. Refer err log." + System.lineSeparator();
+			logger.writeError(e, folName);
 		} finally {
-			storeLog += "--Get Store Data End--";
+			storeLog += "--Get Store Data End--" + System.lineSeparator();
 			logger.writeActivity(storeLog, folName);
 			if (connection != null) {
 				try {
