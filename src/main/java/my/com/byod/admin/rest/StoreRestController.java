@@ -953,7 +953,7 @@ public class StoreRestController {
 			stmt = connection.prepareStatement("INSERT INTO device_info(activation_id, activation_key, status_lookup_id, device_type_lookup_id, ref_id) "
 					+ "VALUES (?,?,?,?,?); SELECT SCOPE_IDENTITY();");
 			
-			stmt.setString(count++, byodUtil.createBackendId(prefix, 8));
+			stmt.setString(count++, byodUtil.createUniqueActivationId(prefix));
 			stmt.setString(count++, byodUtil.createRandomDigit(16));
 			stmt.setInt(count++, 1);
 			stmt.setLong(count++, deviceTypeId);

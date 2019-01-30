@@ -513,50 +513,6 @@ public class GroupCategoryRestController {
 		return new ResponseEntity<JSONObject>(result, HttpStatus.OK);	
 		
 	}
-	
-	@RequestMapping(value = "/syncMenu", method = { RequestMethod.POST })
-	public String getMenuData(HttpServletRequest request, HttpServletResponse response,
-			@RequestParam(value = "storeId", required = true) Long storeId, 
-			@RequestParam(value = "versionCount", required = true) Long versionCount) {
-		// need identifier for ecpos or kiosk
-		
-		// sync menu
-		Connection connection = null;
-		String menuFile = null;
-		JSONObject result = new JSONObject();;
-		try {
-			connection = dataSource.getConnection();
-			
-			if(versionCount==0) {
-				// first time get menu
-				menuFile = getLatestMenuFile(connection, storeId);
-				if(menuFile!=null) {
-					result.put("menuFile", menuFile); 
-				}
-				else {
-					result.put("resultCode", "02");
-					result.put("resultMessage", "Never publish menu before");
-				}
-			}
-			
-			JSONArray versionArray = getVersionUpdates(connection, versionCount, storeId);			
-			if(versionArray.length()!=0) {
-				result.put("versionSync", versionArray);
-				result.put("resultCode", "00");
-			}
-			else {
-				// up-to-date
-				System.out.println("The current version of menu is up-to-date");
-				result.put("resultCode", "01");
-				result.put("resultMessage", "Current menu is the latest version");
-			}
-			
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-		
-		return result.toString();
-	}
 
 	private int checkDuplicateGroupCategoryName(String groupCategoryName) {
 		return jdbcTemplate.queryForObject("SELECT COUNT(group_category_name) FROM group_category WHERE group_category_name = ?", new Object[] {groupCategoryName}, Integer.class);
@@ -979,7 +935,6 @@ public class GroupCategoryRestController {
 				} else {
 					// new file
 					Writer output = new BufferedWriter(new FileWriter(checkFile));
-					output.write("USE byod;\r\n");
 		            output.write(query);
 		            output.close();
 				} 
@@ -1064,7 +1019,6 @@ public class GroupCategoryRestController {
 				} else {
 					// new file
 					Writer output = new BufferedWriter(new FileWriter(checkFile));
-					output.write("USE byod;\r\n");
 		            output.write(query);
 		            output.close();
 				}
@@ -1332,78 +1286,6 @@ public class GroupCategoryRestController {
 			}
 		}
 		return publishVersionId;
-	}
-	
-	private String getLatestMenuFile(Connection connection, Long storeId) throws Exception {
-		String sqlStatement = null;
-		PreparedStatement ps1 = null;
-		ResultSet rs1 = null;
-		String result = null;
-		try {
-			connection = dataSource.getConnection();
-			sqlStatement = "SELECT c.* FROM store a " + 
-					"INNER JOIN group_category b ON a.group_category_id = b.id " + 
-					"INNER JOIN publish_version c ON c.id = b.publish_version_id AND c.group_category_id = b.id " +
-					"WHERE a.id = ? ";
-			ps1 = connection.prepareStatement(sqlStatement);
-			ps1.setLong(1, storeId);
-			rs1 = ps1.executeQuery();
-
-			if (rs1.next()) {
-				result = rs1.getString("menu_file_path");
-			}
-			
-		} catch (Exception ex) {
-			throw ex;
-		} finally {
-			if (rs1 != null) {
-				rs1.close();
-			}
-			if (ps1 != null) {
-				ps1.close();
-			}
-		}
-		return result;
-	}
-	
-	private JSONArray getVersionUpdates(Connection connection, Long versionCount, Long storeId) throws Exception {
-		String sqlStatement = null;
-		PreparedStatement ps1 = null;
-		ResultSet rs1 = null;
-		JSONArray versionArray = new JSONArray();
-		try {
-			connection = dataSource.getConnection();
-			sqlStatement = "SELECT c.* FROM store a " + 
-					"INNER JOIN group_category b ON a.group_category_id = b.id " + 
-					"INNER JOIN publish_version c ON c.id IN ( " + 
-					"SELECT id FROM publish_version WHERE group_category_id = b.id AND version_count > ?) AND c.group_category_id = b.id " +
-					"WHERE a.id = ? " + 
-					"ORDER BY c.version_count ASC ";
-			ps1 = connection.prepareStatement(sqlStatement);
-			ps1.setLong(1, versionCount);
-			ps1.setLong(2, storeId);
-			rs1 = ps1.executeQuery();
-
-			while (rs1.next()) {
-				JSONObject jsonObject = new JSONObject();
-				jsonObject.put("version_count", "version_count");
-				//jsonObject.put("menu_file_path", "menu_file_path");
-				jsonObject.put("menu_query_file_path", "menu_query_file_path");
-				jsonObject.put("menu_img_file_path", "menu_img_file_path");
-				versionArray.put(jsonObject);
-			}
-			
-		} catch (Exception ex) {
-			throw ex;
-		} finally {
-			if (rs1 != null) {
-				rs1.close();
-			}
-			if (ps1 != null) {
-				ps1.close();
-			}
-		}
-		return versionArray;
 	}
 	
 }

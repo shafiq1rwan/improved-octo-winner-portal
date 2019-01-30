@@ -58,28 +58,41 @@ public class ByodUtil {
 		jdbcTemplate.update("UPDATE backend_sequence SET backend_sequence = ? ,modified_date = ? WHERE backend_sequence_code = ?", new Object[] { sequence, currentDate,code });
 		return sequence;
 	}
-
-	public String createBackendId(String typePrefix, int length) {
-		String generatedString = createRandomString(length);
-
-		Date date = new Date();
-		DateFormat dateFormat = new SimpleDateFormat("ddMMyyss");
-		String dateSuffix = dateFormat.format(date);
-
-		return typePrefix + generatedString + dateSuffix;
+	
+	public String createUniqueActivationId(String prefix) {
+		String resultString = "";
+		Date currentDate = new Date();	
+		SimpleDateFormat standardDateFormat = new SimpleDateFormat("ddMMyyyy");
+		String sequence = getActivationIdSequence(prefix);
+		
+		resultString = prefix + standardDateFormat.format(currentDate) + sequence;
+		return resultString;
 	}
 
-	public String createRandomString(int length) {
-		String possibleChar = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-		StringBuilder builder = new StringBuilder();
-		Random random = new Random();
+	private String getActivationIdSequence(String code) {
+		boolean isSameDay = false;
+		int sequence = 0;
+		SimpleDateFormat standardDateFormat = new SimpleDateFormat("dd/MM/yyyy");
 
-		while (builder.length() < length) {
-			int index = (int) (random.nextFloat() * possibleChar.length());
-			builder.append(possibleChar.charAt(index));
-		}
-		return builder.toString();
+		Map<String, Object> backendSequenceResult = jdbcTemplate.queryForMap("SELECT * FROM device_type_lookup WHERE prefix = ?", new Object[] {code});
+		Date databaseDate = (Date) backendSequenceResult.get("modified_date");
+		Date currentDate = new Date();
+		
+		System.out.println("Yesterday " + standardDateFormat.format(databaseDate));
+		System.out.println("Today " + standardDateFormat.format(currentDate));
+		
+		if (standardDateFormat.format(databaseDate).compareTo(standardDateFormat.format(currentDate)) == 0)
+			isSameDay = true;
+
+		if (isSameDay)
+			sequence = (int) backendSequenceResult.get("backend_sequence") + 1;
+		else
+			sequence = 1;
+		
+		jdbcTemplate.update("UPDATE device_type_lookup SET backend_sequence = ? ,modified_date = ? WHERE prefix = ?", new Object[] { sequence, currentDate,code });
+		return String.format("%05d", sequence);
 	}
+
 
 	public String createRandomDigit(int length) {
 		String possibleChar = "0123456789";
@@ -167,7 +180,7 @@ public class ByodUtil {
 		return imageName + ".png";
 	}
 	
-	public static String genSecureHash(String mdInstance, String originalString) {
+	public String genSecureHash(String mdInstance, String originalString) {
 		MessageDigest md = null;
 		byte[] ba = null;
 		

@@ -97,7 +97,7 @@ if it's not present, don't show loader */
 		<jsp:include page="/WEB-INF/user/webparts_include/menu_drawer.jsp" />
 		<!-- *****************************TO-DO : INCLUDE menu_drawer***************************** -->
 
-		<div ng-view></div>
+		<div class="h-100" ng-view></div>
 	</div>
 	</div>
 </body>

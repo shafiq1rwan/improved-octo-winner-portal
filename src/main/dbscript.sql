@@ -210,12 +210,14 @@ CREATE TABLE device_type_lookup
 (
 	id INT UNIQUE NOT NULL, 
 	name NVARCHAR(50) NOT NULL,
-	prefix NVARCHAR(2) NOT NULL UNIQUE
+	prefix NVARCHAR(2) NOT NULL UNIQUE,
+	backend_sequence INT NOT NULL,
+	modified_date DATE NOT NULL DEFAULT GETDATE()
 );
 
-INSERT INTO device_type_lookup (id, name, prefix) VALUES (1, 'ECPOS', 'EC')
-INSERT INTO device_type_lookup (id, name, prefix) VALUES (2, 'BYOD', 'BD')
-INSERT INTO device_type_lookup (id, name, prefix) VALUES (3, 'KIOSK', 'KK')
+INSERT INTO device_type_lookup (id, name, prefix, backend_sequence, modified_date) VALUES (1, 'ECPOS', 'EC', 0, GETDATE())
+INSERT INTO device_type_lookup (id, name, prefix, backend_sequence, modified_date) VALUES (2, 'BYOD', 'BD', 0, GETDATE())
+INSERT INTO device_type_lookup (id, name, prefix, backend_sequence, modified_date) VALUES (3, 'KIOSK', 'KK', 0, GETDATE())
 
 CREATE TABLE status_lookup
 (

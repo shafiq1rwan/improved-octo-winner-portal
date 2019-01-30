@@ -150,7 +150,7 @@
 					{"data": "id", "width": "27%",
 					 "render": function ( data, type, full, meta ) {
 						 	var id = full.id;
-						    return '<div class="d-flex justify-content-start"><a ng-href= "${pageContext.request.contextPath}/user/#!Router_group_category_category/'+id+'" class="btn btn-outline-info p-1 custom-fontsize"><i class="far fa-edit"></i> Edit Category</a><button class="btn btn-outline-danger p-1 custom-fontsize" ng-click="publishMenu('+id+')"><i class="far fa-upload"></i> Publish Menu</button></div>'			   
+						    return '<div class="d-flex justify-content-start"><a ng-href= "${pageContext.request.contextPath}/user/#!Router_group_category_category/'+id+'" class="btn btn-outline-info ml-1 mr-1 custom-fontsize"><i class="far fa-edit"></i> Edit Category</a><button class="btn btn-outline-danger ml-1 mr-1 custom-fontsize" ng-click="publishMenu('+id+')"><i class="far fa-upload"></i> Publish Menu</button></div>'			   
 					 }
 					}
 					],
