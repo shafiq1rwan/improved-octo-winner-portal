@@ -90,7 +90,7 @@ public class DeviceConfigRestController {
 				result.put("menuFilePath", menuFilePath);
 				result.put("imageFilePath", imageFilePath);
 				result.put("resultCode", "00");
-				result.put("resultCode", "Successful device activation");
+				result.put("resultMessage", "Successful device activation");
 			}
 			else {
 				result.put("resultCode", "03");
@@ -100,6 +100,13 @@ public class DeviceConfigRestController {
 				
 		} catch (Exception ex) {
 			ex.printStackTrace();
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch(Exception ex) {
+				}
+			}
 		}
 		
 		return result.toString();

@@ -24,7 +24,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
 import my.com.byod.logger.Logger;
-import my.com.byod.order.configuration.ErrorConfiguration;
 import my.com.byod.order.configuration.LanguageConfiguration;
 
 @RestController
@@ -38,9 +37,6 @@ public class Order_RestController {
 	
 	@Autowired
 	private LanguageConfiguration languageConfiguration;
-
-	@Autowired
-	private ErrorConfiguration errorConfiguration;
 	
 	@Autowired
 	private Logger logger;
@@ -53,8 +49,8 @@ public class Order_RestController {
 	@RequestMapping(value = "/order/getLanguagePack", method = { RequestMethod.POST })
 	public String GetStoreName(HttpServletRequest request, HttpServletResponse response) {
 		JSONObject result = new JSONObject();
-		String resultCode = "E1";
-		String resultMessage = errorConfiguration.errorData().getE1();
+		String resultCode = "E01";
+		String resultMessage = "Server error. Please try again later.";
 
 		try {
 			JSONArray localeDataList = new JSONArray();
@@ -103,8 +99,8 @@ public class Order_RestController {
 		JSONObject result = new JSONObject();
 		Connection connection = null;
 		String sqlStatement = null;
-		String resultCode = "E1";
-		String resultMessage = errorConfiguration.errorData().getE1();
+		String resultCode = "E01";
+		String resultMessage = "Server error. Please try again later.";
 		String menuFilePath = null;
 		JSONArray categoryList = null;
 
@@ -121,8 +117,8 @@ public class Order_RestController {
 			if (rs1.next()) {
 				if(rs1.getLong("publish_version_id")==0) {
 					// never publish menu before
-					resultCode = "E2";
-					resultMessage = errorConfiguration.errorData().getE2();
+					resultCode = "E02";
+					resultMessage = "Store does not exist. Please re-scan QR.";
 				}
 				
 				menuFilePath = rs1.getString("menu_file_path");				
@@ -156,12 +152,12 @@ public class Order_RestController {
 				}
 				else {
 					// unable to find menu file
-					resultCode = "E2";
-					resultMessage = errorConfiguration.errorData().getE2();
+					resultCode = "E02";
+					resultMessage = "Store does not exist. Please re-scan QR.";
 				}
 			} else {
-				resultCode = "E2";
-				resultMessage = errorConfiguration.errorData().getE2();
+				resultCode = "E02";
+				resultMessage = "Store does not exist. Please re-scan QR.";
 			}
 			rs1.close();
 			ps1.close();
