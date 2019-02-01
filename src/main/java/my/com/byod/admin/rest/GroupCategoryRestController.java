@@ -13,6 +13,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -35,13 +37,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.microsoft.sqlserver.jdbc.SQLServerException;
 
 import my.com.byod.admin.util.ByodUtil;
+import my.com.byod.admin.util.DbConnectionUtil;
 
 @RestController
 @RequestMapping("/menu/group_category")
@@ -54,13 +56,10 @@ public class GroupCategoryRestController {
 	private String imagePath;
 	
 	@Autowired
-	private DataSource dataSource;
-	
-	@Autowired
-	private JdbcTemplate jdbcTemplate;
-	
-	@Autowired
 	private ByodUtil byodUtil;
+	
+	@Autowired
+	private DbConnectionUtil dbConnectionUtil;
 	
 	@GetMapping(value ="/get_all_group_category",produces = "application/json")
 	public String getAllGroupCategory(HttpServletRequest request, HttpServletResponse response) {
@@ -69,8 +68,8 @@ public class GroupCategoryRestController {
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		
-		try {
-			connection = dataSource.getConnection();
+		try {	
+			connection = dbConnectionUtil.retrieveConnection(request);		
 			stmt = connection.prepareStatement("SELECT * FROM group_category");
 			rs = (ResultSet) stmt.executeQuery();
 			
@@ -94,7 +93,7 @@ public class GroupCategoryRestController {
 			}
 		}
 		return 	jsonGroupCategoryArray.toString();
-		
+
 	}
 
 	@GetMapping(value = "/get_group_category_by_id", produces = "application/json")
@@ -105,7 +104,7 @@ public class GroupCategoryRestController {
 		ResultSet rs = null;
 		
 		try {
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			stmt = connection.prepareStatement("SELECT * FROM group_category WHERE id = ?");
 			stmt.setLong(1, id);
 			rs = (ResultSet) stmt.executeQuery();
@@ -146,13 +145,13 @@ public class GroupCategoryRestController {
 				response.setStatus(404);
 				return jsonResult.put("response_message", "Group Category Name not found. Please try again.").toString(); 
 			} else {
-				int existingRecord = checkDuplicateGroupCategoryName(jsonGroupCategoryData.getString("group_category_name"));
+				int existingRecord = checkDuplicateGroupCategoryName(jsonGroupCategoryData.getString("group_category_name"), request);
 				if(existingRecord!=0) {
 					response.setStatus(409);
 					return jsonResult.put("response_message", "Duplication Group Category Name Found!").toString();
 				}
 				else {
-					connection = dataSource.getConnection();
+					connection = dbConnectionUtil.retrieveConnection(request);
 					stmt = connection.prepareStatement("INSERT INTO group_category(group_category_name) VALUES(?)", new String[] {"id"});
 					stmt.setString(1, jsonGroupCategoryData.getString("group_category_name"));
 					stmt.executeUpdate();
@@ -205,7 +204,7 @@ public class GroupCategoryRestController {
 		try {
 			JSONObject jsonGroupCategoryData = new JSONObject(data);
 			
-				connection = dataSource.getConnection();
+				connection = dbConnectionUtil.retrieveConnection(request);
 				stmt = connection.prepareStatement("UPDATE group_category SET group_category_name = ? WHERE id = ?");
 				stmt.setString(1, jsonGroupCategoryData.getString("group_category_name"));
 				stmt.setLong(2, jsonGroupCategoryData.getLong("id"));
@@ -268,7 +267,7 @@ public class GroupCategoryRestController {
 		PreparedStatement stmt = null;
 		
 		try {
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			stmt = connection.prepareStatement("DELETE FROM group_category WHERE id = ?");
 			stmt.setLong(1, id);
 			int categoryRowAffected = stmt.executeUpdate();
@@ -307,7 +306,7 @@ public class GroupCategoryRestController {
 		ResultSet rs = null;
 		
 		try {
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			stmt = connection.prepareStatement("SELECT * FROM store WHERE group_category_id IS NULL OR group_category_id = 0");
 			rs = (ResultSet) stmt.executeQuery();
 			
@@ -340,7 +339,7 @@ public class GroupCategoryRestController {
 		ResultSet rs = null;
 		
 		try {
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			stmt = connection.prepareStatement("SELECT * FROM store WHERE group_category_id = ?");
 			stmt.setLong(1, groupCategoryId);
 			rs = (ResultSet) stmt.executeQuery();
@@ -374,7 +373,7 @@ public class GroupCategoryRestController {
 		ResultSet rs = null;
 		
 		try {
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			stmt = connection.prepareStatement("SELECT * FROM store WHERE group_category_id IN (0,?)");
 			stmt.setLong(1, groupCategoryId);
 			rs = (ResultSet) stmt.executeQuery();
@@ -419,7 +418,7 @@ public class GroupCategoryRestController {
 		Long versionCount = null;
 		
 		try {
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			
 			JSONObject groupCategoryInfo = getGroupCategoryInfoByID(connection, groupCategoryId);
 			if(groupCategoryInfo.getLong("publish_version_id")==0) {
@@ -513,15 +512,69 @@ public class GroupCategoryRestController {
 		return new ResponseEntity<JSONObject>(result, HttpStatus.OK);	
 		
 	}
+	
 
-	private int checkDuplicateGroupCategoryName(String groupCategoryName) {
-		return jdbcTemplate.queryForObject("SELECT COUNT(group_category_name) FROM group_category WHERE group_category_name = ?", new Object[] {groupCategoryName}, Integer.class);
+	private int checkDuplicateGroupCategoryName(String groupCategoryName, HttpServletRequest request) {
+		Connection connection = null;
+		PreparedStatement stmt = null;
+	    ResultSet rs = null;
+	    int count =0;
+		
+		try {
+			connection = dbConnectionUtil.retrieveConnection(request);
+	        String query= "SELECT COUNT(group_category_name) FROM group_category WHERE group_category_name = ?";
+	        stmt = connection.prepareStatement(query);
+	        stmt.setString(1,groupCategoryName);
+            rs= stmt.executeQuery();
+
+            while (rs.next()) {
+                count=rs.getInt("COUNT(group_category_name)");
+            }
+		} catch(Exception ex) {
+			ex.printStackTrace();
+			return 0;
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return count;
 	}
 	
-	private int checkDuplicateGroupCategoryNameById(String groupCategoryName, Long id) {
-		System.out.println(groupCategoryName);
-		return jdbcTemplate.queryForObject("SELECT COUNT(group_category_name) FROM group_category WHERE group_category_name = ? AND id = ?", new Object[] {groupCategoryName, id}, Integer.class);
+	private int checkDuplicateGroupCategoryNameById(String groupCategoryName, Long id, HttpServletRequest request) {
+		Connection connection = null;
+		PreparedStatement stmt = null;
+	    ResultSet rs = null;
+	    int count =0;
+		
+		try {
+			connection = dbConnectionUtil.retrieveConnection(request);
+	        String query= "SELECT COUNT(group_category_name) FROM group_category WHERE group_category_name = ? AND id = ?";
+	        stmt = connection.prepareStatement(query);
+	        stmt.setString(1,groupCategoryName);
+	        stmt.setLong(2,id);
+            rs= stmt.executeQuery();
 
+            while (rs.next()) {
+                count=rs.getInt("COUNT(group_category_name)");
+            }
+		} catch(Exception ex) {
+			ex.printStackTrace();
+			return 0;
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return count;
 	}
 	
 	private JSONObject getGroupCategoryInfoByID(Connection connection, Long groupCategoryID) throws Exception {

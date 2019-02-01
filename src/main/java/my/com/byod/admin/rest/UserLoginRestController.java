@@ -72,15 +72,18 @@ public class UserLoginRestController {
 		else if (condition.equals("timeout")) {
 			model.addObject("exceptionMsg", "Session timeout");
 		}
+		else if (condition.equals("not-exist")) {
+			model.addObject("exceptionMsg", "User not exist");
+		}
 		else {
 			model.addObject("exceptionMsg", "Invalid access");
 		}
 		
 		model.setViewName("/login");
-
-		return model;
-	}
 	
+	return model;
+	}
+		
 	// Store
 	@RequestMapping(value = { "/views/store" }, method = RequestMethod.GET)
 	public ModelAndView viewBrand() {

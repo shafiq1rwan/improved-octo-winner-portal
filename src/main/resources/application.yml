@@ -25,7 +25,7 @@ spring:
   profiles: development-data
   datasource:
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
-    url: jdbc:sqlserver://localhost:1433;databaseName=byod
+    url: jdbc:sqlserver://localhost:1433;databaseName=mpay_tenant
     username: sa
     password: MPay@1234
     
@@ -35,13 +35,19 @@ menu-path: byod-menu/
 get-menu-path: /byod-menu/
 log-path: logger
 
+db-port: 1433
+db-domain: localhost
+db-username: sa
+db-password: MPay@1234
+db-driver: com.microsoft.sqlserver.jdbc.SQLServerDriver
+
 ---
 
 spring:
   profiles: production-data
   datasource:
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
-    url: jdbc:sqlserver://localhost:1433;databaseName=byod
+    url: jdbc:sqlserver://localhost:1433;databaseName=mpay_tenant
     username: sa
     password: MPay@1234
     

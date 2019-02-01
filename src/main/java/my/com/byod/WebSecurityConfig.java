@@ -1,20 +1,97 @@
 package my.com.byod;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+
+import javax.sql.DataSource;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.provisioning.JdbcUserDetailsManager;
+import org.springframework.security.provisioning.UserDetailsManager;
+
+import my.com.byod.login.domain.ApplicationUser;
+import my.com.byod.login.repository.ApplicationUserRepository;
 
 @Configuration
-@Order(1)
+@EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
+	@Autowired
+	DataSource dataSource;
+	 
+	@Autowired
+	private BCryptPasswordEncoder passwordencoder;
+	
+	@Autowired
+	private ApplicationUserRepository applicationUserRepo;
+	
+	private static String USERS_BY_USERNAME_QUERY = "SELECT username,password, enabled FROM mpay_users WHERE username=?";
+	private static String AUTHORITIES_BY_USERNAME_QUERY = "SELECT mu.username, ma.authority FROM mpay_authorities ma "
+			+ "INNER JOIN mpay_users mu ON ma.mpay_user = mu.id "
+			+ "WHERE mu.username=?";
+ 
+	 @Autowired
+	 public void configAuthentication(AuthenticationManagerBuilder auth) throws Exception {
+		 auth.jdbcAuthentication()
+	   .dataSource(dataSource)
+       .usersByUsernameQuery(USERS_BY_USERNAME_QUERY)
+       .authoritiesByUsernameQuery(AUTHORITIES_BY_USERNAME_QUERY)
+       .passwordEncoder(passwordencoder());		 
+	 }
+	
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		http.csrf().disable();
-		http.authorizeRequests().anyRequest().permitAll();
+		http 
+		.csrf().disable()
+		.authorizeRequests()
+				.antMatchers("/user/signin/**").permitAll()
+				.antMatchers("/admin/admin-panel/**").access("hasAnyRole('ROLE_SUPER_ADMIN','ROLE_ADMIN')")
+				.anyRequest().authenticated()
+	          .and()
+	          .formLogin().loginPage("/user/signin")
+	           	  .loginProcessingUrl("/perform-login")
+		          .usernameParameter("username")
+		          .passwordParameter("password")
+		          .successHandler((request, response, authentication) -> {
+		        	  User user = (User) authentication.getPrincipal();
+		        	  String role = user.getAuthorities().iterator().next().toString();
+		        	  
+		        	  if(user!=null && role !=null) {
+		        		  if(role.equals("ROLE_SUPER_ADMIN") || role.equals("ROLE_ADMIN"))
+		        		  response.sendRedirect(request.getContextPath()+"/admin/admin-panel");
+		        	  }
+		          })
+		          .failureHandler((request, response, exception) -> {
+		  			String username = request.getParameter("username");
+					ApplicationUser user = applicationUserRepo.findUserByUsername(username);	        	  
+		        	if(user!=null) {
+		        		response.sendRedirect(request.getContextPath()+"/user/signin/error/*");
+		        	} else {
+		        		response.sendRedirect(request.getContextPath()+"/user/signin/error/not-exist");
+		        	} 
+		          })
+		          .permitAll()
+	          .and()
+	          .logout()
+	          .clearAuthentication(true)
+	          .invalidateHttpSession(true)
+	          .and()
+	          .exceptionHandling().accessDeniedPage("/user/403");
+	}
+	
+	@Override
+	public void configure(WebSecurity web) throws Exception {
+		web.ignoring().antMatchers("/assets/**");
 	}
 
 	@Bean
@@ -22,10 +99,4 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		return new BCryptPasswordEncoder();
 	}
 
-	public static void main(String args[]) {
-//		BCryptPasswordEncoder ab = new BCryptPasswordEncoder();
-//		String com = ab.encode("admin");
-//
-//		boolean result = ab.matches("admin", "v$bG5CVs?}k&");
-	}
 }
