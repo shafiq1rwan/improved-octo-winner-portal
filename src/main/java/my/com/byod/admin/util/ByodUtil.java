@@ -213,4 +213,16 @@ public class ByodUtil {
 			'0', '1', '2', '3', '4', '5', '6', '7', 
 			'8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
 	};
+	
+	public String createRandomString(int length) {
+		String possibleChar = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+		StringBuilder builder = new StringBuilder();
+		Random random = new Random();
+
+		while (builder.length() < length) {
+			int index = (int) (random.nextFloat() * possibleChar.length());
+			builder.append(possibleChar.charAt(index));
+		}
+		return builder.toString();
+	}
 }
