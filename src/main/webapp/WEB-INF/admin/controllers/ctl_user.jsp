@@ -28,8 +28,8 @@
 				"order" : [ [ 0, "asc" ] ] ,
 				"columns" : [ 
 					{"data" : "id", "visible": false, "searchable": false},
-					{"data" : "email"},
 					{"data" : "name"},
+					{"data" : "email"},
 					{"data" : "mobileNumber"},
 					{"data" : "username"},
 					{"data": "id", "width": "20%",
