@@ -55,7 +55,7 @@ public class ApplicationUserServiceImp implements ApplicationUserService {
 		Long userId = applicationUserRepo.createUser(user);
 		
 		if(userId != 0 || userId != null) {
-			jdbcTemplate.update("INSERT INTO mpay_authorities(mpay_user, authority) VALUES (?,?)", new Object[] {
+			jdbcTemplate.update("INSERT INTO authorities(user_id, authority) VALUES (?,?)", new Object[] {
 					userId, role
 			});
 		}

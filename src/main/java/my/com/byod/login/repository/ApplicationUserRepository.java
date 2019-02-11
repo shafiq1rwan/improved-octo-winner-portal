@@ -30,7 +30,7 @@ public class ApplicationUserRepository {
 	
     @Transactional(readOnly = true)
     public ApplicationUser getUser(int id) {
-        return jdbcTemplate.queryForObject("SELECT * FROM mpay_users WHERE id = ?", new Object[] {id}, applicationUserRowMapper);
+        return jdbcTemplate.queryForObject("SELECT * FROM users WHERE id = ?", new Object[] {id}, applicationUserRowMapper);
     }
     
     @Transactional(readOnly = true)
@@ -39,7 +39,7 @@ public class ApplicationUserRepository {
             throw new IllegalArgumentException("Email cannot be null");
         }
         try {
-            return jdbcTemplate.queryForObject("SELECT * FROM mpay_users WHERE email = ?", new Object[] {email}, applicationUserRowMapper);
+            return jdbcTemplate.queryForObject("SELECT * FROM users WHERE email = ?", new Object[] {email}, applicationUserRowMapper);
         } catch (EmptyResultDataAccessException notFound) {
             return null;
         }
@@ -51,7 +51,7 @@ public class ApplicationUserRepository {
             throw new IllegalArgumentException("Mobile number cannot be null");
         }
         try {
-            return jdbcTemplate.queryForObject("SELECT * FROM mpay_users WHERE mobileNumber = ?", new Object[] {mobileNumber}, applicationUserRowMapper);
+            return jdbcTemplate.queryForObject("SELECT * FROM users WHERE mobileNumber = ?", new Object[] {mobileNumber}, applicationUserRowMapper);
         } catch (EmptyResultDataAccessException notFound) {
             return null;
         }
@@ -65,7 +65,7 @@ public class ApplicationUserRepository {
         	throw new IllegalArgumentException("Email cannot be null");
         }
         try {
-            return jdbcTemplate.queryForObject("SELECT * FROM mpay_users WHERE LOWER(username) = LOWER(?) AND LOWER(email) = LOWER(?)", new Object[] {username, email}, applicationUserRowMapper);
+            return jdbcTemplate.queryForObject("SELECT * FROM users WHERE LOWER(username) = LOWER(?) AND LOWER(email) = LOWER(?)", new Object[] {username, email}, applicationUserRowMapper);
         } catch (EmptyResultDataAccessException notFound) {
             return null;
         }
@@ -77,7 +77,7 @@ public class ApplicationUserRepository {
             throw new IllegalArgumentException("Username cannot be null");
         }
         try {
-            return jdbcTemplate.queryForObject("SELECT * FROM mpay_users WHERE LOWER(username) = LOWER(?)", new Object[] {username}, applicationUserRowMapper);
+            return jdbcTemplate.queryForObject("SELECT * FROM users WHERE LOWER(username) = LOWER(?)", new Object[] {username}, applicationUserRowMapper);
         } catch (EmptyResultDataAccessException notFound) {
             return null;
         }
@@ -91,7 +91,7 @@ public class ApplicationUserRepository {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         this.jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection
-              .prepareStatement("INSERT INTO mpay_users(name,email,mobileNumber,address,username,password,enabled) VALUES(?,?,?,?,?,?,?)",  Statement.RETURN_GENERATED_KEYS);
+              .prepareStatement("INSERT INTO users(name,email,mobileNumber,address,username,password,enabled) VALUES(?,?,?,?,?,?,?)",  Statement.RETURN_GENERATED_KEYS);
               ps.setString(1, user.getName());
               ps.setString(2, user.getEmail());
               ps.setString(3, user.getMobileNumber());

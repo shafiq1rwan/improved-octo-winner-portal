@@ -159,9 +159,9 @@ public class UserManagementRestController {
 		System.out.println(auth.getAuthorities().iterator().next());*/
 	
 		try {
-			String sql = "SELECT mu.id, mu.name, mu.email, mu.mobileNumber, mu.address, mu.username, mu.enabled, ma.authority "
-					+ "FROM mpay_users mu INNER JOIN mpay_authorities ma ON mu.id = ma.mpay_user "
-					+ "WHERE ma.authority != ?";
+			String sql = "SELECT u.id, u.name, u.email, u.mobileNumber, u.address, u.username, u.enabled, a.authority "
+					+ "FROM users u INNER JOIN authorities a ON u.id = a.user_id "
+					+ "WHERE a.authority != ?";
 			List<Map<String, Object>> users = jdbcTemplate.queryForList(sql, new Object[] {"ROLE_SUPER_ADMIN"});
 			
 			if(!users.isEmpty()) {
@@ -182,9 +182,9 @@ public class UserManagementRestController {
 		JSONObject jsonResult = null;
 	
 		try {
-			String sql = "SELECT mu.id, mu.name, mu.email, mu.mobileNumber, mu.address, mu.username, mu.enabled, ma.authority "
-					+ "FROM mpay_users mu INNER JOIN mpay_authorities ma ON mu.id = ma.mpay_user "
-					+ "WHERE mu.id = ?";
+			String sql = "SELECT u.id, u.name, u.email, u.mobileNumber, u.address, u.username, u.enabled, a.authority "
+					+ "FROM users u INNER JOIN authorities a ON u.id = a.user_id "
+					+ "WHERE u.id = ?";
 			Map<String, Object> user = jdbcTemplate.queryForMap(sql, new Object[] {id});
 			
 			if(!user.isEmpty())

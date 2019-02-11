@@ -35,10 +35,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	@Autowired
 	private ApplicationUserRepository applicationUserRepo;
 	
-	private static String USERS_BY_USERNAME_QUERY = "SELECT username,password, enabled FROM mpay_users WHERE username=?";
-	private static String AUTHORITIES_BY_USERNAME_QUERY = "SELECT mu.username, ma.authority FROM mpay_authorities ma "
-			+ "INNER JOIN mpay_users mu ON ma.mpay_user = mu.id "
-			+ "WHERE mu.username=?";
+	private static String USERS_BY_USERNAME_QUERY = "SELECT username,password, enabled FROM users WHERE username=?";
+	private static String AUTHORITIES_BY_USERNAME_QUERY = "SELECT u.username, a.authority FROM authorities a "
+			+ "INNER JOIN users u ON a.user_id = u.id "
+			+ "WHERE u.username=?";
  
 	 @Autowired
 	 public void configAuthentication(AuthenticationManagerBuilder auth) throws Exception {

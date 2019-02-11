@@ -61,7 +61,7 @@ public class BrandManagementRestController {
 			} else {
 				brands = jdbcTemplate.queryForList(
 						"SELECT b.* FROM brands b " + "INNER JOIN users_brands ub ON b.id = ub.brand_id "
-								+ "INNER JOIN mpay_users mu ON ub.mpay_user = mu.id " + "WHERE mu.username = ?",
+								+ "INNER JOIN users u ON ub.user_id = u.id " + "WHERE u.username = ?",
 						new Object[] { username });
 			}
 
