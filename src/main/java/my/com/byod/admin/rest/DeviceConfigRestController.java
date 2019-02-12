@@ -71,10 +71,15 @@ public class DeviceConfigRestController {
 				resultCode = "E02";
 				resultMessage = "Invalid activation info";
 			}		
-			else if(deviceInfo.getLong("statusLookupId")!=1) {
-				// not pending
+			else if(deviceInfo.getLong("statusLookupId")==2) {
+				// already activated
 				resultCode = "E03";
-				resultMessage = "Activation device is already activated or terminated.";
+				resultMessage = "Activation info is already activated.";
+			}
+			else if(deviceInfo.getLong("statusLookupId")==3) {
+				// already terminated
+				resultCode = "E04";
+				resultMessage = "Activation info is already terminated.";
 			}
 			else if(activateDevice(connection, deviceInfo.getLong("id"), macAddress)) {
 				// successful activation
@@ -107,7 +112,7 @@ public class DeviceConfigRestController {
 				}
 			}
 			else {
-				resultCode = "E04";
+				resultCode = "E05";
 				resultMessage = "Failed to activate device.";
 			}
 				
@@ -141,22 +146,31 @@ public class DeviceConfigRestController {
 			@RequestParam(value = "brandId", required = true) Long brandId) {
 		
 		JSONObject result = new JSONObject();
+		JSONObject deviceInfo = null;
 		Connection connection = null;
 		String menuFile = null;
+		String secureHash = "";
 		String resultCode = "E01";
 		String resultMessage = "Server error. Please try again later.";
 		
 		try {
 			connection = dbConnectionUtil.getConnection(brandId);
-			String macAddress = getMacAddressByActivationId(connection, activationId);
-			String secureHash = byodUtil.genSecureHash("SHA-256", activationId.concat(macAddress).concat(timeStamp));
-			
+			deviceInfo = getDeviceInfoByActivationId(connection, activationId);
+			if(deviceInfo!=null) {
+				secureHash = byodUtil.genSecureHash("SHA-256", activationId.concat(deviceInfo.getString("mac_address")).concat(timeStamp));
+			}
+				
 			System.out.println("authToken:" + authToken);
 			System.out.println("secureHash:" + secureHash);
 			
 			if(!authToken.equals(secureHash)) {
 				resultCode = "E02";
 				resultMessage = "Invalid authentication token.";
+			}
+			else if(deviceInfo.getLong("statusLookupId")!=2) {
+				// not active
+				resultCode = "E03";
+				resultMessage = "Invalid activation info status";
 			}
 			else if(versionCount==0) {
 				// first time get menu
@@ -173,7 +187,7 @@ public class DeviceConfigRestController {
 					resultMessage = "Successful get full menu.";
 				}
 				else {
-					resultCode = "E03";
+					resultCode = "E04";
 					resultMessage = "Never publish menu before";
 				}
 			}
@@ -187,7 +201,7 @@ public class DeviceConfigRestController {
 				}
 				else {
 					// up-to-date
-					resultCode = "E04";
+					resultCode = "E05";
 					resultMessage = "Current menu is the latest version.";
 				}			
 			}
@@ -478,20 +492,22 @@ public class DeviceConfigRestController {
 		return versionArray;
 	}
 	
-	private String getMacAddressByActivationId(Connection connection, String activationId) throws Exception {
+	private JSONObject getDeviceInfoByActivationId(Connection connection, String activationId) throws Exception {
 		String sqlStatement = null;
 		PreparedStatement ps1 = null;
 		ResultSet rs1 = null;
-		String result = "";
+		JSONObject result = null;
 		try {
 			//connection = dataSource.getConnection();
-			sqlStatement = "SELECT mac_address FROM device_info WHERE activation_id = ? ";
+			sqlStatement = "SELECT * FROM device_info WHERE activation_id = ? ";
 			ps1 = connection.prepareStatement(sqlStatement);
 			ps1.setString(1, activationId);
 			rs1 = ps1.executeQuery();
 
 			if (rs1.next()) {
-				result = rs1.getString("mac_address")==null?"":rs1.getString("mac_address");
+				result = new JSONObject();
+				result.put("statusLookupId", rs1.getLong("status_lookup_id"));
+				result.put("mac_address", rs1.getString("mac_address")==null?"":rs1.getString("mac_address"));
 			}
 			
 		} catch (Exception ex) {

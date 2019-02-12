@@ -19,14 +19,14 @@
 		$http({
 			method : 'GET',
 			headers : {'Content-Type' : 'application/json'},
-			url : '${pageContext.request.contextPath}/menu/store/storeById?id='+$scope.store.id	
+			url : '${pageContext.request.contextPath}/menu/store/ecposByStoreId?store_id='+$scope.store.id	
 		})
 		.then(function(response) {
+			$scope.store.brand_id = response.data.brand_id;
 			$scope.store.name = response.data.store_name;
 			$scope.store.backend_id = response.data.backend_id;
 			console.log($scope.store);		
-		});
-		
+		});		
 		
 		// get role list
 		$http({
@@ -312,6 +312,7 @@
 					$scope.ecpos.activation_key = response.data.activation_key;
 					$scope.ecpos.created_date = response.data.created_date;
 					$scope.ecpos.status = response.data.status;
+					$scope.ecpos.mac_address = response.data.mac_address;
 					console.log($scope.ecpos);
 				}
 			 }, function errorCallback(response) {	

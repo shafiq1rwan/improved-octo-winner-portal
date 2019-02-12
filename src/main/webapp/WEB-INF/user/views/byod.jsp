@@ -38,6 +38,7 @@
 								<div class="row">
 									<div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
 										<div class="form-group">
+											<h6><label>Brand ID : {{store.brand_id}}</label></h6>
 											<h6><label>Store ID : {{store.id}}</label></h6>
 											<h6><label>Backend ID : {{store.backend_id}}</label></h6>
 											<h6><label>Store Name : {{store.name}}</label></h6>
@@ -83,7 +84,7 @@
 										<div class="col-3 col-sm-3 col-md-3 col-lg-3 col-xl-3">
 											<div class="form-group">
 												<label class="login-label">MAC Address</label>
-												<input class="form-control"  type="text" disabled>
+												<input class="form-control" ng-model="item.mac_address" type="text" disabled>
 											</div>
 										</div>																			
 									</div>		

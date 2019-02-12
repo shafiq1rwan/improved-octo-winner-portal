@@ -13,6 +13,7 @@
 			})
 			.then(function(response) {
 				console.log(response.data);
+				$scope.store.brand_id = response.data.brand_id;
 				$scope.store.name = response.data.store_name;
 				$scope.store.backend_id = response.data.backend_id;
 				$scope.store.byod = response.data.byod;

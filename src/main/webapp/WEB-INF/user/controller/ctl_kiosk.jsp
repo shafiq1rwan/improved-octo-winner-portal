@@ -13,6 +13,7 @@
 			})
 			.then(function(response) {
 				console.log(response.data);
+				$scope.store.brand_id = response.data.brand_id;
 				$scope.store.name = response.data.store_name;
 				$scope.store.backend_id = response.data.backend_id;
 				$scope.store.kiosk = response.data.kiosk;
@@ -112,7 +113,7 @@
 							console.log(response);
 							if(response.status==200){
 								//console.log(response);
-								swal("Successfully terminate KIOSK.", {
+								swal("Successfully reactivate KIOSK.", {
 									icon: "success",
 								});
 								$scope.getDeviceInfo();

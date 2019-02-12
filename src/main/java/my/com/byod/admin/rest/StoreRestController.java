@@ -116,6 +116,43 @@ public class StoreRestController {
 	}
 	
 	/*Start ECPOS API*/
+	@GetMapping(value = {"/ecposByStoreId"}, produces = "application/json")
+	public String getEcpos(@RequestParam(value = "store_id") Long store_id, HttpServletRequest request, HttpServletResponse response) {
+		//JSONArray jsonArray = new JSONArray();
+		JSONObject jsonObj = null;
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		
+		try {
+			connection = dbConnectionUtil.retrieveConnection(request);
+
+			stmt = connection.prepareStatement("SELECT * FROM store WHERE id = ?");
+			stmt.setLong(1, store_id);
+			rs = (ResultSet) stmt.executeQuery();
+			
+			jsonObj = new JSONObject();
+			if(rs.next()) {
+				jsonObj.put("brand_id", byodUtil.getGeneralConfig(connection, "BRAND_ID"));		
+				jsonObj.put("id", rs.getLong("id"));		
+				jsonObj.put("backend_id", rs.getString("backend_id"));
+				jsonObj.put("store_name", rs.getString("store_name"));				
+			}
+			
+		}catch(Exception ex) {
+			ex.printStackTrace();
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return jsonObj.toString();
+	}
+	
 	@GetMapping(value = {"/ecpos/getStaffRole"}, produces = "application/json")
 	public String getStaffRole(HttpServletRequest request, HttpServletResponse response) {
 		JSONArray jsonArray = new JSONArray();
@@ -569,12 +606,13 @@ public class StoreRestController {
 		try {
 			connection = dbConnectionUtil.retrieveConnection(request);
 
-			 stmt = connection.prepareStatement("SELECT * FROM store WHERE id = ?");
-			 stmt.setLong(1, store_id);
-			 rs = (ResultSet) stmt.executeQuery();
+			stmt = connection.prepareStatement("SELECT * FROM store WHERE id = ?");
+			stmt.setLong(1, store_id);
+			rs = (ResultSet) stmt.executeQuery();
 			 
+			jsonObj = new JSONObject();
 			if(rs.next()) {
-				jsonObj = new JSONObject();
+				jsonObj.put("brand_id", byodUtil.getGeneralConfig(connection, "BRAND_ID"));
 				jsonObj.put("id", rs.getLong("id"));		
 				jsonObj.put("backend_id", rs.getString("backend_id"));
 				jsonObj.put("store_name", rs.getString("store_name"));				
@@ -718,6 +756,7 @@ public class StoreRestController {
 			
 			jsonObj = new JSONObject();
 			if(rs.next()) {
+				jsonObj.put("brand_id", byodUtil.getGeneralConfig(connection, "BRAND_ID"));		
 				jsonObj.put("id", rs.getLong("id"));		
 				jsonObj.put("backend_id", rs.getString("backend_id"));
 				jsonObj.put("store_name", rs.getString("store_name"));				
@@ -1074,12 +1113,12 @@ public class StoreRestController {
 		
 		try {
 			connection = dbConnectionUtil.retrieveConnection(request);
-			stmt = connection.prepareStatement("UPDATE device_info SET status_lookup_id = ?, last_update_date = GETDATE() WHERE id = ? ;");
+			stmt = connection.prepareStatement("UPDATE device_info SET status_lookup_id = ?, mac_address = NULL, last_update_date = GETDATE() WHERE id = ? ;");
 			
 			stmt.setLong(count++, statusTypeId);
 			stmt.setLong(count++, id);
 
-			int rowAffected =  stmt.executeUpdate();
+			int rowAffected = stmt.executeUpdate();
 			
 			if(rowAffected==1) {
 				flag = true;
