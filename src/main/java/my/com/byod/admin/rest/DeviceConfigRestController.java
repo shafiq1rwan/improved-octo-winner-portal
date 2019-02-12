@@ -31,11 +31,17 @@ public class DeviceConfigRestController {
 	@Value("${menu-path}")
 	private String filePath;
 	
+	@Value("${get-menu-path}")
+	private String displayFilePath;
+	
 	@Value("${upload-path}")
 	private String imagePath;
 	
-/*	@Autowired
-	private DataSource dataSource;*/
+	@Value("${get-upload-path}")
+	private String displayImagePath;
+	
+	@Value("${byod-cloud-url}")
+	private String byodUrl;
 	
 	@Autowired
 	private ByodUtil byodUtil;
@@ -54,24 +60,22 @@ public class DeviceConfigRestController {
 		JSONObject deviceInfo = null;
 		Connection connection = null;
 		String menuFile = null;
+		String resultCode = "E01";
+		String resultMessage = "Server error. Please try again later.";
 
 		try {
 			connection = dbConnectionUtil.retrieveConnection(request);
 			deviceInfo = verifyActivation(connection, activationId, activationKey);
 			if(deviceInfo==null) {
-				result.put("resultCode", "01");
-				result.put("resultMessage", "Invalid activation info");
-				return result.toString();
-			}
-			
-			if(deviceInfo.getLong("statusLookupId")!=1) {
+				resultCode = "E02";
+				resultMessage = "Invalid activation info";
+			}		
+			else if(deviceInfo.getLong("statusLookupId")!=1) {
 				// not pending
-				result.put("resultCode", "02");
-				result.put("resultMessage", "Activation device is already activated or terminated");
-				return result.toString();
+				resultCode = "E03";
+				resultMessage = "Activation device is already activated or terminated.";
 			}
-			
-			if(activateDevice(connection, deviceInfo.getLong("id"), macAddress)) {
+			else if(activateDevice(connection, deviceInfo.getLong("id"), macAddress)) {
 				// successful activation
 				
 				// ecpos retrieve extra info
@@ -84,19 +88,20 @@ public class DeviceConfigRestController {
 				}
 				
 				menuFile = getLatestMenuFile(connection, deviceInfo.getLong("refId"));			
-				File file = new File(filePath + menuFile, menuFile + ".json");
-				String menuFilePath = file.getAbsolutePath();
-				String imageFilePath = extractImageFromMenuFilePath(menuFile);
+				String menuFilePath = byodUrl + displayFilePath + menuFile + "/" + menuFile + ".json";
+				String imageFilePath = null;
+				if(extractImageFromMenuFilePath(menuFile)) {
+					imageFilePath = byodUrl + displayFilePath + menuFile + "/" + menuFile + ".zip";
+				}
 				
 				result.put("menuFilePath", menuFilePath);
 				result.put("imageFilePath", imageFilePath);
-				result.put("resultCode", "00");
-				result.put("resultMessage", "Successful device activation");
+				resultCode = "00";
+				resultCode = "Successful device activation.";
 			}
 			else {
-				result.put("resultCode", "03");
-				result.put("resultMessage", "Failed to activate device");
-				return result.toString();
+				resultCode = "E04";
+				resultMessage = "Failed to activate device.";
 			}
 				
 		} catch (Exception ex) {
@@ -107,6 +112,12 @@ public class DeviceConfigRestController {
 					connection.close();
 				} catch(Exception ex) {
 				}
+			}
+			
+			try {
+				result.put("resultCode", resultCode);
+				result.put("resultMessage", resultMessage);
+			} catch (Exception e) {
 			}
 		}
 		
@@ -124,34 +135,38 @@ public class DeviceConfigRestController {
 		JSONObject result = new JSONObject();
 		Connection connection = null;
 		String menuFile = null;
-
+		String resultCode = "E01";
+		String resultMessage = "Server error. Please try again later.";
+		
 		try {
 			connection = dbConnectionUtil.retrieveConnection(request);
 			String macAddress = getMacAddressByActivationId(connection, activationId);
 			String secureHash = byodUtil.genSecureHash("SHA-256", activationId.concat(macAddress).concat(timeStamp));
+			
 			System.out.println("authToken:" + authToken);
 			System.out.println("secureHash:" + secureHash);
-			if(!authToken.equals(secureHash)) {
-				result.put("resultCode", "01");
-				result.put("resultMessage", "Invalid authentication token");
-				return result.toString();
-			}
 			
-			if(versionCount==0) {
+			if(!authToken.equals(secureHash)) {
+				resultCode = "E02";
+				resultMessage = "Invalid authentication token.";
+			}
+			else if(versionCount==0) {
 				// first time get menu
 				menuFile = getLatestMenuFile(connection, storeId);
 				if(menuFile!=null) {
-					File file = new File(filePath + menuFile, menuFile + ".json");
-					String menuFilePath = file.getAbsolutePath();
-					String imageFilePath = extractImageFromMenuFilePath(menuFile);
-					
+					String menuFilePath = byodUrl + displayFilePath + menuFile + "/" + menuFile + ".json";
+					String imageFilePath = null;
+					if(extractImageFromMenuFilePath(menuFile)) {
+						imageFilePath = byodUrl + displayFilePath + menuFile + "/" + menuFile + ".zip";
+					}			
 					result.put("menuFilePath", menuFilePath); 
-					result.put("imageFilePath", imageFilePath);
+					result.put("imageFilePath", imageFilePath);				
+					resultCode = "00";
+					resultMessage = "Successful get full menu.";
 				}
 				else {
-					result.put("resultCode", "02");
-					result.put("resultMessage", "Never publish menu before");
-					return result.toString();
+					resultCode = "E03";
+					resultMessage = "Never publish menu before";
 				}
 			}
 			else {
@@ -159,14 +174,13 @@ public class DeviceConfigRestController {
 				JSONArray versionArray = getVersionUpdates(connection, versionCount, storeId);			
 				if(versionArray.length()!=0) {
 					result.put("versionSync", versionArray);
-					result.put("resultCode", "00");
-					result.put("resultCode", "Successful menu sync");
+					resultCode = "00";
+					resultMessage = "Successful menu sync.";
 				}
 				else {
 					// up-to-date
-					result.put("resultCode", "03");
-					result.put("resultMessage", "Current menu is the latest version");
-					return result.toString();
+					resultCode = "E04";
+					resultMessage = "Current menu is the latest version.";
 				}			
 			}
 		} catch (Exception ex) {
@@ -178,8 +192,13 @@ public class DeviceConfigRestController {
 				} catch(Exception ex) {
 				}
 			}
+			
+			try {
+				result.put("resultCode", resultCode);
+				result.put("resultMessage", resultMessage);
+			} catch (Exception e) {
+			}
 		}
-		
 		return result.toString();
 	}
 	
@@ -187,7 +206,6 @@ public class DeviceConfigRestController {
 		String sqlStatement = null;
 		PreparedStatement ps1 = null;
 		ResultSet rs1 = null;
-		Long id = null;
 		JSONObject result = null;
 		try {
 			//connection = dataSource.getConnection();
@@ -214,6 +232,7 @@ public class DeviceConfigRestController {
 			if (ps1 != null) {
 				ps1.close();
 			}
+			
 		}
 		return result;
 	}
@@ -334,8 +353,8 @@ public class DeviceConfigRestController {
 		return result;
 	}
 	
-	private String extractImageFromMenuFilePath(String menuFilePath) throws Exception {
-		String zipFilePath = "";
+	private boolean extractImageFromMenuFilePath(String menuFilePath) throws Exception {
+		boolean flag = false;
 		// grab menu images
 		File directory = new File(imagePath);
 		if(directory.isDirectory() && directory.list().length == 0) {
@@ -349,9 +368,7 @@ public class DeviceConfigRestController {
 				  imageList.add(imageFiles[i].getName());
 			  } 
 			}
-			System.out.println("my menu file:" + menuFilePath);
 			// zipping images
-			File zipFile = new File(filePath + menuFilePath , menuFilePath+".zip");
 			FileOutputStream fos = new FileOutputStream(filePath + menuFilePath + "/" +  menuFilePath +".zip");
 			ZipOutputStream zipOut = new ZipOutputStream(fos);
 			for (String srcFile : imageList) {
@@ -368,11 +385,11 @@ public class DeviceConfigRestController {
 					fis.close();
 				}
 			}
-			zipFilePath = zipFile.getAbsolutePath();
 			zipOut.close();
 			fos.close();
+			flag = true;
 		}
-		return zipFilePath;
+		return flag;
 	}
 	
 	private String getLatestMenuFile(Connection connection, Long storeId) throws Exception {
@@ -392,8 +409,6 @@ public class DeviceConfigRestController {
 
 			if (rs1.next()) {
 				result = rs1.getString("menu_file_path");
-				/*File file = new File(filePath + rs1.getString("menu_file_path"), rs1.getString("menu_file_path") + ".json");
-				result = file.getAbsolutePath();*/
 			}
 			
 		} catch (Exception ex) {
@@ -432,13 +447,9 @@ public class DeviceConfigRestController {
 				JSONObject jsonObject = new JSONObject();
 				String menuFilePath = rs1.getString("menu_file_path");
 				String menuQueryFile = rs1.getString("menu_query_file_path");
-				String menuImageFile = rs1.getString("menu_img_file_path");
-				
-				file = new File(filePath + menuFilePath, menuQueryFile + ".txt");
-				String menuQueryFilePath = file.getAbsolutePath();
-				
-				file = new File(imagePath + menuFilePath, menuImageFile + ".zip");
-				String menuImageFilePath = file.getAbsolutePath();
+				String menuImageFile = rs1.getString("menu_img_file_path");				
+				String menuQueryFilePath = byodUrl + displayFilePath + menuFilePath + "/" + menuQueryFile + ".txt";	
+				String menuImageFilePath = byodUrl + displayImagePath + menuFilePath + "/" + menuImageFile + ".zip";
 				
 				jsonObject.put("versionCount", rs1.getLong("version_count"));
 				jsonObject.put("menuQueryFilePath", menuQueryFilePath);
