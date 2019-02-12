@@ -715,9 +715,9 @@ public class StoreRestController {
 			 stmt = connection.prepareStatement("SELECT * FROM store WHERE id = ?");
 			 stmt.setLong(1, store_id);
 			 rs = (ResultSet) stmt.executeQuery();
-			 
+			
+			jsonObj = new JSONObject();
 			if(rs.next()) {
-				jsonObj = new JSONObject();
 				jsonObj.put("id", rs.getLong("id"));		
 				jsonObj.put("backend_id", rs.getString("backend_id"));
 				jsonObj.put("store_name", rs.getString("store_name"));				

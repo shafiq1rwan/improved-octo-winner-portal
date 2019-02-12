@@ -4,6 +4,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.MessageDigest;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Base64;
@@ -14,6 +17,7 @@ import java.util.Random;
 import javax.servlet.http.HttpServletRequest;
 import javax.sql.DataSource;
 
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -235,5 +239,31 @@ public class ByodUtil {
 			builder.append(possibleChar.charAt(index));
 		}
 		return builder.toString();
+	}
+	
+	public String getGeneralConfig(Connection connection, String parameter) throws Exception {
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		String value = null;
+		try {
+			stmt = connection.prepareStatement("SELECT * FROM general_configuration WHERE parameter = ?");
+			stmt.setString(1, parameter);
+			rs = (ResultSet) stmt.executeQuery();
+
+			if(rs.next()) {
+				value = rs.getString("value");		
+			}
+			
+		}catch(Exception ex) {
+			ex.printStackTrace();
+		} finally {
+			if (rs != null) {
+				rs.close();
+			}
+			if (stmt != null) {
+				stmt.close();
+			}
+		}
+		return value;
 	}
 }

@@ -9,6 +9,7 @@
 -- This block of comments will not be included in
 -- the definition of the procedure.
 -- ================================================
+USE tenant
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -237,7 +238,9 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 			(
 				id INT UNIQUE NOT NULL, 
 				name NVARCHAR(50) NOT NULL,
-				prefix NVARCHAR(2) NOT NULL UNIQUE
+				prefix NVARCHAR(2) NOT NULL UNIQUE,
+				backend_sequence INT NOT NULL,
+				modified_date DATE NOT NULL DEFAULT GETDATE()
 			);
 
 			CREATE TABLE status_lookup
@@ -295,15 +298,22 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 			(
 				menu_item_id BIGINT NOT NULL,
 				promo_period_id BIGINT NOT NULL
+			);
+			
+			CREATE TABLE general_configuration(
+				id BIGINT IDENTITY(1,1) NOT NULL,
+				description varchar(255) NOT NULL,
+				parameter varchar(255) NOT NULL,
+				value varchar(255) NOT NULL
 			); 
 
 			INSERT INTO role_lookup VALUES (''Admin''),(''Store Manager'');
 
 			INSERT INTO charge_type_lookup VALUES (0, ''None''),(1, ''Tax''),(2, ''Charge'');
 
-			INSERT INTO device_type_lookup (id, name, prefix) VALUES (1, ''ECPOS'', ''EC'');
-			INSERT INTO device_type_lookup (id, name, prefix) VALUES (2, ''BYOD'', ''BD'');
-			INSERT INTO device_type_lookup (id, name, prefix) VALUES (3, ''KIOSK'', ''KK'');
+			INSERT INTO device_type_lookup (id, name, prefix, backend_sequence, modified_date) VALUES (1, ''ECPOS'', ''EC'', 0, GETDATE())
+			INSERT INTO device_type_lookup (id, name, prefix, backend_sequence, modified_date) VALUES (2, ''BYOD'', ''BD'', 0, GETDATE())
+			INSERT INTO device_type_lookup (id, name, prefix, backend_sequence, modified_date) VALUES (3, ''KIOSK'', ''KK'', 0, GETDATE())
 
 			INSERT INTO status_lookup (id, name) VALUES (1, ''PENDING'');
 			INSERT INTO status_lookup (id, name) VALUES (2, ''ACTIVE'');

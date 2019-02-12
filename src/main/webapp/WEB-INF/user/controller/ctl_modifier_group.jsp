@@ -119,7 +119,7 @@
 					{"data": "id", "width": "20%",
 					 "render": function ( data, type, full, meta ) {
 						 	var id = full.id;
-						    return '<div class="d-flex justify-content-start"><button ng-click="getModifierGroupMenuItem('+ id +')" type="button" data-toggle="modal" data-backdrop="static" data-keyboard="false" data-target="#menuItemModal" class="btn btn-outline-primary custom-fontsize"><i class="far fa-list-ul"></i> Manage Items</button><button ng-click="removeModifierGroup('+ id +')" class="btn btn-outline-danger custom-fontsize"><i class="far fa-minus-circle"></i> Remove</button></div>'			   
+						    return '<div class="d-flex justify-content-start"><button ng-click="getModifierGroupMenuItem('+ id +')" type="button" data-toggle="modal" data-backdrop="static" data-keyboard="false" data-target="#menuItemModal" class="btn btn-outline-primary ml-1 mr-1 custom-fontsize"><i class="far fa-list-ul"></i> Manage Items</button><button ng-click="removeModifierGroup('+ id +')" class="btn btn-outline-danger ml-1 mr-1 custom-fontsize"><i class="far fa-minus-circle"></i> Remove</button></div>'			   
 					 }
 					}
 					],

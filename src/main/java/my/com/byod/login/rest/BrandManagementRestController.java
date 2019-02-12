@@ -1,6 +1,8 @@
 package my.com.byod.login.rest;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -17,9 +19,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -162,11 +167,47 @@ public class BrandManagementRestController {
 				if (!output.isEmpty()) {
 					int result = (int) output.get("db_creation_result");
 					if (result == 1) {
+						KeyHolder keyHolder = new GeneratedKeyHolder();
 						rowAffected = jdbcTemplate.update(
+								new PreparedStatementCreator() {
+							        public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
+							        	PreparedStatement stmt = null;
+							        	String sqlStatement = "INSERT INTO brands(name,brand_db_domain,brand_db_name,brand_db_user,brand_db_password,brand_db_port)VALUES(?,?,?,?,?,?)";
+							        	try {
+							        		stmt = connection.prepareStatement(sqlStatement, new String[] {"id"});
+							        		stmt.setString(1, name);
+							        		stmt.setString(2, jsonData.getString("db_domain"));
+							        		stmt.setString(3, jsonData.getString("db_name"));
+							        		stmt.setString(4, jsonData.getString("db_user"));
+							        		stmt.setString(5, jsonData.getString("db_password"));
+							        		stmt.setInt(6, jsonData.getInt("db_port"));							       
+							        	}catch(Exception e) {
+							        		e.printStackTrace();
+							        	}
+							        	 return stmt;
+							        }
+							    },
+							    keyHolder);
+						
+						if(rowAffected!=0) {
+							// insert brand id in brand db
+							Long brandId = keyHolder.getKey().longValue();
+							Connection connection = dbConnectionUtil.getConnection(brandId);
+							String sqlStatement = "INSERT INTO general_configuration (description, parameter, value) VALUES (?, ?, ?)";
+							PreparedStatement stmt = connection.prepareStatement(sqlStatement);
+							stmt.setString(1, "Brand Identity Number");
+							stmt.setString(2, "BRAND_ID");
+							stmt.setLong(3, brandId);
+							int rowAffected2 = stmt.executeUpdate();
+							if(rowAffected2 == 0)
+								return ResponseEntity.badRequest().contentType(MediaType.TEXT_PLAIN).body("Unable to create brand ID");
+						}
+						
+						/*rowAffected = jdbcTemplate.update(
 								"INSERT INTO brands(name,brand_db_domain,brand_db_name,brand_db_user,brand_db_password,brand_db_port)VALUES(?,?,?,?,?,?)",
 								new Object[] { name, jsonData.getString("db_domain"), jsonData.getString("db_name"),
 										jsonData.getString("db_user"), jsonData.getString("db_password"),
-										jsonData.getInt("db_port") });
+										jsonData.getInt("db_port") });*/
 					} else {
 						return ResponseEntity.status(HttpStatus.CONFLICT).contentType(MediaType.TEXT_PLAIN)
 								.body("The database already exist");

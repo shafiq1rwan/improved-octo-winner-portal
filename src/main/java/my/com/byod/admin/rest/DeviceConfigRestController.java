@@ -53,7 +53,8 @@ public class DeviceConfigRestController {
 	public String activation(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam(value = "activationId", required = true) String activationId, 
 			@RequestParam(value = "activationKey", required = true) String activationKey,
-			@RequestParam(value = "macAddress", required = true) String macAddress) {
+			@RequestParam(value = "macAddress", required = true) String macAddress,
+			@RequestParam(value = "brandId", required = true) Long brandId) {
 
 		// device activation api
 		JSONObject result = new JSONObject();
@@ -64,7 +65,7 @@ public class DeviceConfigRestController {
 		String resultMessage = "Server error. Please try again later.";
 
 		try {
-			connection = dbConnectionUtil.retrieveConnection(request);
+			connection = dbConnectionUtil.getConnection(brandId);
 			deviceInfo = verifyActivation(connection, activationId, activationKey);
 			if(deviceInfo==null) {
 				resultCode = "E02";
@@ -87,17 +88,23 @@ public class DeviceConfigRestController {
 					result.put("staffInfo", ecposStaffInfo);
 				}
 				
-				menuFile = getLatestMenuFile(connection, deviceInfo.getLong("refId"));			
-				String menuFilePath = byodUrl + displayFilePath + menuFile + "/" + menuFile + ".json";
-				String imageFilePath = null;
-				if(extractImageFromMenuFilePath(menuFile)) {
-					imageFilePath = byodUrl + displayFilePath + menuFile + "/" + menuFile + ".zip";
+				menuFile = getLatestMenuFile(connection, deviceInfo.getLong("refId"));
+				if(menuFile!=null) {
+					String menuFilePath = byodUrl + displayFilePath + menuFile + "/" + menuFile + ".json";
+					String imageFilePath = null;
+					if(extractImageFromMenuFilePath(menuFile)) {
+						imageFilePath = byodUrl + displayFilePath + menuFile + "/" + menuFile + ".zip";
+					}
+					
+					result.put("menuFilePath", menuFilePath);
+					result.put("imageFilePath", imageFilePath);
+					resultCode = "00";
+					resultMessage = "Successful device activation and menu synchronization.";
 				}
-				
-				result.put("menuFilePath", menuFilePath);
-				result.put("imageFilePath", imageFilePath);
-				resultCode = "00";
-				resultCode = "Successful device activation.";
+				else {
+					resultCode = "01";
+					resultMessage = "Successful device activation. Please proceed to publish menu.";
+				}
 			}
 			else {
 				resultCode = "E04";
@@ -130,7 +137,8 @@ public class DeviceConfigRestController {
 			@RequestParam(value = "versionCount", required = true) Long versionCount,
 			@RequestParam(value = "activationId", required = true) String activationId,
 			@RequestParam(value = "timeStamp", required = true) String timeStamp,
-			@RequestParam(value = "authToken", required = true) String authToken) {
+			@RequestParam(value = "authToken", required = true) String authToken,
+			@RequestParam(value = "brandId", required = true) Long brandId) {
 		
 		JSONObject result = new JSONObject();
 		Connection connection = null;
@@ -139,7 +147,7 @@ public class DeviceConfigRestController {
 		String resultMessage = "Server error. Please try again later.";
 		
 		try {
-			connection = dbConnectionUtil.retrieveConnection(request);
+			connection = dbConnectionUtil.getConnection(brandId);
 			String macAddress = getMacAddressByActivationId(connection, activationId);
 			String secureHash = byodUtil.genSecureHash("SHA-256", activationId.concat(macAddress).concat(timeStamp));
 			
