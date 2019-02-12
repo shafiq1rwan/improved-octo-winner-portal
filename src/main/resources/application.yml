@@ -34,7 +34,7 @@ get-upload-path: /byod-img/
 menu-path: byod-menu/
 get-menu-path: /byod-menu/
 log-path: logger
-byod-cloud-url: 172.31.99.77:8080
+byod-cloud-url: localhost:8080
 
 db-port: 1433
 db-domain: localhost

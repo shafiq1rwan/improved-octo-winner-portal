@@ -605,6 +605,7 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 				'Content-Type': 'application/json'
 			},
 			params: {
+				brandId: $routeParams.brandId,
 				storeId: $routeParams.storeId,
 				tableId: $routeParams.tableId
 			},

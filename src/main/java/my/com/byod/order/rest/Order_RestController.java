@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
+import my.com.byod.admin.util.DbConnectionUtil;
 import my.com.byod.logger.Logger;
 import my.com.byod.order.configuration.LanguageConfiguration;
 
@@ -42,7 +43,7 @@ public class Order_RestController {
 	private Logger logger;
 
 	@Autowired
-	DataSource dataSource;
+	private DbConnectionUtil dbConnectionUtil;
 	
 	private static final String folName = "byodFE";
 
@@ -90,9 +91,11 @@ public class Order_RestController {
 
 	@RequestMapping(value = "/order/getStoreData", method = { RequestMethod.POST })
 	public String getMenuData(HttpServletRequest request, HttpServletResponse response,
+			@RequestParam(value = "brandId", required = true) String brandId,
 			@RequestParam(value = "storeId", required = true) String storeId,
 			@RequestParam(value = "tableId", required = true) String tableId) {
 		String storeLog = "--Get Store Data Begin--" + System.lineSeparator();
+		storeLog += "Brand ID: " + brandId + System.lineSeparator();
 		storeLog += "Store ID: " + storeId + System.lineSeparator();
 		storeLog += "Table ID: " + tableId + System.lineSeparator();
 		
@@ -105,7 +108,7 @@ public class Order_RestController {
 		JSONArray categoryList = null;
 
 		try {
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.getConnection(Long.parseLong(brandId));
 			sqlStatement = "SELECT a.group_category_id, a.store_name, a.store_currency, b.publish_version_id, c.menu_file_path FROM store a "
 					+ "INNER JOIN group_category b ON b.id = a.group_category_id "
 					+ "LEFT JOIN publish_version c ON c.id = b.publish_version_id "

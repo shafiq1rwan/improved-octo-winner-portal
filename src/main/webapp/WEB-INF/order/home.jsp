@@ -99,7 +99,7 @@ byodApp.config(function($routeProvider) {
 	.when('/', {
     	templateUrl : '${pageContext.request.contextPath}/order/views/pleaseScanQR'
 	})
-	.when('/store/:storeId/tn/:tableId', {
+	.when('/brand/:brandId/store/:storeId/tn/:tableId', {
     	templateUrl : '${pageContext.request.contextPath}/order/views/singleOrderPage',
     	controller : "OrderController"
 	})
