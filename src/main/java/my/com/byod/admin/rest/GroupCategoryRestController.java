@@ -528,7 +528,7 @@ public class GroupCategoryRestController {
             rs= stmt.executeQuery();
 
             while (rs.next()) {
-                count=rs.getInt("COUNT(group_category_name)");
+                count=rs.getInt(1);
             }
 		} catch(Exception ex) {
 			ex.printStackTrace();

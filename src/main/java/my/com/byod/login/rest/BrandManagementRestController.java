@@ -238,5 +238,28 @@ public class BrandManagementRestController {
 		}
 		return resultString;
 	}
+	
+	//Brand(s) Display Brand Users Assignment
+/*	@GetMapping(value="/get_all_")
+	public ResponseEntity<?> usersInBrand(@RequestBody String data, HttpServletRequest request,
+			HttpServletResponse response, @RequestParam("brandId") Long brandId) {
+		JSONObject jsonResult = null;
+		
+		try {
+			List<Map<String, Object>> usersInBrand = jdbcTemplate.queryForList("SELECT u.* FROM users u INNER JOIN users_brand ub ")
+			
+			
+		} catch(Exception ex) {
+			ex.printStackTrace();
+		}
+		
+		return ResponseEntity.ok(null);
+	}*/
+	
+	
+
+	
+	
+	
 
 }

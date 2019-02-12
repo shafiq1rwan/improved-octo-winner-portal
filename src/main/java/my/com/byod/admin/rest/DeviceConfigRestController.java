@@ -12,8 +12,6 @@ import java.util.zip.ZipOutputStream;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.sql.DataSource;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import my.com.byod.admin.util.ByodUtil;
+import my.com.byod.admin.util.DbConnectionUtil;
 
 @RestController
 @RequestMapping("/api/device")
@@ -35,12 +34,14 @@ public class DeviceConfigRestController {
 	@Value("${upload-path}")
 	private String imagePath;
 	
-	@Autowired
-	private DataSource dataSource;
+/*	@Autowired
+	private DataSource dataSource;*/
 	
 	@Autowired
 	private ByodUtil byodUtil;
 	
+	@Autowired
+	private DbConnectionUtil dbConnectionUtil;
 	
 	@RequestMapping(value = "/activation", method = { RequestMethod.POST })
 	public String activation(HttpServletRequest request, HttpServletResponse response,
@@ -55,7 +56,7 @@ public class DeviceConfigRestController {
 		String menuFile = null;
 
 		try {
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			deviceInfo = verifyActivation(connection, activationId, activationKey);
 			if(deviceInfo==null) {
 				result.put("resultCode", "01");
@@ -125,7 +126,7 @@ public class DeviceConfigRestController {
 		String menuFile = null;
 
 		try {
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			String macAddress = getMacAddressByActivationId(connection, activationId);
 			String secureHash = byodUtil.genSecureHash("SHA-256", activationId.concat(macAddress).concat(timeStamp));
 			System.out.println("authToken:" + authToken);
@@ -170,7 +171,15 @@ public class DeviceConfigRestController {
 			}
 		} catch (Exception ex) {
 			ex.printStackTrace();
-		}		
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch(Exception ex) {
+				}
+			}
+		}
+		
 		return result.toString();
 	}
 	
@@ -181,7 +190,7 @@ public class DeviceConfigRestController {
 		Long id = null;
 		JSONObject result = null;
 		try {
-			connection = dataSource.getConnection();
+			//connection = dataSource.getConnection();
 			sqlStatement = "SELECT * FROM device_info WHERE activation_id = ? AND activation_key = ? ";
 			ps1 = connection.prepareStatement(sqlStatement);
 			ps1.setString(1, activationId);
@@ -215,7 +224,7 @@ public class DeviceConfigRestController {
 		int rowAffected = 0;
 		boolean flag = false;
 		try {
-			connection = dataSource.getConnection();
+			//connection = dataSource.getConnection();
 			sqlStatement = "UPDATE device_info SET mac_address = ? , last_update_date = GETDATE(), status_lookup_id = ? WHERE id = ? ";
 			ps1 = connection.prepareStatement(sqlStatement);
 			ps1.setString(1, macAddress);
@@ -243,7 +252,7 @@ public class DeviceConfigRestController {
 		ResultSet rs1 = null;
 		JSONObject result = null;
 		try {
-			connection = dataSource.getConnection();
+			//connection = dataSource.getConnection();
 			sqlStatement = "SELECT tax_charge_id, backend_id, store_name, store_logo_path, store_address, store_longitude, store_latitude, store_country, store_currency, " + 
 					"store_table_count, store_start_operating_time, store_end_operating_time, last_update_date, is_publish, created_date FROM store WHERE id = ? ";
 			ps1 = connection.prepareStatement(sqlStatement);
@@ -288,7 +297,7 @@ public class DeviceConfigRestController {
 		ResultSet rs1 = null;
 		JSONArray result = new JSONArray();
 		try {
-			connection = dataSource.getConnection();
+			//connection = dataSource.getConnection();
 			sqlStatement = "SELECT a.id, a.staff_name, a.staff_username, a.staff_password, a.staff_role, a.staff_contact_hp_number, a.staff_contact_email, a.is_active, a.created_date, a.last_update_date " +
 					"FROM staff a " + 
 					"INNER JOIN store b ON a.store_id = b.id " + 
@@ -372,7 +381,7 @@ public class DeviceConfigRestController {
 		ResultSet rs1 = null;
 		String result = null;
 		try {
-			connection = dataSource.getConnection();
+			//connection = dataSource.getConnection();
 			sqlStatement = "SELECT c.* FROM store a " + 
 					"INNER JOIN group_category b ON a.group_category_id = b.id " + 
 					"INNER JOIN publish_version c ON c.id = b.publish_version_id AND c.group_category_id = b.id " +
@@ -407,7 +416,7 @@ public class DeviceConfigRestController {
 		JSONArray versionArray = new JSONArray();
 		File file = null;
 		try {
-			connection = dataSource.getConnection();
+			//connection = dataSource.getConnection();
 			sqlStatement = "SELECT c.* FROM store a " + 
 					"INNER JOIN group_category b ON a.group_category_id = b.id " + 
 					"INNER JOIN publish_version c ON c.id IN ( " + 
@@ -456,7 +465,7 @@ public class DeviceConfigRestController {
 		ResultSet rs1 = null;
 		String result = "";
 		try {
-			connection = dataSource.getConnection();
+			//connection = dataSource.getConnection();
 			sqlStatement = "SELECT mac_address FROM device_info WHERE activation_id = ? ";
 			ps1 = connection.prepareStatement(sqlStatement);
 			ps1.setString(1, activationId);

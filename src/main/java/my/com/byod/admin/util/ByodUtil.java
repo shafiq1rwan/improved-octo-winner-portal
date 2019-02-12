@@ -11,6 +11,9 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Random;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.sql.DataSource;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -22,8 +25,14 @@ public class ByodUtil {
 	@Value("${upload-path}")
 	private String filePath;
 
+	private DbConnectionUtil dbConnectionUtil;
+	private HttpServletRequest request;
+	
 	@Autowired
-	private JdbcTemplate jdbcTemplate;
+	public ByodUtil(DbConnectionUtil dbConnectionUtil, HttpServletRequest request) {
+		this.dbConnectionUtil = dbConnectionUtil;
+		this.request = request;
+	}
 
 	public String createUniqueBackendId(String prefix) {
 		String resultString = "";
@@ -36,6 +45,7 @@ public class ByodUtil {
 	}
 
 	private int getSequence(String code) {
+		JdbcTemplate jdbcTemplate = new JdbcTemplate(dbConnectionUtil.setupDataSource(request));
 		boolean isSameDay = false;
 		int sequence = 0;
 		SimpleDateFormat standardDateFormat = new SimpleDateFormat("dd/MM/yyyy");
@@ -70,6 +80,7 @@ public class ByodUtil {
 	}
 
 	private String getActivationIdSequence(String code) {
+		JdbcTemplate jdbcTemplate = new JdbcTemplate(dbConnectionUtil.setupDataSource(request));
 		boolean isSameDay = false;
 		int sequence = 0;
 		SimpleDateFormat standardDateFormat = new SimpleDateFormat("dd/MM/yyyy");

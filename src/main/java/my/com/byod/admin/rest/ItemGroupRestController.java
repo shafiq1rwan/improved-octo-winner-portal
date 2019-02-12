@@ -24,6 +24,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import my.com.byod.admin.util.DbConnectionUtil;
+
 @RestController
 @RequestMapping("/menu/item_group")
 public class ItemGroupRestController {
@@ -32,13 +34,13 @@ public class ItemGroupRestController {
 	private String displayFilePath;
 	
 	@Autowired
-	private DataSource dataSource;
-	
-	@Autowired
 	private GroupCategoryRestController groupCategoryRestController;
 	
+	@Autowired
+	private DbConnectionUtil dbConnectionUtil;
+	
 	@RequestMapping(value = "/get_all_item_group", method = RequestMethod.GET)
-	public ResponseEntity<?> getAllItemGroup() {
+	public ResponseEntity<?> getAllItemGroup(HttpServletRequest request, HttpServletResponse response) {
 		JSONArray jArray = new JSONArray();
 		JSONObject jObject = new JSONObject();
 		Connection connection = null;
@@ -46,7 +48,7 @@ public class ItemGroupRestController {
 		ResultSet rs = null;
 		
 		try {
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			stmt = connection.prepareStatement("SELECT * FROM menu_item_group");
 			rs = (ResultSet) stmt.executeQuery();
 			 
@@ -85,7 +87,7 @@ public class ItemGroupRestController {
 		ResultSet rs = null;
 
 		try {
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			stmt = connection.prepareStatement("SELECT * FROM menu_item_group WHERE id = ?");
 			stmt.setLong(1, id);
 			rs = (ResultSet) stmt.executeQuery();
@@ -126,7 +128,7 @@ public class ItemGroupRestController {
 			boolean isActive = jsonItemGroupData.isNull("is_active") ? false
 					: jsonItemGroupData.getBoolean("is_active");
 
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			String sqlStatement = "INSERT INTO menu_item_group(menu_item_group_name, is_active) VALUES (?, ?);";
 			stmt = connection.prepareStatement(sqlStatement);
 			stmt.setString(1, jsonItemGroupData.getString("menu_item_group_name"));
@@ -174,7 +176,7 @@ public class ItemGroupRestController {
 			boolean isActive = jsonItemGroupData.isNull("is_active") ? false
 					: jsonItemGroupData.getBoolean("is_active");
 
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			String sqlStatement = "UPDATE menu_item_group SET menu_item_group_name = ?, is_active = ? WHERE id = ?;";
 			stmt = connection
 					.prepareStatement(sqlStatement);
@@ -222,7 +224,7 @@ public class ItemGroupRestController {
 		PreparedStatement stmt3 = null;
 
 		try {
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			String sqlStatement = "DELETE FROM menu_item_group WHERE id = ?;";
 			stmt = connection.prepareStatement(sqlStatement);
 			stmt.setLong(1, id);
@@ -271,7 +273,7 @@ public class ItemGroupRestController {
 		ResultSet rs = null;
 
 		try {		
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			stmt = connection.prepareStatement("SELECT * FROM menu_item a " + 
 					"INNER JOIN menu_item_type_lookup b ON a.menu_item_type = b.menu_item_type_number " + 
 					"INNER JOIN menu_item_group_sequence c ON a.id = c.menu_item_id " + 
@@ -318,7 +320,7 @@ public class ItemGroupRestController {
 			JSONArray jsonItemsArray = jsonObj.getJSONArray("item_list");
 			Long menuItemGroupId = jsonObj.getLong("menu_item_group_id");
 			
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			String sqlStatement = "INSERT INTO menu_item_group_sequence (menu_item_group_id, menu_item_id, menu_item_group_sequence) VALUES (?, ?, ?);";
 
 			for(int i=0;i<jsonItemsArray.length();i++) {
@@ -365,7 +367,7 @@ public class ItemGroupRestController {
 			JSONArray jsonItemsArray = jsonObj.getJSONArray("item_list");
 			Long menuItemGroupId = jsonObj.getLong("menu_item_group_id");
 			
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			String sqlStatement = "DELETE FROM menu_item_group_sequence WHERE menu_item_group_id = ?;";
 			
 			stmt = connection.prepareStatement(sqlStatement);
@@ -420,7 +422,7 @@ public class ItemGroupRestController {
 		ResultSet rs = null;
 
 		try {	
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			stmt = connection.prepareStatement("SELECT * FROM menu_item_group");
 			rs = (ResultSet) stmt.executeQuery();
 			 

@@ -22,16 +22,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import my.com.byod.admin.util.DbConnectionUtil;
+
 @RestController
 @RequestMapping("/menu/charge")
 public class TaxChargeRestController {
-
 
 	@Autowired
 	private DataSource dataSource;
 
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
+	
+	@Autowired
+	private DbConnectionUtil dbConnectionUtil;
 	
 	@GetMapping(value = "/getAllCharge", produces = "application/json")
 	public ResponseEntity<?> getAllCharge(HttpServletRequest request, HttpServletResponse response, @RequestParam("chargeType") int chargeType){
@@ -54,7 +58,7 @@ public class TaxChargeRestController {
 				break;
 			}
 			
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			stmt = connection.prepareStatement(query);
 			rs = (ResultSet) stmt.executeQuery();
 			
@@ -94,7 +98,7 @@ public class TaxChargeRestController {
 		ResultSet rs = null;
 		
 		try {
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			stmt = connection.prepareStatement("SELECT * FROM charge_type_lookup");
 			rs = (ResultSet) stmt.executeQuery();
 			
@@ -128,7 +132,7 @@ public class TaxChargeRestController {
 		
 		try {
 			JSONObject jsonTaxChargeData = new JSONObject(data);
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			stmt = connection.prepareStatement("INSERT INTO tax_charge(tax_charge_name, rate, charge_type, is_active) VALUES (?,?,?,?)");
 				stmt.setString(1, jsonTaxChargeData.getString("tax_charge_name"));
 				stmt.setInt(2, jsonTaxChargeData.getInt("rate"));
@@ -162,7 +166,7 @@ public class TaxChargeRestController {
 		
 		try {
 			JSONObject jsonTaxChargeData = new JSONObject(data);
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			stmt = connection.prepareStatement("UPDATE tax_charge SET tax_charge_name =?, rate =?, charge_type =?, is_active = ? WHERE id = ?");
 				stmt.setString(1, jsonTaxChargeData.getString("tax_charge_name"));
 				stmt.setInt(2, jsonTaxChargeData.getInt("rate"));

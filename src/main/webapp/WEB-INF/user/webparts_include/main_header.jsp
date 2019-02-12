@@ -21,8 +21,8 @@
                                </a>
 
                                <!-- item-->
-                               <a href="${pageContext.request.contextPath}/logout" class="dropdown-item notify-item">
-                                   <i class="fa fa-power-off"></i> <span>Logout</span>
+                               <a href="${pageContext.request.contextPath}/admin/admin-panel" class="dropdown-item notify-item">
+                                   <i class="fa fa-power-off"></i> <span>Back to Admin</span>
                                </a>
 							
                            </div>

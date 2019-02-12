@@ -1,6 +1,7 @@
 package my.com.byod.admin.rest;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,10 +95,10 @@ public class UserLoginRestController {
 	
 	// Store - ECPOS
 	@RequestMapping(value = { "/views/store/{id}/ecpos" }, method = RequestMethod.GET)
-	public ModelAndView viewECPos(@PathVariable(value = "id") long id) {
+	public ModelAndView viewECPos(@PathVariable(value = "id") long id, HttpServletRequest request, HttpServletResponse response) {
 		ModelAndView model = new ModelAndView();
 		
-		if(storeRestController.getEcposStatus(id)) {
+		if(storeRestController.getEcposStatus(id, request)) {
 			model.setViewName("/user/views/ecpos");
 		}
 		else {

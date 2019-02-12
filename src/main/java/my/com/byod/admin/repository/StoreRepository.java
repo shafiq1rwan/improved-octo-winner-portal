@@ -7,6 +7,8 @@ import java.sql.SQLException;
 import java.sql.Time;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
@@ -17,15 +19,18 @@ import org.springframework.stereotype.Repository;
 
 import my.com.byod.admin.entity.Location;
 import my.com.byod.admin.entity.Store;
+import my.com.byod.admin.util.DbConnectionUtil;
 
 @Repository
 public class StoreRepository {
 
-	private JdbcTemplate jdbcTemplate;
+	private DbConnectionUtil dbConnectionUtil;
+	private HttpServletRequest request;
 
 	@Autowired
-	public StoreRepository(JdbcTemplate jdbcTemplate) {
-		this.jdbcTemplate = jdbcTemplate;
+	public StoreRepository(DbConnectionUtil dbConnectionUtil, HttpServletRequest request) {
+		this.dbConnectionUtil = dbConnectionUtil;
+		this.request = request;
 	}
 
 	private RowMapper<Store> rowMapper = (rs, rowNum) -> {
@@ -51,17 +56,20 @@ public class StoreRepository {
 		return store;
 	};
 
-	public List<Store> findAllStore() {
+	public List<Store> findAllStore() {	
+		JdbcTemplate jdbcTemplate = new JdbcTemplate(dbConnectionUtil.setupDataSource(request));
 		return jdbcTemplate.query("SELECT * FROM store",
 				rowMapper);
 	}
 
 	public List<Store> findStoresByGroupCategoryId(Long groupCategoryId) {
+		JdbcTemplate jdbcTemplate = new JdbcTemplate(dbConnectionUtil.setupDataSource(request));
 		return jdbcTemplate.query("SELECT * FROM store WHERE group_category_id = ?", new Object[] { groupCategoryId },
 				rowMapper);
 	}
 
 	public Store findStoreById(Long id) {
+		JdbcTemplate jdbcTemplate = new JdbcTemplate(dbConnectionUtil.setupDataSource(request));
 		return jdbcTemplate.queryForObject("SELECT * FROM store WHERE id = ?", new Object[] { id }, rowMapper);
 	}
 
@@ -81,6 +89,7 @@ public class StoreRepository {
 		String INSERT_SQL = "INSERT INTO store(backend_id,store_name,store_logo_path,store_address,store_longitude,store_latitude,store_country,store_currency, "
 				+ "store_table_count, is_publish, store_start_operating_time, store_end_operating_time) VALUES (?,?,?,?,?,?,?,?,?,?,?,?);";
 		*/
+		JdbcTemplate jdbcTemplate = new JdbcTemplate(dbConnectionUtil.setupDataSource(request));
 		return jdbcTemplate.update(
 				"INSERT INTO store(backend_id,store_name,store_logo_path,store_address,store_longitude,store_latitude,store_country,store_currency, "
 				+ "store_table_count, is_publish, store_start_operating_time, store_end_operating_time, ecpos) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?);",
@@ -114,6 +123,7 @@ public class StoreRepository {
 	}
 
 	public int editStore(Long id, Store store, String image) {
+		JdbcTemplate jdbcTemplate = new JdbcTemplate(dbConnectionUtil.setupDataSource(request));
 		return jdbcTemplate.update(
 				"UPDATE store SET store_name = ?,store_logo_path = ?,store_address = ?,store_longitude = ?,store_latitude = ?,store_country = ?,store_currency = ?, store_table_count = ?, is_publish = ?, store_start_operating_time = ?, store_end_operating_time = ?, last_update_date = GETDATE(), ecpos = ? WHERE id = ?",
 				new Object[] { store.getName(), image, store.getLocation().getAddress(),
@@ -123,6 +133,7 @@ public class StoreRepository {
 	}
 	
 	public int editStore(Long id, Store store) {
+		JdbcTemplate jdbcTemplate = new JdbcTemplate(dbConnectionUtil.setupDataSource(request));
 		return jdbcTemplate.update(
 				"UPDATE store SET store_name = ?,store_address = ?,store_longitude = ?,store_latitude = ?,store_country = ?,store_currency = ?, store_table_count = ?, is_publish = ?, store_start_operating_time = ?, store_end_operating_time = ?, last_update_date = GETDATE(), ecpos = ? WHERE id = ?",
 				new Object[] { store.getName(), store.getLocation().getAddress(),
@@ -132,16 +143,19 @@ public class StoreRepository {
 	}
 
 	public int editStoreGroupCategoryId(Long groupCategoryId, Long id) {
+		JdbcTemplate jdbcTemplate = new JdbcTemplate(dbConnectionUtil.setupDataSource(request));
 		return jdbcTemplate.update("UPDATE store SET group_category_id = ? WHERE id = ?",
 				new Object[] { groupCategoryId, id });
 	}
 
 	public int editStoreGroupCategoryIdInBatch(Long groupCategoryId) {
+		JdbcTemplate jdbcTemplate = new JdbcTemplate(dbConnectionUtil.setupDataSource(request));
 		return jdbcTemplate.update("UPDATE store SET group_category_id = 0 WHERE group_category_id = ?",
 				new Object[] { groupCategoryId });
 	}
 
 	public int removeStore(Long id) {
+		JdbcTemplate jdbcTemplate = new JdbcTemplate(dbConnectionUtil.setupDataSource(request));
 		return jdbcTemplate.update("DELETE FROM store WHERE id = ?", new Object[] { id });
 	}
 

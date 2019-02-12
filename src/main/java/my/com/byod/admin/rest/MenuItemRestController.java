@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.microsoft.sqlserver.jdbc.SQLServerException;
 
 import my.com.byod.admin.util.ByodUtil;
+import my.com.byod.admin.util.DbConnectionUtil;
 
 @RestController
 @RequestMapping("/menu/menuItem")
@@ -39,16 +40,13 @@ public class MenuItemRestController {
 	private String displayFilePath;
 	
 	@Autowired
-	private DataSource dataSource;
-
-	@Autowired
-	private JdbcTemplate jdbcTemplate;
-
-	@Autowired
 	private ByodUtil byodUtil;
 	
 	@Autowired
 	private GroupCategoryRestController groupCategoryRestController;
+	
+	@Autowired
+	private DbConnectionUtil dbConnectionUtil;
 	
 	@GetMapping(value = "/getMenuItemType", produces = "application/json")
 	public ResponseEntity<?> getMenuItemType(HttpServletRequest request, HttpServletResponse response) {
@@ -57,8 +55,8 @@ public class MenuItemRestController {
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 
-		try {
-			connection = dataSource.getConnection();
+		try {			
+			connection = dbConnectionUtil.retrieveConnection(request);		
 			stmt = connection.prepareStatement("SELECT * FROM menu_item_type_lookup");
 			rs = (ResultSet) stmt.executeQuery();
 
@@ -92,7 +90,7 @@ public class MenuItemRestController {
 		ResultSet rs = null;
 
 		try {
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			stmt = connection.prepareStatement("SELECT * FROM menu_item");
 			rs = (ResultSet) stmt.executeQuery();
 
@@ -137,7 +135,7 @@ public class MenuItemRestController {
 		ResultSet rs = null;
 
 		try {
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			if (menuItemType == -1) {
 				// ala carte + combo
 				stmt = connection.prepareStatement(
@@ -191,7 +189,7 @@ public class MenuItemRestController {
 		ResultSet rs = null;
 
 		try {
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			stmt = connection.prepareStatement("SELECT * FROM menu_item WHERE menu_item_type = 0 AND is_active = 1");
 			rs = (ResultSet) stmt.executeQuery();
 
@@ -230,7 +228,7 @@ public class MenuItemRestController {
 		ResultSet rs = null;
 
 		try {
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			stmt = connection.prepareStatement("SELECT * FROM menu_item WHERE id = ?");
 			stmt.setLong(1, id);
 			rs = (ResultSet) stmt.executeQuery();
@@ -279,7 +277,7 @@ public class MenuItemRestController {
 			String description = jsonMenuItemData.isNull("menu_item_description") ? null
 					: jsonMenuItemData.getString("menu_item_description");
 
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			String sqlStatement = "INSERT INTO menu_item(backend_id, menu_item_name, menu_item_description, menu_item_image_path, menu_item_base_price, menu_item_type,is_taxable, is_discountable) VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
 			stmt = connection.prepareStatement(sqlStatement);
 			stmt.setString(1, jsonMenuItemData.getString("menu_item_backend_id"));
@@ -337,10 +335,10 @@ public class MenuItemRestController {
 			JSONObject jsonMenuItemData = new JSONObject(data);
 			if (jsonMenuItemData.has("menu_item_name") && jsonMenuItemData.has("id")) {
 				
-				int existingMenuItemType = checkingExistingMenuItemType(jsonMenuItemData.getLong("id"));
+				int existingMenuItemType = checkingExistingMenuItemType(jsonMenuItemData.getLong("id"), request);
 				
 				if(existingMenuItemType != -1 && existingMenuItemType != jsonMenuItemData.getInt("menu_item_type")) {			
-					if(checkingAlreadyAssigned(jsonMenuItemData.getLong("id"))>0){
+					if(checkingAlreadyAssigned(jsonMenuItemData.getLong("id"), request)>0){
 						return ResponseEntity.badRequest().contentType(MediaType.TEXT_PLAIN).body("Please unassigned first before performing type modification");
 					}
 				}
@@ -350,7 +348,7 @@ public class MenuItemRestController {
 				String description = jsonMenuItemData.isNull("menu_item_description") ? null
 						: jsonMenuItemData.getString("menu_item_description");
 
-				connection = dataSource.getConnection();
+				connection = dbConnectionUtil.retrieveConnection(request);
 				String sqlStatement = ""; 
 				if(imagePath == null) {
 					sqlStatement = "UPDATE menu_item SET backend_id = ?, menu_item_name = ?, menu_item_description =?, menu_item_base_price = ?, menu_item_type = ?, is_taxable = ? , is_discountable = ? WHERE id = ?;";
@@ -435,7 +433,7 @@ public class MenuItemRestController {
 		PreparedStatement stmt = null;
 
 		try {
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			String sqlStatement = "UPDATE menu_item SET is_active = 0 WHERE id = ?;";
 			stmt = connection.prepareStatement(sqlStatement);
 			stmt.setLong(1, id);
@@ -474,7 +472,7 @@ public class MenuItemRestController {
 		try {
 			JSONObject jsonMenuItemData = new JSONObject(data);
 			if (jsonMenuItemData.has("id") && jsonMenuItemData.has("active_status")) {
-				connection = dataSource.getConnection();
+				connection = dbConnectionUtil.retrieveConnection(request);
 				String sqlStatement = "UPDATE menu_item SET is_active = ? WHERE id = ?;";
 				stmt = connection.prepareStatement(sqlStatement);
 				stmt.setBoolean(1, !jsonMenuItemData.getBoolean("active_status"));
@@ -516,7 +514,7 @@ public class MenuItemRestController {
 		ResultSet rs = null;
 
 		try {
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			stmt = connection.prepareStatement(
 					"SELECT mi.*, mitl.menu_item_type_name FROM menu_item mi INNER JOIN menu_item_type_lookup mitl ON mi.menu_item_type = mitl.menu_item_type_number INNER JOIN category_menu_item cmi ON mi.id = cmi.menu_item_id WHERE cmi.category_id = ?");
 			stmt.setLong(1, categoryId);
@@ -556,7 +554,7 @@ public class MenuItemRestController {
 		ResultSet rs = null;
 
 		try {
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			stmt = connection.prepareStatement(
 					"SELECT mi.*, mitl.menu_item_type_name FROM menu_item mi INNER JOIN menu_item_type_lookup mitl ON mi.menu_item_type = mitl.menu_item_type_number INNER JOIN category_menu_item cmi ON mi.id = cmi.menu_item_id WHERE cmi.category_id != ? AND mi.menu_item_type != 2");
 			stmt.setLong(1, categoryId);
@@ -589,28 +587,62 @@ public class MenuItemRestController {
 	}
 	
 	//Used in edit mode
-	private int checkingAlreadyAssigned(Long menuItemId) {
-		
+	private int checkingAlreadyAssigned(Long menuItemId, HttpServletRequest request) {
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
 		String sqlQuery = "SELECT COUNT(*) FROM "
 				+ "(SELECT mi.* FROM menu_item mi INNER JOIN combo_item_detail cid ON mi.id = cid.menu_item_id UNION "
 				+ "SELECT mi.* FROM menu_item mi INNER JOIN menu_item_group_sequence migs ON mi.id =migs.menu_item_id UNION "
 				+ "SELECT mi.* FROM menu_item mi INNER JOIN modifier_item_sequence mis ON mi.id = mis.menu_item_id) AS a "
 				+ "WHERE a.id = ?";
 		try {
-			return jdbcTemplate.queryForObject(sqlQuery, new Object[] {menuItemId}, Integer.class);
+			connection = dbConnectionUtil.retrieveConnection(request);
+			stmt = connection.prepareStatement(sqlQuery);
+			stmt.setLong(1, menuItemId);
+			rs = (ResultSet) stmt.executeQuery();
+			
+			if(rs.next()) 
+				return rs.getInt("COUNT(*)");
+			else 
+				return 0;	
 		} catch(Exception ex) {
-			ex.printStackTrace();
 			return 0;
+		}  finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					return 0;
+				}
+			}
 		}
+		
 	}
 	
-	private int checkingExistingMenuItemType(Long menuItemId) {
+	private int checkingExistingMenuItemType(Long menuItemId, HttpServletRequest request) {
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
 		int existingItemType = 0;
 
 		try {
-			existingItemType = jdbcTemplate.queryForObject("SELECT menu_item_type FROM menu_item WHERE id = ?", new Object[] {menuItemId}, Integer.class);
+			connection = dbConnectionUtil.retrieveConnection(request);
+			stmt = connection.prepareStatement("SELECT menu_item_type FROM menu_item WHERE id = ?");
+			stmt.setLong(1, menuItemId);
+			rs = (ResultSet) stmt.executeQuery();
+			
+			existingItemType = rs.getInt("menu_item_type");
 		} catch(Exception ex) {
 			existingItemType = -1;
+		}  finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					existingItemType = -1;
+				}
+			}
 		}
 		
 		return existingItemType;

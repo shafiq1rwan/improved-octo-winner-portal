@@ -3,25 +3,20 @@ package my.com.byod.admin.rest;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.sql.DataSource;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,15 +25,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import my.com.byod.admin.util.DbConnectionUtil;
+
 @RestController
 @RequestMapping("/menu/combo")
 public class ComboRestController {
 
 	@Autowired
-	private DataSource dataSource;
-
-	@Autowired
-	private JdbcTemplate jdbcTemplate;
+	private DbConnectionUtil dbConnectionUtil;
 
 /*	@PostMapping(value = "/createComboDetail", produces = "application/json")
 	public ResponseEntity<?> createComboDetail(HttpServletRequest request, HttpServletResponse response,
@@ -85,14 +79,14 @@ public class ComboRestController {
 
 		try {
 			JSONObject jsonComboDetailData = new JSONObject(data);
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			
 				stmt = connection.prepareStatement(
 						"INSERT INTO combo_detail(menu_item_id, combo_detail_name, combo_detail_quantity, combo_detail_sequence) VALUES (?,?,?,?)");
 				stmt.setLong(1, jsonComboDetailData.getLong("menu_item_id"));
 				stmt.setString(2, jsonComboDetailData.getString("combo_detail_name"));
 				stmt.setInt(3, jsonComboDetailData.getInt("combo_detail_quantity"));
-				stmt.setInt(4, checkComboDetailSequence(jsonComboDetailData.getLong("menu_item_id"))+ 1);
+				stmt.setInt(4, checkComboDetailSequence(jsonComboDetailData.getLong("menu_item_id"), connection)+ 1);
 				int rowAffected = stmt.executeUpdate();
 				
 				if(rowAffected == 0)
@@ -112,11 +106,28 @@ public class ComboRestController {
 		return ResponseEntity.ok(null);
 	}
 	
-	private int checkComboDetailSequence(Long menu_item_id) {
+	private int checkComboDetailSequence(Long menu_item_id, Connection connection) throws SQLException {
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+
 		try {
-			return jdbcTemplate.queryForObject("SELECT TOP 1 combo_detail_sequence FROM combo_detail WHERE menu_item_id = ? ORDER BY combo_detail_sequence DESC", new Object[] {menu_item_id}, Integer.class);
-		} catch(DataAccessException ex) {
+			stmt = connection.prepareStatement("SELECT TOP 1 combo_detail_sequence FROM combo_detail WHERE menu_item_id = ? ORDER BY combo_detail_sequence DESC");
+			stmt.setLong(1, menu_item_id);
+			rs = (ResultSet)stmt.executeQuery();
+			
+			if(rs.next()) 
+				return rs.getInt("combo_detail_sequence");
+			else 
+				return 0;
+		} catch(Exception ex) {
 			return 0;
+		} finally {
+			if (stmt != null) {
+				stmt.close();
+			}
+			if (rs != null) {
+				rs.close();
+			}
 		}
 	}
 
@@ -129,7 +140,7 @@ public class ComboRestController {
 		ResultSet rs = null;
 
 		try {
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			stmt = connection.prepareStatement(
 					"SELECT * FROM combo_detail WHERE menu_item_id = ? ORDER BY combo_detail_sequence");
 			stmt.setLong(1, menuItemId);
@@ -169,7 +180,7 @@ public class ComboRestController {
 		ResultSet rs = null;
 
 		try {
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			stmt = connection.prepareStatement(
 					"SELECT * FROM combo_detail WHERE id = ?");
 			stmt.setLong(1, id);
@@ -206,7 +217,7 @@ public class ComboRestController {
 
 		try {
 			JSONObject jsonComboDetailData = new JSONObject(data);
-				connection = dataSource.getConnection();
+				connection = dbConnectionUtil.retrieveConnection(request);
 				stmt = connection.prepareStatement(
 						"UPDATE combo_detail SET combo_detail_name = ?, combo_detail_quantity = ? WHERE id = ?");
 				stmt.setString(1, jsonComboDetailData.getString("combo_detail_name"));
@@ -244,7 +255,7 @@ public class ComboRestController {
 			Long menuItemId = jsonComboDetailData.getLong("menu_item_id");
 			JSONArray jsonComboDetailArray = jsonComboDetailData.getJSONArray("tier_items");
 			
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			connection.setAutoCommit(false);
 
 			//Blank all Sequence
@@ -295,7 +306,7 @@ public class ComboRestController {
 		PreparedStatement stmt = null;
 
 		try {
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			stmt = connection.prepareStatement("DELETE FROM combo_detail WHERE id = ?");
 			stmt.setLong(1, id);
 			int deletedRow = stmt.executeUpdate();
@@ -334,7 +345,7 @@ public class ComboRestController {
 		ResultSet rs = null;
 
 		try {
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			stmt = connection.prepareStatement(
 					"SELECT * FROM combo_item_detail WHERE combo_detail_id = ? ORDER BY combo_item_detail_sequence");
 			stmt.setLong(1, comboDetailId);
@@ -375,7 +386,7 @@ public class ComboRestController {
 			JSONObject jsonComboItemDetail = new JSONObject(data);
 			JSONArray jsonComboItemDetailArray = jsonComboItemDetail.getJSONArray("item_arrays");
 
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			connection.setAutoCommit(false);
 			
 			String InsertionSql = "INSERT INTO combo_item_detail(combo_detail_id, menu_item_id, menu_item_group_id, combo_item_detail_sequence) VALUES (?,?,?,?)";
@@ -398,7 +409,7 @@ public class ComboRestController {
 					stmt.setLong(++index, 0);
 					stmt.setLong(++index, jsonComboItemDetailObj.getLong("id"));
 				}
-				stmt.setInt(++index, getComboItemDetailSequence(jsonComboItemDetail.getLong("combo_detail_id"))+(i+1));
+				stmt.setInt(++index, getComboItemDetailSequence(jsonComboItemDetail.getLong("combo_detail_id"), connection)+(i+1));
 				System.out.println("Index count: " + index);
 			}
 			
@@ -429,12 +440,28 @@ public class ComboRestController {
 		return ResponseEntity.ok(null);
 	}
 
-	private int getComboItemDetailSequence(long comboDetailId) {		
-		try {			
-			return jdbcTemplate.queryForObject("SELECT TOP 1 combo_item_detail_sequence FROM combo_item_detail WHERE combo_detail_id = ? ORDER BY combo_item_detail_sequence DESC",
-					new Object[] { comboDetailId }, Integer.class);
+	private int getComboItemDetailSequence(long comboDetailId, Connection connection) throws SQLException {
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+
+		try {
+			stmt = connection.prepareStatement("SELECT TOP 1 combo_item_detail_sequence FROM combo_item_detail WHERE combo_detail_id = ? ORDER BY combo_item_detail_sequence DESC");
+			stmt.setLong(1, comboDetailId);
+			rs = (ResultSet)stmt.executeQuery();
+			
+			if(rs.next()) 
+				return rs.getInt("combo_item_detail_sequence");
+			else 
+				return 0;
 		} catch(Exception ex) {
 			return 0;
+		} finally {
+				if (stmt != null) {
+					stmt.close();
+				}
+				if (rs != null) {
+					rs.close();
+				}
 		}
 	}
 
@@ -446,7 +473,7 @@ public class ComboRestController {
 
 		try {
 			JSONArray jsonComboItemDetailArray = new JSONArray(data);
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			connection.setAutoCommit(false);
 
 			for (int i = 0; i < jsonComboItemDetailArray.length(); i++) {
@@ -489,7 +516,7 @@ public class ComboRestController {
 		PreparedStatement stmt = null;
 
 		try {
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			stmt = connection.prepareStatement("DELETE FROM combo_item_detail WHERE id = ?");
 			stmt.setLong(1, id);
 			int deletedRow = stmt.executeUpdate();
@@ -523,7 +550,7 @@ public class ComboRestController {
 		try {
 			List<JSONObject> menuItemAndGroupJsonList = new ArrayList<>();
 
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			stmt = connection.prepareStatement(
 					"SELECT mi.*, cid.id AS combo_item_detail_id, cid.combo_item_detail_sequence FROM menu_item mi INNER JOIN combo_item_detail cid ON mi.id = cid.menu_item_id WHERE cid.combo_detail_id = ? AND mi.menu_item_type = 0");
 			stmt.setLong(1, comboDetailId);

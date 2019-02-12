@@ -8,10 +8,12 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -55,6 +57,25 @@ public class DbConnectionUtil {
 		HttpSession session = request.getSession();
 		Long brandId = (Long)session.getAttribute("brand_id");	
 		return brandId;
+    }
+    
+    //For jdbcTemplate usage only
+    public DataSource setupDataSource(HttpServletRequest request) {
+    	DriverManagerDataSource ds = null;
+    	Map<String, Object> brand = jdbcTemplate.queryForMap("SELECT * FROM brands WHERE id = ?", new Object[] {getBrandId(request)});
+    	
+    	if(!brand.isEmpty()) {
+    		String dbURL = "jdbc:sqlserver://"+ (String)brand.get("brand_db_domain")+":"+ (Integer)brand.get("brand_db_port")+";databaseName="+ 
+   					(String)brand.get("brand_db_name");
+    		
+            ds = new DriverManagerDataSource();
+            ds.setDriverClassName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+            ds.setUrl(dbURL);
+            ds.setUsername((String)brand.get("brand_db_user"));
+            ds.setPassword((String)brand.get("brand_db_password"));
+    	}
+    	System.out.println("Hello "+ ds.toString());
+    	return ds;
     }
     
 }

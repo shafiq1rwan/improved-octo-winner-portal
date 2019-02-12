@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import my.com.byod.admin.entity.GroupCategory;
 import my.com.byod.admin.util.ByodUtil;
+import my.com.byod.admin.util.DbConnectionUtil;
 
 @RestController
 @RequestMapping("/menu/modifier_group")
@@ -39,16 +40,10 @@ public class ModifierGroupRestController {
 	private String displayFilePath;
 	
 	@Autowired
-	private DataSource dataSource;
-
-	@Autowired
-	private JdbcTemplate jdbcTemplate;
-
-	@Autowired
-	private ByodUtil byodUtil;
+	private GroupCategoryRestController groupCategoryRestController;
 	
 	@Autowired
-	private GroupCategoryRestController groupCategoryRestController;
+	private DbConnectionUtil dbConnectionUtil;
 
 	@GetMapping(value = "/get_all_modifier_group", produces = "application/json")
 	public ResponseEntity<?> getAllModifierGroup(HttpServletRequest request, HttpServletResponse response) {
@@ -58,7 +53,7 @@ public class ModifierGroupRestController {
 		ResultSet rs = null;
 
 		try {
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			stmt = connection.prepareStatement("SELECT * FROM modifier_group");
 			rs = (ResultSet) stmt.executeQuery();
 
@@ -97,7 +92,7 @@ public class ModifierGroupRestController {
 		ResultSet rs = null;
 
 		try {
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			stmt = connection.prepareStatement("SELECT * FROM modifier_group WHERE id = ?");
 			stmt.setLong(1, id);
 			rs = (ResultSet) stmt.executeQuery();
@@ -186,7 +181,7 @@ public class ModifierGroupRestController {
 			boolean isActive = jsonModifierGroupData.isNull("is_active") ? false
 					: jsonModifierGroupData.getBoolean("is_active");
 
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			String sqlStatement = "INSERT INTO modifier_group(modifier_group_name, is_active) VALUES (?, ?);";
 			stmt = connection
 					.prepareStatement(sqlStatement);
@@ -234,7 +229,7 @@ public class ModifierGroupRestController {
 			boolean isActive = jsonModifierGroupData.isNull("is_active") ? false
 					: jsonModifierGroupData.getBoolean("is_active");
 
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			String sqlStatement = "UPDATE modifier_group SET modifier_group_name = ?, is_active = ? WHERE id = ?;";
 			stmt = connection
 					.prepareStatement(sqlStatement);
@@ -283,7 +278,7 @@ public class ModifierGroupRestController {
 		PreparedStatement stmt3 = null;
 
 		try {
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			String sqlStatement = "DELETE FROM modifier_group WHERE id = ?;";
 			stmt = connection.prepareStatement(sqlStatement);
 			stmt.setLong(1, id);
@@ -333,7 +328,7 @@ public class ModifierGroupRestController {
 		ResultSet rs = null;
 
 		try {
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			stmt = connection.prepareStatement("SELECT * FROM menu_item a "
 					+ "INNER JOIN menu_item_type_lookup b ON a.menu_item_type = b.menu_item_type_number "
 					+ "INNER JOIN modifier_item_sequence c ON a.id = c.menu_item_id "
@@ -380,7 +375,7 @@ public class ModifierGroupRestController {
 			JSONArray jsonItemsArray = jsonObj.getJSONArray("item_list");
 			Long modifierGroupId = jsonObj.getLong("modifier_group_id");
 
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			String sqlStatement = "INSERT INTO modifier_item_sequence (modifier_group_id, menu_item_id, modifier_item_sequence) VALUES (?, ?, ?);";
 
 			for (int i = 0; i < jsonItemsArray.length(); i++) {
@@ -427,7 +422,7 @@ public class ModifierGroupRestController {
 			JSONArray jsonItemsArray = jsonObj.getJSONArray("item_list");
 			Long modifierGroupId = jsonObj.getLong("modifier_group_id");
 
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			String sqlStatement = "DELETE FROM modifier_item_sequence WHERE modifier_group_id = ?;";
 			
 			stmt = connection.prepareStatement(sqlStatement);
@@ -483,7 +478,7 @@ public class ModifierGroupRestController {
 
 		try {
 			jsonAssignedModifierArray = new JSONArray();
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 
 			stmt = connection.prepareStatement(
 					"SELECT mg.*, mimg.menu_item_modifier_group_sequence FROM modifier_group mg INNER JOIN menu_item_modifier_group mimg On mg.id = mimg.modifier_group_id WHERE mimg.menu_item_id = ? ORDER BY mimg.menu_item_modifier_group_sequence");
@@ -527,7 +522,7 @@ public class ModifierGroupRestController {
 			System.out.println("Hello From Unassigned " + menuItemId);
 
 			jsonUnassignedModifierArray = new JSONArray();
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 
 			stmt = connection.prepareStatement(
 					"SELECT id, modifier_group_name FROM modifier_group "
@@ -569,7 +564,7 @@ public class ModifierGroupRestController {
 			JSONArray jsonModifierGroupsArray = jsonObj.getJSONArray("modifier_group_list");
 			Long menuItemId = jsonObj.getLong("menu_item_id");
 
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			connection.setAutoCommit(false);
 			String sqlStatement = "INSERT INTO menu_item_modifier_group (menu_item_id, modifier_group_id, menu_item_modifier_group_sequence) VALUES (?, ?, ?);";
 
@@ -622,7 +617,7 @@ public class ModifierGroupRestController {
 
 		try {
 
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			String sqlStatement = "DELETE FROM menu_item_modifier_group WHERE menu_item_id = ? AND modifier_group_id = ?;";
 			stmt = connection.prepareStatement(
 					"DELETE FROM menu_item_modifier_group WHERE menu_item_id = ? AND modifier_group_id = ?");
@@ -667,7 +662,7 @@ public class ModifierGroupRestController {
 			JSONArray jsonModifierGroupsArray = jsonObj.getJSONArray("modifier_group_list");
 			Long menuItemId = jsonObj.getLong("menu_item_id");
 
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			connection.setAutoCommit(false);
 			String sqlStatement = "DELETE FROM menu_item_modifier_group WHERE menu_item_id = ?;";
 			

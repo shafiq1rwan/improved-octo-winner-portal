@@ -6,29 +6,25 @@ import java.sql.ResultSet;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.sql.DataSource;
-
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.microsoft.sqlserver.jdbc.SQLServerException;
 
 import my.com.byod.admin.util.ByodUtil;
+import my.com.byod.admin.util.DbConnectionUtil;
 
 @RestController
 @RequestMapping("/menu/category")
@@ -41,16 +37,13 @@ public class CategoryRestController {
 	private String displayFilePath;
 	
 	@Autowired
-	private DataSource dataSource;
-
-	@Autowired
-	private JdbcTemplate jdbcTemplate;
-
-	@Autowired
 	private ByodUtil byodUtil;
 	
 	@Autowired
 	private GroupCategoryRestController groupCategoryRestController;
+	
+	@Autowired
+	private DbConnectionUtil dbConnectionUtil;
 
 	@GetMapping(value = { "/get_all_category" }, produces = "application/json")
 	public ResponseEntity<?> getAllCategory(HttpServletRequest request, HttpServletResponse response) {
@@ -60,7 +53,7 @@ public class CategoryRestController {
 		ResultSet rs = null;
 
 		try {
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 
 			stmt = connection.prepareStatement("SELECT * FROM category");
 			rs = (ResultSet) stmt.executeQuery();
@@ -103,7 +96,7 @@ public class CategoryRestController {
 		ResultSet rs = null;
 
 		try {
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 
 			stmt = connection.prepareStatement("SELECT * FROM category WHERE group_category_id = ?");
 			stmt.setLong(1, groupCategoryId);
@@ -149,7 +142,7 @@ public class CategoryRestController {
 		ResultSet rs2 = null;
 
 		try {
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			stmt = connection.prepareStatement("SELECT * FROM category WHERE id = ?");
 			stmt.setLong(1, id);
 			rs = (ResultSet) stmt.executeQuery();
@@ -221,13 +214,13 @@ public class CategoryRestController {
 				String imagePath = jsonCategoryData.isNull("category_image_path") ? null
 						: byodUtil.saveImageFile("imgC",jsonCategoryData.getString("category_image_path"), null);
 				String sqlStatement = "INSERT into category(group_category_id, category_name, category_description, category_image_path, category_sequence, is_active) VALUES (?, ?, ?, ?, ?, ?);";
-				connection = dataSource.getConnection();
+				connection = dbConnectionUtil.retrieveConnection(request);
 				stmt = connection.prepareStatement(sqlStatement);
 				stmt.setLong(1, jsonCategoryData.getLong("group_category_id"));
 				stmt.setString(2, jsonCategoryData.getString("category_name"));
 				stmt.setString(3, description);
 				stmt.setString(4, imagePath);
-				stmt.setInt(5, getCategorySequenceNumber(jsonCategoryData.getLong("group_category_id")) + 1);
+				stmt.setInt(5, getCategorySequenceNumber(jsonCategoryData.getLong("group_category_id"), connection) + 1);
 				stmt.setBoolean(6, jsonCategoryData.getBoolean("is_active"));
 				stmt.executeUpdate();
 				
@@ -237,7 +230,7 @@ public class CategoryRestController {
 						jsonCategoryData.getString("category_name")==null?"null":"'"+jsonCategoryData.getString("category_name")+"'",
 						description==null?"null":"'"+description+"'",
 						imagePath==null?"null":"'"+imagePath+"'",
-						String.valueOf(getCategorySequenceNumber(jsonCategoryData.getLong("group_category_id")) + 1),
+						String.valueOf(getCategorySequenceNumber(jsonCategoryData.getLong("group_category_id"), connection) + 1),
 						String.valueOf(jsonCategoryData.getBoolean("is_active"))};	
 				groupCategoryRestController.logActionToFile(connection, sqlStatement, parameters, jsonCategoryData.getLong("group_category_id"), imagePath, 1);
 				
@@ -277,7 +270,7 @@ public class CategoryRestController {
 				String imagePath = jsonCategoryData.isNull("category_image_path") ? null
 						: byodUtil.saveImageFile("imgC",jsonCategoryData.getString("category_image_path"), null);
 				
-				connection = dataSource.getConnection();
+				connection = dbConnectionUtil.retrieveConnection(request);
 				String sqlStatement = "";
 				
 				if(imagePath == null)
@@ -347,7 +340,7 @@ public class CategoryRestController {
 			JSONArray jsonCategorySequenceArray = jsonObjForm.getJSONArray("array");
 			
 			String sqlStatement = "UPDATE category SET category_sequence = ? WHERE id = ?;";
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			connection.setAutoCommit(false);
 			stmt = connection.prepareStatement(sqlStatement);
 			
@@ -398,7 +391,7 @@ public class CategoryRestController {
 
 		try {
 			Long group_category_id = null;
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			// get group_category_id
 			stmt = connection.prepareStatement("SELECT a.id FROM group_category a "
 					+ "INNER JOIN category b ON a.id = b.group_category_id "
@@ -447,16 +440,26 @@ public class CategoryRestController {
 		return ResponseEntity.ok(null);
 	}
 
-	private int getCategorySequenceNumber(Long groupCategoryId) {
+	private int getCategorySequenceNumber(Long groupCategoryId, Connection connection) {
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+
 		try {
-			return jdbcTemplate.queryForObject("SELECT TOP 1 category_sequence FROM category WHERE group_category_id = ? ORDER BY category_sequence DESC",
-					new Object[] { groupCategoryId }, Integer.class);
+			stmt = connection.prepareStatement("SELECT TOP 1 category_sequence FROM category WHERE group_category_id = ? ORDER BY category_sequence DESC");
+			stmt.setLong(1, groupCategoryId);
+			rs = stmt.executeQuery();
+			
+			if(rs.next()) {
+				return rs.getInt("category_sequence");
+			} else {
+				return 0;
+			}
 		} catch (Exception ex) {
 			return 0;
 		}
 	}
 
-	private int checkDuplicateCategoryName(String categoryName) {
+/*	private int checkDuplicateCategoryName(String categoryName) {
 		try {
 			return jdbcTemplate.queryForObject("SELECT COUNT(category_name) WHERE category_name = ?",
 					new Object[] { categoryName }, Integer.class);
@@ -484,7 +487,7 @@ public class CategoryRestController {
 			ex.printStackTrace();
 			return 0;
 		}
-	}
+	}*/
 	
 	//TODO need change
 	@PostMapping("/assign_menu_item_to_category")
@@ -498,7 +501,7 @@ public class CategoryRestController {
 			Long categoryId = jsonObj.getLong("category_id");
 			Long group_category_id = jsonObj.getLong("group_category_id");
 			
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			connection.setAutoCommit(false);
 			
 			String sqlStatement = "INSERT INTO category_menu_item (category_id, menu_item_id, category_menu_item_sequence) VALUES (?, ?, ?)";
@@ -565,7 +568,7 @@ public class CategoryRestController {
 			Long categoryId = jsonObj.getLong("category_id");
 			Long group_category_id = jsonObj.getLong("group_category_id");
 			
-			connection = dataSource.getConnection();
+			connection = dbConnectionUtil.retrieveConnection(request);
 			
 			String sqlStatement = "DELETE FROM category_menu_item WHERE category_id = ?;";
 			
