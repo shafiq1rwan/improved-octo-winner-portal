@@ -309,7 +309,7 @@ public class DeviceConfigRestController {
 		JSONObject result = null;
 		try {
 			//connection = dataSource.getConnection();
-			sqlStatement = "SELECT tax_charge_id, backend_id, store_name, store_logo_path, store_address, store_longitude, store_latitude, store_country, store_currency, " + 
+			sqlStatement = "SELECT id, tax_charge_id, backend_id, store_name, store_logo_path, store_address, store_longitude, store_latitude, store_country, store_currency, " + 
 					"store_table_count, store_start_operating_time, store_end_operating_time, last_update_date, is_publish, created_date FROM store WHERE id = ? ";
 			ps1 = connection.prepareStatement(sqlStatement);
 			ps1.setLong(1, storeId);
@@ -317,6 +317,7 @@ public class DeviceConfigRestController {
 			
 			if (rs1.next()) {
 				result = new JSONObject();
+				result.put("storeId", rs1.getLong("id"));
 				result.put("taxChargeId", rs1.getLong("tax_charge_id"));
 				result.put("backeEndId", rs1.getString("backend_id"));
 				result.put("name", rs1.getString("store_name"));
