@@ -109,7 +109,7 @@ overflow-y: auto;
 							 	<div class="row" ng-if="stores.length > 0">
 									<div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
 									
-									<div "class="table-wrapper-scroll-y">
+									<div class="table-wrapper-scroll-y">
 											<table class="table">
 												<thead>
 													<tr>

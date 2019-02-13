@@ -74,7 +74,7 @@ public class DbConnectionUtil {
             ds.setUsername((String)brand.get("brand_db_user"));
             ds.setPassword((String)brand.get("brand_db_password"));
     	}
-    	System.out.println("Hello "+ ds.toString());
+    	//System.out.println("Hello "+ ds.toString());
     	return ds;
     }
     

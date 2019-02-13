@@ -5,6 +5,14 @@
 	padding-left: 15px;
 	border-left: 2px solid #FF851B;
 }
+
+.table-wrapper-scroll-y {
+	display: block;
+	max-height: 200px;
+	overflow-y: auto;
+	-ms-overflow-style: -ms-autohiding-scrollbar;
+}
+
 </style>
 
 <body class="adminbody">
@@ -141,13 +149,13 @@
 	</div>
 	<!-- BRAND MODAL ENDED -->
 	
-	<!-- USER MODAL STARTED -->
-<!-- 	<div class="modal fade" id="userModal" tabindex="-1" role="dialog" aria-labelledby="userModal" aria-hidden="true">
+	<!-- BRAND USER MODAL STARTED -->
+	<div class="modal fade" id="brandUserModal" tabindex="-1" role="dialog" aria-labelledby="brandUserModal" aria-hidden="true">
 		<div class="modal-dialog modal-lg">
 		    <div class="modal-content">
-		    <form id="userForm" method="POST" accept-charset="UTF-8" role="form" class="form-signin">
+		    <form id="brandUserForm" method="POST" accept-charset="UTF-8" role="form" class="form-signin">
 		      <div class="modal-header">
-		        <h5>Assign User(s) To Brand</h5>	
+		        <h5>Assigned User(s)</h5>	
 		        <button type="button" class="close" data-dismiss="modal" ng-click="resetModal()" aria-label="Close">
 		          <span aria-hidden="true">&times;</span>
 		        </button>
@@ -156,28 +164,40 @@
 		      	<div class="form-section">
 					<div class="row">
 						<div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
-							<div class="form-group">
-								<label class="login-label">Brand Name</label>
-								 
-								 
-								 
-								 
-								 
-								 
-								 
-							</div>
+								<div class="table-wrapper-scroll-y">
+											<table class="table">
+												<thead>
+													<tr>
+														<th>Username</th>
+														<th>Email</th>
+														<th>Selected</th>
+													</tr>
+												</thead>
+			
+												<tbody>
+													<tr ng-repeat="user in users">
+															<td>{{user.username}}</td>
+															<td>{{user.email}}</td>
+															<td >
+																<input type="checkbox" ng-model="user.exist"
+																ng-change="addIntoUserList(user)"/>				
+															</td>
+													</tr>
+												</tbody>
+											</table>
+									</div>
 						</div>
 					</div>
 				</div>				       									  				 									
 		      </div>
 		      <div class="modal-footer">
-		      	<button class="btn btn-primary" type="submit" ng-click=""> Assign</button>
+		      	<button class="btn btn-primary" type="submit" ng-click="assignUser()">Assign</button>
 		      </div>
 		       </form>		      
 		    </div>
 		</div>
-	</div> -->
-	<!-- USER MODAL ENDED -->
+	</div>
+	<!-- BRAND USER MODAL ENDED -->
 
 	</div>
 </body>

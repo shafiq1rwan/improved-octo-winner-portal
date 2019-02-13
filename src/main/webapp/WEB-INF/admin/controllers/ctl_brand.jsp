@@ -3,10 +3,14 @@
 	app.controller('ctl_brand', function($scope, $http, $compile) {
 				
 		$scope.brands = [];
+		$scope.users = [];
 		$scope.role = '';
 		$scope.brand = {};
 		$scope.action = '';
+		$scope.brand_id = 0;
+		
 		var table;
+		var users_array = [];
 		
 		$(document).ready(function() {
 			getBrandInfo();
@@ -28,7 +32,7 @@
 					alert(response.data);
 			});
 		}
-		
+	
 		//Datatable
 		var refreshBrandTable = function(brands){
 			table = $('#brands_dtable').DataTable({
@@ -50,13 +54,13 @@
 				"order" : [ [ 0, "asc" ] ] ,
 				"columns" : [ 
 					{"data" : "name"},
-					{"data": "id", "width": "20%",
+					{"data": "id", "width": "30%",
 						 "render": function ( data, type, full, meta ) {
 							 	var id = full.id;
 							 	var html;
 							 	
 							 	if($scope.role === 'ROLE_SUPER_ADMIN'){
-							 		html = '<div class="btn-toolbar justify-content-between"><button ng-click="redirectToBrand('+ id +')" type="button" class="btn btn-primary custom-fontsize"><b><i class="fa fa-plug"></i>Connect</b></button><button ng-click="promptEditBrandModal('+ id +')" type="button" class="btn btn-danger custom-fontsize"><b><i class="fa fa-plug"></i>Edit</b></button></div>'
+							 		html = '<div class="btn-toolbar justify-content-between"><button data-toggle="modal" data-target="#brandUserModal" data-keyboard="false" data-backdrop="static" ng-click="getUsersByBrand('+ id +')" type="button" class="btn btn-default custom-fontsize"><b><i class="fa fa-plug"></i>Assign</b></button><button ng-click="redirectToBrand('+ id +')" type="button" class="btn btn-primary custom-fontsize"><b><i class="fa fa-plug"></i>Connect</b></button><button ng-click="promptEditBrandModal('+ id +')" type="button" class="btn btn-danger custom-fontsize"><b><i class="fa fa-plug"></i>Edit</b></button></div>'
 							 	} 
 							 	else {
 							 		html = '<div class="btn-toolbar justify-content-between"><button ng-click="redirectToBrand('+ id +')" type="button" class="btn btn-primary custom-fontsize"><b><i class="fa fa-plug"></i>Connect</b></button></div>';
@@ -68,6 +72,23 @@
 					"createdRow": function ( row, data, index ) {
 				        $compile(row)($scope);
 				    }
+			});
+		}
+		
+		$scope.getUsersByBrand = function(brand_id){
+			$http({
+				method : 'GET',
+				headers : {'Content-Type' : 'application/json'},
+				url : '${pageContext.request.contextPath}/brands/users-in-brand?brandId='+brand_id
+			})
+			.then(
+				function(response) {
+					$scope.brand_id = brand_id;
+					$scope.users = response.data;
+					checked($scope.users);
+				},
+				function(response) {
+					alert(response.data);
 			});
 		}
 		
@@ -110,13 +131,60 @@
 			});
 		}
 		
+		$scope.addIntoUserList = function(user){	
+			if(user.exist){	
+				 	users_array.push(user);
+				} else {
+	 				 var toDel = users_array.indexOf(user);
+		 				if (toDel > -1) {
+		 					users_array.splice(toDel,1); 
+		 				}
+				}
+		}
+		
+		function checked(users){
+			for(var i=0;i<users.length;i++){
+				if(users[i].exist){
+					users_array.push(users[i]);
+				}
+			}
+			console.log("already list "+ users_array);
+		}
+
+		$scope.assignUser = function(){
+			var post_data = JSON.stringify({
+				'brandId' : $scope.brand_id,
+				'users' : users_array
+			});
+			
+			console.log(post_data);
+			
+			$http({
+				method : 'POST',
+				headers : {'Content-Type' : 'application/json'},
+				url : '${pageContext.request.contextPath}/brands/assign-users-to-brand',
+				data : post_data
+			})
+			.then(
+				function(response) {
+					$scope.resetModal();
+					$('#brandUserModal').modal('toggle');
+				},
+				function(response) {
+					alert(response.data);
+			});
+		}
+		
 		$scope.setModalType = function(action){
 			$scope.action = action;
 		}
 		
 		$scope.resetModal = function(){
+			$scope.brand_id = 0;
 			$scope.brand = {};
+			$scope.users = [];
 			$scope.action = '';
+			users_array = [];	
 		}
 		
 		$scope.submitBrand = function(){
@@ -154,18 +222,6 @@
 				});
 			}
 		}
-		
-/* 		$scope.assignedUserToBrand = function(){
-			
-			
-			
-			
-			
-			
-			
-			
-		} */
-		
 
 	});
 </script>

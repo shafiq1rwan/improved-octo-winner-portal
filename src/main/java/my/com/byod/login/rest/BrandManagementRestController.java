@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import my.com.byod.admin.util.DbConnectionUtil;
@@ -201,9 +202,9 @@ public class BrandManagementRestController {
 							int rowAffected2 = stmt.executeUpdate();
 							if(rowAffected2 == 0)
 								return ResponseEntity.badRequest().contentType(MediaType.TEXT_PLAIN).body("Unable to create brand ID");
-						}
-						
-						/*rowAffected = jdbcTemplate.update(
+						}					
+
+/*	rowAffected = jdbcTemplate.update(
 								"INSERT INTO brands(name,brand_db_domain,brand_db_name,brand_db_user,brand_db_password,brand_db_port)VALUES(?,?,?,?,?,?)",
 								new Object[] { name, jsonData.getString("db_domain"), jsonData.getString("db_name"),
 										jsonData.getString("db_user"), jsonData.getString("db_password"),
@@ -281,26 +282,87 @@ public class BrandManagementRestController {
 	}
 	
 	//Brand(s) Display Brand Users Assignment
-/*	@GetMapping(value="/get_all_")
-	public ResponseEntity<?> usersInBrand(@RequestBody String data, HttpServletRequest request,
+	@GetMapping(value="/users-in-brand")
+	public ResponseEntity<?> usersInBrand(HttpServletRequest request,
 			HttpServletResponse response, @RequestParam("brandId") Long brandId) {
-		JSONObject jsonResult = null;
-		
+		JSONArray jsonArray = new JSONArray();	
 		try {
-			List<Map<String, Object>> usersInBrand = jdbcTemplate.queryForList("SELECT u.* FROM users u INNER JOIN users_brand ub ")
+			//Exluce Super Admin
+			List<Map<String, Object>> usersInBrand = jdbcTemplate.queryForList("SELECT u.id, u.username, u.name, u.email, " + 
+					"CASE WHEN (SELECT COUNT(*) " + 
+					"FROM users_brands ub " + 
+					"WHERE ub.user_id = u.id " + 
+					"AND " + 
+					"ub.brand_id = ?) > 0 " + 
+					"THEN CAST (1 AS BIT) " + 
+					"ELSE CAST (0 AS BIT) END as exist " + 
+					"FROM users u WHERE u.id != 1", new Object[] {brandId});
 			
+			if(!usersInBrand.isEmpty()) {
+				jsonArray = new JSONArray(usersInBrand);
+			}
 			
 		} catch(Exception ex) {
 			ex.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN)
+					.body("Cannot retrieve users. Please try again later");
 		}
+		return ResponseEntity.ok(jsonArray.toString());
+	}
+	
+	@PostMapping(value="/assign-users-to-brand")
+	public ResponseEntity<?> assignUsersToBrand(@RequestBody String data, HttpServletRequest request, HttpServletResponse response){
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		PreparedStatement stmt2 = null;
 		
-		return ResponseEntity.ok(null);
-	}*/
-	
-	
+		try {
+			JSONObject jsonObject = new JSONObject(data);
+			Long brandId = jsonObject.getLong("brandId");
+			JSONArray userArray = jsonObject.optJSONArray("users");
+			
+			connection = dataSource.getConnection();
+			stmt = connection.prepareStatement("DELETE FROM users_brands WHERE brand_id = ?");
+			stmt.setLong(1,brandId);
+			stmt.executeUpdate();
 
-	
-	
-	
+			if(userArray.length()!= 0) {
+				connection.setAutoCommit(false);
+				
+				String insertionSql = "INSERT INTO users_brands(brand_id,user_id,permission) VALUES (?,?,'0')";
 
+				for(int i = 0; i < userArray.length(); i++) {
+					JSONObject jsonUserObj = userArray.getJSONObject(i);
+						stmt2 = connection.prepareStatement(insertionSql);
+						stmt2.setLong(1, brandId);
+						stmt2.setLong(2, jsonUserObj.getLong("id"));
+						stmt2.executeUpdate();
+						
+						connection.commit();
+				}
+			}
+			return ResponseEntity.ok(null);
+		} catch(Exception ex) {
+			ex.printStackTrace();
+			if (connection != null) {
+				try {
+					connection.rollback();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN)
+					.body("Cannot assign user to brand. Please try again later");
+		} finally {
+			if(connection!=null) {
+				try {
+					connection.setAutoCommit(true);
+					connection.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
 }

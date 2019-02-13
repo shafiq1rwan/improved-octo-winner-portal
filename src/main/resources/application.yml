@@ -36,12 +36,6 @@ get-menu-path: /byod-menu/
 log-path: logger
 byod-cloud-url: http://localhost:8080
 
-db-port: 1433
-db-domain: localhost
-db-username: sa
-db-password: MPay@1234
-db-driver: com.microsoft.sqlserver.jdbc.SQLServerDriver
-
 ---
 
 spring:
