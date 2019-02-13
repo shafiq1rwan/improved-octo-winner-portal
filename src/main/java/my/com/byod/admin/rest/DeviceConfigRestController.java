@@ -54,19 +54,27 @@ public class DeviceConfigRestController {
 			@RequestParam(value = "activationId", required = true) String activationId, 
 			@RequestParam(value = "activationKey", required = true) String activationKey,
 			@RequestParam(value = "macAddress", required = true) String macAddress,
-			@RequestParam(value = "brandId", required = true) Long brandId) {
+			@RequestParam(value = "brandId", required = true) Long brandId,
+			@RequestParam(value = "type", required = true) Long type) {
 
 		// device activation api
+		
+		// parameter "type"
+		// 1 - ECPOS
+		// 2 - BYOD
+		// 3 - KIOSK
+		
 		JSONObject result = new JSONObject();
 		JSONObject deviceInfo = null;
 		Connection connection = null;
+		JSONObject menuInfo = null;
 		String menuFile = null;
 		String resultCode = "E01";
 		String resultMessage = "Server error. Please try again later.";
 
 		try {
 			connection = dbConnectionUtil.getConnection(brandId);
-			deviceInfo = verifyActivation(connection, activationId, activationKey);
+			deviceInfo = verifyActivation(connection, activationId, activationKey, type);
 			if(deviceInfo==null) {
 				resultCode = "E02";
 				resultMessage = "Invalid activation info";
@@ -74,7 +82,7 @@ public class DeviceConfigRestController {
 			else if(deviceInfo.getLong("statusLookupId")==2) {
 				// already activated
 				resultCode = "E03";
-				resultMessage = "Activation info is already activated.";
+				resultMessage = "Activation info is already being used.";
 			}
 			else if(deviceInfo.getLong("statusLookupId")==3) {
 				// already terminated
@@ -85,16 +93,17 @@ public class DeviceConfigRestController {
 				// successful activation
 				
 				// ecpos retrieve extra info
-				if(deviceInfo.getLong("typeId")==1) {
-					JSONObject storeInfo = getStoreInfo(connection, deviceInfo.getLong("refId"));
+				if(type==1) {
 					JSONArray ecposStaffInfo = getEcposStaffInfo(connection, deviceInfo.getLong("refId"));
-					
-					result.put("storeInfo", storeInfo);
 					result.put("staffInfo", ecposStaffInfo);
 				}
 				
-				menuFile = getLatestMenuFile(connection, deviceInfo.getLong("refId"));
-				if(menuFile!=null) {
+				JSONObject storeInfo = getStoreInfo(connection, deviceInfo.getLong("refId"));
+				result.put("storeInfo", storeInfo);
+				
+				menuInfo = getLatestMenuFile(connection, deviceInfo.getLong("refId"));
+				if(menuInfo!=null) {
+					menuFile = menuInfo.getString("menuFilePath");
 					String menuFilePath = byodUrl + displayFilePath + menuFile + "/" + menuFile + ".json";
 					String imageFilePath = null;
 					if(extractImageFromMenuFilePath(menuFile)) {
@@ -103,10 +112,12 @@ public class DeviceConfigRestController {
 					
 					result.put("menuFilePath", menuFilePath);
 					result.put("imageFilePath", imageFilePath);
+					result.put("versionCount", menuInfo.getLong("versionCount"));
 					resultCode = "00";
 					resultMessage = "Successful device activation and menu synchronization.";
 				}
 				else {
+					result.put("versionCount", Long.valueOf("0"));
 					resultCode = "01";
 					resultMessage = "Successful device activation. Please proceed to publish menu.";
 				}
@@ -148,6 +159,7 @@ public class DeviceConfigRestController {
 		JSONObject result = new JSONObject();
 		JSONObject deviceInfo = null;
 		Connection connection = null;
+		JSONObject menuInfo = null;
 		String menuFile = null;
 		String secureHash = "";
 		String resultCode = "E01";
@@ -174,15 +186,17 @@ public class DeviceConfigRestController {
 			}
 			else if(versionCount==0) {
 				// first time get menu
-				menuFile = getLatestMenuFile(connection, storeId);
-				if(menuFile!=null) {
+				menuInfo = getLatestMenuFile(connection, storeId);
+				if(menuInfo!=null) {
+					menuFile = menuInfo.getString("menuFilePath");
 					String menuFilePath = byodUrl + displayFilePath + menuFile + "/" + menuFile + ".json";
 					String imageFilePath = null;
 					if(extractImageFromMenuFilePath(menuFile)) {
 						imageFilePath = byodUrl + displayFilePath + menuFile + "/" + menuFile + ".zip";
 					}			
 					result.put("menuFilePath", menuFilePath); 
-					result.put("imageFilePath", imageFilePath);				
+					result.put("imageFilePath", imageFilePath);
+					result.put("versionCount", menuInfo.getLong("versionCount"));
 					resultCode = "00";
 					resultMessage = "Successful get full menu.";
 				}
@@ -224,17 +238,18 @@ public class DeviceConfigRestController {
 		return result.toString();
 	}
 	
-	private JSONObject verifyActivation(Connection connection, String activationId, String activationKey) throws Exception {
+	private JSONObject verifyActivation(Connection connection, String activationId, String activationKey, Long type) throws Exception {
 		String sqlStatement = null;
 		PreparedStatement ps1 = null;
 		ResultSet rs1 = null;
 		JSONObject result = null;
 		try {
 			//connection = dataSource.getConnection();
-			sqlStatement = "SELECT * FROM device_info WHERE activation_id = ? AND activation_key = ? ";
+			sqlStatement = "SELECT * FROM device_info WHERE activation_id = ? AND activation_key = ? AND device_type_lookup_id = ? ";
 			ps1 = connection.prepareStatement(sqlStatement);
 			ps1.setString(1, activationId);
 			ps1.setString(2, activationKey);
+			ps1.setLong(3, type);
 			rs1 = ps1.executeQuery();
 
 			if (rs1.next()) {
@@ -242,7 +257,7 @@ public class DeviceConfigRestController {
 				result.put("id", rs1.getLong("id"));
 				result.put("refId", rs1.getLong("ref_id"));
 				result.put("statusLookupId", rs1.getLong("status_lookup_id"));
-				result.put("typeId", rs1.getLong("device_type_lookup_id"));
+				//result.put("typeId", rs1.getLong("device_type_lookup_id"));
 			}
 			
 		} catch (Exception ex) {
@@ -305,7 +320,7 @@ public class DeviceConfigRestController {
 				result.put("taxChargeId", rs1.getLong("tax_charge_id"));
 				result.put("backeEndId", rs1.getString("backend_id"));
 				result.put("name", rs1.getString("store_name"));
-				result.put("logoPath", imagePath + rs1.getString("store_logo_path") + ".png");
+				result.put("logoPath", byodUrl + displayImagePath + rs1.getString("store_logo_path"));
 				result.put("address", rs1.getString("store_address"));
 				result.put("longitude", rs1.getString("store_longitude"));
 				result.put("latitude", rs1.getString("store_latitude"));
@@ -414,11 +429,11 @@ public class DeviceConfigRestController {
 		return flag;
 	}
 	
-	private String getLatestMenuFile(Connection connection, Long storeId) throws Exception {
+	private JSONObject getLatestMenuFile(Connection connection, Long storeId) throws Exception {
 		String sqlStatement = null;
 		PreparedStatement ps1 = null;
 		ResultSet rs1 = null;
-		String result = null;
+		JSONObject result = null;
 		try {
 			//connection = dataSource.getConnection();
 			sqlStatement = "SELECT c.* FROM store a " + 
@@ -430,7 +445,9 @@ public class DeviceConfigRestController {
 			rs1 = ps1.executeQuery();
 
 			if (rs1.next()) {
-				result = rs1.getString("menu_file_path");
+				result = new JSONObject();
+				result.put("menuFilePath", rs1.getString("menu_file_path"));
+				result.put("versionCount", rs1.getLong("version_count"));
 			}
 			
 		} catch (Exception ex) {
