@@ -210,7 +210,7 @@ public class DeviceConfigRestController {
 				JSONArray versionArray = getVersionUpdates(connection, versionCount, storeId);			
 				if(versionArray.length()!=0) {
 					result.put("versionSync", versionArray);
-					resultCode = "00";
+					resultCode = "01";
 					resultMessage = "Successful menu sync.";
 				}
 				else {
