@@ -124,8 +124,8 @@ public class Order_RestController {
 					resultMessage = "Store does not exist. Please re-scan QR.";
 				}
 				
-				menuFilePath = rs1.getString("menu_file_path");				
-				File checkFile = new File(filePath + menuFilePath, menuFilePath + ".json");
+				//menuFilePath = rs1.getString("menu_file_path");				
+				File checkFile = new File(filePath + brandId + "/" + rs1.getLong("group_category_id"), "/latest/menuFilePath.json");
 				if (checkFile.exists()) {
 					// read file
 					BufferedReader br = new BufferedReader(new FileReader(checkFile));
