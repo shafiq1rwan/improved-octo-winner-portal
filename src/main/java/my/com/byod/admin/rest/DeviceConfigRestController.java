@@ -1,8 +1,12 @@
 package my.com.byod.admin.rest;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -104,14 +108,12 @@ public class DeviceConfigRestController {
 				menuInfo = getLatestMenuFile(connection, deviceInfo.getLong("refId"));
 				if(menuInfo!=null) {
 					menuFile = menuInfo.getString("menuFilePath");
-					String menuFilePath = byodUrl + displayFilePath + menuFile + "/" + menuFile + ".json";
-					String imageFilePath = null;
-					if(extractImageFromMenuFilePath(menuFile)) {
-						imageFilePath = byodUrl + displayFilePath + menuFile + "/" + menuFile + ".zip";
-					}
-					
+					String menuFilePath = byodUrl + displayFilePath + "latest/menuFilePath.json";
+					String imageFilePath = byodUrl + displayFilePath + "latest/image.zip";	
+					String queryFilePath = byodUrl + displayFilePath + "latest/query.txt";	
 					result.put("menuFilePath", menuFilePath);
 					result.put("imageFilePath", imageFilePath);
+					result.put("queryFilePath", queryFilePath);
 					result.put("versionCount", menuInfo.getLong("versionCount"));
 					resultCode = "00";
 					resultMessage = "Successful device activation and menu synchronization.";
@@ -189,13 +191,12 @@ public class DeviceConfigRestController {
 				menuInfo = getLatestMenuFile(connection, storeId);
 				if(menuInfo!=null) {
 					menuFile = menuInfo.getString("menuFilePath");
-					String menuFilePath = byodUrl + displayFilePath + menuFile + "/" + menuFile + ".json";
-					String imageFilePath = null;
-					if(extractImageFromMenuFilePath(menuFile)) {
-						imageFilePath = byodUrl + displayFilePath + menuFile + "/" + menuFile + ".zip";
-					}			
+					String menuFilePath = byodUrl + displayFilePath + "latest/menuFilePath.json";
+					String imageFilePath = byodUrl + displayFilePath + "latest/image.zip";
+					String queryFilePath = byodUrl + displayFilePath + "latest/query.txt";
 					result.put("menuFilePath", menuFilePath); 
 					result.put("imageFilePath", imageFilePath);
+					result.put("queryFilePath", queryFilePath);
 					result.put("versionCount", menuInfo.getLong("versionCount"));
 					resultCode = "00";
 					resultMessage = "Successful get full menu.";
@@ -391,7 +392,7 @@ public class DeviceConfigRestController {
 		return result;
 	}
 	
-	private boolean extractImageFromMenuFilePath(String menuFilePath) throws Exception {
+	public boolean extractLatestImages() throws Exception {
 		boolean flag = false;
 		// grab menu images
 		File directory = new File(imagePath);
@@ -407,7 +408,7 @@ public class DeviceConfigRestController {
 			  } 
 			}
 			// zipping images
-			FileOutputStream fos = new FileOutputStream(filePath + menuFilePath + "/" +  menuFilePath +".zip");
+			FileOutputStream fos = new FileOutputStream(filePath + "latest/image.zip");
 			ZipOutputStream zipOut = new ZipOutputStream(fos);
 			for (String srcFile : imageList) {
 				File fileToZip = new File(imagePath, srcFile);
@@ -539,6 +540,70 @@ public class DeviceConfigRestController {
 			}
 		}
 		return result;
+	}
+	
+	public void generateLatestQueryFile(Connection connection) throws Exception {
+		String sqlStatement = null;
+		PreparedStatement ps1 = null;
+		ResultSet rs1 = null;
+		String result = "";
+		
+		String[] tableNames = {
+				"category",
+				"category_menu_item", 
+				"combo_detail",
+				"combo_item_detail",
+				"menu_item",
+				"menu_item_display_period",
+				"menu_item_group",
+				"menu_item_group_sequence",
+				"menu_item_modifier_group",
+				"menu_item_promo_period",
+				"menu_item_tax_charge",
+				"modifier_group",
+				"modifier_item_sequence"};
+		try {
+			for(String table : tableNames) {
+				sqlStatement = "EXEC sp_generate_inserts ?";
+				ps1 = connection.prepareStatement(sqlStatement);
+				ps1.setString(1, table);
+				rs1 = ps1.executeQuery();
+				
+				while (rs1.next()) {
+					result += rs1.getString(1) +";\r\n";
+				}
+			}
+
+			File checkFile = new File(filePath + "latest", "query" + ".txt");
+			// new file
+			Writer output = new BufferedWriter(new FileWriter(checkFile));
+            output.write(result);
+            output.close();
+			
+		} catch (Exception ex) {
+			throw ex;
+		} finally {
+			if (rs1 != null) {
+				rs1.close();
+			}
+			if (ps1 != null) {
+				ps1.close();
+			}
+		}
+	}
+	
+	public void generateLatestMenuFile(JSONObject result) throws Exception {
+		// write to json file
+		try {
+			File checkFile = new File(filePath + "latest", "menuFilePath.json");
+			// new file
+			Writer output = new BufferedWriter(new FileWriter(checkFile));
+            output.write(result.toString());
+            output.close();
+            
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		}
 	}
 	
 }
