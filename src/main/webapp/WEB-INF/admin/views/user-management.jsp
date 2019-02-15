@@ -131,12 +131,20 @@
 						</div>					
 					</div>
 					<div class="row">
-						<div class="col-md-8">
+						<div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
 							<div class="custom-control custom-checkbox">
 								<input type="checkbox" name="enabled" ng-model="user.enabled" class="custom-control-input" id="enabled">
 								<label class="custom-control-label" for="enabled">Enabled</label>							
 							</div>
 						</div>	
+						
+						<div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
+							<div class="form-group">
+								<label class="login-label">Role</label>
+								
+							</div>
+						</div>
+						
 					</div>
 				</div>				       									  				 									
 		      </div>

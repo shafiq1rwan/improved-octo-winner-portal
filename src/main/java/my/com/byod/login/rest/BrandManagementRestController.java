@@ -102,6 +102,7 @@ public class BrandManagementRestController {
 		try {
 			Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 			String username = auth.getName();
+			System.out.println("Hello My " + username);
 			
 			JSONObject jsonData = new JSONObject(data);
 			conn = dbConnectionUtil.getConnection(jsonData.getLong("id"));

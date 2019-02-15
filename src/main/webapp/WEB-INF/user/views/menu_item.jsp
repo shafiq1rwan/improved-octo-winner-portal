@@ -139,6 +139,12 @@
 											</div>
 
 										</div>																		
+									</div>						
+									<div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">	
+										<div class="form-group">
+											<label for="menuItemAltName">Alternate Name</label>
+    										<input type="text" class="form-control" id="menuItemAltName" placeholder="Alternate Name" ng-model = "menu_item.menu_item_alt_name" maxlength="20"/>
+										</div>
 									</div>
 								</div>
 							

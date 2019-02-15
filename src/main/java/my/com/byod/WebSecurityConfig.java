@@ -55,7 +55,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		.csrf().disable()
 		.authorizeRequests()
 				.antMatchers("/user/signin/**","/order/**","/api/device/**","/byod-menu/**").permitAll()
-				.antMatchers("/admin/admin-panel/**").access("hasAnyRole('ROLE_SUPER_ADMIN','ROLE_ADMIN')")
+				.antMatchers("/admin/admin-panel/**").access("hasAnyRole('ROLE_SUPER_ADMIN','ROLE_ADMIN','ROLE_USER')")
 				.anyRequest().authenticated()
 	          .and()
 	          .formLogin().loginPage("/user/signin")
@@ -69,9 +69,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		        	  if(user!=null && role !=null) {
 		        		  if(role.equals("ROLE_SUPER_ADMIN") || role.equals("ROLE_ADMIN")) {
 		        			  response.sendRedirect(request.getContextPath()+"/admin/admin-panel");
-		        		  } else if(role.equals("ROLE_USER")){
-		        			  //Do something
-		        			  response.sendRedirect(request.getContextPath()+"/user");
 		        		  }
 		        	  }
 		          })
