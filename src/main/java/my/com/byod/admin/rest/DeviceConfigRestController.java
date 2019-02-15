@@ -108,9 +108,11 @@ public class DeviceConfigRestController {
 				menuInfo = getLatestMenuFile(connection, deviceInfo.getLong("refId"));
 				if(menuInfo!=null) {
 					menuFile = menuInfo.getString("menuFilePath");
-					String menuFilePath = byodUrl + displayFilePath + "latest/menuFilePath.json";
-					String imageFilePath = byodUrl + displayFilePath + "latest/image.zip";	
-					String queryFilePath = byodUrl + displayFilePath + "latest/query.txt";	
+					Long groupCategoryId = menuInfo.getLong("groupCategoryId");
+					String url = byodUrl + displayFilePath + brandId + "/" + groupCategoryId;
+					String menuFilePath = url + "/latest/menuFilePath.json";
+					String imageFilePath = url + "/latest/image.zip";	
+					String queryFilePath = url + "/latest/query.txt";	
 					result.put("menuFilePath", menuFilePath);
 					result.put("imageFilePath", imageFilePath);
 					result.put("queryFilePath", queryFilePath);
@@ -191,9 +193,11 @@ public class DeviceConfigRestController {
 				menuInfo = getLatestMenuFile(connection, storeId);
 				if(menuInfo!=null) {
 					menuFile = menuInfo.getString("menuFilePath");
-					String menuFilePath = byodUrl + displayFilePath + "latest/menuFilePath.json";
-					String imageFilePath = byodUrl + displayFilePath + "latest/image.zip";
-					String queryFilePath = byodUrl + displayFilePath + "latest/query.txt";
+					Long groupCategoryId = menuInfo.getLong("groupCategoryId");
+					String url = byodUrl + displayFilePath + brandId + "/" + groupCategoryId;
+					String menuFilePath = url + "/latest/menuFilePath.json";
+					String imageFilePath = url + "/latest/image.zip";	
+					String queryFilePath = url + "/latest/query.txt";
 					result.put("menuFilePath", menuFilePath); 
 					result.put("imageFilePath", imageFilePath);
 					result.put("queryFilePath", queryFilePath);
@@ -392,7 +396,7 @@ public class DeviceConfigRestController {
 		return result;
 	}
 	
-	public boolean extractLatestImages() throws Exception {
+	public boolean extractLatestImages(String brandId, Long groupCategoryId) throws Exception {
 		boolean flag = false;
 		// grab menu images
 		File directory = new File(imagePath);
@@ -408,7 +412,7 @@ public class DeviceConfigRestController {
 			  } 
 			}
 			// zipping images
-			FileOutputStream fos = new FileOutputStream(filePath + "latest/image.zip");
+			FileOutputStream fos = new FileOutputStream(filePath + brandId + "/" + groupCategoryId +"/latest/image.zip");
 			ZipOutputStream zipOut = new ZipOutputStream(fos);
 			for (String srcFile : imageList) {
 				File fileToZip = new File(imagePath, srcFile);
@@ -438,7 +442,7 @@ public class DeviceConfigRestController {
 		JSONObject result = null;
 		try {
 			//connection = dataSource.getConnection();
-			sqlStatement = "SELECT c.* FROM store a " + 
+			sqlStatement = "SELECT a.group_category_id, c.* FROM store a " + 
 					"INNER JOIN group_category b ON a.group_category_id = b.id " + 
 					"INNER JOIN publish_version c ON c.id = b.publish_version_id AND c.group_category_id = b.id " +
 					"WHERE a.id = ? ";
@@ -448,6 +452,7 @@ public class DeviceConfigRestController {
 
 			if (rs1.next()) {
 				result = new JSONObject();
+				result.put("groupCategoryId", rs1.getLong("group_category_id"));
 				result.put("menuFilePath", rs1.getString("menu_file_path"));
 				result.put("versionCount", rs1.getLong("version_count"));
 			}
@@ -542,7 +547,7 @@ public class DeviceConfigRestController {
 		return result;
 	}
 	
-	public void generateLatestQueryFile(Connection connection) throws Exception {
+	public void generateLatestQueryFile(Connection connection, String brandId, Long groupCategoryId) throws Exception {
 		String sqlStatement = null;
 		PreparedStatement ps1 = null;
 		ResultSet rs1 = null;
@@ -565,6 +570,11 @@ public class DeviceConfigRestController {
 		try {
 			for(String table : tableNames) {
 				sqlStatement = "EXEC sp_generate_inserts ?";
+				
+				// filter for group category
+				if(table.equals("category"))
+					sqlStatement += ", @from = \"from category where group_category_id = "+groupCategoryId+"\"";
+				
 				ps1 = connection.prepareStatement(sqlStatement);
 				ps1.setString(1, table);
 				rs1 = ps1.executeQuery();
@@ -574,7 +584,7 @@ public class DeviceConfigRestController {
 				}
 			}
 
-			File checkFile = new File(filePath + "latest", "query" + ".txt");
+			File checkFile = new File(filePath + brandId + "/" + groupCategoryId, "latest/query.txt");
 			// new file
 			Writer output = new BufferedWriter(new FileWriter(checkFile));
             output.write(result);
@@ -592,10 +602,10 @@ public class DeviceConfigRestController {
 		}
 	}
 	
-	public void generateLatestMenuFile(JSONObject result) throws Exception {
+	public void generateLatestMenuFile(JSONObject result, String brandId, Long groupCategoryId) throws Exception {
 		// write to json file
 		try {
-			File checkFile = new File(filePath + "latest", "menuFilePath.json");
+			File checkFile = new File(filePath + brandId + "/" + groupCategoryId, "latest/menuFilePath.json");
 			// new file
 			Writer output = new BufferedWriter(new FileWriter(checkFile));
             output.write(result.toString());

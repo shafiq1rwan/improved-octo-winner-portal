@@ -415,9 +415,11 @@ public class GroupCategoryRestController {
 		String menuQueryFilePath = null;
 		String menuFilePath = null;
 		Long versionCount = null;
+		String brandId = null;
 		
 		try {
 			connection = dbConnectionUtil.retrieveConnection(request);
+			brandId = byodUtil.getGeneralConfig(connection, "BRAND_ID");
 			
 			JSONObject groupCategoryInfo = getGroupCategoryInfoByID(connection, groupCategoryId);
 			if(groupCategoryInfo.getLong("publish_version_id")==0) {
@@ -437,7 +439,7 @@ public class GroupCategoryRestController {
 			}
 			
 			// not first time publish menu and no query action performed
-			if(!firstPublish && !checkTmpQueryFileExist(connection, groupCategoryInfo)) {
+			if(!firstPublish && !checkTmpQueryFileExist(connection, brandId, groupCategoryInfo)) {
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Previously published menu is already the latest version menu."); 
 			}
 			
@@ -481,12 +483,12 @@ public class GroupCategoryRestController {
 			menuFilePath = byodUtil.createUniqueBackendId("MF");
 			// get new info after logging tmp image file
 			groupCategoryInfo = getGroupCategoryInfoByID(connection, groupCategoryId);		
-			menuImgFilePath = extractImageList(connection, tmpImgFilePath, menuFilePath);
+			menuImgFilePath = extractImageList(connection, brandId, groupCategoryId, tmpImgFilePath, menuFilePath);
 			
 			if(groupCategoryInfo.has("tmp_query_file_path"))
 				tmpQueryFilePath = groupCategoryInfo.getString("tmp_query_file_path");
 			
-			menuQueryFilePath = extractQueryFile(connection, tmpQueryFilePath, menuFilePath);		
+			menuQueryFilePath = extractQueryFile(connection, brandId, groupCategoryId, tmpQueryFilePath, menuFilePath);		
 			Long publishVersionId = updatePublishVersion(connection, groupCategoryId, versionCount, menuFilePath, menuQueryFilePath, menuImgFilePath);
 			
 			sqlStatement = "UPDATE group_category SET publish_version_id = ? WHERE id = ? ";
@@ -499,11 +501,11 @@ public class GroupCategoryRestController {
 			}
 			
 			// extract files as latest version
-			File checkdir = new File(filePath, "latest");
+			File checkdir = new File(filePath + brandId + "/" + groupCategoryId, "latest");
 			checkdir.mkdirs();
-			deviceConfigRestController.generateLatestQueryFile(connection);
-			deviceConfigRestController.extractLatestImages();
-			deviceConfigRestController.generateLatestMenuFile(result);
+			deviceConfigRestController.generateLatestQueryFile(connection, brandId, groupCategoryId);
+			deviceConfigRestController.extractLatestImages(brandId, groupCategoryId);
+			deviceConfigRestController.generateLatestMenuFile(result, brandId, groupCategoryId);
 			
 		}catch(Exception ex) {
 			ex.printStackTrace();
@@ -600,6 +602,7 @@ public class GroupCategoryRestController {
 
 			if (rs1.next()) {
 				groupCategoryInfo = new JSONObject();
+				groupCategoryInfo.put("id", groupCategoryID);
 				groupCategoryInfo.put("group_category_name", rs1.getString("group_category_name"));
 				groupCategoryInfo.put("created_date",  rs1.getString("created_date"));
 				groupCategoryInfo.put("publish_version_id", rs1.getLong("publish_version_id"));
@@ -950,6 +953,7 @@ public class GroupCategoryRestController {
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		Long publishVersionId = null;
+		String brandId = "";
 		
 		try {
 			System.out.println(query);
@@ -963,6 +967,8 @@ public class GroupCategoryRestController {
 			query+="\r\n";
 			
 			System.out.println(query);
+			
+			brandId = byodUtil.getGeneralConfig(connection, "BRAND_ID");
 			
 			sqlStatement = "SELECT publish_version_id, tmp_query_file_path, tmp_img_file_path FROM group_category "
 					+ "WHERE id = ? ";
@@ -983,10 +989,10 @@ public class GroupCategoryRestController {
 				}
 				
 				// write to txt file
-				File checkdir = new File(filePath);
+				File checkdir = new File(filePath + brandId + "/" + groupCategoryId);
 				checkdir.mkdirs();
 
-				File checkFile = new File(filePath, tmpQueryFilePath + ".txt");
+				File checkFile = new File(filePath + brandId + "/" + groupCategoryId, tmpQueryFilePath + ".txt");
 				if (checkFile.exists()) {	
 					// append to existing file
 					Writer output = new BufferedWriter(new FileWriter(checkFile, true));
@@ -1034,6 +1040,7 @@ public class GroupCategoryRestController {
 		ResultSet rs = null;
 		Long groupCategoryId = null;
 		Long publishVersionId = null;
+		String brandId = "";
 		
 		try {	
 			System.out.println(query);
@@ -1047,6 +1054,8 @@ public class GroupCategoryRestController {
 			query+="\r\n";
 			
 			System.out.println(query);
+			
+			brandId = byodUtil.getGeneralConfig(connection, "BRAND_ID");
 			
 			sqlStatement = "SELECT id, publish_version_id, tmp_query_file_path, tmp_img_file_path FROM group_category ";
 			stmt = connection.prepareStatement(sqlStatement);
@@ -1067,10 +1076,10 @@ public class GroupCategoryRestController {
 					tmpQueryFilePath = byodUtil.createUniqueBackendId("TQF");
 				}
 				// write to txt file
-				File checkdir = new File(filePath);
+				File checkdir = new File(filePath  + brandId + "/" + groupCategoryId);
 				checkdir.mkdirs();
 
-				File checkFile = new File(filePath, tmpQueryFilePath + ".txt");
+				File checkFile = new File(filePath + brandId + "/" + groupCategoryId, tmpQueryFilePath + ".txt");
 				if (checkFile.exists()) {	
 					// append to existing file
 					Writer output = new BufferedWriter(new FileWriter(checkFile, true));
@@ -1113,17 +1122,19 @@ public class GroupCategoryRestController {
 		// 2 - Delete
 		String sqlStatement = "";
 		PreparedStatement stmt = null;
+		String brandId = "";
 		
 		try {
 			// write to image file
 			if(tmpImgFilePath==null) {
 				tmpImgFilePath = byodUtil.createUniqueBackendId("TIF");
 			}
+			brandId = byodUtil.getGeneralConfig(connection, "BRAND_ID");
 			File checkdir = new File(filePath);
 			checkdir.mkdirs();
 			JSONObject writeResult = new JSONObject();
 			ArrayList<String> imageList = new ArrayList<String>();
-			File checkFile = new File(filePath, tmpImgFilePath + ".json");
+			File checkFile = new File(filePath + brandId + "/" + groupCategoryId, tmpImgFilePath + ".json");
 			if (checkFile.exists()) {
 				// read file
 				BufferedReader br = new BufferedReader(new FileReader(checkFile));
@@ -1182,13 +1193,13 @@ public class GroupCategoryRestController {
 		}
 	}
 	
-	private String extractImageList(Connection connection, String tmpImgFilePath, String menuFilePath) throws Exception {
+	private String extractImageList(Connection connection, String brandId, Long groupCategoryId, String tmpImgFilePath, String menuFilePath) throws Exception {
 		String menuImgFilePath = null;
 		try {		
 			if(tmpImgFilePath!=null && !tmpImgFilePath.equals("")) {
 
 				ArrayList<String> imageList = new ArrayList<String>();
-				File checkFile = new File(filePath, tmpImgFilePath + ".json");
+				File checkFile = new File(filePath + brandId + "/" + groupCategoryId, tmpImgFilePath + ".json");
 				if (checkFile.exists()) {
 					// read file
 					BufferedReader br = new BufferedReader(new FileReader(checkFile));
@@ -1226,7 +1237,7 @@ public class GroupCategoryRestController {
 					// zipping images
 					//List<String> srcFiles = Arrays.asList("test1.txt", "test2.txt");
 					menuImgFilePath = byodUtil.createUniqueBackendId("MIF");
-					FileOutputStream fos = new FileOutputStream(filePath + menuFilePath + "/" + menuImgFilePath+".zip");
+					FileOutputStream fos = new FileOutputStream(filePath + brandId + "/" + menuFilePath + "/" + menuImgFilePath+".zip");
 					ZipOutputStream zipOut = new ZipOutputStream(fos);
 					for (String srcFile : imageList) {
 						File fileToZip = new File(imagePath, srcFile);
@@ -1246,7 +1257,7 @@ public class GroupCategoryRestController {
 					fos.close();
 					
 					// copy image json file
-					File dest = new File(filePath + menuFilePath, menuImgFilePath + ".json");
+					File dest = new File(filePath + brandId +" /" + menuFilePath, menuImgFilePath + ".json");
 					try {
 						FileUtils.copyFile(checkFile, dest);
 					}catch(Exception e) {
@@ -1267,16 +1278,16 @@ public class GroupCategoryRestController {
 		return menuImgFilePath;
 	}
 	
-	private String extractQueryFile(Connection connection, String tmpQueryFilePath, String menuFilePath) throws Exception {
+	private String extractQueryFile(Connection connection, String brandId, Long groupCategoryId, String tmpQueryFilePath, String menuFilePath) throws Exception {
 		String menuQueryFilePath = null;
 		try {
 			if(tmpQueryFilePath!=null && !tmpQueryFilePath.equals("")) {
 				
-				File checkFile = new File(filePath, tmpQueryFilePath + ".txt");
+				File checkFile = new File(filePath + brandId + "/" + groupCategoryId, tmpQueryFilePath + ".txt");
 				if (checkFile.exists()) {
 					menuQueryFilePath = byodUtil.createUniqueBackendId("MQF");
 					// copy query file
-					File dest = new File(filePath + menuFilePath, menuQueryFilePath + ".txt");
+					File dest = new File(filePath + brandId + "/" + groupCategoryId + "/" + menuFilePath, menuQueryFilePath + ".txt");
 					try {
 						FileUtils.copyFile(checkFile, dest);
 					}catch(Exception e) {
@@ -1298,13 +1309,13 @@ public class GroupCategoryRestController {
 		return menuQueryFilePath;
 	}
 	
-	private boolean checkTmpQueryFileExist(Connection connection, JSONObject groupCategoryInfo) throws Exception {
+	private boolean checkTmpQueryFileExist(Connection connection, String brandId, JSONObject groupCategoryInfo) throws Exception {
 		String tmpQueryFilePath = "";
 		boolean flag = false;
 		try {
 			if(groupCategoryInfo.has("tmp_query_file_path")) {
 				tmpQueryFilePath = groupCategoryInfo.getString("tmp_query_file_path");
-				File checkFile = new File(filePath, tmpQueryFilePath + ".txt");
+				File checkFile = new File(filePath + brandId + "/" + groupCategoryInfo.getLong("id"), tmpQueryFilePath + ".txt");
 				if (checkFile.exists()) {
 					flag = true;
 				} 
