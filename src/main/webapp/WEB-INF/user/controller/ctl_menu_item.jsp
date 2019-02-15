@@ -216,8 +216,24 @@
 		     arr.splice(new_index, 0, arr.splice(old_index, 1)[0]); 
 		}
 	    
-		$(document).ready(function() {					
-			$scope.refreshItemMenuGroupTable();
+		$(document).ready(function() {			
+			//get menu item type
+			$http
+			.get(
+				'${pageContext.request.contextPath}/menu/menuItem/getMenuItemType')
+			.then(
+				function(response) {	
+					$scope.menu_item_types = response.data;
+					$scope.refreshItemMenuGroupTable();
+				},
+				function(response) {
+					swal({
+						  title: "Error",
+						  text: response.data,
+						  icon: "warning",
+						  dangerMode: true,
+					});
+			});
 
 			$('input[type=file]').change(function(event) {
 				var element = event.target.id;			
@@ -310,22 +326,7 @@
 			$scope.upload_image = false;		
 		}
 		
-		//get menu item type
-		$http
-		.get(
-			'${pageContext.request.contextPath}/menu/menuItem/getMenuItemType')
-		.then(
-			function(response) {	
-				$scope.menu_item_types = response.data;
-			},
-			function(response) {
-				swal({
-					  title: "Error",
-					  text: response.data,
-					  icon: "warning",
-					  dangerMode: true,
-				});
-		});
+
 		
 		//get modifier group
 		$http
@@ -375,7 +376,10 @@
 					 "render": function(data, type, full, meta){
 						 var menu_item_type = full.menu_item_type;
 						 var result = $scope.menu_item_types.find(obj => obj.menu_item_type_id === menu_item_type);
-						 return result.menu_item_type_name;
+						 if(result == null)
+							 return null;
+						 else
+						 	return result.menu_item_type_name;
 					 }
 					},
 					{"data" : "is_active", "width" : "5%" , 

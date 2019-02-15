@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import my.com.byod.admin.util.AccessRightsUtil;
 import my.com.byod.admin.util.DbConnectionUtil;
 
 @RestController
@@ -49,6 +50,9 @@ public class BrandManagementRestController {
 
 	@Autowired
 	private DbConnectionUtil dbConnectionUtil;
+	
+	@Autowired
+	private AccessRightsUtil accessRightsUtil;
 
 	@GetMapping(value = "/user")
 	public ResponseEntity<?> findBrandsByUsername(HttpServletRequest request, HttpServletResponse response) {
@@ -96,11 +100,15 @@ public class BrandManagementRestController {
 		Connection conn = null;
 
 		try {
+			Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+			String username = auth.getName();
+			
 			JSONObject jsonData = new JSONObject(data);
 			conn = dbConnectionUtil.getConnection(jsonData.getLong("id"));
 
 			if (conn != null) {
 				dbConnectionUtil.setBrandId(jsonData.getLong("id"), request);
+				accessRightsUtil.setupAccessRightByUsername(username, jsonData.getLong("id"),request);
 			} else {
 				return ResponseEntity.badRequest().contentType(MediaType.TEXT_PLAIN)
 						.body("Error occured while connecting to database");

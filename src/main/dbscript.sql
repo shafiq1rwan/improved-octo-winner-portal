@@ -26,6 +26,7 @@ CREATE TABLE menu_item
 	backend_id NVARCHAR(50) NOT NULL UNIQUE,
 	modifier_group_id BIGINT,
 	menu_item_name NVARCHAR(150) NOT NULL,
+	menu_item_alt_name NVARCHAR(50),
 	menu_item_description NVARCHAR(255),
 	menu_item_image_path NVARCHAR(MAX),
 	menu_item_base_price DECIMAL(10,2) DEFAULT 0.00,

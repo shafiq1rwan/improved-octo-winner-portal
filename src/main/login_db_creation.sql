@@ -32,8 +32,24 @@ CREATE TABLE users_brands
 (
 	brand_id BIGINT NOT NULL,
 	user_id BIGINT NOT NULL,
-	permission VARCHAR(10) NOT NULL
+	permission VARCHAR(10) DEFAULT '0'
 );
+
+CREATE TABLE permission_lookup
+(
+	id BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,
+	perm_name nvarchar(256) NOT NULL
+);
+
+--CREATE TABLE alt_permission_lookup
+--(
+--	id BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,
+--	perm_store varchar(10) DEFAULT '0',
+--	perm_group_category varchar(10) DEFAULT '0',
+--	perm_menu_item varchar(10) DEFAULT '0',
+--	perm_user_config varchar(10) DEFAULT '0',
+--	perm_setting varchar(10) DEFAULT '0'
+--)
 
 -- Patch first admin and brand-admin
 INSERT INTO users("name",email,mobileNumber,"address",username,"password","enabled") VALUES ('admin', 'admin@mpsb.net','013-3456789','usj21','admin','$2a$10$wohHqv2iUEhboYehz8AP8eVvnIreAeH4ZTZYyubCE8JkLbzjEK4c2',1),('KFC','kfc@example.com','011-9871010','klcc','KFC','$2a$10$h9oHzb3EzGUM1c3/20SU0Oq96ESHzfV72oVR3meRMCfVm790M0zIO',1),('SUSHI','sushi@example.com','013-9271010','PJ','SUSHI','$2a$10$Cwa9ruZgdmPL0vz9QN0C4eLc0nWrRJK.O/9kqhkq2Zl6phP69hAEO',1);
@@ -46,9 +62,13 @@ VALUES('kfc','localhost','KFC','sa','MPay@1234',1433),('sushi','localhost','SUSH
 -- Patch: Assign brands to users
 INSERT INTO users_brands(brand_id,user_id,permission) VALUES(1,2,'0'),(2,3,'0');
 
+-- Patch: Permission lookup
+INSERT INTO permission_lookup(perm_name) VALUES ('store'),('group-category'),('menu-item'),('user-config'),('setting');
+
 --drop table authorities;
 --drop table users;
 --drop table brands;
 --drop table users_brands;
-
+--drop table permission_lookup;
+--drop table alt_permission_lookup;
 

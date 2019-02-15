@@ -150,6 +150,147 @@
 	</div>
 	<!-- USER MODAL ENDED -->
 	
+	<!-- USER BRAND MODAL STARTED -->
+	<div class="modal fade" id="userBrandModal" tabindex="-1" role="dialog" aria-labelledby="userBrandModal" aria-hidden="true">
+		<div class="modal-dialog modal-lg">
+		    <div class="modal-content">
+		    <form id="userBrandForm" method="POST" accept-charset="UTF-8" role="form" class="form-signin">
+		      <div class="modal-header">
+		        <h5>Assign User(s) to Brand</h5>	
+		        <button type="button" class="close" data-dismiss="modal" ng-click="resetModal()" aria-label="Close">
+		          <span aria-hidden="true">&times;</span>
+		        </button>
+		      </div>
+		      <div class="modal-body">
+		      	<div class="form-section">
+					<div class="row">
+						<div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
+								<div class="table-wrapper-scroll-y">
+											<table class="table">
+												<thead>
+													<tr>
+														<th>Brand Name</th>
+														<th>Selected</th>
+													</tr>
+												</thead>
+			
+												<tbody>
+													<tr ng-repeat="brand in brands">
+															<td>{{brand.name}}</td>
+															<td>
+																<input type="checkbox" ng-model="brand.exist"
+																ng-change="addIntoBrandList(brand)"/>				
+															</td>
+													</tr>
+												</tbody>
+											</table>
+									</div>
+						</div>
+					</div>
+				</div>				       									  				 									
+		      </div>
+		      <div class="modal-footer">
+		      	<button class="btn btn-primary" type="submit" ng-click="assignUserToBrands()">Assign</button>
+		      </div>
+		       </form>		      
+		    </div>
+		</div>
+	</div>
+	<!-- USER BRAND MODAL ENDED -->
+	
+	<!-- BRAND MODAL STARTED -->
+	<div class="modal fade" id="assignedBrandModel" tabindex="-1" role="dialog" aria-labelledby="assignedBrandModel" aria-hidden="true">
+		<div class="modal-dialog modal-lg">
+		    <div class="modal-content">
+		    <form id="assignedBrandForm" method="POST" accept-charset="UTF-8" role="form" class="form-signin">
+		      <div class="modal-header">
+		        <h5>Assigned Brand(s)</h5>	
+		        <button type="button" class="close" data-dismiss="modal" ng-click="resetModal()" aria-label="Close">
+		          <span aria-hidden="true">&times;</span>
+		        </button>
+		      </div>
+		      <div class="modal-body">
+		      	<div class="form-section">
+					<div class="row">
+						<div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
+								<div class="table-wrapper-scroll-y">
+											<table class="table">
+												<thead>
+													<tr>
+														<th>Brand Name</th>
+														<th>Action</th>
+													</tr>
+												</thead>
+			
+												<tbody>
+													<tr ng-repeat="brand in assigned_brands">
+															<td>{{brand.name}}</td>
+															<td>
+																<button class="btn btn-danger" data-toggle="modal" data-target="#accessRightsModal" data-keyboard="false" data-backdrop="static" type="submit" ng-click="promptAccessRightsModal(brand.id)">Access Rights</button>
+															</td>
+													</tr>
+												</tbody>
+											</table>
+									</div>
+						</div>
+					</div>
+				</div>				       									  				 									
+		      </div>
+
+		       </form>		      
+		    </div>
+		</div>
+	</div>
+	<!-- BRAND MODAL ENDED -->
+	
+	
+	<!-- ACCESS RIGHTS MODAL STARTED -->
+	<div class="modal fade" id="accessRightsModal" tabindex="-1" role="dialog" aria-labelledby="accessRightsModal" aria-hidden="true">
+		<div class="modal-dialog modal-lg">
+		    <div class="modal-content">
+		    <form id="accessRightsForm" method="POST" accept-charset="UTF-8" role="form" class="form-signin">
+		      <div class="modal-header">
+		        <h5>Assign Access Right(s)</h5>	
+		        <button type="button" class="close" data-dismiss="modal" ng-click="resetAccessRightsModal('close')" aria-label="Close">
+		          <span aria-hidden="true">&times;</span>
+		        </button>
+		      </div>
+		      <div class="modal-body">
+		      	<div class="form-section">
+					<div class="row">
+						<div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
+								<div class="table-wrapper-scroll-y">
+											<table class="table">
+												<thead>
+													<tr>
+														<th>Access Name</th>
+														<th>Selected</th>
+													</tr>
+												</thead>
+			
+												<tbody>
+													<tr ng-repeat="right in access_rights">
+															<td>{{right.name}}</td>
+															<td>
+																<input type="checkbox" ng-model="right.exist"/>				
+															</td>
+													</tr>
+												</tbody>
+											</table>
+									</div>
+						</div>
+					</div>
+				</div>				       									  				 									
+		      </div>
+		      <div class="modal-footer">
+		      	<button class="btn btn-primary" type="submit" ng-click="assignPermissions(brand_id)">Assign</button>
+		      </div>
+		       </form>		      
+		    </div>
+		</div>
+	</div>
+	<!-- ACCESS RIGHTS MODAL ENDED -->
+	
 	
 	</div>
 </body>

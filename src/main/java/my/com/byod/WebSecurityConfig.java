@@ -67,8 +67,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		        	  String role = user.getAuthorities().iterator().next().toString();
 		        	  
 		        	  if(user!=null && role !=null) {
-		        		  if(role.equals("ROLE_SUPER_ADMIN") || role.equals("ROLE_ADMIN"))
-		        		  response.sendRedirect(request.getContextPath()+"/admin/admin-panel");
+		        		  if(role.equals("ROLE_SUPER_ADMIN") || role.equals("ROLE_ADMIN")) {
+		        			  response.sendRedirect(request.getContextPath()+"/admin/admin-panel");
+		        		  } else if(role.equals("ROLE_USER")){
+		        			  //Do something
+		        			  response.sendRedirect(request.getContextPath()+"/user");
+		        		  }
 		        	  }
 		          })
 		          .failureHandler((request, response, exception) -> {
@@ -77,7 +81,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		        	if(user!=null) {
 		        		response.sendRedirect(request.getContextPath()+"/user/signin/error/*");
 		        	} else {
-		        		response.sendRedirect(request.getContextPath()+"/user/signin/error/not-exist");
+		        		//response.sendRedirect(request.getContextPath()+"/user/signin/error/not-exist");
 		        	} 
 		          })
 		          .permitAll()

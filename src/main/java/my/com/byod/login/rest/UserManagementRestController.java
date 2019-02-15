@@ -1,6 +1,10 @@
 package my.com.byod.login.rest;
 
+import java.math.BigInteger;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -49,6 +53,9 @@ public class UserManagementRestController {
 
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
+	
+	@Autowired
+	private DataSource dataSource;
 
 	@Autowired
 	private ApplicationUserService applicationUserService;
@@ -191,12 +198,316 @@ public class UserManagementRestController {
 				jsonResult = new JSONObject(user);
 		} catch(Exception ex) {
 			ex.printStackTrace();
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Internal Server Error");
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Cannot retrieve user info. Please try again later");
 		}
 		return ResponseEntity.ok(jsonResult.toString());
 	}
 	
+	@GetMapping("/{id}/brands")
+	public ResponseEntity<?> findBrands(HttpServletRequest request, HttpServletResponse response, @PathVariable("id") String id){
+		JSONArray jsonBrandArray = new JSONArray();	
+		try {
+			List<Map<String, Object>> usersInBrand = jdbcTemplate.queryForList("SELECT b.id, b.name, " + 
+					"CASE WHEN(SELECT COUNT(1) " + 
+					"FROM users_brands ub " + 
+					"WHERE ub.brand_id = b.id " + 
+					"AND " + 
+					"ub.user_id = ?) > 0 " + 
+					"THEN CAST (1 AS BIT) " + 
+					"ELSE CAST (0 AS BIT) END as exist " + 
+					"FROM brands b", new Object[] {id});
 
+			if(!usersInBrand.isEmpty()) {
+				jsonBrandArray = new JSONArray(usersInBrand);
+			}
+			return ResponseEntity.ok(jsonBrandArray.toString());
+		}
+		catch(DataAccessException ex) {
+			ex.printStackTrace();
+			return ResponseEntity.ok(jsonBrandArray.toString());
+		}
+		catch(Exception ex) {
+			ex.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Cannot retrieve brands info. Please try again later.");
+		}
+	}
+	
+	@PostMapping("/assign-brands")
+	public ResponseEntity<?> assignBrands(HttpServletRequest request, HttpServletResponse response, @RequestBody String data){
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		PreparedStatement stmt2 = null;
+		PreparedStatement stmt3 = null;
+		
+		try {
+			JSONObject jsonObject = new JSONObject(data);
+			Long userId = jsonObject.getLong("userId");
+			JSONArray brandArray = jsonObject.optJSONArray("brands");
+			JSONArray tempArray = new JSONArray();
+			ResultSet rs = null;
+			
+			connection = dataSource.getConnection();
+
+			if(brandArray.length()!= 0) {
+				String selectSql = "SELECT brand_id,permission FROM users_brands WHERE user_id = ?";
+				stmt = connection.prepareStatement(selectSql);
+				stmt.setLong(1,userId);
+				rs = stmt.executeQuery();
+				
+				while(rs.next()) {
+					//backup existing data
+					JSONObject temp = new JSONObject();
+					temp.put("brand_id", rs.getLong("brand_id"));
+					temp.put("permission", rs.getString("permission"));
+							
+					tempArray.put(temp);
+				}
+			}
+
+			stmt2 = connection.prepareStatement("DELETE FROM users_brands WHERE user_id = ?");
+			stmt2.setLong(1,userId);
+			stmt2.executeUpdate();
+			
+			if(brandArray.length()!= 0) {
+				connection.setAutoCommit(false);
+				String insertionSql = "INSERT INTO users_brands(brand_id,user_id) VALUES (?,?)";
+
+				for(int i = 0; i < brandArray.length(); i++) {
+					JSONObject jsonBrandObj = brandArray.getJSONObject(i);
+						stmt3 = connection.prepareStatement(insertionSql);
+						stmt3.setLong(1, jsonBrandObj.getLong("id"));
+						stmt3.setLong(2, userId);
+						stmt3.executeUpdate();
+		
+						connection.commit();
+				}
+				
+				//UPDATE BASED ON WHERE
+				if(tempArray.length()!=0) {
+					String updateSql = "UPDATE users_brands SET permission = ? WHERE user_id = ? AND brand_id = ?";
+					for(int j = 0; j < tempArray.length(); j++) {
+						JSONObject temp = tempArray.getJSONObject(j);
+							stmt3 = connection.prepareStatement(updateSql);
+							stmt3.setString(1, temp.getString("permission"));
+							stmt3.setLong(2, userId);
+							stmt3.setLong(3, temp.getLong("brand_id"));
+							stmt3.executeUpdate();
+			
+							connection.commit();
+					}
+				}
+
+			}
+			return ResponseEntity.ok(null);
+		} catch(Exception ex) {
+			ex.printStackTrace();
+			if (connection != null) {
+				try {
+					connection.rollback();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN)
+					.body("Cannot assign user to brands. Please try again later");
+		} finally {
+			if(connection!=null) {
+				try {
+					connection.setAutoCommit(true);
+					connection.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+
+	}
+	
+	@PostMapping("/assign-access-rights")
+	public ResponseEntity<?> assignAccessRights(HttpServletRequest request, HttpServletResponse response, @RequestBody String data){	
+		Connection connection = null;
+		PreparedStatement stmt = null;
+
+		try {
+			
+			JSONObject jsonObject = new JSONObject(data);
+			Long userId = jsonObject.getLong("user_id");
+			Long brandId = jsonObject.getLong("brand_id");
+			JSONArray permissionArray = jsonObject.optJSONArray("permissions");
+			
+			connection = dataSource.getConnection();	
+			
+			String updateSql = "UPDATE users_brands SET permission = ? WHERE brand_id = ? AND user_id = ?";
+			String binaryString = "";
+				
+			if(permissionArray.length()==0) {
+				binaryString = String.format("%-8s", "0").replace(" ", "0");
+			} else {
+				String binaryTempString = "";
+				for(int i =0; i<permissionArray.length();i++) {
+					JSONObject jsonPermissionObj = permissionArray.getJSONObject(i);
+					binaryTempString += jsonPermissionObj.getBoolean("exist")?"1":"0";
+				}
+				//Pad extra zeros to the right
+				binaryString = String.format("%-8s", binaryTempString).replace(" ", "0");
+			}
+			int decimal = Integer.parseInt(binaryString,2);
+			String hexString = Integer.toString(decimal,16);
+			
+			System.out.println("Binary Permission :" + binaryString);
+			System.out.println("Hex Permission :" + hexString);
+
+			stmt = connection.prepareStatement(updateSql);
+			stmt.setString(1, hexString);
+			stmt.setLong(2, brandId);
+			stmt.setLong(3, userId);
+			stmt.executeUpdate();
+
+			return ResponseEntity.ok(null);
+		} catch(Exception ex) {
+			ex.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN)
+					.body("Cannot assign access rights to user. Please try again later");
+		} finally {
+			if(connection!=null) {
+				try {
+					connection.setAutoCommit(true);
+					connection.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
+		
+		
+		
+		
+		
+	}
+	
+	@GetMapping("/access-rights")
+	public ResponseEntity<?> findAccessRightsByUserAndBrand(HttpServletRequest request, HttpServletResponse response, 
+			@RequestParam("id") Long id, @RequestParam("brandId") Long brandId){
+		JSONArray jsonAccessRightsArray = new JSONArray();
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		PreparedStatement stmt2 = null;
+		ResultSet rs = null;
+		ResultSet rs2 = null;
+			
+		try {
+			connection = dataSource.getConnection();
+			stmt = connection.prepareStatement("SELECT permission FROM users_brands WHERE brand_id = ? AND user_id = ?");
+			stmt.setLong(1, brandId);
+			stmt.setLong(2, id);
+			rs = stmt.executeQuery();
+			
+			if(!rs.next()) {
+				System.out.println("New Record");
+				stmt2 = connection.prepareStatement("SELECT *, exist = CAST(0 AS BIT) FROM permission_lookup");
+				rs2 = stmt2.executeQuery();
+				
+				while(rs2.next()) {
+					JSONObject jsonAccessRightObj = new JSONObject();
+					jsonAccessRightObj.put("id", rs2.getLong("id"));
+					jsonAccessRightObj.put("name", rs2.getString("perm_name"));
+					jsonAccessRightObj.put("exist", rs2.getBoolean("exist"));
+					
+					jsonAccessRightsArray.put(jsonAccessRightObj);
+				}
+			} else{
+				System.out.println("Already exist");
+				String permission = rs.getString("permission");
+				List<String> accessRights = new ArrayList<String>();
+				
+				stmt2 = connection.prepareStatement("SELECT * FROM permission_lookup");
+				rs2 = (ResultSet)stmt2.executeQuery();
+				
+				while(rs2.next()) {
+					System.out.println("name " + rs2.getString("perm_name"));
+					accessRights.add(rs2.getString("perm_name"));
+				}
+				
+				int i = Integer.parseInt(permission, 16);
+			    String binaryString = String.format("%8s", Integer.toBinaryString(i)).replace(" ", "0");	
+			    String[] resultArray = binaryString.split("");
+			    
+			    boolean[] permissionBooleans = new boolean[accessRights.size()];
+			    
+			    for(int j=0;j<permissionBooleans.length;j++) {
+			    	permissionBooleans[j] = (!resultArray[j].equals("0"));
+			    	System.out.println(permissionBooleans[j]);
+			    }
+			    
+			    for(int k=0; k<accessRights.size();k++) {
+			    	int index = k+1;
+			    	JSONObject jsonObject = new JSONObject();
+			    	jsonObject.put("id", index);
+			    	jsonObject.put("name", accessRights.get(k));
+			    	jsonObject.put("exist", permissionBooleans[k]);
+			    	
+			    	jsonAccessRightsArray.put(jsonObject);
+			    }
+			}
+			System.out.println("Result: " + jsonAccessRightsArray.toString());
+			return ResponseEntity.ok(jsonAccessRightsArray.toString());
+		}
+		catch(SQLException ex) {
+			ex.printStackTrace();
+			return ResponseEntity.ok(jsonAccessRightsArray.toString());
+		}
+		catch(Exception ex) {
+			ex.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Cannot retrieve brands info. Please try again later.");
+		}
+		finally {
+			if(connection!=null) {
+				try {
+					connection.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
+	@GetMapping("/assigned-brands")
+	public ResponseEntity<?> findAssignedBrandByUser(HttpServletRequest request, HttpServletResponse response, @RequestParam("userId") Long userId){
+		
+		JSONArray jsonAssignedBrandArray = new JSONArray();
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		
+		try {
+			connection = dataSource.getConnection();
+			stmt = connection.prepareStatement("SELECT b.* FROM brands b INNER JOIN users_brands ub ON b.id = ub.brand_id WHERE ub.user_id = ?");
+			stmt.setLong(1,userId);
+			rs = stmt.executeQuery();
+			
+			while(rs.next()) {
+				JSONObject jsonAssignedBrandObj = new JSONObject();
+				jsonAssignedBrandObj.put("id", rs.getLong("id"));
+				jsonAssignedBrandObj.put("name", rs.getString("name"));
+				
+				jsonAssignedBrandArray.put(jsonAssignedBrandObj);
+			}
+			return ResponseEntity.ok(jsonAssignedBrandArray.toString());
+		} catch(Exception ex) {
+			ex.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Cannot retrieve assigned brands info. Please try again later.");
+		}
+		finally {
+			if(connection!=null) {
+				try {
+					connection.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
 
 	
 

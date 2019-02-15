@@ -3,8 +3,21 @@
 	app.controller('ctl_user', function($scope, $http, $compile) {
 		
 		$scope.user = {};
+		$scope.user_id = 0;
+		$scope.brands = [];
+		$scope.brand_id = 0;
+		
+		$scope.assigned_brands = [];
+		
+		
+		
+		$scope.access_rights = [];
 		$scope.action = '';
+		
 		var table;
+		var brands_array = [];
+		var access_rights_array = []; 
+		//var access_rights_data = {};
 		
 		$(document).ready(function() {
 			refreshUserTable();
@@ -32,10 +45,11 @@
 					{"data" : "email"},
 					{"data" : "mobileNumber"},
 					{"data" : "username"},
-					{"data": "id", "width": "20%",
+					{"data": "id",
 						 "render": function ( data, type, full, meta ) {
 							 	var id = full.id;
-							    return '<div class="btn-toolbar justify-content-between"><button ng-click="promptEditUserModal('+ id +')" type="button" class="btn btn-primary custom-fontsize"><b><i class="fa fa-wrench"></i>Edit</b></button></div>'	
+							    return '<div class="btn-toolbar justify-content-between"><button ng-click="promptEditUserModal('+ id +')" type="button" class="btn btn-primary custom-fontsize"><b><i class="fa fa-wrench"></i>Edit</b></button><button data-toggle="modal" data-target="#userBrandModal" data-keyboard="false" data-backdrop="static" ng-click="promptAssignBrandModal('+ id +')" type="button" class="btn btn-info custom-fontsize"><b><i class="fa fa-wrench"></i>Assign Brand</b></button>'
+							    	+'<button data-toggle="modal" data-target="#assignedBrandModel" data-keyboard="false" data-backdrop="static" ng-click="promptAssignedBrandModal('+ id +')" type="button" class="btn btn-default custom-fontsize"><b><i class="fa fa-wrench"></i>View Brands</b></button></div>'	
 						 }
 					}
 					],			
@@ -62,9 +76,108 @@
 			});
 		}
 		
+		$scope.promptAssignBrandModal = function(id){
+			$http({
+				method : 'GET',
+				headers : {'Content-Type' : 'application/json'},
+				url : '${pageContext.request.contextPath}/users/'+ id +'/brands'
+			})
+			.then(
+				function(response) {
+					$scope.user_id = id;
+					$scope.brands = response.data;
+					checked($scope.brands);
+				},
+				function(response) {
+					alert(response.data);
+			});
+		}
+		
+		$scope.promptAssignedBrandModal = function(id){
+			$http({
+				method : 'GET',
+				headers : {'Content-Type' : 'application/json'},
+				url : '${pageContext.request.contextPath}/users/assigned-brands?userId='+id
+			})
+			.then(
+				function(response) {
+					$scope.user_id = id;
+					$scope.assigned_brands = response.data;
+				},
+				function(response) {
+					alert(response.data);
+			});
+		}
+
+		$scope.promptAccessRightsModal = function(id){
+			console.log("Brand Id: " + id);
+			console.log("User Id: " + $scope.user_id);
+			$('#assignedBrandModel').modal('toggle');
+
+ 			$http({
+				method : 'GET',
+				headers : {'Content-Type' : 'application/json'},
+				url : '${pageContext.request.contextPath}/users/access-rights?id='+$scope.user_id+'&brandId='+id
+			})
+			.then(
+				function(response) {
+					$scope.access_rights = response.data;
+					$scope.brand_id = id;
+					//checkedExistingList($scope.access_rights, access_rights_array);
+				},
+				function(response) {
+					alert(response.data);
+			});
+		}
+		
+		
+		
+		$scope.addIntoBrandList = function(brand){	
+			if(brand.exist){	
+				brands_array.push(brand);
+			} else {
+ 				 var toDel = brands_array.indexOf(brand);
+	 				if (toDel > -1) {
+	 					brands_array.splice(toDel,1); 
+	 				}
+			}
+		}
+		
+		function checked(brands){
+			for(var i=0;i<brands.length;i++){
+				if(brands[i].exist){
+					brands_array.push(brands[i]);
+				}
+			}
+			console.log("already list "+ brands_array);
+		}
+		
+		function checkedExistingList(sourceList, targetArray){
+			for(var i=0;i<sourceList.length;i++){
+				targetArray.push(sourceList[i]);
+			}
+			console.log("target list "+ targetArray);
+		}
+		
 		$scope.resetModal = function(){
 			$scope.user = {};
+			$scope.user_id = 0;
 			$scope.action = '';
+			$scope.brands = [];
+			brands_array = [];
+			$scope.assigned_brands = [];
+			$scope.resetAccessRightsModal('reset');
+		}
+		
+		$scope.resetAccessRightsModal = function(type){
+			if(type != 'reset'){
+				
+				$('#assignedBrandModel').modal('toggle');
+			} 
+			$scope.brand_id = 0;
+			$scope.access_rights = [];
+			access_rights_array = [];
+			//access_rights_data = {};
 		}
 		
 		$scope.setModalType = function(action){
@@ -119,13 +232,58 @@
 				});
 				
 			}
-			
-			
-
 		}
 		
-	
+		$scope.assignPermissions = function(brand_id){
+			//access_rights_array = $scope.access_rights;
+			
+			var post_data = JSON.stringify({
+				'user_id' : $scope.user_id,
+				'brand_id': brand_id,
+				'permissions': $scope.access_rights
+			});
+			
+			console.log("Access Rights data: "+ post_data);
+
+			$http({
+				method : 'POST',
+				headers : {'Content-Type' : 'application/json'},
+				url : '${pageContext.request.contextPath}/users/assign-access-rights',
+				data : post_data
+			})
+			.then(
+				function(response) {
+					$('#accessRightsModal').modal('toggle');
+					$scope.resetAccessRightsModal('close');
+				},
+				function(response) {
+					alert(response.data);
+			});
+		}
 		
+		$scope.assignUserToBrands = function(){
+	 		var post_data = JSON.stringify({
+				'userId' :  $scope.user_id,
+				'brands' : brands_array,
+			});
+			
+			console.log(post_data);
+			
+  	 		$http({
+				method : 'POST',
+				headers : {'Content-Type' : 'application/json'},
+				url : '${pageContext.request.contextPath}/users/assign-brands',
+				data : post_data
+			})
+			.then(
+				function(response) {
+					$scope.resetModal();
+					$('#userBrandModal').modal('toggle');
+				},
+				function(response) {
+					alert(response.data);
+			});
+		}
 
 	});
 </script>

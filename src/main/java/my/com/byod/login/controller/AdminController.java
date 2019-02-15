@@ -4,6 +4,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.json.JSONObject;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,6 +17,11 @@ public class AdminController {
 	@GetMapping(value = "/admin-panel")
 	public ModelAndView adminPanel(HttpServletRequest request, HttpServletResponse response) {
 		request.getSession().removeAttribute("brand_id");
+		request.getSession().removeAttribute("access_rights");
+		
+		System.out.println("My brand " + (Long)request.getSession().getAttribute("brand_id"));
+		System.out.println("My accessRights " + (JSONObject)request.getSession().getAttribute("access_rights"));
+		
 		ModelAndView model = new ModelAndView();
 		model.setViewName("/admin/home");
 		return model;
