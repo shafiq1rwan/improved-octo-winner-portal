@@ -13,14 +13,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.sql.DataSource;
 
 import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
@@ -31,7 +28,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -60,6 +56,9 @@ public class GroupCategoryRestController {
 	
 	@Autowired
 	private DbConnectionUtil dbConnectionUtil;
+	
+	@Autowired
+	private DeviceConfigRestController deviceConfigRestController;
 	
 	@GetMapping(value ="/get_all_group_category",produces = "application/json")
 	public String getAllGroupCategory(HttpServletRequest request, HttpServletResponse response) {
@@ -425,7 +424,7 @@ public class GroupCategoryRestController {
 				// first time publish menu
 				firstPublish = true;
 				versionCount = (long) 1;
-		
+				
 				if(groupCategoryInfo.has("tmp_img_file_path"))
 					tmpImgFilePath = groupCategoryInfo.getString("tmp_img_file_path");
 				else 
@@ -479,7 +478,7 @@ public class GroupCategoryRestController {
 			result = new JSONObject();
 			result.put("menuList", categoryList);
 			
-			menuFilePath = createMenuFile(result);
+			menuFilePath = byodUtil.createUniqueBackendId("MF");
 			// get new info after logging tmp image file
 			groupCategoryInfo = getGroupCategoryInfoByID(connection, groupCategoryId);		
 			menuImgFilePath = extractImageList(connection, tmpImgFilePath, menuFilePath);
@@ -497,7 +496,15 @@ public class GroupCategoryRestController {
 			int rowAffected = stmt.executeUpdate();
 			if(rowAffected==0) {
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Failed to publish menu.");
-			}	
+			}
+			
+			// extract files as latest version
+			File checkdir = new File(filePath, "latest");
+			checkdir.mkdirs();
+			deviceConfigRestController.generateLatestQueryFile(connection);
+			deviceConfigRestController.extractLatestImages();
+			deviceConfigRestController.generateLatestMenuFile(result);
+			
 		}catch(Exception ex) {
 			ex.printStackTrace();
 		} finally {
@@ -899,7 +906,7 @@ public class GroupCategoryRestController {
 		return modifierGroupList;
 	}
 	
-	private String createMenuFile(JSONObject result){
+	/*private String createMenuFile(JSONObject result){
 		// write to json file
 		String menuFilePath = byodUtil.createUniqueBackendId("MF");
 		try {
@@ -928,7 +935,7 @@ public class GroupCategoryRestController {
 			ex.printStackTrace();
 		}
 		return menuFilePath;
-	}
+	}*/
 	
 	
 	public void logActionToFile(Connection connection, String query, String[] parameters, Long groupCategoryId, String imageName, int saveType) throws Exception {
