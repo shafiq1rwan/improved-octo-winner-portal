@@ -123,40 +123,41 @@ public class Order_RestController {
 					resultCode = "E02";
 					resultMessage = "Store does not exist. Please re-scan QR.";
 				}
-				
-				//menuFilePath = rs1.getString("menu_file_path");				
-				File checkFile = new File(filePath + brandId + "/" + rs1.getLong("group_category_id"), "/latest/menuFilePath.json");
-				if (checkFile.exists()) {
-					// read file
-					BufferedReader br = new BufferedReader(new FileReader(checkFile));
-					try {
-					    StringBuilder sb = new StringBuilder();
-					    String line = br.readLine();
-
-					    while (line != null) {
-					        sb.append(line);
-					        sb.append(System.lineSeparator());
-					        line = br.readLine();
-					    }
-					    String everything = sb.toString();
-					    JSONObject jsonFile = new JSONObject(everything);
-					    categoryList = jsonFile.getJSONArray("menuList");
-					} finally {
-					    br.close();
-					}
-					
-					result.put("storeName", rs1.getString("store_name"));
-					result.put("priceTag", rs1.getString("store_currency"));
-					result.put("imagePath", imagePath);
-					result.put("menuList", categoryList);
-
-					resultCode = "00";
-					resultMessage = "Success";
-				}
 				else {
-					// unable to find menu file
-					resultCode = "E02";
-					resultMessage = "Store does not exist. Please re-scan QR.";
+					//menuFilePath = rs1.getString("menu_file_path");				
+					File checkFile = new File(filePath + brandId + "/" + rs1.getLong("group_category_id"), "/latest/menuFilePath.json");
+					if (checkFile.exists()) {
+						// read file
+						BufferedReader br = new BufferedReader(new FileReader(checkFile));
+						try {
+						    StringBuilder sb = new StringBuilder();
+						    String line = br.readLine();
+	
+						    while (line != null) {
+						        sb.append(line);
+						        sb.append(System.lineSeparator());
+						        line = br.readLine();
+						    }
+						    String everything = sb.toString();
+						    JSONObject jsonFile = new JSONObject(everything);
+						    categoryList = jsonFile.getJSONArray("menuList");
+						} finally {
+						    br.close();
+						}
+						
+						result.put("storeName", rs1.getString("store_name"));
+						result.put("priceTag", rs1.getString("store_currency"));
+						result.put("imagePath", imagePath);
+						result.put("menuList", categoryList);
+	
+						resultCode = "00";
+						resultMessage = "Success";
+					}
+					else {
+						// unable to find menu file
+						resultCode = "E02";
+						resultMessage = "Store does not exist. Please re-scan QR.";
+					}
 				}
 			} else {
 				resultCode = "E02";
