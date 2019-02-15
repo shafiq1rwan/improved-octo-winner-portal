@@ -6,6 +6,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +29,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.security.core.Authentication;
@@ -159,29 +162,63 @@ public class UserManagementRestController {
 
 	@GetMapping("/")
 	public ResponseEntity<?> findUsers(HttpServletRequest request, HttpServletResponse response){		
+		JSONObject jsonUserResult = new JSONObject();
 		JSONArray jsonUserArray = new JSONArray();
 		
-/*		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		String username = auth.getName(); // get logged in username
-		System.out.println(auth.getAuthorities().iterator().next());*/
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		String username = auth.getName();
+		String role = auth.getAuthorities().iterator().next().toString();
 	
 		try {
-			String sql = "SELECT u.id, u.name, u.email, u.mobileNumber, u.address, u.username, u.enabled, a.authority "
-					+ "FROM users u INNER JOIN authorities a ON u.id = a.user_id "
-					+ "WHERE a.authority != ?";
-			List<Map<String, Object>> users = jdbcTemplate.queryForList(sql, new Object[] {"ROLE_SUPER_ADMIN"});
+			String sql = "";
+			List<Map<String, Object>> users = new ArrayList<Map<String, Object>>();
+			List<String> roleList = new ArrayList<String>(Arrays.asList("ROLE_ADMIN","ROLE_USER"));
+			
+			if(role.equals("ROLE_SUPER_ADMIN")) {
+				sql = "SELECT u.id, u.name, u.email, u.mobileNumber, u.address, u.username, u.enabled, a.authority "
+						+ "FROM users u INNER JOIN authorities a ON u.id = a.user_id "
+						+ "WHERE a.authority != ?";
+
+				users = jdbcTemplate.queryForList(sql, new Object[] {role});
+			} else if(role.equals("ROLE_ADMIN")){
+				List<Long> brandIds = jdbcTemplate.queryForList("SELECT b.id FROM brands b "
+						+ "INNER JOIN users_brands ub ON b.id = ub.brand_id "
+						+ "INNER JOIN users u ON ub.user_id = u.id "
+						+ "WHERE u.username = ?", 
+						new Object[] {username}, Long.class);
+				
+				if(!brandIds.isEmpty()) {
+					sql = "SELECT u.id, u.name, u.email, u.mobileNumber, u.address, u.username, u.enabled, a.authority "
+							+ "FROM users u INNER JOIN authorities a ON u.id = a.user_id "
+							+ "INNER JOIN users_brands ub ON u.id = ub.user_id "
+							+ "WHERE a.authority NOT IN('ROLE_SUPER_ADMIN','ROLE_ADMIN') "
+							+ "AND ub.brand_id IN(:ids)";
+					
+					Map<String, List<Long>> paramMap = Collections.singletonMap("ids", brandIds);
+					NamedParameterJdbcTemplate template = 
+						    new NamedParameterJdbcTemplate(dataSource);
+					
+					users = template.queryForList(sql, paramMap);
+				}
+			}
 			
 			if(!users.isEmpty()) {
 				for(Map<String, Object> user:users) {
 					JSONObject jsonObj = new JSONObject(user);
 					jsonUserArray.put(jsonObj);
-				}
+					}
 			}
+
+			jsonUserResult.put("role", role);
+			jsonUserResult.put("role_list", new JSONArray(roleList));
+			jsonUserResult.put("user_list", jsonUserArray);
+			
+			System.out.println("Users Data: " + jsonUserResult.toString());
 		} catch(Exception ex) {
 			ex.printStackTrace();
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Internal Server Error");
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Cannot retrive users info. Please try again later");
 		}
-		return ResponseEntity.ok(jsonUserArray.toString());
+		return ResponseEntity.ok(jsonUserResult.toString());
 	}
 	
 	@GetMapping("/{id}")

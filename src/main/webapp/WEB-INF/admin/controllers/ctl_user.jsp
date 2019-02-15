@@ -2,14 +2,13 @@
 <script>
 	app.controller('ctl_user', function($scope, $http, $compile) {
 		
+		$scope.users = [];
 		$scope.user = {};
 		$scope.user_id = 0;
 		$scope.brands = [];
 		$scope.brand_id = 0;
 		
 		$scope.assigned_brands = [];
-		
-		
 		
 		$scope.access_rights = [];
 		$scope.action = '';
@@ -19,13 +18,36 @@
 		var access_rights_array = []; 
 		//var access_rights_data = {};
 		
+		$scope.role = '';
+		$scope.roles = [];
+		var role_array = [];
+		
 		$(document).ready(function() {
-			refreshUserTable();
+			getUserInfo();
 		});
 		
-		var refreshUserTable = function(){
+		var getUserInfo = function(){
+			$http({
+				method : 'GET',
+				headers : {'Content-Type' : 'application/json'},
+				url : '${pageContext.request.contextPath}/users/'
+			})
+			.then(
+				function(response) {
+					$scope.role = response.data.role;
+					$scope.users = response.data.user_list;
+					$scope.roles = response.data.role_list.filter(r => r!= $scope.role);
+					refreshUserTable($scope.users);
+				},
+				function(response) {
+					alert(response.data);
+			});
+		}
+		
+		var refreshUserTable = function(users){
 			table = $('#users_dtable').DataTable({
-				'ajax' : {
+				'data': users,
+				/* 'ajax' : {
 					'url' : '${pageContext.request.contextPath}/users/',
 					'dataSrc': function ( json ) {
 		                return json;
@@ -36,7 +58,7 @@
 							$(location).attr('href', '${pageContext.request.contextPath}/logout');
 						}
 					}
-				},
+				} */
 				"destroy" : true,
 				"order" : [ [ 0, "asc" ] ] ,
 				"columns" : [ 
@@ -129,9 +151,7 @@
 					alert(response.data);
 			});
 		}
-		
-		
-		
+
 		$scope.addIntoBrandList = function(brand){	
 			if(brand.exist){	
 				brands_array.push(brand);
@@ -185,13 +205,24 @@
 			console.log($scope.action);
 		}
 		
+	/* 	function filterRoles(role){
+			for(var i=0;$scope.roles.length;i++){
+				role_array
+			}
+			
+			role_array
+			
+			
+		} */
+		
 		$scope.submitUser = function(){
 			if($scope.user.name == null || $scope.user.name == '' 
 					|| $scope.user.email == null || $scope.user.email == '' 
 					|| $scope.user.mobileNumber == null || $scope.user.mobileNumber == '' 
 					|| $scope.user.address == null || $scope.user.address == ''
 					|| $scope.user.username == null || $scope.user.username == '' 
-					|| $scope.user.password == null || $scope.user.password == ''){
+					|| $scope.user.password == null || $scope.user.password == ''
+					|| $scope.user.authority == null || $scope.user.authority == ''){
 			}
 			else {
 				var	data = {
@@ -203,7 +234,7 @@
 						'username' : $scope.user.username,
 						'password' : $scope.user.password,
 						'enabled' : $scope.user.enabled || false,
-						'role' : $scope.action == 'create'?'ROLE_ADMIN':null
+						'role' : $scope.user.authority
 				};
 				var postData = JSON.stringify(data);
 					
@@ -223,7 +254,7 @@
 					function(response) {			
 						$scope.resetModal();
 						$('#userModal').modal('toggle');
-						refreshUserTable();
+						getUserInfo();
 					},
 					function(response) {			
 						alert(response.data);

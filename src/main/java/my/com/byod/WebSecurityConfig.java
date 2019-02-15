@@ -67,7 +67,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		        	  String role = user.getAuthorities().iterator().next().toString();
 		        	  
 		        	  if(user!=null && role !=null) {
-		        		  if(role.equals("ROLE_SUPER_ADMIN") || role.equals("ROLE_ADMIN")) {
+		        		  if(role.equals("ROLE_SUPER_ADMIN") || role.equals("ROLE_ADMIN") || role.equals("ROLE_USER"))
+		        		  {
 		        			  response.sendRedirect(request.getContextPath()+"/admin/admin-panel");
 		        		  }
 		        	  }

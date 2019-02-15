@@ -141,7 +141,11 @@
 						<div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
 							<div class="form-group">
 								<label class="login-label">Role</label>
-								
+								<select class="form-control" ng-model="user.authority" 
+									ng-options="r as r for r in roles"
+									required>
+										<option value="" disabled>-- SELECT --</option>
+								</select>
 							</div>
 						</div>
 						
