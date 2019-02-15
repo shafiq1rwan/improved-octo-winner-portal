@@ -179,14 +179,14 @@ public class DeviceConfigRestController {
 			System.out.println("authToken:" + authToken);
 			System.out.println("secureHash:" + secureHash);
 			
-			if(!authToken.equals(secureHash)) {
-				resultCode = "E02";
-				resultMessage = "Invalid authentication token.";
-			}
-			else if(deviceInfo.getLong("statusLookupId")!=2) {
+			if(deviceInfo!=null && deviceInfo.getLong("statusLookupId")!=2) {
 				// not active
+				resultCode = "E02";
+				resultMessage = "Activation info is already deactivated.";
+			}
+			else if(!authToken.equals(secureHash)) {
 				resultCode = "E03";
-				resultMessage = "Invalid activation info status";
+				resultMessage = "Invalid authentication token.";
 			}
 			else if(versionCount==0) {
 				// first time get menu
