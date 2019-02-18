@@ -237,6 +237,7 @@ public class MenuItemRestController {
 				jsonResult.put("id", rs.getLong("id"));
 				jsonResult.put("backend_id", rs.getString("backend_id"));
 				jsonResult.put("menu_item_name", rs.getString("menu_item_name"));
+				jsonResult.put("menu_item_alt_name", rs.getString("menu_item_alt_name"));
 				jsonResult.put("menu_item_description", rs.getString("menu_item_description"));
 				jsonResult.put("menu_item_image_path", displayFilePath + rs.getString("menu_item_image_path"));
 				jsonResult.put("menu_item_base_price", rs.getBigDecimal("menu_item_base_price"));
@@ -261,7 +262,7 @@ public class MenuItemRestController {
 		}
 		return ResponseEntity.ok().body(jsonResult.toString());
 	}
-
+	
 	@PostMapping(value = "/createMenuItem", produces = "application/json")
 	public ResponseEntity<?> createMenuItem(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody String data) {
@@ -276,18 +277,21 @@ public class MenuItemRestController {
 					: byodUtil.saveImageFile("imgMI", jsonMenuItemData.getString("menu_item_image_path"), null);      
 			String description = jsonMenuItemData.isNull("menu_item_description") ? null
 					: jsonMenuItemData.getString("menu_item_description");
+			String altName = jsonMenuItemData.isNull("menu_item_alt_name") ? null 
+					: jsonMenuItemData.getString("menu_item_alt_name");
 
 			connection = dbConnectionUtil.retrieveConnection(request);
-			String sqlStatement = "INSERT INTO menu_item(backend_id, menu_item_name, menu_item_description, menu_item_image_path, menu_item_base_price, menu_item_type,is_taxable, is_discountable) VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
+			String sqlStatement = "INSERT INTO menu_item(backend_id, menu_item_name, menu_item_alt_name, menu_item_description, menu_item_image_path, menu_item_base_price, menu_item_type,is_taxable, is_discountable) VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
 			stmt = connection.prepareStatement(sqlStatement);
 			stmt.setString(1, jsonMenuItemData.getString("menu_item_backend_id"));
 			stmt.setString(2, jsonMenuItemData.getString("menu_item_name"));
-			stmt.setString(3, description);
-			stmt.setString(4, imagePath);
-			stmt.setBigDecimal(5, BigDecimal.valueOf(jsonMenuItemData.getDouble("menu_item_base_price")));
-			stmt.setInt(6, jsonMenuItemData.getInt("menu_item_type"));
-			stmt.setBoolean(7, jsonMenuItemData.getBoolean("is_taxable"));
-			stmt.setBoolean(8, jsonMenuItemData.getBoolean("is_discountable"));
+			stmt.setString(3, altName);
+			stmt.setString(4, description);
+			stmt.setString(5, imagePath);
+			stmt.setBigDecimal(6, BigDecimal.valueOf(jsonMenuItemData.getDouble("menu_item_base_price")));
+			stmt.setInt(7, jsonMenuItemData.getInt("menu_item_type"));
+			stmt.setBoolean(8, jsonMenuItemData.getBoolean("is_taxable"));
+			stmt.setBoolean(9, jsonMenuItemData.getBoolean("is_discountable"));
 			
 			int rowAffected = stmt.executeUpdate();
 			
@@ -295,6 +299,7 @@ public class MenuItemRestController {
 			String [] parameters = {
 					jsonMenuItemData.getString("menu_item_backend_id"),
 					jsonMenuItemData.getString("menu_item_name")==null?"null":"'"+jsonMenuItemData.getString("menu_item_name")+"'",
+					altName==null?"null":"'"+altName+"'",
 					description==null?"null":"'"+description+"'",
 					imagePath==null?"null":"'"+imagePath+"'",
 					String.valueOf(jsonMenuItemData.getDouble("menu_item_base_price")),
@@ -347,31 +352,35 @@ public class MenuItemRestController {
 						: byodUtil.saveImageFile("imgMI", jsonMenuItemData.getString("menu_item_image_path"), null); 
 				String description = jsonMenuItemData.isNull("menu_item_description") ? null
 						: jsonMenuItemData.getString("menu_item_description");
+				String altName = jsonMenuItemData.isNull("menu_item_alt_name") ? null 
+						: jsonMenuItemData.getString("menu_item_alt_name");
 
 				connection = dbConnectionUtil.retrieveConnection(request);
 				String sqlStatement = ""; 
 				if(imagePath == null) {
-					sqlStatement = "UPDATE menu_item SET backend_id = ?, menu_item_name = ?, menu_item_description =?, menu_item_base_price = ?, menu_item_type = ?, is_taxable = ? , is_discountable = ? WHERE id = ?;";
+					sqlStatement = "UPDATE menu_item SET backend_id = ?, menu_item_name = ?, menu_item_alt_name, menu_item_description =?, menu_item_base_price = ?, menu_item_type = ?, is_taxable = ? , is_discountable = ? WHERE id = ?;";
 				} else {
-					sqlStatement = "UPDATE menu_item SET backend_id = ?, menu_item_name = ?, menu_item_description =?, menu_item_base_price = ?, menu_item_type = ?, is_taxable = ? , is_discountable = ?, menu_item_image_path = ? WHERE id = ?;";
+					sqlStatement = "UPDATE menu_item SET backend_id = ?, menu_item_name = ?, menu_item_alt_name, menu_item_description =?, menu_item_base_price = ?, menu_item_type = ?, is_taxable = ? , is_discountable = ?, menu_item_image_path = ? WHERE id = ?;";
 				}
 				
 				stmt = connection.prepareStatement(sqlStatement);
 				stmt.setString(1, jsonMenuItemData.getString("menu_item_backend_id"));
 				stmt.setString(2, jsonMenuItemData.getString("menu_item_name"));
-				stmt.setString(3, description);
-				stmt.setBigDecimal(4, BigDecimal.valueOf(jsonMenuItemData.getDouble("menu_item_base_price")));
-				stmt.setInt(5, jsonMenuItemData.getInt("menu_item_type"));
-				stmt.setBoolean(6, jsonMenuItemData.getBoolean("is_taxable"));
-				stmt.setBoolean(7, jsonMenuItemData.getBoolean("is_discountable"));
+				stmt.setString(3, altName);
+				stmt.setString(4, description);
+				stmt.setBigDecimal(5, BigDecimal.valueOf(jsonMenuItemData.getDouble("menu_item_base_price")));
+				stmt.setInt(6, jsonMenuItemData.getInt("menu_item_type"));
+				stmt.setBoolean(7, jsonMenuItemData.getBoolean("is_taxable"));
+				stmt.setBoolean(8, jsonMenuItemData.getBoolean("is_discountable"));
 				
 				if(imagePath == null) {
-					stmt.setLong(8, jsonMenuItemData.getLong("id"));
+					stmt.setLong(9, jsonMenuItemData.getLong("id"));
 					
 					// logging to file	
 					parameters = new String[] {
 							jsonMenuItemData.getString("menu_item_backend_id"),
 							jsonMenuItemData.getString("menu_item_name")==null?"null":"'"+jsonMenuItemData.getString("menu_item_name")+"'",
+							altName == null?"null":"'"+altName+"'",		
 							description==null?"null":"'"+description+"'",
 							String.valueOf(jsonMenuItemData.getDouble("menu_item_base_price")),
 							String.valueOf(jsonMenuItemData.getInt("menu_item_type")),
@@ -379,13 +388,14 @@ public class MenuItemRestController {
 							String.valueOf(jsonMenuItemData.getBoolean("is_discountable")),
 							String.valueOf(jsonMenuItemData.getLong("id"))};	
 				} else {
-					stmt.setString(8, imagePath);
-					stmt.setLong(9, jsonMenuItemData.getLong("id"));
+					stmt.setString(9, imagePath);
+					stmt.setLong(10, jsonMenuItemData.getLong("id"));
 					
 					// logging to file
 					parameters = new String[] {
 							jsonMenuItemData.getString("menu_item_backend_id"),
 							jsonMenuItemData.getString("menu_item_name")==null?"null":"'"+jsonMenuItemData.getString("menu_item_name")+"'",
+							altName == null?"null":"'" + altName + "'",
 							description==null?"null":"'"+description+"'",
 							String.valueOf(jsonMenuItemData.getDouble("menu_item_base_price")),
 							String.valueOf(jsonMenuItemData.getInt("menu_item_type")),

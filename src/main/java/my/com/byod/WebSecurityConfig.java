@@ -3,6 +3,7 @@ package my.com.byod;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +56,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		.csrf().disable()
 		.authorizeRequests()
 				.antMatchers("/user/signin/**","/order/**","/api/device/**","/byod-menu/**").permitAll()
-				.antMatchers("/admin/admin-panel/**").access("hasAnyRole('ROLE_SUPER_ADMIN','ROLE_ADMIN','ROLE_USER')")
+				.antMatchers("/byod/byod-panel/**").access("hasAnyRole('ROLE_SUPER_ADMIN','ROLE_ADMIN','ROLE_USER')")
 				.anyRequest().authenticated()
 	          .and()
 	          .formLogin().loginPage("/user/signin")
@@ -69,8 +70,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		        	  if(user!=null && role !=null) {
 		        		  if(role.equals("ROLE_SUPER_ADMIN") || role.equals("ROLE_ADMIN") || role.equals("ROLE_USER"))
 		        		  {
-		        			  response.sendRedirect(request.getContextPath()+"/admin/admin-panel");
+		        				HttpSession session = request.getSession();
+		        		    	session.setAttribute("role", role);
 		        		  }
+		        		  response.sendRedirect(request.getContextPath()+"/byod/byod-panel");
 		        	  }
 		          })
 		          .failureHandler((request, response, exception) -> {

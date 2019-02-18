@@ -11,16 +11,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
 @Controller
-@RequestMapping("/admin")
-public class AdminController {
+@RequestMapping("/byod")
+public class ByodController {
 
-	@GetMapping(value = "/admin-panel")
+	@GetMapping(value = "/byod-panel")
 	public ModelAndView adminPanel(HttpServletRequest request, HttpServletResponse response) {
 		request.getSession().removeAttribute("brand_id");
 		request.getSession().removeAttribute("access_rights");
 		
-		System.out.println("My brand " + (Long)request.getSession().getAttribute("brand_id"));
-		System.out.println("My accessRights " + (JSONObject)request.getSession().getAttribute("access_rights"));
+		//System.out.println("My brand " + (Long)request.getSession().getAttribute("brand_id"));
+		//System.out.println("My accessRights " + (JSONObject)request.getSession().getAttribute("access_rights"));
 		
 		ModelAndView model = new ModelAndView();
 		model.setViewName("/admin/home");

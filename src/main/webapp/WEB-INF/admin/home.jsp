@@ -108,14 +108,14 @@ if it's not present, don't show loader */
 	app.config(function($routeProvider) {
 		$routeProvider
 		.when("/brands", {
-			templateUrl : "${pageContext.request.contextPath}/admin/views/brand-management",
+			templateUrl : "${pageContext.request.contextPath}/byod/views/brand-management",
 			controller : "ctl_brand",
 			resolve : {
 		       	checkSession:checkSession
 		    }
 		})
 		.when("/users", {
-			templateUrl : "${pageContext.request.contextPath}/admin/views/user-management",
+			templateUrl : "${pageContext.request.contextPath}/byod/views/user-management",
 			controller : "ctl_user",
 			resolve : {
 		       	checkSession:checkSession
