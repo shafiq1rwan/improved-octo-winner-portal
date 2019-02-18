@@ -212,7 +212,7 @@ public class DeviceConfigRestController {
 			}
 			else {
 				// sync menu
-				JSONArray versionArray = getVersionUpdates(connection, versionCount, storeId);			
+				JSONArray versionArray = getVersionUpdates(connection, brandId, versionCount, storeId);			
 				if(versionArray.length()!=0) {
 					result.put("versionSync", versionArray);
 					resultCode = "01";
@@ -470,7 +470,7 @@ public class DeviceConfigRestController {
 		return result;
 	}
 	
-	private JSONArray getVersionUpdates(Connection connection, Long versionCount, Long storeId) throws Exception {
+	private JSONArray getVersionUpdates(Connection connection, Long brandId, Long versionCount, Long storeId) throws Exception {
 		String sqlStatement = null;
 		PreparedStatement ps1 = null;
 		ResultSet rs1 = null;
@@ -488,7 +488,7 @@ public class DeviceConfigRestController {
 			ps1.setLong(1, versionCount);
 			ps1.setLong(2, storeId);
 			rs1 = ps1.executeQuery();
-
+			
 			while (rs1.next()) {
 				JSONObject jsonObject = new JSONObject();
 				String menuFilePath = rs1.getString("menu_file_path");
@@ -496,11 +496,13 @@ public class DeviceConfigRestController {
 				String menuImageFile = rs1.getString("menu_img_file_path");
 				String menuQueryFilePath = "";
 				String menuImageFilePath = "";
+				Long groupCategoryId = rs1.getLong("group_category_id");
+				String url = byodUrl + displayFilePath + brandId + "/" + groupCategoryId + "/" ;
 				
 				if(menuQueryFile!=null)
-					menuQueryFilePath = byodUrl + displayFilePath + menuFilePath + "/" + menuQueryFile + ".txt";	
+					menuQueryFilePath = url + menuFilePath + "/" + menuQueryFile + ".txt";	
 				if(menuImageFile!=null)
-					menuImageFilePath = byodUrl + displayImagePath + menuFilePath + "/" + menuImageFile + ".zip";
+					menuImageFilePath = url + menuFilePath + "/" + menuImageFile + ".zip";
 				
 				jsonObject.put("versionCount", rs1.getLong("version_count"));
 				jsonObject.put("menuQueryFilePath", menuQueryFilePath);
@@ -528,7 +530,8 @@ public class DeviceConfigRestController {
 		JSONObject result = null;
 		try {
 			//connection = dataSource.getConnection();
-			sqlStatement = "SELECT * FROM device_info WHERE activation_id = ? ";
+			sqlStatement = "SELECT * FROM device_info "
+					+ "WHERE activation_id = ? ";
 			ps1 = connection.prepareStatement(sqlStatement);
 			ps1.setString(1, activationId);
 			rs1 = ps1.executeQuery();
