@@ -281,7 +281,7 @@ public class MenuItemRestController {
 					: jsonMenuItemData.getString("menu_item_alt_name");
 
 			connection = dbConnectionUtil.retrieveConnection(request);
-			String sqlStatement = "INSERT INTO menu_item(backend_id, menu_item_name, menu_item_alt_name, menu_item_description, menu_item_image_path, menu_item_base_price, menu_item_type,is_taxable, is_discountable) VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
+			String sqlStatement = "INSERT INTO menu_item(backend_id, menu_item_name, menu_item_alt_name, menu_item_description, menu_item_image_path, menu_item_base_price, menu_item_type,is_taxable, is_discountable) VALUES(?, ?, ?,?, ?, ?, ?, ?, ?)";
 			stmt = connection.prepareStatement(sqlStatement);
 			stmt.setString(1, jsonMenuItemData.getString("menu_item_backend_id"));
 			stmt.setString(2, jsonMenuItemData.getString("menu_item_name"));
@@ -358,9 +358,9 @@ public class MenuItemRestController {
 				connection = dbConnectionUtil.retrieveConnection(request);
 				String sqlStatement = ""; 
 				if(imagePath == null) {
-					sqlStatement = "UPDATE menu_item SET backend_id = ?, menu_item_name = ?, menu_item_alt_name, menu_item_description =?, menu_item_base_price = ?, menu_item_type = ?, is_taxable = ? , is_discountable = ? WHERE id = ?;";
+					sqlStatement = "UPDATE menu_item SET backend_id = ?, menu_item_name = ?, menu_item_alt_name = ?, menu_item_description =?, menu_item_base_price = ?, menu_item_type = ?, is_taxable = ? , is_discountable = ? WHERE id = ?;";
 				} else {
-					sqlStatement = "UPDATE menu_item SET backend_id = ?, menu_item_name = ?, menu_item_alt_name, menu_item_description =?, menu_item_base_price = ?, menu_item_type = ?, is_taxable = ? , is_discountable = ?, menu_item_image_path = ? WHERE id = ?;";
+					sqlStatement = "UPDATE menu_item SET backend_id = ?, menu_item_name = ?, menu_item_alt_name = ?, menu_item_description =?, menu_item_base_price = ?, menu_item_type = ?, is_taxable = ? , is_discountable = ?, menu_item_image_path = ? WHERE id = ?;";
 				}
 				
 				stmt = connection.prepareStatement(sqlStatement);
