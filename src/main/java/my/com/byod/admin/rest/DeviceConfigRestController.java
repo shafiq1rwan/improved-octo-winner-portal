@@ -475,7 +475,7 @@ public class DeviceConfigRestController {
 		PreparedStatement ps1 = null;
 		ResultSet rs1 = null;
 		JSONArray versionArray = new JSONArray();
-		File file = null;
+
 		try {
 			//connection = dataSource.getConnection();
 			sqlStatement = "SELECT c.* FROM store a " + 
@@ -493,9 +493,14 @@ public class DeviceConfigRestController {
 				JSONObject jsonObject = new JSONObject();
 				String menuFilePath = rs1.getString("menu_file_path");
 				String menuQueryFile = rs1.getString("menu_query_file_path");
-				String menuImageFile = rs1.getString("menu_img_file_path");				
-				String menuQueryFilePath = byodUrl + displayFilePath + menuFilePath + "/" + menuQueryFile + ".txt";	
-				String menuImageFilePath = byodUrl + displayImagePath + menuFilePath + "/" + menuImageFile + ".zip";
+				String menuImageFile = rs1.getString("menu_img_file_path");
+				String menuQueryFilePath = "";
+				String menuImageFilePath = "";
+				
+				if(menuQueryFile!=null)
+					menuQueryFilePath = byodUrl + displayFilePath + menuFilePath + "/" + menuQueryFile + ".txt";	
+				if(menuImageFile!=null)
+					menuImageFilePath = byodUrl + displayImagePath + menuFilePath + "/" + menuImageFile + ".zip";
 				
 				jsonObject.put("versionCount", rs1.getLong("version_count"));
 				jsonObject.put("menuQueryFilePath", menuQueryFilePath);
