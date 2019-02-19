@@ -289,7 +289,7 @@ public class CategoryRestController {
 					parameters = new String []{
 							jsonCategoryData.getString("category_name")==null?"null":"'"+jsonCategoryData.getString("category_name")+"'",
 							description==null?"null":"'"+description+"'",
-							String.valueOf(jsonCategoryData.getBoolean("is_active")),
+							String.valueOf(jsonCategoryData.getBoolean("is_active")?1:0),
 							String.valueOf(jsonCategoryData.getLong("id"))};
 					
 				} else {
