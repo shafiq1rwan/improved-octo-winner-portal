@@ -1234,10 +1234,13 @@ public class GroupCategoryRestController {
 						}
 					}*/
 					
+					File dir = new File(filePath + brandId + "/" + groupCategoryId + "/" + menuFilePath);
+					dir.mkdir();
+					
 					// zipping images
 					//List<String> srcFiles = Arrays.asList("test1.txt", "test2.txt");
 					menuImgFilePath = byodUtil.createUniqueBackendId("MIF");
-					FileOutputStream fos = new FileOutputStream(filePath + brandId + "/" + menuFilePath + "/" + menuImgFilePath+".zip");
+					FileOutputStream fos = new FileOutputStream(filePath + brandId + "/" + groupCategoryId + "/" + menuFilePath + "/" + menuImgFilePath+".zip");
 					ZipOutputStream zipOut = new ZipOutputStream(fos);
 					for (String srcFile : imageList) {
 						File fileToZip = new File(imagePath, srcFile);
@@ -1257,7 +1260,7 @@ public class GroupCategoryRestController {
 					fos.close();
 					
 					// copy image json file
-					File dest = new File(filePath + brandId +" /" + menuFilePath, menuImgFilePath + ".json");
+					File dest = new File(filePath + brandId + "/" + groupCategoryId + "/" + menuFilePath, menuImgFilePath + ".json");
 					try {
 						FileUtils.copyFile(checkFile, dest);
 					}catch(Exception e) {

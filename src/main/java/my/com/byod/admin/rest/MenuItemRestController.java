@@ -401,7 +401,7 @@ public class MenuItemRestController {
 							String.valueOf(jsonMenuItemData.getInt("menu_item_type")),
 							String.valueOf(jsonMenuItemData.getBoolean("is_taxable")?1:0),
 							String.valueOf(jsonMenuItemData.getBoolean("is_discountable")?1:0),
-							imagePath, 
+							"'" + imagePath + "'", 
 							String.valueOf(jsonMenuItemData.getLong("id"))};	
 				}
 				int rowAffected = stmt.executeUpdate();
