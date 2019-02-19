@@ -231,7 +231,7 @@ public class CategoryRestController {
 						description==null?"null":"'"+description+"'",
 						imagePath==null?"null":"'"+imagePath+"'",
 						String.valueOf(getCategorySequenceNumber(jsonCategoryData.getLong("group_category_id"), connection) + 1),
-						String.valueOf(jsonCategoryData.getBoolean("is_active"))};	
+						String.valueOf(jsonCategoryData.getBoolean("is_active")?1:0)};	
 				groupCategoryRestController.logActionToFile(connection, sqlStatement, parameters, jsonCategoryData.getLong("group_category_id"), imagePath, 1);
 				
 			} else {
@@ -301,7 +301,7 @@ public class CategoryRestController {
 							jsonCategoryData.getString("category_name")==null?"null":"'"+jsonCategoryData.getString("category_name")+"'",
 							description==null?"null":"'"+description+"'",
 							imagePath==null?"null":"'"+imagePath+"'",
-							String.valueOf(jsonCategoryData.getBoolean("is_active")),
+							String.valueOf(jsonCategoryData.getBoolean("is_active")?1:0),
 							String.valueOf(jsonCategoryData.getLong("id"))};
 				}
 				stmt.executeUpdate();

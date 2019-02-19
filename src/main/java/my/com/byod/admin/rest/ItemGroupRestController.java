@@ -139,7 +139,7 @@ public class ItemGroupRestController {
 			// logging to file	
 			String [] parameters = {
 					jsonItemGroupData.getString("menu_item_group_name")==null?"null":"'"+jsonItemGroupData.getString("menu_item_group_name")+"'",
-					String.valueOf(isActive)};		
+					String.valueOf(isActive?1:0)};		
 			groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0);
 
 			if (rowAffected == 0) {
@@ -188,7 +188,7 @@ public class ItemGroupRestController {
 			// logging to file	
 			String [] parameters = {
 					jsonItemGroupData.getString("menu_item_group_name")==null?"null":"'"+jsonItemGroupData.getString("menu_item_group_name")+"'",
-					String.valueOf(isActive),
+					String.valueOf(isActive?1:0),
 					String.valueOf(jsonItemGroupData.getLong("id"))};		
 			groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0);
 			

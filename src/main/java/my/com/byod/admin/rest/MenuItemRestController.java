@@ -304,8 +304,8 @@ public class MenuItemRestController {
 					imagePath==null?"null":"'"+imagePath+"'",
 					String.valueOf(jsonMenuItemData.getDouble("menu_item_base_price")),
 					String.valueOf(jsonMenuItemData.getInt("menu_item_type")),
-					String.valueOf(jsonMenuItemData.getBoolean("is_taxable")),
-					String.valueOf(jsonMenuItemData.getBoolean("is_discountable"))};		
+					String.valueOf(jsonMenuItemData.getBoolean("is_taxable")?1:0),
+					String.valueOf(jsonMenuItemData.getBoolean("is_discountable")?1:0)};		
 			groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, imagePath, 1);
 			
 			if (rowAffected == 0) {
@@ -384,8 +384,8 @@ public class MenuItemRestController {
 							description==null?"null":"'"+description+"'",
 							String.valueOf(jsonMenuItemData.getDouble("menu_item_base_price")),
 							String.valueOf(jsonMenuItemData.getInt("menu_item_type")),
-							String.valueOf(jsonMenuItemData.getBoolean("is_taxable")),
-							String.valueOf(jsonMenuItemData.getBoolean("is_discountable")),
+							String.valueOf(jsonMenuItemData.getBoolean("is_taxable")?1:0),
+							String.valueOf(jsonMenuItemData.getBoolean("is_discountable")?1:0),
 							String.valueOf(jsonMenuItemData.getLong("id"))};	
 				} else {
 					stmt.setString(9, imagePath);
@@ -399,8 +399,8 @@ public class MenuItemRestController {
 							description==null?"null":"'"+description+"'",
 							String.valueOf(jsonMenuItemData.getDouble("menu_item_base_price")),
 							String.valueOf(jsonMenuItemData.getInt("menu_item_type")),
-							String.valueOf(jsonMenuItemData.getBoolean("is_taxable")),
-							String.valueOf(jsonMenuItemData.getBoolean("is_discountable")),
+							String.valueOf(jsonMenuItemData.getBoolean("is_taxable")?1:0),
+							String.valueOf(jsonMenuItemData.getBoolean("is_discountable")?1:0),
 							imagePath, 
 							String.valueOf(jsonMenuItemData.getLong("id"))};	
 				}
@@ -491,7 +491,7 @@ public class MenuItemRestController {
 				
 				// logging to file	
 				String [] parameters = {
-						String.valueOf(!jsonMenuItemData.getBoolean("active_status")),
+						String.valueOf(!jsonMenuItemData.getBoolean("active_status")?1:0),
 						String.valueOf(jsonMenuItemData.getLong("id"))};		
 				groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0);
 				

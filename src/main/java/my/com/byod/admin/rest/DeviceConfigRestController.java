@@ -112,10 +112,12 @@ public class DeviceConfigRestController {
 					String url = byodUrl + displayFilePath + brandId + "/" + groupCategoryId;
 					String menuFilePath = url + "/latest/menuFilePath.json";
 					String imageFilePath = url + "/latest/image.zip";	
-					String queryFilePath = url + "/latest/query.txt";	
+					String queryFilePath = url + "/latest/query.txt";
+					String queryFilePath2 = url + "/latest/queryMySql.txt";
 					result.put("menuFilePath", menuFilePath);
 					result.put("imageFilePath", imageFilePath);
 					result.put("queryFilePath", queryFilePath);
+					result.put("queryMySqlFilePath", queryFilePath2);
 					result.put("versionCount", menuInfo.getLong("versionCount"));
 					resultCode = "00";
 					resultMessage = "Successful device activation and menu synchronization.";
@@ -198,9 +200,11 @@ public class DeviceConfigRestController {
 					String menuFilePath = url + "/latest/menuFilePath.json";
 					String imageFilePath = url + "/latest/image.zip";	
 					String queryFilePath = url + "/latest/query.txt";
+					String queryFilePath2 = url + "/latest/queryMySql.txt";
 					result.put("menuFilePath", menuFilePath); 
 					result.put("imageFilePath", imageFilePath);
 					result.put("queryFilePath", queryFilePath);
+					result.put("queryMySqlFilePath", queryFilePath2);
 					result.put("versionCount", menuInfo.getLong("versionCount"));
 					resultCode = "00";
 					resultMessage = "Successful get full menu.";
@@ -556,10 +560,16 @@ public class DeviceConfigRestController {
 	}
 	
 	public void generateLatestQueryFile(Connection connection, String brandId, Long groupCategoryId) throws Exception {
+		// sqlStatement - sql server script
+		// sqlStatement2 - my sql script
 		String sqlStatement = null;
+		String sqlStatement2 = null;
 		PreparedStatement ps1 = null;
+		PreparedStatement ps2 = null;
 		ResultSet rs1 = null;
+		ResultSet rs2 = null;
 		String result = "";
+		String result2 = "";
 		
 		String[] tableNames = {
 				"category",
@@ -578,18 +588,27 @@ public class DeviceConfigRestController {
 		try {
 			for(String table : tableNames) {
 				sqlStatement = "EXEC sp_generate_inserts ?";
+				sqlStatement2 = "EXEC sp_generate_inserts_mysql ?";
 				
 				// filter for group category
-				if(table.equals("category"))
+				if(table.equals("category")) {
 					sqlStatement += ", @from = \"from category where group_category_id = "+groupCategoryId+"\"";
-				
+					sqlStatement2 += ", @from = \"from category where group_category_id = "+groupCategoryId+"\"";
+				}
+					
 				ps1 = connection.prepareStatement(sqlStatement);
 				ps1.setString(1, table);
-				rs1 = ps1.executeQuery();
-				
+				rs1 = ps1.executeQuery();			
 				while (rs1.next()) {
 					result += rs1.getString(1) +";\r\n";
 				}
+				
+				ps2 = connection.prepareStatement(sqlStatement2);
+				ps2.setString(1, table);
+				rs2 = ps2.executeQuery();				
+				while (rs2.next()) {
+					result2 += rs2.getString(1) +";\r\n";
+				}			
 			}
 
 			File checkFile = new File(filePath + brandId + "/" + groupCategoryId, "latest/query.txt");
@@ -597,6 +616,11 @@ public class DeviceConfigRestController {
 			Writer output = new BufferedWriter(new FileWriter(checkFile));
             output.write(result);
             output.close();
+            
+            checkFile = new File(filePath + brandId + "/" + groupCategoryId, "latest/queryMySql.txt");
+            output = new BufferedWriter(new FileWriter(checkFile));
+            output.write(result2);
+            output.close();       
 			
 		} catch (Exception ex) {
 			throw ex;
@@ -606,6 +630,12 @@ public class DeviceConfigRestController {
 			}
 			if (ps1 != null) {
 				ps1.close();
+			}
+			if (rs2 != null) {
+				rs2.close();
+			}
+			if (ps2 != null) {
+				ps2.close();
 			}
 		}
 	}

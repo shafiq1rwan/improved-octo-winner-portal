@@ -192,7 +192,7 @@ public class ModifierGroupRestController {
 			// logging to file	
 			String [] parameters = {
 					jsonModifierGroupData.getString("modifier_group_name"),
-					String.valueOf(isActive)};		
+					String.valueOf(isActive?1:0)};		
 			groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0);
 			
 			if (rowAffected == 0) {
@@ -241,7 +241,7 @@ public class ModifierGroupRestController {
 			// logging to file	
 			String [] parameters = {
 					jsonModifierGroupData.getString("modifier_group_name"),
-					String.valueOf(isActive),
+					String.valueOf(isActive?1:0),
 					String.valueOf(jsonModifierGroupData.getLong("id"))};		
 			groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0);
 			
