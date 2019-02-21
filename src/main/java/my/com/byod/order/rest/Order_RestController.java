@@ -147,7 +147,7 @@ public class Order_RestController {
 						
 						result.put("storeName", rs1.getString("store_name"));
 						result.put("priceTag", rs1.getString("store_currency"));
-						result.put("imagePath", imagePath);
+						result.put("imagePath", imagePath + brandId + "/");
 						result.put("menuList", categoryList);
 	
 						resultCode = "00";
