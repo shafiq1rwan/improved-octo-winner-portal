@@ -12,9 +12,9 @@ public interface StoreService {
 
 	public List<Store> findAllStore();
 
-	public int createStore(Store store);
+	public int createStore(Store store, String brandId);
 
-	public int editStore(Long id, Store store);
+	public int editStore(Long id, Store store, String brandId);
 	
 	public int editStoreGroupCategoryId(Long groupCategoryId, Long id);
 	

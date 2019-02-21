@@ -3,6 +3,8 @@ package my.com.byod.admin.rest;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -122,7 +124,7 @@ public class ItemGroupRestController {
 			@RequestBody String data) {
 		Connection connection = null;
 		PreparedStatement stmt = null;
-
+		ResultSet rs = null;
 		try {
 			JSONObject jsonItemGroupData = new JSONObject(data);
 			boolean isActive = jsonItemGroupData.isNull("is_active") ? false
@@ -130,19 +132,20 @@ public class ItemGroupRestController {
 
 			connection = dbConnectionUtil.retrieveConnection(request);
 			String sqlStatement = "INSERT INTO menu_item_group(menu_item_group_name, is_active) VALUES (?, ?);";
-			stmt = connection.prepareStatement(sqlStatement);
+			stmt = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
 			stmt.setString(1, jsonItemGroupData.getString("menu_item_group_name"));
 			stmt.setBoolean(2, isActive);
 				
-			int rowAffected = stmt.executeUpdate();
-			
-			// logging to file	
-			String [] parameters = {
-					jsonItemGroupData.getString("menu_item_group_name")==null?"null":"'"+jsonItemGroupData.getString("menu_item_group_name")+"'",
-					String.valueOf(isActive?1:0)};		
-			groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0);
-
-			if (rowAffected == 0) {
+			rs = stmt.executeQuery();
+			if(rs.next()) {
+				// logging to file	
+				String [] parameters = {
+						String.valueOf(rs.getLong(1)),
+						jsonItemGroupData.getString("menu_item_group_name")==null?"null":"'"+jsonItemGroupData.getString("menu_item_group_name")+"'",
+						String.valueOf(isActive?1:0)};		
+				groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0, "menu_item_group");
+			}
+			else {
 				return ResponseEntity.badRequest().body("Failed To Create Item Group");
 			}
 
@@ -161,6 +164,15 @@ public class ItemGroupRestController {
 					e.printStackTrace();
 				}
 			}
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			
 		}
 
 	}
@@ -190,7 +202,7 @@ public class ItemGroupRestController {
 					jsonItemGroupData.getString("menu_item_group_name")==null?"null":"'"+jsonItemGroupData.getString("menu_item_group_name")+"'",
 					String.valueOf(isActive?1:0),
 					String.valueOf(jsonItemGroupData.getLong("id"))};		
-			groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0);
+			groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0, null);
 			
 			if (rowAffected == 0) {
 				return ResponseEntity.badRequest().body("Failed To Edit Item Group");
@@ -233,7 +245,7 @@ public class ItemGroupRestController {
 			// logging to file	
 			String [] parameters = {
 					String.valueOf(id)};		
-			groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0);
+			groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0, null);
 
 			if (rowAffected == 0) {
 				return ResponseEntity.badRequest().body("Failed To Remove Item Group");
@@ -247,7 +259,7 @@ public class ItemGroupRestController {
 				// logging to file	
 				String [] parameters2 = {
 						String.valueOf(id)};		
-				groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters2, null, 0);
+				groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters2, null, 0, null);
 			}
 			return ResponseEntity.ok().body(null);
 		} catch (Exception ex) {
@@ -337,7 +349,7 @@ public class ItemGroupRestController {
 						String.valueOf(menuItemGroupId),
 						String.valueOf(jsonItemObj.getLong("id")),
 						String.valueOf(index+1)};		
-				groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0);
+				groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0, null);
 			}
 			
 			return ResponseEntity.ok().body(null);
@@ -377,7 +389,7 @@ public class ItemGroupRestController {
 			// logging to file	
 			String [] parameters = {
 					String.valueOf(menuItemGroupId)};		
-			groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0);
+			groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0, null);
 
 			for(int i=0;i<jsonItemsArray.length();i++) {
 				int index = i;
@@ -394,7 +406,7 @@ public class ItemGroupRestController {
 						String.valueOf(menuItemGroupId),
 						String.valueOf(jsonItemObj.getLong("id")),
 						String.valueOf(index+1)};		
-				groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters2, null, 0);
+				groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters2, null, 0, null);
 			}
 			
 			return ResponseEntity.ok().body(null);

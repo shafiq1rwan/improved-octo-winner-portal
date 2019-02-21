@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -175,7 +176,7 @@ public class ModifierGroupRestController {
 			@RequestBody String data) {
 		Connection connection = null;
 		PreparedStatement stmt = null;
-
+		ResultSet rs = null;
 		try {
 			JSONObject jsonModifierGroupData = new JSONObject(data);
 			boolean isActive = jsonModifierGroupData.isNull("is_active") ? false
@@ -184,18 +185,20 @@ public class ModifierGroupRestController {
 			connection = dbConnectionUtil.retrieveConnection(request);
 			String sqlStatement = "INSERT INTO modifier_group(modifier_group_name, is_active) VALUES (?, ?);";
 			stmt = connection
-					.prepareStatement(sqlStatement);
+					.prepareStatement(sqlStatement,  Statement.RETURN_GENERATED_KEYS);
 			stmt.setString(1, jsonModifierGroupData.getString("modifier_group_name"));
 			stmt.setBoolean(2, isActive);
-			int rowAffected = stmt.executeUpdate();
+			rs = stmt.executeQuery();
 			
-			// logging to file	
-			String [] parameters = {
-					jsonModifierGroupData.getString("modifier_group_name"),
-					String.valueOf(isActive?1:0)};		
-			groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0);
-			
-			if (rowAffected == 0) {
+			if(rs.next()) {
+				// logging to file	
+				String [] parameters = {
+						String.valueOf(rs.getLong(1)),
+						jsonModifierGroupData.getString("modifier_group_name")==null?"null":"'"+jsonModifierGroupData.getString("modifier_group_name")+"'",
+						String.valueOf(isActive?1:0)};		
+				groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0, "modifier_group");
+			}
+			else {
 				return ResponseEntity.badRequest().body("Failed To Create Modifier Group");
 			}
 
@@ -211,6 +214,14 @@ public class ModifierGroupRestController {
 				try {
 					connection.close();
 				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -243,7 +254,7 @@ public class ModifierGroupRestController {
 					jsonModifierGroupData.getString("modifier_group_name"),
 					String.valueOf(isActive?1:0),
 					String.valueOf(jsonModifierGroupData.getLong("id"))};		
-			groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0);
+			groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0, null);
 			
 			if (rowAffected == 0) {
 				return ResponseEntity.badRequest().body("Failed To Edit Modifer Group");
@@ -287,7 +298,7 @@ public class ModifierGroupRestController {
 			// logging to file	
 			String [] parameters = {
 					String.valueOf(id)};		
-			groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0);
+			groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0,null);
 
 			if (rowAffected == 0) {
 				return ResponseEntity.badRequest().body("Failed To Remove Modifer Group");
@@ -301,7 +312,7 @@ public class ModifierGroupRestController {
 				// logging to file	
 				String [] parameters2 = {
 						String.valueOf(id)};		
-				groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters2, null, 0);
+				groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters2, null, 0, null);
 			}
 			return ResponseEntity.ok().body(null);
 		} catch (Exception ex) {
@@ -392,7 +403,7 @@ public class ModifierGroupRestController {
 						String.valueOf(modifierGroupId),
 						String.valueOf(jsonItemObj.getLong("id")),
 						String.valueOf(index + 1)};		
-				groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0);
+				groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0, null);
 			}
 
 			return ResponseEntity.ok().body(null);
@@ -432,7 +443,7 @@ public class ModifierGroupRestController {
 			// logging to file	
 			String [] parameters = {
 					String.valueOf(modifierGroupId)};		
-			groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0);
+			groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0, null);
 
 			for (int i = 0; i < jsonItemsArray.length(); i++) {
 				int index = i;
@@ -449,7 +460,7 @@ public class ModifierGroupRestController {
 						String.valueOf(modifierGroupId),
 						String.valueOf(jsonItemObj.getLong("id")),
 						String.valueOf(index + 1)};		
-				groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters2, null, 0);
+				groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters2, null, 0, null);
 			}
 
 			return ResponseEntity.ok().body(null);
@@ -582,7 +593,7 @@ public class ModifierGroupRestController {
 						String.valueOf(menuItemId),
 						String.valueOf(jsonModifierGroupsObj.getLong("id")),
 						String.valueOf(index)};		
-				groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0);
+				groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0, null);
 				
 				connection.commit();
 			}
@@ -629,7 +640,7 @@ public class ModifierGroupRestController {
 			String [] parameters = {
 					String.valueOf(menuItemId),
 					String.valueOf(modifierGroupId)};		
-			groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0);
+			groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0, null);
 			
 			if (rowAffected == 0) {
 				return ResponseEntity.badRequest().body("Failed To Remove Assigned Modifer");
@@ -673,7 +684,7 @@ public class ModifierGroupRestController {
 			// logging to file	
 			String [] parameters = {
 					String.valueOf(menuItemId)};		
-			groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0);
+			groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0, null);
 
 			for (int i = 0; i < jsonModifierGroupsArray.length(); i++) {
 				int index = i;
@@ -690,7 +701,7 @@ public class ModifierGroupRestController {
 						String.valueOf(menuItemId),
 						String.valueOf(jsonModifierGroupsObj.getLong("id")),
 						String.valueOf(index + 1)};		
-				groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters2, null, 0);			
+				groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters2, null, 0, null);			
 				
 				connection.commit();
 			}

@@ -3,6 +3,8 @@ package my.com.byod.admin.rest;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -143,6 +145,7 @@ public class CategoryRestController {
 
 		try {
 			connection = dbConnectionUtil.retrieveConnection(request);
+			String brandId = byodUtil.getGeneralConfig(connection, "BRAND_ID");
 			stmt = connection.prepareStatement("SELECT * FROM category WHERE id = ?");
 			stmt.setLong(1, id);
 			rs = (ResultSet) stmt.executeQuery();
@@ -152,7 +155,7 @@ public class CategoryRestController {
 				jsonResult.put("group_category_id", rs.getLong("group_category_id"));
 				jsonResult.put("category_name", rs.getString("category_name"));
 				jsonResult.put("category_description", rs.getString("category_description"));
-				jsonResult.put("category_image_path", displayFilePath + rs.getString("category_image_path"));
+				jsonResult.put("category_image_path", displayFilePath + brandId + "/" + rs.getString("category_image_path"));
 				jsonResult.put("category_sequence", rs.getInt("category_sequence"));
 				jsonResult.put("is_active", rs.getBoolean("is_active"));
 				jsonResult.put("created_date", rs.getDate("created_date"));
@@ -203,37 +206,39 @@ public class CategoryRestController {
 	public ResponseEntity<?> createCategory(HttpServletRequest request, HttpServletResponse response, @RequestBody String data) {
 		Connection connection = null;
 		PreparedStatement stmt = null;
-
+		ResultSet rs = null;
 		try {
 			
 			JSONObject jsonCategoryData = new JSONObject(data);
 			if (jsonCategoryData.has("group_category_id") && jsonCategoryData.has("category_name")) {
-
+				connection = dbConnectionUtil.retrieveConnection(request);
+				String brandId = byodUtil.getGeneralConfig(connection, "BRAND_ID");
 				String description = jsonCategoryData.isNull("category_description") ? null
 						: jsonCategoryData.getString("category_description");
 				String imagePath = jsonCategoryData.isNull("category_image_path") ? null
-						: byodUtil.saveImageFile("imgC",jsonCategoryData.getString("category_image_path"), null);
+						: byodUtil.saveImageFile(brandId,"imgC",jsonCategoryData.getString("category_image_path"), null);
 				String sqlStatement = "INSERT into category(group_category_id, category_name, category_description, category_image_path, category_sequence, is_active) VALUES (?, ?, ?, ?, ?, ?);";
-				connection = dbConnectionUtil.retrieveConnection(request);
-				stmt = connection.prepareStatement(sqlStatement);
+				stmt = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
 				stmt.setLong(1, jsonCategoryData.getLong("group_category_id"));
 				stmt.setString(2, jsonCategoryData.getString("category_name"));
 				stmt.setString(3, description);
 				stmt.setString(4, imagePath);
 				stmt.setInt(5, getCategorySequenceNumber(jsonCategoryData.getLong("group_category_id"), connection) + 1);
 				stmt.setBoolean(6, jsonCategoryData.getBoolean("is_active"));
-				stmt.executeUpdate();
-				
-				// logging to file	
-				String [] parameters = {
-						String.valueOf(jsonCategoryData.getLong("group_category_id")),
-						jsonCategoryData.getString("category_name")==null?"null":"'"+jsonCategoryData.getString("category_name")+"'",
-						description==null?"null":"'"+description+"'",
-						imagePath==null?"null":"'"+imagePath+"'",
-						String.valueOf(getCategorySequenceNumber(jsonCategoryData.getLong("group_category_id"), connection) + 1),
-						String.valueOf(jsonCategoryData.getBoolean("is_active")?1:0)};	
-				groupCategoryRestController.logActionToFile(connection, sqlStatement, parameters, jsonCategoryData.getLong("group_category_id"), imagePath, 1);
-				
+				rs = stmt.executeQuery();
+				if(rs.next()) {
+					// logging to file	
+					String [] parameters = {
+							String.valueOf(rs.getLong(1)),
+							String.valueOf(jsonCategoryData.getLong("group_category_id")),
+							jsonCategoryData.getString("category_name")==null?"null":"'"+jsonCategoryData.getString("category_name")+"'",
+							description==null?"null":"'"+description+"'",
+							imagePath==null?"null":"'"+imagePath+"'",
+							String.valueOf(getCategorySequenceNumber(jsonCategoryData.getLong("group_category_id"), connection) + 1),
+							String.valueOf(jsonCategoryData.getBoolean("is_active")?1:0)};	
+					groupCategoryRestController.logActionToFile(connection, sqlStatement, parameters, jsonCategoryData.getLong("group_category_id"), imagePath, 1, "category");
+					
+				}
 			} else {
 				return ResponseEntity.status(HttpStatus.NOT_FOUND).contentType(MediaType.TEXT_PLAIN).body("Category name not available");
 			}
@@ -251,6 +256,14 @@ public class CategoryRestController {
 					e.printStackTrace();
 				}
 			}
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 		}
 		return ResponseEntity.ok(null);
 	}
@@ -264,13 +277,13 @@ public class CategoryRestController {
 		try {
 			JSONObject jsonCategoryData = new JSONObject(data);
 			if (jsonCategoryData.has("id") && jsonCategoryData.has("category_name")) {
-			
+				connection = dbConnectionUtil.retrieveConnection(request);
+				String brandId = byodUtil.getGeneralConfig(connection, "BRAND_ID");
 				String description = jsonCategoryData.isNull("category_description") ? null
 						: jsonCategoryData.getString("category_description");
 				String imagePath = jsonCategoryData.isNull("category_image_path") ? null
-						: byodUtil.saveImageFile("imgC",jsonCategoryData.getString("category_image_path"), null);
+						: byodUtil.saveImageFile(brandId,"imgC",jsonCategoryData.getString("category_image_path"), null);
 				
-				connection = dbConnectionUtil.retrieveConnection(request);
 				String sqlStatement = "";
 				
 				if(imagePath == null)
@@ -305,7 +318,7 @@ public class CategoryRestController {
 							String.valueOf(jsonCategoryData.getLong("id"))};
 				}
 				stmt.executeUpdate();
-				groupCategoryRestController.logActionToFile(connection, sqlStatement, parameters, jsonCategoryData.getLong("group_category_id"), imagePath, 1);			
+				groupCategoryRestController.logActionToFile(connection, sqlStatement, parameters, jsonCategoryData.getLong("group_category_id"), imagePath, 1, null);			
 			} else {
 				return ResponseEntity.status(HttpStatus.NOT_FOUND).contentType(MediaType.TEXT_PLAIN).body("Category name not available");
 			}
@@ -355,7 +368,7 @@ public class CategoryRestController {
 				String [] parameters = {
 						String.valueOf(index),
 						String.valueOf(jsonObj.getLong("id"))};			
-				groupCategoryRestController.logActionToFile(connection, sqlStatement, parameters, group_category_id, null, 0);					
+				groupCategoryRestController.logActionToFile(connection, sqlStatement, parameters, group_category_id, null, 0, null);					
 			}		
 			connection.commit();	
 		}
@@ -410,7 +423,7 @@ public class CategoryRestController {
 			// logging to file	
 			String [] parameters = {
 					String.valueOf(id)};		
-			groupCategoryRestController.logActionToFile(connection, sqlStatement, parameters, group_category_id, null, 0);	
+			groupCategoryRestController.logActionToFile(connection, sqlStatement, parameters, group_category_id, null, 0, null);	
 
 			if (categoryRowAffected == 0) {
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Cannot delete category");
@@ -423,7 +436,7 @@ public class CategoryRestController {
 				// logging to file	
 				String [] parameters2 = {
 						String.valueOf(id)};		
-				groupCategoryRestController.logActionToFile(connection, sqlStatement, parameters2, group_category_id, null, 0);	
+				groupCategoryRestController.logActionToFile(connection, sqlStatement, parameters2, group_category_id, null, 0, null);	
 			}
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -512,23 +525,26 @@ public class CategoryRestController {
 			
 			stmt = connection.prepareStatement(sqlStatement);
 			int insertionIndex = 0;
-
+			int parameterCount = jsonItemsArray.length() * 3;
+			String [] parameters = new String[parameterCount];
+			
 			for(int i=0;i<jsonItemsArray.length();i++) {
 				int index = i;
-				JSONObject jsonItemObj = jsonItemsArray.getJSONObject(i);		
-				stmt.setLong(++insertionIndex, categoryId);
-				stmt.setLong(++insertionIndex, jsonItemObj.getLong("id"));
-				stmt.setInt(++insertionIndex, index+1);
-				//System.out.println("Test Insertion Index :" + insertionIndex);
-				//System.out.println("Test index :" + index);
+				JSONObject jsonItemObj = jsonItemsArray.getJSONObject(i);
 				
-				// logging to file	
-				String [] parameters = {
-						String.valueOf(categoryId),
-						String.valueOf(jsonItemObj.getLong("id")),
-						String.valueOf(index+1)};		
-				groupCategoryRestController.logActionToFile(connection, sqlStatement, parameters, group_category_id, null, 0);
+				// 3 parameter for stmt
+				parameters[insertionIndex] = String.valueOf(categoryId);
+				stmt.setLong(++insertionIndex, categoryId);
+				
+				parameters[insertionIndex] = String.valueOf(jsonItemObj.getLong("id"));
+				stmt.setLong(++insertionIndex, jsonItemObj.getLong("id"));
+				
+				parameters[insertionIndex] = String.valueOf(index+1);
+				stmt.setInt(++insertionIndex, index+1);	
 			}
+			// logging to file		
+			groupCategoryRestController.logActionToFile(connection, sqlStatement, parameters, group_category_id, null, 0, null);
+			
 			stmt.executeUpdate();
 			connection.commit();
 		} catch (Exception ex) {
@@ -583,7 +599,7 @@ public class CategoryRestController {
 				String [] parameters = {
 						String.valueOf(categoryId)
 						};		
-				groupCategoryRestController.logActionToFile(connection, sqlStatement, parameters, group_category_id, null, 0);
+				groupCategoryRestController.logActionToFile(connection, sqlStatement, parameters, group_category_id, null, 0, null);
 			}
 			
 			if(jsonItemsArray.length() > 0) {
@@ -596,24 +612,26 @@ public class CategoryRestController {
 				
 				stmt2 = connection.prepareStatement(sqlStatement);
 				int insertionIndex = 0;
-
+				int parameterCount = jsonItemsArray.length() * 3;
+				String [] parameters2 = new String[parameterCount];		
+				
 				for(int i=0;i<jsonItemsArray.length();i++) {
 					int index = i;
 					JSONObject jsonItemObj = jsonItemsArray.getJSONObject(i);
+					
+					// 3 parameter for stmt
+					parameters2[insertionIndex] = String.valueOf(categoryId);
 					stmt2.setLong(++insertionIndex, categoryId);
+					
+					parameters2[insertionIndex] = String.valueOf(jsonItemObj.getLong("id"));
 					stmt2.setLong(++insertionIndex, jsonItemObj.getLong("id"));
+					
+					parameters2[insertionIndex] = String.valueOf(index+1);
 					stmt2.setInt(++insertionIndex, index+1);
-					
-					System.out.println("Test Insertion Index :" + insertionIndex);
-					System.out.println("Test index :" + index);
-					
-					// logging to file	
-					String [] parameters2 = {
-							String.valueOf(categoryId),
-							String.valueOf(jsonItemObj.getLong("id")),
-							String.valueOf(index+1)};		
-					groupCategoryRestController.logActionToFile(connection, sqlStatement, parameters2, group_category_id, null, 0);
-				}		
+				}
+				// logging to file	
+				groupCategoryRestController.logActionToFile(connection, sqlStatement, parameters2, group_category_id, null, 0, null);
+				
 				stmt2.executeUpdate();
 				connection.commit();
 			}

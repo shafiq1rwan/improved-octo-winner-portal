@@ -158,7 +158,7 @@ public class ByodUtil {
 		return imageName + ".png";
 	}*/
 	
-	public String saveImageFile(String image_prefix, String base64_img, String existing) {
+	public String saveImageFile(String brandId, String image_prefix, String base64_img, String existing) {
 		boolean checker = false;
 		String uploadPath = filePath;
 		String imageName = createUniqueBackendId(image_prefix);
@@ -166,16 +166,16 @@ public class ByodUtil {
 		byte[] imageBytes = Base64.getDecoder().decode(splitString[1]);
 
 		try {
-			File checkdir = new File(uploadPath);
+			File checkdir = new File(uploadPath + brandId);
 			checkdir.mkdirs();
 
 			if (existing != null) {
-				File tempfile = new File(uploadPath + existing);
+				File tempfile = new File(uploadPath + brandId, existing);
 				tempfile.delete();
 			}
 
 			do {
-				File checkFile = new File(uploadPath + imageName);
+				File checkFile = new File(uploadPath + brandId, imageName);
 				if (checkFile.exists()) {
 					checker = true;
 					imageName = createUniqueBackendId(image_prefix);
@@ -184,7 +184,7 @@ public class ByodUtil {
 				}
 			} while (checker);
 
-			File file = new File(uploadPath, imageName + ".png");
+			File file = new File(uploadPath + brandId, imageName + ".png");
 			FileOutputStream fos = new FileOutputStream(file);
 			fos.write(imageBytes);
 			fos.close();

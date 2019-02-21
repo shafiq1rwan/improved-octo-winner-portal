@@ -99,7 +99,9 @@ public class DeviceConfigRestController {
 				// ecpos retrieve extra info
 				if(type==1) {
 					JSONArray ecposStaffInfo = getEcposStaffInfo(connection, deviceInfo.getLong("refId"));
+					JSONArray ecposStaffRole = getEcposStaffRole(connection);
 					result.put("staffInfo", ecposStaffInfo);
+					result.put("staffRole", ecposStaffRole);
 				}
 				
 				JSONObject storeInfo = getStoreInfo(connection, deviceInfo.getLong("refId"));
@@ -216,7 +218,7 @@ public class DeviceConfigRestController {
 			}
 			else {
 				// sync menu
-				JSONArray versionArray = getVersionUpdates(connection, brandId, versionCount, storeId);			
+				JSONArray versionArray = getVersionUpdates(connection, brandId, versionCount, storeId, deviceInfo.getLong("deviceType"));			
 				if(versionArray.length()!=0) {
 					result.put("versionSync", versionArray);
 					resultCode = "01";
@@ -328,7 +330,7 @@ public class DeviceConfigRestController {
 				result = new JSONObject();
 				result.put("storeId", rs1.getLong("id"));
 				result.put("taxChargeId", rs1.getLong("tax_charge_id"));
-				result.put("backeEndId", rs1.getString("backend_id"));
+				result.put("backEndId", rs1.getString("backend_id"));
 				result.put("name", rs1.getString("store_name"));
 				result.put("logoPath", byodUrl + displayImagePath + rs1.getString("store_logo_path"));
 				result.put("address", rs1.getString("store_address"));
@@ -383,7 +385,38 @@ public class DeviceConfigRestController {
 				jsonObject.put("email", rs1.getString("staff_contact_email"));
 				jsonObject.put("isActive", rs1.getLong("is_active"));
 				jsonObject.put("createdDate", rs1.getString("created_date"));
-				jsonObject.put("lastUpdateDate", rs1.getString("last_update_date"));
+				jsonObject.put("lastUpdateDate", rs1.getString("last_update_date")==null?"":rs1.getString("last_update_date"));
+				result.put(jsonObject);
+			}
+			
+		} catch (Exception ex) {
+			throw ex;
+		} finally {
+			if (rs1 != null) {
+				rs1.close();
+			}
+			if (ps1 != null) {
+				ps1.close();
+			}
+		}
+		return result;
+	}
+	
+	private JSONArray getEcposStaffRole(Connection connection) throws Exception {
+		String sqlStatement = null;
+		PreparedStatement ps1 = null;
+		ResultSet rs1 = null;
+		JSONArray result = new JSONArray();
+		try {
+			//connection = dataSource.getConnection();
+			sqlStatement = "SELECT id, role_name FROM role_lookup";
+			ps1 = connection.prepareStatement(sqlStatement);
+			rs1 = ps1.executeQuery();	
+			
+			while (rs1.next()) {
+				JSONObject jsonObject = new JSONObject();
+				jsonObject.put("id", rs1.getLong("id"));
+				jsonObject.put("roleName", rs1.getString("role_name"));
 				result.put(jsonObject);
 			}
 			
@@ -474,7 +507,7 @@ public class DeviceConfigRestController {
 		return result;
 	}
 	
-	private JSONArray getVersionUpdates(Connection connection, Long brandId, Long versionCount, Long storeId) throws Exception {
+	private JSONArray getVersionUpdates(Connection connection, Long brandId, Long versionCount, Long storeId, Long deviceType) throws Exception {
 		String sqlStatement = null;
 		PreparedStatement ps1 = null;
 		ResultSet rs1 = null;
@@ -503,8 +536,14 @@ public class DeviceConfigRestController {
 				Long groupCategoryId = rs1.getLong("group_category_id");
 				String url = byodUrl + displayFilePath + brandId + "/" + groupCategoryId + "/" ;
 				
-				if(menuQueryFile!=null)
-					menuQueryFilePath = url + menuFilePath + "/" + menuQueryFile + ".txt";	
+				if(menuQueryFile!=null) {
+					if(deviceType==1) {
+						// ecpos (MySQL)
+						// process query file for mysql usage
+						
+					}
+					menuQueryFilePath = url + menuFilePath + "/" + menuQueryFile + ".txt";
+				}	
 				if(menuImageFile!=null)
 					menuImageFilePath = url + menuFilePath + "/" + menuImageFile + ".zip";
 				
@@ -543,6 +582,7 @@ public class DeviceConfigRestController {
 			if (rs1.next()) {
 				result = new JSONObject();
 				result.put("statusLookupId", rs1.getLong("status_lookup_id"));
+				result.put("deviceType", rs1.getLong("device_type_lookup_id"));
 				result.put("mac_address", rs1.getString("mac_address")==null?"":rs1.getString("mac_address"));
 			}
 			

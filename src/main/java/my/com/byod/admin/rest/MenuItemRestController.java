@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -136,6 +137,7 @@ public class MenuItemRestController {
 
 		try {
 			connection = dbConnectionUtil.retrieveConnection(request);
+			String brandId = byodUtil.getGeneralConfig(connection, "BRAND_ID");
 			if (menuItemType == -1) {
 				// ala carte + combo
 				stmt = connection.prepareStatement(
@@ -154,7 +156,7 @@ public class MenuItemRestController {
 				jsonMenuItemObj.put("modifier_group_id", rs.getLong("modifier_group_id"));
 				jsonMenuItemObj.put("menu_item_name", rs.getString("menu_item_name"));
 				jsonMenuItemObj.put("menu_item_description", rs.getString("menu_item_description"));
-				jsonMenuItemObj.put("menu_item_image_path", displayFilePath+rs.getString("menu_item_image_path"));
+				jsonMenuItemObj.put("menu_item_image_path", displayFilePath + brandId + "/" + rs.getString("menu_item_image_path"));
 				jsonMenuItemObj.put("menu_item_base_price", rs.getBigDecimal("menu_item_base_price"));
 				jsonMenuItemObj.put("menu_item_type", rs.getInt("menu_item_type"));
 				jsonMenuItemObj.put("menu_item_type_name", rs.getString("menu_item_type_name"));
@@ -229,6 +231,7 @@ public class MenuItemRestController {
 
 		try {
 			connection = dbConnectionUtil.retrieveConnection(request);
+			String brandId = byodUtil.getGeneralConfig(connection, "BRAND_ID");
 			stmt = connection.prepareStatement("SELECT * FROM menu_item WHERE id = ?");
 			stmt.setLong(1, id);
 			rs = (ResultSet) stmt.executeQuery();
@@ -239,7 +242,7 @@ public class MenuItemRestController {
 				jsonResult.put("menu_item_name", rs.getString("menu_item_name"));
 				jsonResult.put("menu_item_alt_name", rs.getString("menu_item_alt_name"));
 				jsonResult.put("menu_item_description", rs.getString("menu_item_description"));
-				jsonResult.put("menu_item_image_path", displayFilePath + rs.getString("menu_item_image_path"));
+				jsonResult.put("menu_item_image_path", displayFilePath + brandId + "/" + rs.getString("menu_item_image_path"));
 				jsonResult.put("menu_item_base_price", rs.getBigDecimal("menu_item_base_price"));
 				jsonResult.put("menu_item_type", rs.getInt("menu_item_type"));
 				jsonResult.put("is_taxable", rs.getBoolean("is_taxable"));
@@ -268,21 +271,23 @@ public class MenuItemRestController {
 			@RequestBody String data) {
 		Connection connection = null;
 		PreparedStatement stmt = null;
+		ResultSet rs = null;
 		//ResponseEntity<String> responseEntity = ResponseEntity.badRequest().body(null);
 
 		try {
 			JSONObject jsonMenuItemData = new JSONObject(data);
-
+			
+			connection = dbConnectionUtil.retrieveConnection(request);
+			String brandId = byodUtil.getGeneralConfig(connection, "BRAND_ID");
 			String imagePath = jsonMenuItemData.isNull("menu_item_image_path") ? null
-					: byodUtil.saveImageFile("imgMI", jsonMenuItemData.getString("menu_item_image_path"), null);      
+					: byodUtil.saveImageFile(brandId,"imgMI", jsonMenuItemData.getString("menu_item_image_path"), null);      
 			String description = jsonMenuItemData.isNull("menu_item_description") ? null
 					: jsonMenuItemData.getString("menu_item_description");
 			String altName = jsonMenuItemData.isNull("menu_item_alt_name") ? null 
 					: jsonMenuItemData.getString("menu_item_alt_name");
 
-			connection = dbConnectionUtil.retrieveConnection(request);
-			String sqlStatement = "INSERT INTO menu_item(backend_id, menu_item_name, menu_item_alt_name, menu_item_description, menu_item_image_path, menu_item_base_price, menu_item_type,is_taxable, is_discountable) VALUES(?, ?, ?,?, ?, ?, ?, ?, ?)";
-			stmt = connection.prepareStatement(sqlStatement);
+			String sqlStatement = "INSERT INTO menu_item(backend_id, menu_item_name, menu_item_alt_name, menu_item_description, menu_item_image_path, menu_item_base_price, menu_item_type,is_taxable, is_discountable) VALUES(?, ?, ?,?, ?, ?, ?, ?, ?);";
+			stmt = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
 			stmt.setString(1, jsonMenuItemData.getString("menu_item_backend_id"));
 			stmt.setString(2, jsonMenuItemData.getString("menu_item_name"));
 			stmt.setString(3, altName);
@@ -293,22 +298,23 @@ public class MenuItemRestController {
 			stmt.setBoolean(8, jsonMenuItemData.getBoolean("is_taxable"));
 			stmt.setBoolean(9, jsonMenuItemData.getBoolean("is_discountable"));
 			
-			int rowAffected = stmt.executeUpdate();
-			
-			// logging to file	
-			String [] parameters = {
-					jsonMenuItemData.getString("menu_item_backend_id"),
-					jsonMenuItemData.getString("menu_item_name")==null?"null":"'"+jsonMenuItemData.getString("menu_item_name")+"'",
-					altName==null?"null":"'"+altName+"'",
-					description==null?"null":"'"+description+"'",
-					imagePath==null?"null":"'"+imagePath+"'",
-					String.valueOf(jsonMenuItemData.getDouble("menu_item_base_price")),
-					String.valueOf(jsonMenuItemData.getInt("menu_item_type")),
-					String.valueOf(jsonMenuItemData.getBoolean("is_taxable")?1:0),
-					String.valueOf(jsonMenuItemData.getBoolean("is_discountable")?1:0)};		
-			groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, imagePath, 1);
-			
-			if (rowAffected == 0) {
+			rs = stmt.executeQuery();
+			if(rs.next()) {
+				// logging to file	
+				String [] parameters = {
+						String.valueOf(rs.getLong(1)),
+						jsonMenuItemData.getString("menu_item_backend_id"),
+						jsonMenuItemData.getString("menu_item_name")==null?"null":"'"+jsonMenuItemData.getString("menu_item_name")+"'",
+						altName==null?"null":"'"+altName+"'",
+						description==null?"null":"'"+description+"'",
+						imagePath==null?"null":"'"+imagePath+"'",
+						String.valueOf(jsonMenuItemData.getDouble("menu_item_base_price")),
+						String.valueOf(jsonMenuItemData.getInt("menu_item_type")),
+						String.valueOf(jsonMenuItemData.getBoolean("is_taxable")?1:0),
+						String.valueOf(jsonMenuItemData.getBoolean("is_discountable")?1:0)};		
+				groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, imagePath, 1, "menu_item");	
+			}
+			else {
 				return ResponseEntity.badRequest().contentType(MediaType.TEXT_PLAIN).body("Cannot create menu item");
 			}
 		} catch (SQLServerException ex) {
@@ -321,6 +327,14 @@ public class MenuItemRestController {
 				try {
 					connection.close();
 				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -347,15 +361,15 @@ public class MenuItemRestController {
 						return ResponseEntity.badRequest().contentType(MediaType.TEXT_PLAIN).body("Please unassigned first before performing type modification");
 					}
 				}
-
+				connection = dbConnectionUtil.retrieveConnection(request);
+				String brandId = byodUtil.getGeneralConfig(connection, "BRAND_ID");
 				String imagePath = jsonMenuItemData.isNull("menu_item_image_path") ? null
-						: byodUtil.saveImageFile("imgMI", jsonMenuItemData.getString("menu_item_image_path"), null); 
+						: byodUtil.saveImageFile(brandId,"imgMI", jsonMenuItemData.getString("menu_item_image_path"), null); 
 				String description = jsonMenuItemData.isNull("menu_item_description") ? null
 						: jsonMenuItemData.getString("menu_item_description");
 				String altName = jsonMenuItemData.isNull("menu_item_alt_name") ? null 
 						: jsonMenuItemData.getString("menu_item_alt_name");
 
-				connection = dbConnectionUtil.retrieveConnection(request);
 				String sqlStatement = ""; 
 				if(imagePath == null) {
 					sqlStatement = "UPDATE menu_item SET backend_id = ?, menu_item_name = ?, menu_item_alt_name = ?, menu_item_description =?, menu_item_base_price = ?, menu_item_type = ?, is_taxable = ? , is_discountable = ? WHERE id = ?;";
@@ -407,7 +421,7 @@ public class MenuItemRestController {
 				int rowAffected = stmt.executeUpdate();
 				
 				// logging to file	
-				groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, imagePath, 1);
+				groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, imagePath, 1, null);
 				
 				if (rowAffected == 0) {
 					return ResponseEntity.badRequest().contentType(MediaType.TEXT_PLAIN).body("Cannot create menu item");
@@ -453,7 +467,7 @@ public class MenuItemRestController {
 			String [] parameters = {
 					String.valueOf(id)
 					};		
-			groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0);
+			groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0, null);
 			
 			if (categoryRowAffected == 0) {
 				return ResponseEntity.badRequest().contentType(MediaType.TEXT_PLAIN).body("Cannot delete menu item");
@@ -493,7 +507,7 @@ public class MenuItemRestController {
 				String [] parameters = {
 						String.valueOf(!jsonMenuItemData.getBoolean("active_status")?1:0),
 						String.valueOf(jsonMenuItemData.getLong("id"))};		
-				groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0);
+				groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0, null);
 				
 				if (rowAffected == 0)
 					return ResponseEntity.badRequest().body("Cannot update menu item active status");
@@ -525,6 +539,7 @@ public class MenuItemRestController {
 
 		try {
 			connection = dbConnectionUtil.retrieveConnection(request);
+			String brandId = byodUtil.getGeneralConfig(connection, "BRAND_ID");
 			stmt = connection.prepareStatement(
 					"SELECT mi.*, mitl.menu_item_type_name FROM menu_item mi INNER JOIN menu_item_type_lookup mitl ON mi.menu_item_type = mitl.menu_item_type_number INNER JOIN category_menu_item cmi ON mi.id = cmi.menu_item_id WHERE cmi.category_id = ?");
 			stmt.setLong(1, categoryId);
@@ -535,7 +550,7 @@ public class MenuItemRestController {
 				jsonMenuItemObj.put("id", rs.getLong("id"));
 				jsonMenuItemObj.put("backend_id", rs.getString("backend_id"));
 				jsonMenuItemObj.put("menu_item_name", rs.getString("menu_item_name"));
-				jsonMenuItemObj.put("menu_item_image_path", displayFilePath + rs.getString("menu_item_image_path"));
+				jsonMenuItemObj.put("menu_item_image_path", displayFilePath + brandId + "/" + rs.getString("menu_item_image_path"));
 				jsonMenuItemObj.put("menu_item_base_price", rs.getBigDecimal("menu_item_base_price"));
 				jsonMenuItemObj.put("menu_item_type_name", rs.getString("menu_item_type_name"));
 				jsonMenuItemArray.put(jsonMenuItemObj);

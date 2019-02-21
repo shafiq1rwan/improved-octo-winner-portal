@@ -941,12 +941,13 @@ public class GroupCategoryRestController {
 	}*/
 	
 	
-	public void logActionToFile(Connection connection, String query, String[] parameters, Long groupCategoryId, String imageName, int saveType) throws Exception {
+	public void logActionToFile(Connection connection, String query, String[] parameters, Long groupCategoryId, String imageName, int saveType, String insertTable) throws Exception {
 		// saveType for imageName
 		// 0 - Nothing
 		// 1 - Save
 		// 2 - Delete
 		
+		// insertTable if want to SET IDENTITY_INSERT ON/OFF
 		String sqlStatement = "";
 		String tmpQueryFilePath = "";
 		String tmpImgFilePath = "";
@@ -956,6 +957,12 @@ public class GroupCategoryRestController {
 		String brandId = "";
 		
 		try {
+			if(insertTable!=null && !insertTable.equals("")) {
+				String tmpOn = "SET IDENTITY_INSERT [dbo].["+insertTable+"] ON;\r\n";
+				String tmpOff = "\r\nSET IDENTITY_INSERT [dbo].["+insertTable+"] OFF;";
+				query = tmpOn + query.substring(0, query.indexOf("(")+1) + "id, " + query.substring(query.indexOf("(")+1);
+				query = query.substring(0, query.lastIndexOf("(")+1) + "?, " + query.substring(query.lastIndexOf("(")+1) + tmpOff;
+			}
 			System.out.println(query);
 			System.out.println(parameters.length);
 			
@@ -1026,12 +1033,13 @@ public class GroupCategoryRestController {
 		}
 	}
 	
-	public void logActionToAllFiles(Connection connection, String query, String[] parameters, String imageName, int saveType) throws Exception {
+	public void logActionToAllFiles(Connection connection, String query, String[] parameters, String imageName, int saveType, String insertTable) throws Exception {
 		// saveType for imageName
 		// 0 - Nothing
 		// 1 - Save
 		// 2 - Delete
 		
+		// insertTable if want to SET IDENTITY_INSERT ON/OFF
 		String sqlStatement = "";
 		String tmpQueryFilePath = "";
 		String tmpImgFilePath = "";
@@ -1042,7 +1050,14 @@ public class GroupCategoryRestController {
 		Long publishVersionId = null;
 		String brandId = "";
 		
-		try {	
+		try {
+			if(insertTable!=null && !insertTable.equals("")) {
+				String tmpOn = "SET IDENTITY_INSERT [dbo].["+insertTable+"] ON;\r\n";
+				String tmpOff = "\r\nSET IDENTITY_INSERT [dbo].["+insertTable+"] OFF;";
+				query = tmpOn + query.substring(0, query.indexOf("(")+1) + "id, " + query.substring(query.indexOf("(")+1);
+				query = query.substring(0, query.lastIndexOf("(")+1) + "?, " + query.substring(query.lastIndexOf("(")+1) + tmpOff;
+			}
+			
 			System.out.println(query);
 			System.out.println(parameters.length);
 			

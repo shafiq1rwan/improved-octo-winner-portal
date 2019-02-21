@@ -55,8 +55,15 @@ public class StoreRestController {
 	@GetMapping("")
 	public ResponseEntity<List<Store>> findAllStore(HttpServletRequest request, HttpServletResponse response) {
 		List<Store> stores = storeService.findAllStore();
-		for(Store store: stores) {
-			store.setLogoPath(displayFilePath + store.getLogoPath());
+		try {
+			Connection connection = dbConnectionUtil.retrieveConnection(request);
+			String brandId = byodUtil.getGeneralConfig(connection, "BRAND_ID");
+			for(Store store: stores) {
+				store.setLogoPath(displayFilePath + brandId + "/" + store.getLogoPath());
+			}
+			connection.close();
+		} catch (Exception ex) {
+			ex.printStackTrace();
 		}
 		return new ResponseEntity<List<Store>>(stores, HttpStatus.OK);
 	}
@@ -64,20 +71,30 @@ public class StoreRestController {
 	@GetMapping("/storeById")
 	public ResponseEntity<Store> findStoreById(@RequestParam("id") Long id, HttpServletRequest request, HttpServletResponse response) {
 		Store existingStore = storeService.findStoreById(id);
-		if (existingStore.getId() == 0)
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		existingStore.setLogoPath(displayFilePath + existingStore.getLogoPath());
+		try {
+			Connection connection = dbConnectionUtil.retrieveConnection(request);
+			String brandId = byodUtil.getGeneralConfig(connection, "BRAND_ID");
+			if (existingStore.getId() == 0)
+				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			existingStore.setLogoPath(displayFilePath + brandId + "/" + existingStore.getLogoPath());
+			connection.close();
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
 		return new ResponseEntity<Store>(existingStore, HttpStatus.OK);
 	}
 
 	@PostMapping("/create")
 	public ResponseEntity<?> createStore(@RequestBody Store store, HttpServletRequest request, HttpServletResponse response) {
 		try {
-			int rowAffected = storeService.createStore(store);
+			Connection connection = dbConnectionUtil.retrieveConnection(request);
+			String brandId = byodUtil.getGeneralConfig(connection, "BRAND_ID");
+			int rowAffected = storeService.createStore(store, brandId);
+			connection.close();
 			if (rowAffected == 0)
 				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 			return new ResponseEntity<>(HttpStatus.OK);
-		} catch (DuplicateKeyException ex) {
+		} catch (Exception ex) {
 			return new ResponseEntity<String>(ex.getMessage(), HttpStatus.CONFLICT);
 		}
 	}
@@ -85,16 +102,19 @@ public class StoreRestController {
 	@PostMapping("/edit")
 	public ResponseEntity<?> editStore(@RequestBody Store store, HttpServletRequest request, HttpServletResponse response) {
 		try {
+			Connection connection = dbConnectionUtil.retrieveConnection(request);
+			String brandId = byodUtil.getGeneralConfig(connection, "BRAND_ID");
 			Store existingStore = storeService.findStoreById(store.getId());
 			if (existingStore.getId() == 0)
 				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
-			int rowAffected = storeService.editStore(store.getId(), store);
+			int rowAffected = storeService.editStore(store.getId(), store, brandId);
+			connection.close();
 			if (rowAffected == 0)
 				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
 			return new ResponseEntity<>(HttpStatus.OK);
-		} catch (DuplicateKeyException ex) {
+		} catch (Exception ex) {
 			return new ResponseEntity<String>(ex.getMessage(), HttpStatus.CONFLICT);
 		}
 	}
