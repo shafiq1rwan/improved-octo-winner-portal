@@ -187,4 +187,27 @@ public class Order_RestController {
 
 		return result.toString();
 	}
+	
+	@RequestMapping(value = "/order/sendOrder", method = { RequestMethod.POST })
+	public String GetStoreName(HttpServletRequest request, HttpServletResponse response,
+			@RequestParam(value = "cartData", required = true) JSONObject cartData) {
+		JSONObject result = new JSONObject();
+		String resultCode = "E01";
+		String resultMessage = "Server error. Please try again later.";
+
+		try {
+			resultCode = "00";
+			resultMessage = "Success";
+		} catch (Exception e) {
+			logger.writeError(e, folName);
+		} finally {
+			try {
+				result.put("resultCode", resultCode);
+				result.put("resultMessage", resultMessage);
+			} catch (Exception e) {
+			}
+		}
+
+		return result.toString();
+	}
 }
