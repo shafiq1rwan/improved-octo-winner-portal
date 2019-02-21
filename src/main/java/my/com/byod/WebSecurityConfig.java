@@ -55,7 +55,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		http 
 		.csrf().disable()
 		.authorizeRequests()
-				.antMatchers("/user/signin/**","/order/**","/api/device/**","/byod-menu/**").permitAll()
+				.antMatchers("/user/signin/**","/order/**","/api/device/**","/byod-menu/**","/byod-img/**").permitAll()
 				.antMatchers("/byod/byod-panel/**").access("hasAnyRole('ROLE_SUPER_ADMIN','ROLE_ADMIN','ROLE_USER')")
 				.anyRequest().authenticated()
 	          .and()
@@ -97,6 +97,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	public void configure(WebSecurity web) throws Exception {
 		web.ignoring().antMatchers("/assets/**");
+		web.ignoring().antMatchers("/*/imgS_190220191.png");
 	}
 
 	@Bean

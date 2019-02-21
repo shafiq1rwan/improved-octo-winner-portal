@@ -1258,7 +1258,7 @@ public class GroupCategoryRestController {
 					FileOutputStream fos = new FileOutputStream(filePath + brandId + "/" + groupCategoryId + "/" + menuFilePath + "/" + menuImgFilePath+".zip");
 					ZipOutputStream zipOut = new ZipOutputStream(fos);
 					for (String srcFile : imageList) {
-						File fileToZip = new File(imagePath, srcFile);
+						File fileToZip = new File(imagePath + brandId, srcFile);
 						if(fileToZip.exists()) {
 							FileInputStream fis = new FileInputStream(fileToZip);
 							ZipEntry zipEntry = new ZipEntry(fileToZip.getName());
