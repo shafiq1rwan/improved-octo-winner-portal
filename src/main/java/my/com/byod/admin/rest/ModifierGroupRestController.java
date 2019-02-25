@@ -569,6 +569,8 @@ public class ModifierGroupRestController {
 			@RequestBody String data) {
 		Connection connection = null;
 		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		int index = 1;
 
 		try {
 			JSONObject jsonObj = new JSONObject(data);
@@ -577,10 +579,17 @@ public class ModifierGroupRestController {
 
 			connection = dbConnectionUtil.retrieveConnection(request);
 			connection.setAutoCommit(false);
-			String sqlStatement = "INSERT INTO menu_item_modifier_group (menu_item_id, modifier_group_id, menu_item_modifier_group_sequence) VALUES (?, ?, ?);";
+			String sqlStatement = "SELECT TOP 1 menu_item_modifier_group_sequence FROM menu_item_modifier_group WHERE menu_item_id = ? ORDER BY menu_item_modifier_group_sequence DESC";
+			stmt = connection.prepareStatement(sqlStatement);
+			stmt.setLong(1, menuItemId);
+			rs = stmt.executeQuery();
+			if(rs.next()) {
+				index = rs.getInt("menu_item_modifier_group_sequence")+1;
+			}	
+			
+			sqlStatement = "INSERT INTO menu_item_modifier_group (menu_item_id, modifier_group_id, menu_item_modifier_group_sequence) VALUES (?, ?, ?);";
 
 			for (int i = 0; i < jsonModifierGroupsArray.length(); i++) {
-				int index = i + 1;
 				JSONObject jsonModifierGroupsObj = jsonModifierGroupsArray.getJSONObject(i);
 				stmt = connection.prepareStatement(sqlStatement);
 				stmt.setLong(1, menuItemId);
@@ -594,7 +603,7 @@ public class ModifierGroupRestController {
 						String.valueOf(jsonModifierGroupsObj.getLong("id")),
 						String.valueOf(index)};		
 				groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0, null);
-				
+				index++;
 				connection.commit();
 			}
 
@@ -613,6 +622,13 @@ public class ModifierGroupRestController {
 			if (connection != null) {
 				try {
 					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			if(rs!=null) {
+				try {
+					rs.close();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
