@@ -342,7 +342,7 @@ public class StoreRestController {
 			
 			connection = dbConnectionUtil.retrieveConnection(request);
 			stmt = connection.prepareStatement("INSERT INTO staff (store_id, staff_name, staff_username, staff_password, staff_role, staff_contact_hp_number,"
-			 		+ "staff_contact_email, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?); SELECT SCOPE_IDENTITY();");
+			 		+ "staff_contact_email, is_active, created_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, GETDATE()); SELECT SCOPE_IDENTITY();");
 			stmt.setLong(count++, jsonObj.getLong("store_id"));
 			stmt.setString(count++, jsonObj.getString("name"));
 			stmt.setString(count++, jsonObj.getString("username"));
@@ -1010,8 +1010,8 @@ public class StoreRestController {
 			String prefix = getDevicePrefix(deviceTypeId, request);
 			
 			connection = dbConnectionUtil.retrieveConnection(request);
-			stmt = connection.prepareStatement("INSERT INTO device_info(activation_id, activation_key, status_lookup_id, device_type_lookup_id, ref_id) "
-					+ "VALUES (?,?,?,?,?); SELECT SCOPE_IDENTITY();");
+			stmt = connection.prepareStatement("INSERT INTO device_info (activation_id, activation_key, status_lookup_id, device_type_lookup_id, ref_id, created_date) "
+					+ "VALUES (?, ? ,? ,? ,? , GETDATE()); SELECT SCOPE_IDENTITY();");
 			
 			stmt.setString(count++, byodUtil.createUniqueActivationId(prefix));
 			stmt.setString(count++, byodUtil.createRandomDigit(16));

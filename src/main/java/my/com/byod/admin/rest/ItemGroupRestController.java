@@ -131,7 +131,7 @@ public class ItemGroupRestController {
 					: jsonItemGroupData.getBoolean("is_active");
 
 			connection = dbConnectionUtil.retrieveConnection(request);
-			String sqlStatement = "INSERT INTO menu_item_group(menu_item_group_name, is_active) VALUES (?, ?);";
+			String sqlStatement = "INSERT INTO menu_item_group (menu_item_group_name, is_active, created_date) VALUES (?, ?, GETDATE());";
 			stmt = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
 			stmt.setString(1, jsonItemGroupData.getString("menu_item_group_name"));
 			stmt.setBoolean(2, isActive);

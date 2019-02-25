@@ -183,7 +183,7 @@ public class ModifierGroupRestController {
 					: jsonModifierGroupData.getBoolean("is_active");
 
 			connection = dbConnectionUtil.retrieveConnection(request);
-			String sqlStatement = "INSERT INTO modifier_group(modifier_group_name, is_active) VALUES (?, ?);";
+			String sqlStatement = "INSERT INTO modifier_group (modifier_group_name, is_active, created_date) VALUES (?, ?, GETDATE());";
 			stmt = connection
 					.prepareStatement(sqlStatement,  Statement.RETURN_GENERATED_KEYS);
 			stmt.setString(1, jsonModifierGroupData.getString("modifier_group_name"));
@@ -630,8 +630,7 @@ public class ModifierGroupRestController {
 
 			connection = dbConnectionUtil.retrieveConnection(request);
 			String sqlStatement = "DELETE FROM menu_item_modifier_group WHERE menu_item_id = ? AND modifier_group_id = ?;";
-			stmt = connection.prepareStatement(
-					"DELETE FROM menu_item_modifier_group WHERE menu_item_id = ? AND modifier_group_id = ?");
+			stmt = connection.prepareStatement(sqlStatement);
 			stmt.setLong(1, menuItemId);
 			stmt.setLong(2, modifierGroupId);
 			int rowAffected = stmt.executeUpdate();
@@ -689,7 +688,7 @@ public class ModifierGroupRestController {
 			for (int i = 0; i < jsonModifierGroupsArray.length(); i++) {
 				int index = i;
 				JSONObject jsonModifierGroupsObj = jsonModifierGroupsArray.getJSONObject(i);
-				sqlStatement = "INSERT INTO menu_item_modifier_group (menu_item_id, modifier_group_id, menu_item_modifier_group_sequence) VALUES (? ,? ,?);";
+				sqlStatement = "INSERT INTO menu_item_modifier_group (menu_item_id, modifier_group_id, menu_item_modifier_group_sequence) VALUES (? ,? ,? );";
 				stmt2 = connection.prepareStatement(sqlStatement);
 				stmt2.setLong(1, menuItemId);
 				stmt2.setLong(2, jsonModifierGroupsObj.getLong("id"));

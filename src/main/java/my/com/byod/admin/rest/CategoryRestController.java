@@ -217,7 +217,7 @@ public class CategoryRestController {
 						: jsonCategoryData.getString("category_description");
 				String imagePath = jsonCategoryData.isNull("category_image_path") ? null
 						: byodUtil.saveImageFile(brandId,"imgC",jsonCategoryData.getString("category_image_path"), null);
-				String sqlStatement = "INSERT into category(group_category_id, category_name, category_description, category_image_path, category_sequence, is_active) VALUES (?, ?, ?, ?, ?, ?);";
+				String sqlStatement = "INSERT into category(group_category_id, category_name, category_description, category_image_path, category_sequence, is_active, created_date) VALUES (?, ?, ?, ?, ?, ?, GETDATE());";
 				stmt = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
 				stmt.setLong(1, jsonCategoryData.getLong("group_category_id"));
 				stmt.setString(2, jsonCategoryData.getString("category_name"));
@@ -520,8 +520,9 @@ public class CategoryRestController {
 			String sqlStatement = "INSERT INTO category_menu_item (category_id, menu_item_id, category_menu_item_sequence) VALUES (?, ?, ?)";
 			
 			for(int count=0; count<jsonItemsArray.length() -1;count++) {
-				sqlStatement += ",(?,?,?)";
+				sqlStatement += ", (?, ?, ?)";
 			}
+			sqlStatement+=";";
 			
 			stmt = connection.prepareStatement(sqlStatement);
 			int insertionIndex = 0;
@@ -607,8 +608,9 @@ public class CategoryRestController {
 				
 				sqlStatement = "INSERT INTO category_menu_item (category_id, menu_item_id, category_menu_item_sequence) VALUES (?, ?, ?)";
 				for(int count=0; count<jsonItemsArray.length() -1;count++) {
-					sqlStatement += ",(?,?,?)";
+					sqlStatement += ", (?, ?, ?)";
 				}
+				sqlStatement+=";";
 				
 				stmt2 = connection.prepareStatement(sqlStatement);
 				int insertionIndex = 0;

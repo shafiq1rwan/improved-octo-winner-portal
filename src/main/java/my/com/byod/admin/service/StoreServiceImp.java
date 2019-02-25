@@ -2,6 +2,7 @@ package my.com.byod.admin.service;
 
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,6 +64,7 @@ public class StoreServiceImp implements StoreService {
 			endTime.set(Calendar.MILLISECOND, 0);
 			store.setOperatingEndTime(endTime.getTime());
 			
+			store.setCreatedDate(new Date());
 			return storeRepo.createStore(store);
 		} catch (DuplicateKeyException ex) {
 			throw new DuplicateKeyException("Duplication Found");

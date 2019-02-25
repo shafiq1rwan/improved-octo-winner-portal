@@ -1,9 +1,11 @@
 package my.com.byod.admin.rest;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
@@ -11,11 +13,14 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -104,7 +109,7 @@ public class DeviceConfigRestController {
 					result.put("staffRole", ecposStaffRole);
 				}
 				
-				JSONObject storeInfo = getStoreInfo(connection, deviceInfo.getLong("refId"));
+				JSONObject storeInfo = getStoreInfo(connection, deviceInfo.getLong("refId"), brandId);
 				result.put("storeInfo", storeInfo);
 				
 				menuInfo = getLatestMenuFile(connection, deviceInfo.getLong("refId"));
@@ -246,6 +251,7 @@ public class DeviceConfigRestController {
 			} catch (Exception e) {
 			}
 		}
+		System.out.println(result);
 		return result.toString();
 	}
 	
@@ -313,7 +319,7 @@ public class DeviceConfigRestController {
 		return flag;
 	}
 	
-	private JSONObject getStoreInfo(Connection connection, Long storeId) throws Exception {
+	private JSONObject getStoreInfo(Connection connection, Long storeId, Long brandId) throws Exception {
 		String sqlStatement = null;
 		PreparedStatement ps1 = null;
 		ResultSet rs1 = null;
@@ -332,7 +338,7 @@ public class DeviceConfigRestController {
 				result.put("taxChargeId", rs1.getLong("tax_charge_id"));
 				result.put("backEndId", rs1.getString("backend_id"));
 				result.put("name", rs1.getString("store_name"));
-				result.put("logoPath", byodUrl + displayImagePath + rs1.getString("store_logo_path"));
+				result.put("logoPath", byodUrl + displayImagePath + brandId + "/" + rs1.getString("store_logo_path"));
 				result.put("address", rs1.getString("store_address"));
 				result.put("longitude", rs1.getString("store_longitude"));
 				result.put("latitude", rs1.getString("store_latitude"));
@@ -539,10 +545,53 @@ public class DeviceConfigRestController {
 				if(menuQueryFile!=null) {
 					if(deviceType==1) {
 						// ecpos (MySQL)
-						// process query file for mysql usage
-						
+						// process query file for mysql usage		
+						File mysqlFile = new File(filePath + brandId + "/" + groupCategoryId + "/" + menuFilePath, menuQueryFile + "_mysql.txt");
+						File queryFile = new File(filePath + brandId + "/" + groupCategoryId + "/" + menuFilePath, menuQueryFile + ".txt");		
+						if (!mysqlFile.exists()) {
+							// read file
+							BufferedReader br = new BufferedReader(new FileReader(queryFile));
+							try {
+							    StringBuilder sb = new StringBuilder();
+							    String line = br.readLine();	
+							    while (line != null) {
+							        sb.append(line);
+							        sb.append(System.lineSeparator());
+							        line = br.readLine();
+							    }
+							    String everything = sb.toString();
+							    // remove SET IDENTITY_INSERT
+							    String regex = "^SET IDENTITY_INSERT.*;$\r?\n";
+							    Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
+							    Matcher matcher = pattern.matcher(everything);
+							    while (matcher.find()) {
+							        everything = everything.replace(matcher.group(0), "");
+							    }
+							    
+							   /* // remove empty lines
+							    regex = "(?m)^[ \t]*\r?\n";
+							    pattern = Pattern.compile(regex, Pattern.MULTILINE);
+							    matcher = pattern.matcher(everything);
+							    while (matcher.find()) {
+							        everything = everything.replace(matcher.group(0), "");
+							    }					    
+							    */
+							    // replace GETDATE() with NOW()
+							    everything = everything.replaceAll("GETDATE\\(\\)", "NOW()");				    							  					
+ 
+							    // new mysql file
+								Writer output = new BufferedWriter(new FileWriter(mysqlFile));
+					            output.write(everything);
+					            output.close();
+							} finally {
+							    br.close();
+							}
+						}
+						menuQueryFilePath = url + menuFilePath + "/" + menuQueryFile + "_mysql.txt";
 					}
-					menuQueryFilePath = url + menuFilePath + "/" + menuQueryFile + ".txt";
+					else {
+						menuQueryFilePath = url + menuFilePath + "/" + menuQueryFile + ".txt";
+					}
 				}	
 				if(menuImageFile!=null)
 					menuImageFilePath = url + menuFilePath + "/" + menuImageFile + ".zip";

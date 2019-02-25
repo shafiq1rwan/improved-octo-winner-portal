@@ -41,7 +41,7 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 				(
 					id BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,
 					group_category_name NVARCHAR(50) NOT NULL UNIQUE,
-					created_date DATETIME NOT NULL DEFAULT GETDATE(),
+					created_date DATETIME NOT NULL,
 					publish_version_id bigint,
 					tmp_query_file_path nvarchar(150),
 					tmp_img_file_path nvarchar(150)
@@ -56,7 +56,7 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 					category_image_path nvarchar(MAX),
 					category_sequence INT,
 					is_active BIT DEFAULT 1,
-					created_date DATETIME NOT NULL DEFAULT GETDATE()
+					created_date DATETIME NOT NULL
 				);
 
 				CREATE TABLE menu_item
@@ -73,7 +73,7 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 					is_taxable BIT DEFAULT 0,
 					is_discountable BIT DEFAULT 0,
 					is_active BIT DEFAULT 1,
-					created_date DATETIME NOT NULL DEFAULT GETDATE()
+					created_date DATETIME NOT NULL
 				);
 
 				CREATE TABLE category_menu_item
@@ -88,7 +88,7 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 					id BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,
 					menu_item_group_name NVARCHAR(150) NOT NULL UNIQUE,
 					is_active BIT DEFAULT 1,
-					created_date DATETIME NOT NULL DEFAULT GETDATE()
+					created_date DATETIME NOT NULL
 				);
 
 				CREATE TABLE menu_item_group_sequence
@@ -103,7 +103,7 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 					id BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,
 					modifier_group_name NVARCHAR(100) NOT NULL UNIQUE,
 					is_active BIT DEFAULT 1,
-					created_date DATETIME NOT NULL DEFAULT GETDATE()
+					created_date DATETIME NOT NULL
 				);
 
 				CREATE TABLE menu_item_modifier_group
@@ -127,7 +127,7 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 					combo_detail_name NVARCHAR(50) NOT NULL,
 					combo_detail_quantity INT DEFAULT 0,
 					combo_detail_sequence INT NOT NULL,
-					created_date DATETIME NOT NULL DEFAULT GETDATE()
+					created_date DATETIME NOT NULL
 				);
 
 				CREATE TABLE combo_item_detail
@@ -137,7 +137,7 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 					menu_item_id BIGINT,
 					menu_item_group_id BIGINT,
 					combo_item_detail_sequence INT NOT NULL,
-					created_date DATETIME NOT NULL DEFAULT GETDATE()
+					created_date DATETIME NOT NULL
 				);
 
 				CREATE TABLE store
@@ -159,7 +159,7 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 						last_update_date datetime,
 						is_publish BIT DEFAULT 0,
 						ecpos BIT DEFAULT 0,
-						created_date DATETIME NOT NULL DEFAULT GETDATE()
+						created_date DATETIME NOT NULL
 				);
 
 				CREATE TABLE staff 
@@ -173,7 +173,7 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 						staff_contact_hp_number NVARCHAR(50) NOT NULL UNIQUE,
 						staff_contact_email VARCHAR(320) NOT NULL UNIQUE,
 						is_active BIT DEFAULT 1 NOT NULL,
-						created_date DATETIME NOT NULL DEFAULT GETDATE(),
+						created_date DATETIME NOT NULL,
 						last_update_date DATETIME
 				);
 
@@ -190,7 +190,7 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 					username NVARCHAR(100) NOT NULL,
 					user_action NVARCHAR(MAX) NOT NULL,
 					table_name NVARCHAR(100) NOT NULL,
-					table_log_datetime DATETIME NOT NULL DEFAULT GETDATE()
+					table_log_datetime DATETIME NOT NULL
 				);
 
 			-- no del
@@ -201,7 +201,7 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 				rate INT DEFAULT 0,
 				charge_type INT DEFAULT 1,
 				is_active BIT DEFAULT 0,
-				created_date DATETIME NOT NULL DEFAULT GETDATE()
+				created_date DATETIME NOT NULL
 			);
 
 			CREATE TABLE charge_type_lookup
@@ -231,7 +231,7 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 				status_lookup_id BIGINT DEFAULT 0,
 				device_type_lookup_id BIGINT DEFAULT 0,
 				ref_id BIGINT DEFAULT 0,
-				created_date DATETIME NOT NULL DEFAULT GETDATE(),
+				created_date DATETIME NOT NULL,
 				last_update_date DATETIME 
 			);
 
@@ -267,7 +267,7 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 				menu_file_path nvarchar(150),
 				menu_query_file_path nvarchar(150),
 				menu_img_file_path nvarchar(150),
-				publish_date DATETIME NOT NULL DEFAULT GETDATE()
+				publish_date DATETIME NOT NULL
 			);
 
 			CREATE TABLE display_period

@@ -4,12 +4,14 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -33,6 +35,9 @@ public class ComboRestController {
 
 	@Autowired
 	private DbConnectionUtil dbConnectionUtil;
+	
+	@Autowired
+	private GroupCategoryRestController groupCategoryRestController;
 
 /*	@PostMapping(value = "/createComboDetail", produces = "application/json")
 	public ResponseEntity<?> createComboDetail(HttpServletRequest request, HttpServletResponse response,
@@ -76,21 +81,30 @@ public class ComboRestController {
 			@RequestBody String data) {
 		Connection connection = null;
 		PreparedStatement stmt = null;
+		ResultSet rs = null;
 
 		try {
 			JSONObject jsonComboDetailData = new JSONObject(data);
 			connection = dbConnectionUtil.retrieveConnection(request);
-			
-				stmt = connection.prepareStatement(
-						"INSERT INTO combo_detail(menu_item_id, combo_detail_name, combo_detail_quantity, combo_detail_sequence) VALUES (?,?,?,?)");
-				stmt.setLong(1, jsonComboDetailData.getLong("menu_item_id"));
-				stmt.setString(2, jsonComboDetailData.getString("combo_detail_name"));
-				stmt.setInt(3, jsonComboDetailData.getInt("combo_detail_quantity"));
-				stmt.setInt(4, checkComboDetailSequence(jsonComboDetailData.getLong("menu_item_id"), connection)+ 1);
-				int rowAffected = stmt.executeUpdate();
-				
-				if(rowAffected == 0)
-					return ResponseEntity.badRequest().contentType(MediaType.TEXT_PLAIN).body("Cannot create combo detail");
+			String sqlStatement = "INSERT INTO combo_detail (menu_item_id, combo_detail_name, combo_detail_quantity, combo_detail_sequence, created_date) VALUES (?, ?, ?, ?, GETDATE());";
+			stmt = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
+			stmt.setLong(1, jsonComboDetailData.getLong("menu_item_id"));
+			stmt.setString(2, jsonComboDetailData.getString("combo_detail_name"));
+			stmt.setInt(3, jsonComboDetailData.getInt("combo_detail_quantity"));
+			stmt.setInt(4, checkComboDetailSequence(jsonComboDetailData.getLong("menu_item_id"), connection)+ 1);
+			rs = stmt.executeQuery();
+			if(rs.next()) {
+				// logging to file	
+				String [] parameters = {
+						String.valueOf(rs.getLong(1)),
+						String.valueOf(jsonComboDetailData.getLong("menu_item_id")),
+						jsonComboDetailData.getString("combo_detail_name")==null?"null":"'"+jsonComboDetailData.getString("combo_detail_name")+"'",
+						String.valueOf(jsonComboDetailData.getInt("combo_detail_quantity")),
+						String.valueOf(checkComboDetailSequence(jsonComboDetailData.getLong("menu_item_id"), connection)+ 1)};		
+				groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0, "combo_detail");
+			}
+			else
+				return ResponseEntity.badRequest().contentType(MediaType.TEXT_PLAIN).body("Cannot create combo detail");
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Internal Server Error");
@@ -99,6 +113,14 @@ public class ComboRestController {
 				try {
 					connection.close();
 				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -217,17 +239,24 @@ public class ComboRestController {
 
 		try {
 			JSONObject jsonComboDetailData = new JSONObject(data);
-				connection = dbConnectionUtil.retrieveConnection(request);
-				stmt = connection.prepareStatement(
-						"UPDATE combo_detail SET combo_detail_name = ?, combo_detail_quantity = ? WHERE id = ?");
-				stmt.setString(1, jsonComboDetailData.getString("combo_detail_name"));
-				stmt.setInt(2, jsonComboDetailData.getInt("combo_detail_quantity"));
-				stmt.setLong(3, jsonComboDetailData.getLong("id"));
-				int affectedRow = stmt.executeUpdate();
-				
-				if(affectedRow == 0) {
-					return ResponseEntity.badRequest().body("Cannot update combo detail");
-				}
+			connection = dbConnectionUtil.retrieveConnection(request);
+			String sqlStatement = "UPDATE combo_detail SET combo_detail_name = ?, combo_detail_quantity = ? WHERE id = ?;";
+			stmt = connection.prepareStatement(sqlStatement);
+			stmt.setString(1, jsonComboDetailData.getString("combo_detail_name"));
+			stmt.setInt(2, jsonComboDetailData.getInt("combo_detail_quantity"));
+			stmt.setLong(3, jsonComboDetailData.getLong("id"));
+			int affectedRow = stmt.executeUpdate();
+			
+			// logging to file	
+			String [] parameters = {
+					jsonComboDetailData.getString("combo_detail_name")==null?"null":"'"+jsonComboDetailData.getString("combo_detail_name")+"'",
+					String.valueOf(jsonComboDetailData.getInt("combo_detail_quantity")),
+					String.valueOf(jsonComboDetailData.getLong("id"))};		
+			groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0, null);
+			
+			if(affectedRow == 0) {
+				return ResponseEntity.badRequest().body("Cannot update combo detail");
+			}
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Internal Server Error");
@@ -257,21 +286,33 @@ public class ComboRestController {
 			
 			connection = dbConnectionUtil.retrieveConnection(request);
 			connection.setAutoCommit(false);
-
+			String sqlStatement = "UPDATE combo_detail SET combo_detail_sequence = 0 WHERE menu_item_id = ?;";
 			//Blank all Sequence
-			stmt = connection.prepareStatement(
-						"UPDATE combo_detail SET combo_detail_sequence = 0 WHERE menu_item_id = ?");
+			stmt = connection.prepareStatement(sqlStatement);
 			stmt.setLong(1, menuItemId);
 			stmt.executeUpdate();
-
+			
+			// logging to file	
+			String [] parameters = {
+					String.valueOf(menuItemId)
+					};		
+			groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0, null);		
+			
 			//Reassign All Sequence
-			stmt2 = connection.prepareStatement("UPDATE combo_detail SET combo_detail_sequence = ? WHERE id = ?");
+			sqlStatement = "UPDATE combo_detail SET combo_detail_sequence = ? WHERE id = ?;";
+			stmt2 = connection.prepareStatement(sqlStatement);
 			for(int i=0;i<jsonComboDetailArray.length();i++) {
 				int index = i + 1;
 				JSONObject jsonObj = jsonComboDetailArray.getJSONObject(i);	
 				stmt2.setLong(1, index);
 				stmt2.setLong(2, jsonObj.getLong("id"));
 				stmt2.executeUpdate();
+				
+				// logging to file	
+				String [] parameters2 = {			
+						String.valueOf(index),
+						String.valueOf(jsonObj.getLong("id"))};		
+				groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters2, null, 0, null);	
 			}
 			connection.commit();
 		} catch (Exception ex) {
@@ -307,10 +348,17 @@ public class ComboRestController {
 
 		try {
 			connection = dbConnectionUtil.retrieveConnection(request);
-			stmt = connection.prepareStatement("DELETE FROM combo_detail WHERE id = ?");
+			String sqlStatement = "DELETE FROM combo_detail WHERE id = ?;";
+			stmt = connection.prepareStatement(sqlStatement);
 			stmt.setLong(1, id);
 			int deletedRow = stmt.executeUpdate();
-
+			
+			// logging to file	
+			String [] parameters = {
+					String.valueOf(id)
+					};		
+			groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0, null);					
+			
 			if (deletedRow == 0) {
 				return ResponseEntity.badRequest().contentType(MediaType.TEXT_PLAIN).body("Cannot delete combo detail");
 			} else {			
@@ -381,27 +429,22 @@ public class ComboRestController {
 			@RequestBody String data) {
 		Connection connection = null;
 		PreparedStatement stmt = null;
+		ResultSet rs = null;
 
 		try {		
 			JSONObject jsonComboItemDetail = new JSONObject(data);
 			JSONArray jsonComboItemDetailArray = jsonComboItemDetail.getJSONArray("item_arrays");
 
 			connection = dbConnectionUtil.retrieveConnection(request);
-			connection.setAutoCommit(false);
+			connection.setAutoCommit(false);		
 			
-			String InsertionSql = "INSERT INTO combo_item_detail(combo_detail_id, menu_item_id, menu_item_group_id, combo_item_detail_sequence) VALUES (?,?,?,?)";
-			for(int count=0; count<jsonComboItemDetailArray.length() -1;count++) {
-				InsertionSql += ",(?,?,?,?)";
-			}
-			
-			System.out.println(InsertionSql);
-			stmt = connection.prepareStatement(InsertionSql);
-			int index = 0;
 			
 			for (int i = 0; i < jsonComboItemDetailArray.length(); i++) {
-				JSONObject jsonComboItemDetailObj = jsonComboItemDetailArray.getJSONObject(i);	
+				String sqlStatement = "INSERT INTO combo_item_detail (combo_detail_id, menu_item_id, menu_item_group_id, combo_item_detail_sequence, created_date) VALUES (?, ?, ?, ?, GETDATE());";			
+				stmt = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
+				JSONObject jsonComboItemDetailObj = jsonComboItemDetailArray.getJSONObject(i);
+				int index = 0;		
 				stmt.setLong(++index, jsonComboItemDetail.getLong("combo_detail_id"));
-
 				if (jsonComboItemDetailObj.getString("type").equals("Item")) {
 					stmt.setLong(++index, jsonComboItemDetailObj.getLong("id"));
 					stmt.setLong(++index, 0);
@@ -410,11 +453,21 @@ public class ComboRestController {
 					stmt.setLong(++index, jsonComboItemDetailObj.getLong("id"));
 				}
 				stmt.setInt(++index, getComboItemDetailSequence(jsonComboItemDetail.getLong("combo_detail_id"), connection)+(i+1));
-				System.out.println("Index count: " + index);
+				rs = stmt.executeQuery();
+				
+				if(rs.next()) {
+					// 4 parameter for stmt + 1 identity key
+					// logging to file	
+					String [] parameters = {
+							String.valueOf(rs.getLong(1)),
+							String.valueOf(jsonComboItemDetail.getLong("combo_detail_id")),
+							String.valueOf(jsonComboItemDetailObj.getString("type").equals("Item")?jsonComboItemDetailObj.getLong("id"): 0),
+							String.valueOf(jsonComboItemDetailObj.getString("type").equals("Item")?0:jsonComboItemDetailObj.getLong("id")),
+							String.valueOf(getComboItemDetailSequence(jsonComboItemDetail.getLong("combo_detail_id"), connection)+(i+1))};	
+						
+					groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0, "combo_item_detail");	
+				}
 			}
-			
-			stmt.executeUpdate();
-			System.out.println("Index Result: " + index);
 			
 			connection.commit();
 		} catch (Exception ex) {
@@ -478,11 +531,18 @@ public class ComboRestController {
 
 			for (int i = 0; i < jsonComboItemDetailArray.length(); i++) {
 				JSONObject jsonComboItemDetailObj = jsonComboItemDetailArray.getJSONObject(i);
-				stmt = connection.prepareStatement(
-						"UPDATE combo_item_detail SET combo_item_detail_sequence = ? WHERE id = ?");
+				String sqlStatement = "UPDATE combo_item_detail SET combo_item_detail_sequence = ? WHERE id = ?;";
+				stmt = connection.prepareStatement(sqlStatement);
 				stmt.setInt(1, jsonComboItemDetailObj.getInt("sequence"));
 				stmt.setLong(2, jsonComboItemDetailObj.getLong("id"));
 				stmt.executeUpdate();
+				
+				// logging to file	
+				String [] parameters = {
+						String.valueOf(jsonComboItemDetailObj.getInt("sequence")),
+						String.valueOf(jsonComboItemDetailObj.getLong("id"))};	
+	
+				groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0, null);			
 			}
 			
 			connection.commit();
@@ -517,10 +577,17 @@ public class ComboRestController {
 
 		try {
 			connection = dbConnectionUtil.retrieveConnection(request);
-			stmt = connection.prepareStatement("DELETE FROM combo_item_detail WHERE id = ?");
+			String sqlStatement = "DELETE FROM combo_item_detail WHERE id = ?;";
+			stmt = connection.prepareStatement(sqlStatement);
 			stmt.setLong(1, id);
 			int deletedRow = stmt.executeUpdate();
+			
+			// logging to file	
+			String [] parameters = {
+					String.valueOf(id)};	
 
+			groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, null, 0, null);				
+			
 			if (deletedRow == 0)
 				return ResponseEntity.badRequest().contentType(MediaType.TEXT_PLAIN).body("Cannot delete combo item detail");	
 		} catch (Exception ex) {
