@@ -98,6 +98,11 @@ public class DeviceConfigRestController {
 				resultCode = "E04";
 				resultMessage = "Activation info is already terminated.";
 			}
+			else if(deviceInfo.getLong("storeStatus")==0) {
+				// store status is not active
+				resultCode = "E06";
+				resultMessage = "Store info is not published.";
+			}
 			else if(activateDevice(connection, deviceInfo.getLong("id"), macAddress)) {
 				// successful activation
 				
@@ -180,7 +185,7 @@ public class DeviceConfigRestController {
 		
 		try {
 			connection = dbConnectionUtil.getConnection(brandId);
-			deviceInfo = getDeviceInfoByActivationId(connection, activationId);
+			deviceInfo = getDeviceInfoByActivationId(connection, activationId, storeId);
 			if(deviceInfo!=null) {
 				secureHash = byodUtil.genSecureHash("SHA-256", activationId.concat(deviceInfo.getString("mac_address")).concat(timeStamp));
 			}
@@ -196,6 +201,11 @@ public class DeviceConfigRestController {
 			else if(!authToken.equals(secureHash)) {
 				resultCode = "E03";
 				resultMessage = "Invalid authentication token.";
+			}
+			else if(deviceInfo.getLong("storeStatus")==0) {
+				// store status is not active
+				resultCode = "E06";
+				resultMessage = "Current store is not published at cloud.";
 			}
 			else if(versionCount==0) {
 				// first time get menu
@@ -255,6 +265,77 @@ public class DeviceConfigRestController {
 		return result.toString();
 	}
 	
+	@RequestMapping(value = "/syncStore", method = { RequestMethod.POST })
+	public String getStoreData(HttpServletRequest request, HttpServletResponse response,
+			@RequestParam(value = "storeId", required = true) Long storeId, 
+			@RequestParam(value = "activationId", required = true) String activationId,
+			@RequestParam(value = "timeStamp", required = true) String timeStamp,
+			@RequestParam(value = "authToken", required = true) String authToken,
+			@RequestParam(value = "brandId", required = true) Long brandId) {
+		
+		JSONObject result = new JSONObject();
+		JSONObject deviceInfo = null;
+		Connection connection = null;
+		String secureHash = "";
+		String resultCode = "E01";
+		String resultMessage = "Server error. Please try again later.";
+		
+		try {
+			connection = dbConnectionUtil.getConnection(brandId);
+			deviceInfo = getDeviceInfoByActivationId(connection, activationId, storeId);
+			if(deviceInfo!=null) {
+				secureHash = byodUtil.genSecureHash("SHA-256", activationId.concat(deviceInfo.getString("mac_address")).concat(timeStamp));
+			}
+				
+			System.out.println("authToken:" + authToken);
+			System.out.println("secureHash:" + secureHash);
+			
+			if(deviceInfo!=null && deviceInfo.getLong("statusLookupId")!=2) {
+				// not active
+				resultCode = "E02";
+				resultMessage = "Activation info is already deactivated.";
+			}
+			else if(!authToken.equals(secureHash)) {
+				resultCode = "E03";
+				resultMessage = "Invalid authentication token.";
+			}
+			else if(deviceInfo.getLong("storeStatus")==0) {
+				// store status is not active
+				resultCode = "E04";
+				resultMessage = "Current store is not published at cloud.";
+			}
+			else {
+				// sync store
+				JSONObject storeInfo = getStoreInfo(connection, storeId, brandId);
+				JSONArray ecposStaffInfo = getEcposStaffInfo(connection, storeId);
+				JSONArray ecposStaffRole = getEcposStaffRole(connection);
+				result.put("storeInfo", storeInfo);	
+				result.put("staffInfo", ecposStaffInfo);
+				result.put("staffRole", ecposStaffRole);
+				
+				resultCode = "00";
+				resultMessage = "Successful store synchronization.";
+			}
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch(Exception ex) {
+				}
+			}
+			
+			try {
+				result.put("resultCode", resultCode);
+				result.put("resultMessage", resultMessage);
+			} catch (Exception e) {
+			}
+		}
+		System.out.println(result);
+		return result.toString();
+	}
+	
 	private JSONObject verifyActivation(Connection connection, String activationId, String activationKey, Long type) throws Exception {
 		String sqlStatement = null;
 		PreparedStatement ps1 = null;
@@ -262,7 +343,9 @@ public class DeviceConfigRestController {
 		JSONObject result = null;
 		try {
 			//connection = dataSource.getConnection();
-			sqlStatement = "SELECT * FROM device_info WHERE activation_id = ? AND activation_key = ? AND device_type_lookup_id = ? ";
+			sqlStatement = "SELECT * FROM device_info a "
+					+ "INNER JOIN store b ON b.id = a.ref_id "
+					+ "WHERE a.activation_id = ? AND a.activation_key = ? AND a.device_type_lookup_id = ? ";
 			ps1 = connection.prepareStatement(sqlStatement);
 			ps1.setString(1, activationId);
 			ps1.setString(2, activationKey);
@@ -274,6 +357,7 @@ public class DeviceConfigRestController {
 				result.put("id", rs1.getLong("id"));
 				result.put("refId", rs1.getLong("ref_id"));
 				result.put("statusLookupId", rs1.getLong("status_lookup_id"));
+				result.put("storeStatus", rs1.getLong("is_publish"));
 				//result.put("typeId", rs1.getLong("device_type_lookup_id"));
 			}
 			
@@ -615,17 +699,19 @@ public class DeviceConfigRestController {
 		return versionArray;
 	}
 	
-	private JSONObject getDeviceInfoByActivationId(Connection connection, String activationId) throws Exception {
+	private JSONObject getDeviceInfoByActivationId(Connection connection, String activationId, Long storeId) throws Exception {
 		String sqlStatement = null;
 		PreparedStatement ps1 = null;
 		ResultSet rs1 = null;
 		JSONObject result = null;
 		try {
 			//connection = dataSource.getConnection();
-			sqlStatement = "SELECT * FROM device_info "
-					+ "WHERE activation_id = ? ";
+			sqlStatement = "SELECT * FROM device_info a "
+					+ "INNER JOIN store b ON b.id = a.ref_id "
+					+ "WHERE a.activation_id = ? AND a.ref_id = ?";
 			ps1 = connection.prepareStatement(sqlStatement);
 			ps1.setString(1, activationId);
+			ps1.setLong(2, storeId);
 			rs1 = ps1.executeQuery();
 
 			if (rs1.next()) {
@@ -633,6 +719,7 @@ public class DeviceConfigRestController {
 				result.put("statusLookupId", rs1.getLong("status_lookup_id"));
 				result.put("deviceType", rs1.getLong("device_type_lookup_id"));
 				result.put("mac_address", rs1.getString("mac_address")==null?"":rs1.getString("mac_address"));
+				result.put("storeStatus", rs1.getLong("is_publish"));
 			}
 			
 		} catch (Exception ex) {
