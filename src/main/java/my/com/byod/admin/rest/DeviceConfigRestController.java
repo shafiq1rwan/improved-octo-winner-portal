@@ -526,7 +526,7 @@ public class DeviceConfigRestController {
 	public boolean extractLatestImages(String brandId, Long groupCategoryId) throws Exception {
 		boolean flag = false;
 		// grab menu images
-		File directory = new File(imagePath);
+		File directory = new File(imagePath + brandId);
 		if(directory.isDirectory() && directory.list().length == 0) {
 		    System.out.println("No images found");
 		} else {			
@@ -542,7 +542,7 @@ public class DeviceConfigRestController {
 			FileOutputStream fos = new FileOutputStream(filePath + brandId + "/" + groupCategoryId +"/latest/image.zip");
 			ZipOutputStream zipOut = new ZipOutputStream(fos);
 			for (String srcFile : imageList) {
-				File fileToZip = new File(imagePath, srcFile);
+				File fileToZip = new File(imagePath + brandId, srcFile);
 				if(fileToZip.exists()) {
 					FileInputStream fis = new FileInputStream(fileToZip);
 					ZipEntry zipEntry = new ZipEntry(fileToZip.getName());
