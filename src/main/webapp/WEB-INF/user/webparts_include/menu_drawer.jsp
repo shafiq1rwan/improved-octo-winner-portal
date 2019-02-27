@@ -43,12 +43,6 @@
                  </li>
               <%} %> 
                  
-              <%if (accessRight.getJSONObject("accessRights").getBoolean("user-config")) {%>	
-                 <li class="submenu">
-                       <a href="${pageContext.request.contextPath}/user/#!Router_user"><i class="far fa-users"></i><span> User Configuration </span> </a>
-                </li>	
-              <%} %>  
-                 
               <%if (accessRight.getJSONObject("accessRights").getBoolean("setting")) {%>   
                  <li class="submenu">
                        <a href="${pageContext.request.contextPath}/user/#!Router_setting"><i class="far fa-cog"></i><span> Setting </span> </a>

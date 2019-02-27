@@ -210,14 +210,6 @@ public class UserLoginRestController {
 		return model;
 	}
 	
-	// User Management
-	@RequestMapping(value = { "/views/userMgmt" }, method = RequestMethod.GET)
-	public ModelAndView viewUsers() {
-		ModelAndView model = new ModelAndView();
-		model.setViewName("/user/views/user");
-		return model;
-	}
-	
 	// Setting
 	@RequestMapping(value = { "/views/setting" }, method = RequestMethod.GET)
 	public ModelAndView viewSetting() {
