@@ -433,7 +433,7 @@ public class DeviceConfigRestController {
 				result.put("tableCount", rs1.getString("store_table_count"));
 				result.put("startOperatingTime", rs1.getString("store_start_operating_time"));
 				result.put("endOperatingTime", rs1.getString("store_end_operating_time"));
-				result.put("lastUpdateDate", rs1.getString("last_update_date"));
+				result.put("lastUpdateDate", rs1.getString("last_update_date")==null?"":rs1.getString("last_update_date"));
 				result.put("isPublish", rs1.getLong("is_publish"));
 				result.put("createdDate", rs1.getString("created_date"));
 			}
