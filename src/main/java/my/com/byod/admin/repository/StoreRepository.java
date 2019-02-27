@@ -92,7 +92,7 @@ public class StoreRepository {
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(dbConnectionUtil.setupDataSource(request));
 		return jdbcTemplate.update(
 				"INSERT INTO store(backend_id,store_name,store_logo_path,store_address,store_longitude,store_latitude,store_country,store_currency, "
-				+ "store_table_count, is_publish, store_start_operating_time, store_end_operating_time, ecpos) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?);",
+				+ "store_table_count, is_publish, store_start_operating_time, store_end_operating_time, ecpos, created_date) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,GETDATE());",
 				new Object[] { store.getBackendId(), store.getName(), store.getLogoPath(),
 						store.getLocation().getAddress(), store.getLocation().getLongitude(),
 						store.getLocation().getLatitude(), store.getLocation().getCountry(), store.getCurrency(),

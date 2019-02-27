@@ -64,7 +64,6 @@ public class StoreServiceImp implements StoreService {
 			endTime.set(Calendar.MILLISECOND, 0);
 			store.setOperatingEndTime(endTime.getTime());
 			
-			store.setCreatedDate(new Date());
 			return storeRepo.createStore(store);
 		} catch (DuplicateKeyException ex) {
 			throw new DuplicateKeyException("Duplication Found");
