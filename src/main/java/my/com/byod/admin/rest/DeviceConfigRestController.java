@@ -80,7 +80,9 @@ public class DeviceConfigRestController {
 		String menuFile = null;
 		String resultCode = "E01";
 		String resultMessage = "Server error. Please try again later.";
-
+		System.out.println("activationId:"+ activationId);
+		System.out.println("activationKey:"+ activationKey);
+		System.out.println("type:"+ type);
 		try {
 			connection = dbConnectionUtil.getConnection(brandId);
 			deviceInfo = verifyActivation(connection, activationId, activationKey, type);
@@ -161,7 +163,7 @@ public class DeviceConfigRestController {
 			} catch (Exception e) {
 			}
 		}
-		
+		System.out.println(result);
 		return result.toString();
 	}
 	

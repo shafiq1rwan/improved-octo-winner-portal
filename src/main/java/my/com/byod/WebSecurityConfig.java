@@ -96,8 +96,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	
 	@Override
 	public void configure(WebSecurity web) throws Exception {
-		web.ignoring().antMatchers("/assets/**");
-		web.ignoring().antMatchers("/*/imgS_190220191.png");
+		web.ignoring().antMatchers("/assets/**", "/*/imgS_190220191.png");
 	}
 
 	@Bean

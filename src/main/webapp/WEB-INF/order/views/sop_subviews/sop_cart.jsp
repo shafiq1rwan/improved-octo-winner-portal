@@ -118,7 +118,7 @@
 			</div>
 			<div class="pt-1 pb-1 align-self-center" ng-show="cart.length > 0">
 				<button class="btn btn-primary btn-main sm-resp-font" type="button"
-					ng-click="">{{currentLanguageData.cart_checkout}}&nbsp;({{priceTag}}{{cartTotalPrice}})</button>
+					ng-click="sendCartData()">{{currentLanguageData.cart_checkout}}&nbsp;({{priceTag}}{{cartTotalPrice}})</button>
 			</div>
 		</div>
 	</div>

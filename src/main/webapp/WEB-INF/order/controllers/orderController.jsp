@@ -16,6 +16,7 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 	$scope.priceTag;
 	$scope.storeName;
 	$scope.tableId;
+	$scope.checkNo;
 	$scope.cart
 	$scope.cartTotalPrice;
 	/*Dialog Config*/
@@ -605,9 +606,7 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 				'Content-Type': 'application/json'
 			},
 			params: {
-				brandId: $routeParams.brandId,
-				storeId: $routeParams.storeId,
-				tableId: $routeParams.tableId
+				token: $routeParams.token,
 			},
 			url: '${pageContext.request.contextPath}/order/getStoreData'
 		}).then(function (response) {
@@ -615,7 +614,8 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 				if (response.data.resultCode == "00") {
 					$scope.menuList = response.data.menuList;
 					$scope.storeName = response.data.storeName;
-					$scope.tableId = $routeParams.tableId;
+					$scope.tableId = response.data.tableId;
+					$scope.checkNo = response.data.checkNo;
 					$scope.priceTag = response.data.priceTag;
 					$scope.imagePath = response.data.imagePath;
 					
@@ -684,6 +684,33 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 		} else {
 			$scope.loadingText = "Loading Failed.";
 		}
+	}
+	
+	/*Other Function*/
+	$scope.sendCartData = function() {
+		console.log($scope.cart);
+		$http({
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			data: {
+				cartData: $scope.cart,
+			},
+			url: '${pageContext.request.contextPath}/order/sendOrder'
+		}).then(function (response) {
+			if (response != null && response.data != null && response.data.resultCode != null) {
+				if (response.data.resultCode == "00") {
+					console.log("Success");
+				} else {
+					console.log("Failed");
+				}
+			} else {
+				$scope.loadFailed();
+			}
+		}, function (error) {
+			$scope.loadFailed();
+	    });
 	}
 	
 	/*Init Function*/
