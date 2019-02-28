@@ -37,161 +37,161 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 			AS
 			BEGIN
 				
-				CREATE TABLE group_category
-				(
-					id BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,
-					group_category_name NVARCHAR(50) NOT NULL UNIQUE,
-					created_date DATETIME NOT NULL,
-					publish_version_id bigint,
-					tmp_query_file_path nvarchar(150),
-					tmp_img_file_path nvarchar(150)
-				);
+			CREATE TABLE group_category
+			(
+				id BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,
+				group_category_name NVARCHAR(50) NOT NULL UNIQUE,
+				created_date DATETIME NOT NULL,
+				publish_version_id bigint,
+				tmp_query_file_path nvarchar(150),
+				tmp_img_file_path nvarchar(150)
+			);
 
-				CREATE TABLE category
-				(
-					id bigInt PRIMARY KEY identity(1,1) NOT NULL,
-					group_category_id bigInt NOT NULL,
-					category_name nvarchar(150) NOT NULL UNIQUE,
-					category_description nvarchar(255),
-					category_image_path nvarchar(MAX),
-					category_sequence INT,
-					is_active BIT DEFAULT 1,
-					created_date DATETIME NOT NULL
-				);
+			CREATE TABLE category
+			(
+				id bigInt PRIMARY KEY identity(1,1) NOT NULL,
+				group_category_id bigInt NOT NULL,
+				category_name nvarchar(150) NOT NULL UNIQUE,
+				category_description nvarchar(255),
+				category_image_path nvarchar(MAX),
+				category_sequence INT,
+				is_active BIT DEFAULT 1,
+				created_date DATETIME NOT NULL
+			);
 
-				CREATE TABLE menu_item
-				(
-					id BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,
-					backend_id NVARCHAR(50) NOT NULL UNIQUE,
-					modifier_group_id BIGINT,
-					menu_item_name NVARCHAR(150) NOT NULL,
-					menu_item_alt_name NVARCHAR(50),
-					menu_item_description NVARCHAR(255),
-					menu_item_image_path NVARCHAR(MAX),
-					menu_item_base_price DECIMAL(10,2) DEFAULT 0.00,
-					menu_item_type INT DEFAULT 0, 
-					is_taxable BIT DEFAULT 0,
-					is_discountable BIT DEFAULT 0,
-					is_active BIT DEFAULT 1,
-					created_date DATETIME NOT NULL
-				);
+			CREATE TABLE menu_item
+			(
+				id BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,
+				backend_id NVARCHAR(50) NOT NULL UNIQUE,
+				modifier_group_id BIGINT,
+				menu_item_name NVARCHAR(150) NOT NULL,
+				menu_item_alt_name NVARCHAR(50),
+				menu_item_description NVARCHAR(255),
+				menu_item_image_path NVARCHAR(MAX),
+				menu_item_base_price DECIMAL(10,2) DEFAULT 0.00,
+				menu_item_type INT DEFAULT 0, 
+				is_taxable BIT DEFAULT 0,
+				is_discountable BIT DEFAULT 0,
+				is_active BIT DEFAULT 1,
+				created_date DATETIME NOT NULL
+			);
 
-				CREATE TABLE category_menu_item
-				(
-					category_id BIGINT NOT NULL,
-					menu_item_id BIGINT NOT NULL,
-					category_menu_item_sequence INT NOT NULL
-				);
+			CREATE TABLE category_menu_item
+			(
+				category_id BIGINT NOT NULL,
+				menu_item_id BIGINT NOT NULL,
+				category_menu_item_sequence INT NOT NULL
+			);
 
-				CREATE TABLE menu_item_group
-				(
-					id BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,
-					menu_item_group_name NVARCHAR(150) NOT NULL UNIQUE,
-					is_active BIT DEFAULT 1,
-					created_date DATETIME NOT NULL
-				);
+			CREATE TABLE menu_item_group
+			(
+				id BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,
+				menu_item_group_name NVARCHAR(150) NOT NULL UNIQUE,
+				is_active BIT DEFAULT 1,
+				created_date DATETIME NOT NULL
+			);
 
-				CREATE TABLE menu_item_group_sequence
-				(
-					menu_item_group_id BigInt,
-					menu_item_id BigInt,
-					menu_item_group_sequence INT NOT NULL	
-				);
+			CREATE TABLE menu_item_group_sequence
+			(
+				menu_item_group_id BigInt,
+				menu_item_id BigInt,
+				menu_item_group_sequence INT NOT NULL	
+			);
 
-				CREATE TABLE modifier_group
-				(
-					id BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,
-					modifier_group_name NVARCHAR(100) NOT NULL UNIQUE,
-					is_active BIT DEFAULT 1,
-					created_date DATETIME NOT NULL
-				);
+			CREATE TABLE modifier_group
+			(
+				id BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,
+				modifier_group_name NVARCHAR(100) NOT NULL UNIQUE,
+				is_active BIT DEFAULT 1,
+				created_date DATETIME NOT NULL
+			);
 
-				CREATE TABLE menu_item_modifier_group
-				(
-					menu_item_id BIGINT,
-					modifier_group_id BIGINT,
-					menu_item_modifier_group_sequence INT
-				);
+			CREATE TABLE menu_item_modifier_group
+			(
+				menu_item_id BIGINT,
+				modifier_group_id BIGINT,
+				menu_item_modifier_group_sequence INT
+			);
 
-				CREATE TABLE modifier_item_sequence
-				(
-					modifier_group_id BIGINT NOT NULL,
-					menu_item_id BIGINT NOT NULL,
-					modifier_item_sequence INT
-				);
+			CREATE TABLE modifier_item_sequence
+			(
+				modifier_group_id BIGINT NOT NULL,
+				menu_item_id BIGINT NOT NULL,
+				modifier_item_sequence INT
+			);
 
-				CREATE TABLE combo_detail
-				(
-					id BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,
-					menu_item_id BIGINT NOT NULL,
-					combo_detail_name NVARCHAR(50) NOT NULL,
-					combo_detail_quantity INT DEFAULT 0,
-					combo_detail_sequence INT NOT NULL,
-					created_date DATETIME NOT NULL
-				);
+			CREATE TABLE combo_detail
+			(
+				id BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,
+				menu_item_id BIGINT NOT NULL,
+				combo_detail_name NVARCHAR(50) NOT NULL,
+				combo_detail_quantity INT DEFAULT 0,
+				combo_detail_sequence INT NOT NULL,
+				created_date DATETIME NOT NULL
+			);
 
-				CREATE TABLE combo_item_detail
-				(
-					id BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,
-					combo_detail_id BIGINT NOT NULL,
-					menu_item_id BIGINT,
-					menu_item_group_id BIGINT,
-					combo_item_detail_sequence INT NOT NULL,
-					created_date DATETIME NOT NULL
-				);
+			CREATE TABLE combo_item_detail
+			(
+				id BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,
+				combo_detail_id BIGINT NOT NULL,
+				menu_item_id BIGINT,
+				menu_item_group_id BIGINT,
+				combo_item_detail_sequence INT NOT NULL,
+				created_date DATETIME NOT NULL
+			);
 
-				CREATE TABLE store
-				(
-						id BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,
-						group_category_id BIGINT DEFAULT 0,
-						tax_charge_id BIGINT DEFAULT 0,
-						backend_id NVARCHAR(50) NOT NULL UNIQUE,
-						store_name NVARCHAR(150) NOT NULL UNIQUE,
-						store_logo_path NVARCHAR(MAX),
-						store_address NVARCHAR(150),
-						store_longitude DECIMAL(15,8),
-						store_latitude DECIMAL(15,8),
-						store_country NVARCHAR(100),
-						store_currency NVARCHAR(50),
-						store_table_count INT DEFAULT 0,
-						store_start_operating_time time NOT NULL,
-						store_end_operating_time time NOT NULL,
-						last_update_date datetime,
-						is_publish BIT DEFAULT 0,
-						ecpos BIT DEFAULT 0,
-						created_date DATETIME NOT NULL
-				);
+			CREATE TABLE store
+			(
+				id BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,
+				group_category_id BIGINT DEFAULT 0,
+				tax_charge_id BIGINT DEFAULT 0,
+				backend_id NVARCHAR(50) NOT NULL UNIQUE,
+				store_name NVARCHAR(150) NOT NULL UNIQUE,
+				store_logo_path NVARCHAR(MAX),
+				store_address NVARCHAR(150),
+				store_longitude DECIMAL(15,8),
+				store_latitude DECIMAL(15,8),
+				store_country NVARCHAR(100),
+				store_currency NVARCHAR(50),
+				store_table_count INT DEFAULT 0,
+				store_start_operating_time time NOT NULL,
+				store_end_operating_time time NOT NULL,
+				last_update_date datetime,
+				is_publish BIT DEFAULT 0,
+				ecpos BIT DEFAULT 0,
+				created_date DATETIME NOT NULL
+			);
 
-				CREATE TABLE staff 
-				(
-						id BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,
-						store_id BIGINT DEFAULT 0,
-						staff_name NVARCHAR(150) NOT NULL,
-						staff_username NVARCHAR(100) NOT NULL UNIQUE,
-						staff_password NVARCHAR(200) NOT NULL,
-						staff_role INT NOT NULL,
-						staff_contact_hp_number NVARCHAR(50) NOT NULL UNIQUE,
-						staff_contact_email VARCHAR(320) NOT NULL UNIQUE,
-						is_active BIT DEFAULT 1 NOT NULL,
-						created_date DATETIME NOT NULL,
-						last_update_date DATETIME
-				);
+			CREATE TABLE staff 
+			(
+				id BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,
+				store_id BIGINT DEFAULT 0,
+				staff_name NVARCHAR(150) NOT NULL,
+				staff_username NVARCHAR(100) NOT NULL UNIQUE,
+				staff_password NVARCHAR(200) NOT NULL,
+				staff_role INT NOT NULL,
+				staff_contact_hp_number NVARCHAR(50) NOT NULL UNIQUE,
+				staff_contact_email VARCHAR(320) NOT NULL UNIQUE,
+				is_active BIT DEFAULT 1 NOT NULL,
+				created_date DATETIME NOT NULL,
+				last_update_date DATETIME
+			);
 
-				CREATE TABLE role_lookup
-				(
-					id BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,
-					role_name NVARCHAR(50) NOT NULL UNIQUE
-				);
+			CREATE TABLE role_lookup
+			(
+				id BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,
+				role_name NVARCHAR(50) NOT NULL UNIQUE
+			);
 
-				CREATE TABLE table_log
-				(
-					id BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,
-					login_user_id BIGINT NOT NULL,
-					username NVARCHAR(100) NOT NULL,
-					user_action NVARCHAR(MAX) NOT NULL,
-					table_name NVARCHAR(100) NOT NULL,
-					table_log_datetime DATETIME NOT NULL
-				);
+			CREATE TABLE table_log
+			(
+				id BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,
+				login_user_id BIGINT NOT NULL,
+				username NVARCHAR(100) NOT NULL,
+				user_action NVARCHAR(MAX) NOT NULL,
+				table_name NVARCHAR(100) NOT NULL,
+				table_log_datetime DATETIME NOT NULL
+			);
 
 			-- no del
 			CREATE TABLE tax_charge
@@ -308,6 +308,172 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 				value varchar(255) NOT NULL
 			); 
 
+			CREATE TABLE order_type_lookup
+			(
+				id INT UNIQUE NOT NULL, 
+				name NVARCHAR(50) NOT NULL UNIQUE 
+			);
+
+			CREATE TABLE check_status_lookup
+			(
+				id INT UNIQUE NOT NULL, 
+				name NVARCHAR(50) NOT NULL UNIQUE 
+			);
+
+			CREATE TABLE [check] 
+			(
+				id BIGINT IDENTITY(1,1) NOT NULL,
+				store_id BIGINT NOT NULL,
+				check_number BIGINT NOT NULL,
+				device_type BIGINT NOT NULL,
+				staff_id BIGINT NULL,
+				order_type BIGINT NOT NULL,
+				table_number INT NULL,
+				total_item_quantity INT NOT NULL,
+				subtotal_amount DECIMAL(25, 4) NOT NULL,
+				total_tax_amount DECIMAL(25, 4) NULL,
+				total_service_charge_amount DECIMAL(25, 4) NULL,
+				total_amount DECIMAL(25, 4) NOT NULL,
+				total_amount_rounding_adjustment DECIMAL(25, 4) NOT NULL,
+				grand_total_amount DECIMAL(25, 4) NOT NULL,
+				deposit_amount DECIMAL(25, 4) NOT NULL,
+				tender_amount DECIMAL(25, 4) NOT NULL,
+				overdue_amount DECIMAL(25, 4) NOT NULL,
+				check_status BIGINT NOT NULL,
+				created_date DATETIME NOT NULL,
+				updated_date DATETIME NULL
+			);
+
+			CREATE TABLE check_detail 
+			(
+				id BIGINT IDENTITY(1,1) NOT NULL,
+				store_id BIGINT NOT NULL,
+				check_id BIGINT NOT NULL,
+				check_number BIGINT NOT NULL,
+				parent_check_detail_id BIGINT NULL,
+				menu_item_id BIGINT NOT NULL,
+				menu_item_code nvarchar(50) NOT NULL,
+				menu_item_name nvarchar(150) NOT NULL,
+				menu_item_price DECIMAL(25, 4) NOT NULL,
+				tax_rate INT NULL,
+				service_charge_rate INT NULL,
+				quantity INT NOT NULL,
+				subtotal_amount DECIMAL(25, 4) NOT NULL,
+				total_tax_amount DECIMAL(25, 4) NULL,
+				total_service_charge_amount DECIMAL(25, 4) NULL,
+				total_amount DECIMAL(25, 4) NOT NULL,
+				check_detail_status BIGINT NOT NULL,
+				transaction_id BIGINT NULL,
+				created_date DATETIME NOT NULL,
+				updated_date DATETIME NULL
+			);
+
+			CREATE TABLE transaction_type_lookup
+			(
+				id INT UNIQUE NOT NULL, 
+				name NVARCHAR(50) NOT NULL UNIQUE 
+			);
+
+			CREATE TABLE payment_method_lookup
+			(
+				id INT UNIQUE NOT NULL, 
+				name NVARCHAR(50) NOT NULL UNIQUE 
+			);
+
+			CREATE TABLE payment_type_lookup
+			(
+				id INT UNIQUE NOT NULL, 
+				name NVARCHAR(50) NOT NULL UNIQUE 
+			);
+
+			CREATE TABLE transaction_settlement_status_lookup
+			(
+				id INT UNIQUE NOT NULL, 
+				name NVARCHAR(50) NOT NULL UNIQUE 
+			);
+
+			CREATE TABLE [transaction] 
+			(
+				id BIGINT IDENTITY(1,1) NOT NULL,
+				store_id BIGINT NOT NULL,
+				staff_id BIGINT NOT NULL,
+				check_id BIGINT NOT NULL,
+				check_number BIGINT NOT NULL,
+				transaction_type BIGINT NOT NULL,
+				payment_method BIGINT NOT NULL,
+				payment_type BIGINT NOT NULL,
+				terminal_serial_number nvarchar(255) NULL,
+				transaction_currency nvarchar(100) NOT NULL,
+				transaction_amount DECIMAL(25, 4) NOT NULL,
+				transaction_tips DECIMAL(25, 4) NULL,
+				transaction_status BIGINT NOT NULL,
+				unique_trans_number nvarchar(255) NULL,
+				qr_content nvarchar(255) NULL,
+				created_date DATETIME NOT NULL,
+				response_code nvarchar(255) NULL,
+				response_message nvarchar(255) NULL,
+				updated_date DATETIME NULL,
+				wifi_ip nvarchar(255) NULL,
+				wifi_port nvarchar(255) NULL,
+				approval_code nvarchar(255) NULL,
+				bank_mid nvarchar(255) NULL,
+				bank_tid nvarchar(255) NULL,
+				transaction_date nvarchar(255) NULL,
+				transaction_time nvarchar(255) NULL,
+				original_invoice_number nvarchar(255) NULL,
+				invoice_number nvarchar(255) NULL,
+				merchant_info nvarchar(255) NULL,
+				card_issuer_name nvarchar(255) NULL,
+				masked_card_number nvarchar(255) NULL,
+				card_expiry_date nvarchar(255) NULL,
+				batch_number nvarchar(255) NULL,
+				rrn nvarchar(255) NULL,
+				card_issuer_id nvarchar(255) NULL,
+				cardholder_name nvarchar(255) NULL,
+				aid nvarchar(255) NULL,
+				app_label nvarchar(255) NULL,
+				tc nvarchar(255) NULL,
+				terminal_verification_result nvarchar(255) NULL,
+				original_trace_number nvarchar(255) NULL,
+				trace_number nvarchar(255) NULL,
+				qr_issuer_type nvarchar(255) NULL,
+				mpay_mid nvarchar(255) NULL,
+				mpay_tid nvarchar(255) NULL,
+				qr_ref_id nvarchar(255) NULL,
+				qr_user_id nvarchar(255) NULL,
+				qr_amount_myr nvarchar(255) NULL,
+				qr_amount_rmb nvarchar(255) NULL
+			);
+
+			CREATE TABLE nii_type_lookup
+			(
+				id INT UNIQUE NOT NULL, 
+				name NVARCHAR(50) NOT NULL UNIQUE 
+			);
+
+			CREATE TABLE settlement 
+			(
+				id BIGINT IDENTITY(1,1) NOT NULL,
+				store_id BIGINT NOT NULL,
+				staff_id BIGINT NOT NULL,
+				nii_type BIGINT NOT NULL,
+				settlement_status BIGINT NOT NULL,
+				created_date DATETIME NOT NULL,
+				response_code nvarchar(255) NULL,
+				response_message nvarchar(255) NULL,
+				updated_date DATETIME NULL,
+				wifi_ip nvarchar(255) NULL,
+				wifi_port nvarchar(255) NULL,
+				merchant_info nvarchar(255) NULL,
+				bank_mid nvarchar(255) NULL,
+				bank_tid nvarchar(255) NULL,
+				batch_number nvarchar(255) NULL,
+				transaction_date nvarchar(255) NULL,
+				transaction_time nvarchar(255) NULL,
+				batch_total nvarchar(255) NULL,
+				nii nvarchar(255) NULL
+			);
+
 			INSERT INTO role_lookup VALUES (''Admin''),(''Store Manager'');
 
 			INSERT INTO charge_type_lookup VALUES (0, ''None''),(1, ''Tax''),(2, ''Charge'');
@@ -315,6 +481,20 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 			INSERT INTO device_type_lookup (id, name, prefix, backend_sequence, modified_date) VALUES (1, ''ECPOS'', ''EC'', 0, GETDATE())
 			INSERT INTO device_type_lookup (id, name, prefix, backend_sequence, modified_date) VALUES (2, ''BYOD'', ''BD'', 0, GETDATE())
 			INSERT INTO device_type_lookup (id, name, prefix, backend_sequence, modified_date) VALUES (3, ''KIOSK'', ''KK'', 0, GETDATE())
+
+			INSERT INTO check_status_lookup values (1, ''New''), (2, ''Pending''), (3, ''Closed''), (4, ''Cancelled'');
+
+			INSERT INTO order_type_lookup values (1, ''table''), (2, ''take away'');
+
+			insert into transaction_type_lookup values (1, ''Sale''), (2, ''Void''), (3, ''Refund''), (4, ''Reversal'');
+
+			insert into payment_method_lookup values (1, ''Cash''), (2, ''Card''), (3, ''QR'');
+
+			insert into payment_type_lookup values (1, ''Full Payment''), (2, ''Partial Payment''), (3, ''Split Payment''), (4, ''Deposit Payment'');
+
+			insert into nii_type_lookup values (1, ''VISA/MASTER/JCB''), (2, ''AMEX''), (3, ''MCCS''), (4, ''UNIONPAY'');
+
+			insert into transaction_settlement_status_lookup values (1, ''New''), (2, ''Pending''), (3, ''Approved''), (4, ''Declined''), (5, ''Voided''), (6, ''Refunded''), (7, ''Reversed'');
 
 			INSERT INTO status_lookup (id, name) VALUES (1, ''PENDING'');
 			INSERT INTO status_lookup (id, name) VALUES (2, ''ACTIVE'');
@@ -351,13 +531,3 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 ELSE
 		SELECT @db_creation_result = 0;
 GO
-	
-
-
-
-
-
-
-	
-
-
