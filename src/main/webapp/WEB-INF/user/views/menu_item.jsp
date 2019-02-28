@@ -216,7 +216,7 @@
 									<div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
 										<ul class="list-group no-bullets" id="sortableList">
 										  <li class="list-group-item" ng-repeat="x in tierItems">										  	
-										  	<h5 ng-if="reordering_action"><i class="fa fa-reorder pull-right"></i></h5>							  	
+										  	<h5 ng-if="reordering_action"><i class="fas fa-arrows-alt pull-right"></i></h5>							  	
 										  	<div class="row">
 											  	<div class="col-6 col-md-6">
 													  	<h5>Name</h5>

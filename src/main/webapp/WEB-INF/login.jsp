@@ -95,7 +95,9 @@
 								<%-- <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" /> --%>
 							</div>
 				
-						</form>													
+						</form>
+						<a href="${pageContext.request.contextPath}/forget-password">Forget Password</a>	
+									
 					</div>
 				</div>
 			</div>

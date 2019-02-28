@@ -276,7 +276,7 @@ public class MenuItemRestController {
 
 		try {
 			JSONObject jsonMenuItemData = new JSONObject(data);
-			
+
 			connection = dbConnectionUtil.retrieveConnection(request);
 			String brandId = byodUtil.getGeneralConfig(connection, "BRAND_ID");
 			String imagePath = jsonMenuItemData.isNull("menu_item_image_path") ? null
@@ -300,18 +300,18 @@ public class MenuItemRestController {
 			
 			rs = stmt.executeQuery();
 			if(rs.next()) {
-				// logging to file	
-				String [] parameters = {
+			// logging to file	
+			String [] parameters = {
 						String.valueOf(rs.getLong(1)),
-						jsonMenuItemData.getString("menu_item_backend_id"),
-						jsonMenuItemData.getString("menu_item_name")==null?"null":"'"+jsonMenuItemData.getString("menu_item_name")+"'",
-						altName==null?"null":"'"+altName+"'",
-						description==null?"null":"'"+description+"'",
-						imagePath==null?"null":"'"+imagePath+"'",
-						String.valueOf(jsonMenuItemData.getDouble("menu_item_base_price")),
-						String.valueOf(jsonMenuItemData.getInt("menu_item_type")),
-						String.valueOf(jsonMenuItemData.getBoolean("is_taxable")?1:0),
-						String.valueOf(jsonMenuItemData.getBoolean("is_discountable")?1:0)};		
+					jsonMenuItemData.getString("menu_item_backend_id"),
+					jsonMenuItemData.getString("menu_item_name")==null?"null":"'"+jsonMenuItemData.getString("menu_item_name")+"'",
+					altName==null?"null":"'"+altName+"'",
+					description==null?"null":"'"+description+"'",
+					imagePath==null?"null":"'"+imagePath+"'",
+					String.valueOf(jsonMenuItemData.getDouble("menu_item_base_price")),
+					String.valueOf(jsonMenuItemData.getInt("menu_item_type")),
+					String.valueOf(jsonMenuItemData.getBoolean("is_taxable")?1:0),
+					String.valueOf(jsonMenuItemData.getBoolean("is_discountable")?1:0)};		
 				groupCategoryRestController.logActionToAllFiles(connection, sqlStatement, parameters, imagePath, 1, "menu_item");	
 			}
 			else {
@@ -671,6 +671,38 @@ public class MenuItemRestController {
 		}
 		
 		return existingItemType;
+	}
+	
+	private int checkingExistingBackendId(Long menuItemId, String backendId, HttpServletRequest request) throws Exception {
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		int existingBackendId = 0;
+
+		try {
+			connection = dbConnectionUtil.retrieveConnection(request);
+			stmt = connection.prepareStatement("SELECT COUNT(backend_id) FROM menu_item WHERE backend_id = ? AND id !=?");
+			stmt.setString(1, backendId);
+			stmt.setLong(2, menuItemId);
+			rs = (ResultSet) stmt.executeQuery();
+			
+			if(rs.next()) {
+				existingBackendId = rs.getInt("COUNT(backend_id)");
+			} else {
+				existingBackendId = -1;
+			}
+		} catch(Exception ex) {
+			throw ex;
+		}  finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					existingBackendId = -1;
+				}
+			}
+		}
+		return existingBackendId;
 	}
 
 }

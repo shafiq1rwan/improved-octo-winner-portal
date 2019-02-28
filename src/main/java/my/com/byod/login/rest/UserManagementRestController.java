@@ -47,6 +47,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import my.com.byod.admin.util.ByodUtil;
 import my.com.byod.admin.util.DbConnectionUtil;
+import my.com.byod.admin.util.UserEmailUtil;
 import my.com.byod.login.domain.ApplicationUser;
 import my.com.byod.login.service.ApplicationUserService;
 
@@ -65,6 +66,9 @@ public class UserManagementRestController {
 	
 	@Autowired
 	private ByodUtil byodUtil;
+	
+	@Autowired
+	private UserEmailUtil userEmailUtil;
 
 	@PostMapping(value = "/signup")
 	public ResponseEntity<?> signupUser(HttpServletRequest request, HttpServletResponse response,
@@ -77,7 +81,6 @@ public class UserManagementRestController {
 			user.setMobileNumber(jsonData.getString("mobileNumber"));
 			user.setAddress(jsonData.getString("address"));
 			user.setUsername(jsonData.getString("username"));
-			user.setPassword(jsonData.getString("password"));
 			user.setEnabled(jsonData.getBoolean("enabled"));
 
 			if (applicationUserService.findUserByEmail(user.getEmail()) != null)
@@ -90,11 +93,20 @@ public class UserManagementRestController {
 				throw new IllegalArgumentException(
 						constructJsonResponse("03", user.getMobileNumber() + " already being taken"));
 
-			//user.setPassword(byodUtil.createRandomString(8));
-
+			String randomPass = byodUtil.createRandomString(10);
+			user.setPassword(randomPass);
+			
 			Long userId = applicationUserService.createUser(user, jsonData.getString("role"));
-			if (userId == 0)
+			if (userId == 0) {
 				return ResponseEntity.badRequest().contentType(MediaType.TEXT_PLAIN).body("Cannot create new user");
+			}
+			else {
+				//send email
+				boolean sendStatus = userEmailUtil.sendUserRegisterPassword(user.getUsername(),randomPass,user.getEmail());
+				if(!sendStatus) {
+					return ResponseEntity.badRequest().contentType(MediaType.TEXT_PLAIN).body("Cannot send email to user");
+				}
+			}
 		} catch (IllegalArgumentException ex) {
 			ex.printStackTrace();
 			return ResponseEntity.status(HttpStatus.CONFLICT).contentType(MediaType.TEXT_PLAIN).body(ex.getMessage());

@@ -115,7 +115,7 @@
 		//Reordering Operations for Tier
 		$scope.reorderTierItems = function(){
 			$scope.reordering_action = true;
-			
+			console.log("Reorder Action: " + $scope.reordering_action);
 			//copy the existing field
 /* 			for(var i=0; i<$scope.tierItems.length;i++){
 				$scope.extra_tier_items.push($scope.tierItems[i]);
@@ -163,7 +163,7 @@
 			$scope.menu_item_id = menu_item_id;
 			
 		     var sortable = Sortable.create($('#sortableList')[0], {
-			   		handle: ".fa-reorder",
+			   		handle: ".fa-arrows-alt",
 			   		scroll: true,
 			   		// Element is chosen
 			   		onChoose: function (/**Event*/evt) {

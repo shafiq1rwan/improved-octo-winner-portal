@@ -123,12 +123,12 @@
 								<input class="form-control" name="username" placeholder="Username" ng-model="user.username" type="text" required> 
 							</div>
 						</div>
-						<div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
+				<!-- 		<div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
 							<div class="form-group">
 								<label class="login-label">Password</label>
 								<input class="form-control" name="password" placeholder="Password" ng-model="user.password" type="password" required> 
 							</div>
-						</div>					
+						</div>		 -->			
 					</div>
 					<div class="row">
 						<div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">

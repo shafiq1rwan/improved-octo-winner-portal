@@ -221,7 +221,6 @@
 					|| $scope.user.mobileNumber == null || $scope.user.mobileNumber == '' 
 					|| $scope.user.address == null || $scope.user.address == ''
 					|| $scope.user.username == null || $scope.user.username == '' 
-					|| $scope.user.password == null || $scope.user.password == ''
 					|| $scope.user.authority == null || $scope.user.authority == ''){
 			}
 			else {
@@ -232,14 +231,12 @@
 						'mobileNumber' : $scope.user.mobileNumber,
 						'address' : $scope.user.address,
 						'username' : $scope.user.username,
-						'password' : $scope.user.password,
 						'enabled' : $scope.user.enabled || false,
 						'role' : $scope.user.authority
 				};
 				var postData = JSON.stringify(data);
 					
 				console.log("Submit User");
-				console.log($scope.action);
 				console.log(postData);
 				
 				var userUrl = $scope.action == 'create'?'signup':'edit';

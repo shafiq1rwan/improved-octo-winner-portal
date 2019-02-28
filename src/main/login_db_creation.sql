@@ -41,6 +41,14 @@ CREATE TABLE permission_lookup
 	perm_name nvarchar(256) NOT NULL
 );
 
+CREATE TABLE password_reset_token
+(
+	id BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,
+	user_id BIGINT NOT NULL,
+	token NVARCHAR(256) NOT NULL,
+	"expiry_date" DATETIME NOT NULL
+)
+
 --CREATE TABLE alt_permission_lookup
 --(
 --	id BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,
@@ -72,4 +80,5 @@ INSERT INTO permission_lookup(perm_name) VALUES ('store'),('group-category'),('m
 --drop table users_brands;
 --drop table permission_lookup;
 --drop table alt_permission_lookup;
+--drop table password_reset_token;
 

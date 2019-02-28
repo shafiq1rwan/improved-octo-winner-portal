@@ -29,7 +29,7 @@ public class ApplicationUserRepository {
 	}
 	
     @Transactional(readOnly = true)
-    public ApplicationUser getUser(int id) {
+    public ApplicationUser getUser(Long id) {
         return jdbcTemplate.queryForObject("SELECT * FROM users WHERE id = ?", new Object[] {id}, applicationUserRowMapper);
     }
     
@@ -82,6 +82,18 @@ public class ApplicationUserRepository {
             return null;
         }
     }
+    
+    @Transactional(readOnly = true)
+    public ApplicationUser findUserById(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("User id cannot be null");
+        }
+        try {
+            return jdbcTemplate.queryForObject("SELECT * FROM users WHERE id = ?", new Object[] {id}, applicationUserRowMapper);
+        } catch (EmptyResultDataAccessException notFound) {
+            return null;
+        }
+    }
 
     public Long createUser(final ApplicationUser user) {
         if (user == null) {
@@ -103,6 +115,20 @@ public class ApplicationUserRepository {
             }, keyHolder);
      
             return (Long) keyHolder.getKey().longValue();
+    }
+    
+    public int updatePassword(final String updatedPassword, final Long userId) {
+        if (userId == null) {
+            throw new IllegalArgumentException("User id cannot be null");
+        } else if(updatedPassword == null) {
+        	throw new IllegalArgumentException("Password cannot be null");
+        }
+    	
+    	try {
+    		return jdbcTemplate.update("UPDATE users SET password = ? WHERE id = ?", new Object[] {updatedPassword, userId});
+    	} catch(Exception ex) {
+    		return 0;
+    	}
     }
     
 	private RowMapper<ApplicationUser> applicationUserRowMapper = (rs, rowNum) -> {
