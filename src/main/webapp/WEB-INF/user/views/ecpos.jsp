@@ -165,7 +165,7 @@
 						<div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
 							<div class="form-group">
 								<label class="login-label">Email</label>
-								<input class="form-control" name="staffEmail" placeholder="johndoe@email.com" ng-model="staff.email" type="text" required> 
+								<input class="form-control" name="staffEmail" placeholder="johndoe@email.com" ng-model="staff.email" type="email" required> 
 							</div>
 						</div>
 					</div>	

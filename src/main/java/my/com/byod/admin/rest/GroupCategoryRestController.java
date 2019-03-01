@@ -9,9 +9,11 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.sql.Array;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -172,6 +174,7 @@ public class GroupCategoryRestController {
 								stmt2.setLong(1, keyRs.getLong(1));
 								stmt2.setLong(2, storeId);
 								stmt2.executeUpdate();
+								stmt2.close();
 							}
 							
 						}
@@ -197,42 +200,95 @@ public class GroupCategoryRestController {
 		JSONObject jsonResult = new JSONObject();
 		Connection connection = null;
 		PreparedStatement stmt = null;
+		ResultSet rs = null;
 		
 		try {
 			JSONObject jsonGroupCategoryData = new JSONObject(data);
+			System.out.println(jsonGroupCategoryData);
+			connection = dbConnectionUtil.retrieveConnection(request);
 			
-				connection = dbConnectionUtil.retrieveConnection(request);
-				stmt = connection.prepareStatement("UPDATE group_category SET group_category_name = ? WHERE id = ?");
-				stmt.setString(1, jsonGroupCategoryData.getString("group_category_name"));
-				stmt.setLong(2, jsonGroupCategoryData.getLong("id"));
-				int rowAffected = stmt.executeUpdate();
+			String sqlStatement = "UPDATE group_category SET group_category_name = ? WHERE id = ?";
+			stmt = connection.prepareStatement(sqlStatement);
+			stmt.setString(1, jsonGroupCategoryData.getString("group_category_name"));
+			stmt.setLong(2, jsonGroupCategoryData.getLong("id"));
+			int rowAffected = stmt.executeUpdate();
+			
+			System.out.println("Edit Row " + rowAffected);	
+			if(rowAffected == 1) {
 				
-				System.out.println("Edit Row " + rowAffected);	
-				if(rowAffected == 1) {
+				if(jsonGroupCategoryData.has("stores")) {
+					JSONArray array = jsonGroupCategoryData.getJSONArray("stores");
+					ArrayList<Long> storeList = new ArrayList<Long>();
+					for (int i = 0; i < array.length(); ++i) {
+						storeList.add(array.getLong(i));
+					}
 					
-					if(jsonGroupCategoryData.has("stores")) {		
-						JSONArray array = jsonGroupCategoryData.optJSONArray("stores");
-						System.out.println(array.length());
-	
-							stmt = connection.prepareStatement("UPDATE store SET group_category_id = 0 WHERE group_category_id = ?");
+					sqlStatement = "SELECT id FROM store WHERE group_category_id = ?";
+					stmt = connection.prepareStatement(sqlStatement);
+					stmt.setLong(1, jsonGroupCategoryData.getLong("id"));
+					rs = stmt.executeQuery();
+					while(rs.next()) {
+						Long storeId = rs.getLong("id");
+						if(!storeList.contains(storeId)) {
+							System.out.println("unassign store id:" + storeId);
+							// unassign store from group category	
+							sqlStatement = "UPDATE store SET group_category_id = 0 WHERE id = ?";						
+							stmt = connection.prepareStatement(sqlStatement);
+							stmt.setLong(1, storeId);
+							stmt.executeUpdate();				
+							
+							// update activated device with group category id
+							sqlStatement = "UPDATE device_info SET status_lookup_id = ?, mac_address = NULL, last_update_date = GETDATE(), group_category_id = 0 WHERE ref_id = ? AND group_category_id !=0";						
+							stmt = connection.prepareStatement(sqlStatement);
+							stmt.setLong(1, 3);
+							stmt.setLong(2, storeId);
+							stmt.executeUpdate();
+						}
+					}
+					
+					for(Long storeId: storeList) {
+						System.out.println("storeId:" + storeId);
+						// assign store to group category
+						sqlStatement = "UPDATE store SET group_category_id = ? WHERE id = ? AND group_category_id != ?";
+						stmt = connection.prepareStatement(sqlStatement);
+						stmt.setLong(1, jsonGroupCategoryData.getLong("id"));
+						stmt.setLong(2, storeId);
+						stmt.setLong(3, jsonGroupCategoryData.getLong("id"));
+						stmt.executeUpdate();
+						
+						// update activated device without group category id
+						sqlStatement = "UPDATE device_info SET group_category_id = ? WHERE group_category_id = 0 AND ref_id = ? AND status_lookup_id = ?";
+						stmt = connection.prepareStatement(sqlStatement);
+						stmt.setLong(1, jsonGroupCategoryData.getLong("id"));
+						stmt.setLong(2, storeId);
+						stmt.setLong(3, 2);
+						stmt.executeUpdate();
+					}
+					
+					
+					/*JSONArray array = jsonGroupCategoryData.optJSONArray("stores");
+					System.out.println(array.length());
+
+						stmt = connection.prepareStatement("UPDATE store SET group_category_id = 0 WHERE group_category_id = ?");
+						stmt.setLong(1, jsonGroupCategoryData.getLong("id"));
+						stmt.executeUpdate();
+
+						int[] stores = new int[array.length()];
+						
+						for (int i = 0; i < array.length(); ++i) {
+							stores[i] = array.optInt(i);
+						}
+						
+						for(int storeId: stores) {
+							stmt = connection.prepareStatement("UPDATE store SET group_category_id = ? WHERE id = ?");
 							stmt.setLong(1, jsonGroupCategoryData.getLong("id"));
+							stmt.setLong(2, storeId);
 							stmt.executeUpdate();
 
-							int[] stores = new int[array.length()];
-							
-							for (int i = 0; i < array.length(); ++i) {
-								stores[i] = array.optInt(i);
-							}
-							
-							for(int storeId: stores) {
-								stmt = connection.prepareStatement("UPDATE store SET group_category_id = ? WHERE id = ?");
-								stmt.setLong(1, jsonGroupCategoryData.getLong("id"));
-								stmt.setLong(2, storeId);
-								stmt.executeUpdate();
-							}
-						
-					}
-				}			
+						}*/
+					
+				}
+			}			
 		}catch(SQLServerException ex) {
 			ex.printStackTrace();
 			response.setStatus(409);
@@ -250,6 +306,14 @@ public class GroupCategoryRestController {
 				try {
 					connection.close();
 				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			if(rs!=null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -955,6 +1019,7 @@ public class GroupCategoryRestController {
 		String brandId = "";
 		
 		try {
+			System.out.println("initial: " + query);
 			if(insertTable!=null && !insertTable.equals("")) {
 				String tmpOn = "SET IDENTITY_INSERT [dbo].["+insertTable+"] ON;\r\n";
 				String tmpOff = "\r\nSET IDENTITY_INSERT [dbo].["+insertTable+"] OFF;";

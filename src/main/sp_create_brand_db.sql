@@ -170,8 +170,8 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 				staff_username NVARCHAR(100) NOT NULL UNIQUE,
 				staff_password NVARCHAR(200) NOT NULL,
 				staff_role INT NOT NULL,
-				staff_contact_hp_number NVARCHAR(50) NOT NULL UNIQUE,
-				staff_contact_email VARCHAR(320) NOT NULL UNIQUE,
+				staff_contact_hp_number NVARCHAR(50) NOT NULL,
+				staff_contact_email VARCHAR(320) NOT NULL,
 				is_active BIT DEFAULT 1 NOT NULL,
 				created_date DATETIME NOT NULL,
 				last_update_date DATETIME
@@ -231,6 +231,7 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 				status_lookup_id BIGINT DEFAULT 0,
 				device_type_lookup_id BIGINT DEFAULT 0,
 				ref_id BIGINT DEFAULT 0,
+				group_category_id BIGINT DEFAULT 0,
 				created_date DATETIME NOT NULL,
 				last_update_date DATETIME 
 			);

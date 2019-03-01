@@ -216,7 +216,15 @@
 		     arr.splice(new_index, 0, arr.splice(old_index, 1)[0]); 
 		}
 	    
-		$(document).ready(function() {			
+		$(document).ready(function() {
+			$("textarea").keydown(function(e){
+				if (e.keyCode == 13)
+				{
+				    // prevent default behavior
+				    e.preventDefault();
+				}
+			});
+			
 			//get menu item type
 			$http
 			.get(
@@ -438,6 +446,8 @@
 						});
 					} else if(response.status == "200") {
 						console.log(response.data);
+						
+						//$scope.menu_item.menu_item_description = $scope.menu_item.menu_item_description.replace(/\r?\n/g, '\\n');
 						
 						$scope.menu_item.id = response.data.id;
 						$scope.menu_item.backend_id = response.data.backend_id;

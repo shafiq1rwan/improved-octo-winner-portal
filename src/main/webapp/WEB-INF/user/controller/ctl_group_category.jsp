@@ -5,6 +5,7 @@
 		$scope.group_category = {};
 		$scope.stores = [];
 		$scope.action = "";
+		var ori_store_array = [];
 		var store_array = [];
 		var store_with_group_category_array = [];
 		
@@ -78,8 +79,8 @@
 		}
 		
 		$scope.updateGroupCategory = function() {
-			
-			console.log(store_array);
+			console.log('ori:' + ori_store_array.sort());
+			console.log('now:' + store_array.sort());
 		 	if($scope.group_category.group_category_name == '' || $scope.group_category.group_category_name == null){
 			}else{
 				
@@ -89,34 +90,79 @@
 					"stores": store_array
 				});
 				
-				console.log(jsonData);
-							
- 				$http
-				.post(
-						'${pageContext.request.contextPath}/menu/group_category/edit_group_category',
-						jsonData)
-				.then(
-						function(response) {							
-							$scope.resetModal();	
-							$('#createGroupCategoryModal').modal('toggle');
-							$scope.refreshGroupCategoryTable();		
-						},
-						function(response) {
-							$scope.resetModal();	
-							$('#createGroupCategoryModal').modal('toggle');
-							
-							if(response.status == 409)
-								{
-									alert(response.data.response_message);
-								}
-							else {
-								alert("Session TIME OUT");
-						 		$(location)
-								.attr('href',
-										'${pageContext.request.contextPath}/user');
-							}
+				console.log(jsonData);			
 				
-						}); 
+				//if(ori_store_array.sort().every(function(value, index) { console.log('here');return value === store_array.sort()[index]})){
+				if (ori_store_array.every(function(value, index) { return store_array.includes(value)})){
+					// only perform assign new stores
+					$http
+					.post(
+							'${pageContext.request.contextPath}/menu/group_category/edit_group_category',
+							jsonData)
+					.then(
+							function(response) {							
+								$scope.resetModal();	
+								$('#createGroupCategoryModal').modal('toggle');
+								$scope.refreshGroupCategoryTable();		
+							},
+							function(response) {
+								$scope.resetModal();	
+								$('#createGroupCategoryModal').modal('toggle');
+								
+								if(response.status == 409)
+									{
+										alert(response.data.response_message);
+									}
+								else {
+									alert("Session TIME OUT");
+							 		$(location)
+									.attr('href',
+											'${pageContext.request.contextPath}/user');
+								}
+					
+							}); 
+				}
+				else{
+					// got perform unassign store
+					swal({
+						  title: "Alert",
+						  text: "Unassign store will deactivate all existing activated devices.\nDo you want to proceed?",
+						  icon: "warning",
+						  buttons: true,
+						  dangerMode: true,
+						})
+						.then((willCreate) => {
+						  if (willCreate) {
+							  $http
+								.post(
+										'${pageContext.request.contextPath}/menu/group_category/edit_group_category',
+										jsonData)
+								.then(
+										function(response) {							
+											$scope.resetModal();	
+											$('#createGroupCategoryModal').modal('toggle');
+											$scope.refreshGroupCategoryTable();		
+										},
+										function(response) {
+											$scope.resetModal();	
+											$('#createGroupCategoryModal').modal('toggle');
+											
+											if(response.status == 409)
+												{
+													alert(response.data.response_message);
+												}
+											else {
+												alert("Session TIME OUT");
+										 		$(location)
+												.attr('href',
+														'${pageContext.request.contextPath}/user');
+											}
+								
+										}); 
+						}					 
+					});	
+				}
+			
 			} 
 		}
 		
@@ -124,6 +170,7 @@
 			$scope.group_category = {};
 			$scope.stores = [];
 			$scope.action = "";
+			ori_store_array = [];
 			store_array = [];
 			store_with_group_category_array = [];
 		}
@@ -175,7 +222,8 @@
 						$scope.group_category.group_category_name = response.data.group_category_name;
 						$scope.action = 'update';
 						$scope.getStore('update');
-						$('#createGroupCategoryModal').modal('toggle');
+						//$('#createGroupCategoryModal').modal('toggle');
+						$('#createGroupCategoryModal').modal({backdrop: 'static', keyboard: false});	
 					}
 				});
 			});
@@ -206,7 +254,8 @@
 				else if($scope.action === 'update'){
 					
 					for(var i=0;i<response.data.length;i++){
-						if(response.data[i].group_category_id != 0){			
+						if(response.data[i].group_category_id != 0){
+							ori_store_array.push(response.data[i].id);
 							store_array.push(response.data[i].id);
 						}
 					}

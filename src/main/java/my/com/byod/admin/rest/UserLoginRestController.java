@@ -1,5 +1,8 @@
 package my.com.byod.admin.rest;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -7,12 +10,13 @@ import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
+
+import my.com.byod.admin.util.DbConnectionUtil;
 
 
 @RestController
@@ -24,6 +28,9 @@ public class UserLoginRestController {
 	
 	@Autowired
 	StoreRestController storeRestController;
+	
+	@Autowired
+	DbConnectionUtil dbConnectionUtil;
 	
 	// SIGNIN
 	@RequestMapping(value = { "/signin" }, method = RequestMethod.GET)
@@ -98,12 +105,25 @@ public class UserLoginRestController {
 	@RequestMapping(value = { "/views/store/{id}/ecpos" }, method = RequestMethod.GET)
 	public ModelAndView viewECPos(@PathVariable(value = "id") long id, HttpServletRequest request, HttpServletResponse response) {
 		ModelAndView model = new ModelAndView();
-		
-		if(storeRestController.getEcposStatus(id, request)) {
-			model.setViewName("/user/views/ecpos");
-		}
-		else {
-			model.setViewName("/user/views/unauthorized");
+		Connection connection = null;
+		try {
+			connection = dbConnectionUtil.retrieveConnection(request);
+			if(storeRestController.getEcposStatus(connection, id)) {
+				model.setViewName("/user/views/ecpos");
+			}
+			else {
+				model.setViewName("/user/views/unauthorized");
+			}
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		} finally {
+			if(connection!=null)
+				try {
+					connection.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 		}
 		return model;
 	}
@@ -208,14 +228,6 @@ public class UserLoginRestController {
 	public ModelAndView viewAssignModifier(@PathVariable("id") long id) {
 		ModelAndView model = new ModelAndView();
 		model.setViewName("/user/views/assign_modifier");
-		return model;
-	}
-	
-	// User Management
-	@RequestMapping(value = { "/views/userMgmt" }, method = RequestMethod.GET)
-	public ModelAndView viewUsers() {
-		ModelAndView model = new ModelAndView();
-		model.setViewName("/user/views/user");
 		return model;
 	}
 	

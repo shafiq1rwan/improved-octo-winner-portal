@@ -85,6 +85,7 @@ public class DeviceConfigRestController {
 		System.out.println("type:"+ type);
 		try {
 			connection = dbConnectionUtil.getConnection(brandId);
+			connection.setAutoCommit(false);
 			deviceInfo = verifyActivation(connection, activationId, activationKey, type);
 			if(deviceInfo==null) {
 				resultCode = "E02";
@@ -105,16 +106,24 @@ public class DeviceConfigRestController {
 				resultCode = "E06";
 				resultMessage = "Store info is not published.";
 			}
-			else if(activateDevice(connection, deviceInfo.getLong("id"), macAddress)) {
+			else if(activateDevice(connection, deviceInfo.getLong("id"), macAddress, deviceInfo.getLong("groupCategoryId"))) {
 				// successful activation
 				
 				// ecpos retrieve extra info
 				if(type==1) {
 					JSONArray ecposStaffInfo = getEcposStaffInfo(connection, deviceInfo.getLong("refId"));
-					JSONArray ecposStaffRole = getEcposStaffRole(connection);
+					JSONArray ecposStaffRole = getEcposStaffRole(connection);					
+					if(ecposStaffInfo.length()==0) {
+						resultCode = "E07";
+						resultMessage = "Please create at least one staff login before activation.";
+						throw new IllegalArgumentException("There is no staff login info.");
+					}		
 					result.put("staffInfo", ecposStaffInfo);
 					result.put("staffRole", ecposStaffRole);
 				}
+				
+				connection.commit();
+				connection.setAutoCommit(true);
 				
 				JSONObject storeInfo = getStoreInfo(connection, deviceInfo.getLong("refId"), brandId);
 				result.put("storeInfo", storeInfo);
@@ -149,9 +158,16 @@ public class DeviceConfigRestController {
 				
 		} catch (Exception ex) {
 			ex.printStackTrace();
+			try {
+				if (connection != null && !connection.getAutoCommit()) {
+					connection.rollback();
+				}
+			} catch (Exception e) {
+			}
 		} finally {
 			if (connection != null) {
 				try {
+					connection.setAutoCommit(true);
 					connection.close();
 				} catch(Exception ex) {
 				}
@@ -345,7 +361,7 @@ public class DeviceConfigRestController {
 		JSONObject result = null;
 		try {
 			//connection = dataSource.getConnection();
-			sqlStatement = "SELECT * FROM device_info a "
+			sqlStatement = "SELECT b.group_category_id AS 'groupCategoryId', * FROM device_info a "
 					+ "INNER JOIN store b ON b.id = a.ref_id "
 					+ "WHERE a.activation_id = ? AND a.activation_key = ? AND a.device_type_lookup_id = ? ";
 			ps1 = connection.prepareStatement(sqlStatement);
@@ -360,6 +376,7 @@ public class DeviceConfigRestController {
 				result.put("refId", rs1.getLong("ref_id"));
 				result.put("statusLookupId", rs1.getLong("status_lookup_id"));
 				result.put("storeStatus", rs1.getLong("is_publish"));
+				result.put("groupCategoryId", rs1.getLong("groupCategoryId"));
 				//result.put("typeId", rs1.getLong("device_type_lookup_id"));
 			}
 			
@@ -377,18 +394,19 @@ public class DeviceConfigRestController {
 		return result;
 	}
 	
-	private boolean activateDevice(Connection connection, Long id, String macAddress) throws Exception {
+	private boolean activateDevice(Connection connection, Long id, String macAddress, Long groupCategoryId) throws Exception {
 		String sqlStatement = null;
 		PreparedStatement ps1 = null;
 		int rowAffected = 0;
 		boolean flag = false;
 		try {
 			//connection = dataSource.getConnection();
-			sqlStatement = "UPDATE device_info SET mac_address = ? , last_update_date = GETDATE(), status_lookup_id = ? WHERE id = ? ";
+			sqlStatement = "UPDATE device_info SET mac_address = ? , last_update_date = GETDATE(), status_lookup_id = ?, group_category_id = ? WHERE id = ? ";
 			ps1 = connection.prepareStatement(sqlStatement);
 			ps1.setString(1, macAddress);
 			ps1.setInt(2, 2);
-			ps1.setLong(3, id);
+			ps1.setLong(3, groupCategoryId);
+			ps1.setLong(4, id);
 			rowAffected = ps1.executeUpdate();
 
 			if (rowAffected==1) {
@@ -709,7 +727,7 @@ public class DeviceConfigRestController {
 		try {
 			//connection = dataSource.getConnection();
 			sqlStatement = "SELECT * FROM device_info a "
-					+ "INNER JOIN store b ON b.id = a.ref_id "
+					+ "INNER JOIN store b ON b.id = a.ref_id AND a.group_category_id = b.group_category_id "
 					+ "WHERE a.activation_id = ? AND a.ref_id = ?";
 			ps1 = connection.prepareStatement(sqlStatement);
 			ps1.setString(1, activationId);

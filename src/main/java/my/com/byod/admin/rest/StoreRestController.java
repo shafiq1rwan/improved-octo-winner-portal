@@ -7,20 +7,16 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.sql.DataSource;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,6 +27,7 @@ import my.com.byod.admin.entity.Store;
 import my.com.byod.admin.service.StoreService;
 import my.com.byod.admin.util.ByodUtil;
 import my.com.byod.admin.util.DbConnectionUtil;
+import my.com.byod.order.util.AESEncryption;
 
 @RestController
 @RequestMapping("/menu/store")
@@ -49,7 +46,7 @@ public class StoreRestController {
 	private ByodUtil byodUtil;
 	
 	@Autowired
-	private DbConnectionUtil dbConnectionUtil;
+	private DbConnectionUtil dbConnectionUtil;	
 	
 	// Store
 	@GetMapping("")
@@ -58,10 +55,10 @@ public class StoreRestController {
 		try {
 			Connection connection = dbConnectionUtil.retrieveConnection(request);
 			String brandId = byodUtil.getGeneralConfig(connection, "BRAND_ID");
+			connection.close();
 			for(Store store: stores) {
 				store.setLogoPath(displayFilePath + brandId + "/" + store.getLogoPath());
 			}
-			connection.close();
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
@@ -74,10 +71,10 @@ public class StoreRestController {
 		try {
 			Connection connection = dbConnectionUtil.retrieveConnection(request);
 			String brandId = byodUtil.getGeneralConfig(connection, "BRAND_ID");
+			connection.close();
 			if (existingStore.getId() == 0)
 				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 			existingStore.setLogoPath(displayFilePath + brandId + "/" + existingStore.getLogoPath());
-			connection.close();
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
@@ -89,8 +86,8 @@ public class StoreRestController {
 		try {
 			Connection connection = dbConnectionUtil.retrieveConnection(request);
 			String brandId = byodUtil.getGeneralConfig(connection, "BRAND_ID");
-			int rowAffected = storeService.createStore(store, brandId);
 			connection.close();
+			int rowAffected = storeService.createStore(store, brandId);
 			if (rowAffected == 0)
 				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 			return new ResponseEntity<>(HttpStatus.OK);
@@ -104,12 +101,12 @@ public class StoreRestController {
 		try {
 			Connection connection = dbConnectionUtil.retrieveConnection(request);
 			String brandId = byodUtil.getGeneralConfig(connection, "BRAND_ID");
+			connection.close();
 			Store existingStore = storeService.findStoreById(store.getId());
 			if (existingStore.getId() == 0)
 				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
 			int rowAffected = storeService.editStore(store.getId(), store, brandId);
-			connection.close();
 			if (rowAffected == 0)
 				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
@@ -227,8 +224,9 @@ public class StoreRestController {
 				jsonObj = new JSONObject();
 				jsonObj.put("id", rs.getLong("id"));
 				jsonObj.put("name", rs.getString("staff_name"));
-				jsonObj.put("username", rs.getString("staff_username"));	
-				jsonObj.put("password", rs.getString("staff_password"));	
+				jsonObj.put("username", rs.getString("staff_username"));
+				String decPassword = AESEncryption.decrypt(rs.getString("staff_password"));
+				jsonObj.put("password", decPassword);	
 				jsonObj.put("role_id", rs.getLong("staff_role"));	
 				jsonObj.put("mobilePhone", rs.getString("staff_contact_hp_number"));	
 				jsonObj.put("email", rs.getString("staff_contact_email"));
@@ -274,8 +272,9 @@ public class StoreRestController {
 				jsonObj = new JSONObject();
 				jsonObj.put("id", rs.getLong("id"));
 				jsonObj.put("name", rs.getString("staff_name"));
-				jsonObj.put("username", rs.getString("staff_username"));	
-				jsonObj.put("password", rs.getString("staff_password"));	
+				jsonObj.put("username", rs.getString("staff_username"));
+				String decPassword = AESEncryption.decrypt(rs.getString("staff_password"));
+				jsonObj.put("password", decPassword);	
 				jsonObj.put("role_id", rs.getLong("staff_role"));	
 				jsonObj.put("mobilePhone", rs.getString("staff_contact_hp_number"));	
 				jsonObj.put("email", rs.getString("staff_contact_email"));
@@ -339,6 +338,7 @@ public class StoreRestController {
 			}
 			
 			System.out.println(jsonObj.toString());
+			String encPassword = AESEncryption.encrypt(jsonObj.getString("password"));
 			
 			connection = dbConnectionUtil.retrieveConnection(request);
 			stmt = connection.prepareStatement("INSERT INTO staff (store_id, staff_name, staff_username, staff_password, staff_role, staff_contact_hp_number,"
@@ -346,7 +346,7 @@ public class StoreRestController {
 			stmt.setLong(count++, jsonObj.getLong("store_id"));
 			stmt.setString(count++, jsonObj.getString("name"));
 			stmt.setString(count++, jsonObj.getString("username"));
-			stmt.setString(count++, jsonObj.getString("password"));
+			stmt.setString(count++, encPassword);
 			stmt.setLong(count++, jsonObj.getLong("role_id"));
 			stmt.setString(count++, jsonObj.getString("mobilePhone"));
 			stmt.setString(count++, jsonObj.getString("email"));
@@ -418,6 +418,7 @@ public class StoreRestController {
 			}		
 			
 			System.out.println(jsonObj.toString());
+			String encPassword = AESEncryption.encrypt(jsonObj.getString("password"));
 			
 			connection = dbConnectionUtil.retrieveConnection(request);
 			stmt = connection.prepareStatement("UPDATE staff SET staff_name = ?, staff_username = ?, staff_password = ?, staff_role = ?, staff_contact_hp_number = ?,"
@@ -425,7 +426,7 @@ public class StoreRestController {
 			
 			stmt.setString(count++, jsonObj.getString("name"));
 			stmt.setString(count++, jsonObj.getString("username"));
-			stmt.setString(count++, jsonObj.getString("password"));
+			stmt.setString(count++, encPassword);
 			stmt.setLong(count++, jsonObj.getLong("role_id"));
 			stmt.setString(count++, jsonObj.getString("mobilePhone"));
 			stmt.setString(count++, jsonObj.getString("email"));
@@ -462,10 +463,11 @@ public class StoreRestController {
 		ResultSet rs = null;
 		
 		try {
-			if(checkDeviceInfoExist(1, store_id, request))
+			connection = dbConnectionUtil.retrieveConnection(request);
+			if(checkDeviceInfoExist(connection, 1, store_id))
 				return ResponseEntity.status(HttpStatus.CONFLICT).contentType(MediaType.TEXT_PLAIN).body("ECPOS has already been activated.");
 			
-			int rowAffected = createDeviceInfo(1, store_id, request);
+			int rowAffected = createDeviceInfo(connection, 1, store_id);
 			if(rowAffected==0)
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Failed to generate ECPOS activation info.");
 					
@@ -493,10 +495,11 @@ public class StoreRestController {
 		ResultSet rs = null;
 		
 		try {
-			if(!getEcposStatus(store_id, request))
+			connection = dbConnectionUtil.retrieveConnection(request);
+			if(!getEcposStatus(connection, store_id))
 				return new ResponseEntity<>(HttpStatus.BAD_REQUEST); 
 				
-			jsonArray = getDeviceInfoByStoreId(1, store_id, request);
+			jsonArray = getDeviceInfoByStoreId(connection, 1, store_id);
 			if(jsonArray.length()==0) {
 				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 			}
@@ -529,11 +532,11 @@ public class StoreRestController {
 		ResultSet rs = null;
 		
 		try {
-			
-			if(!getEcposStatus(store_id, request))
+			connection = dbConnectionUtil.retrieveConnection(request);
+			if(!getEcposStatus(connection, store_id))
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("ECPOS is disabled.");
 			
-			jsonArray = getDeviceInfoByStoreId(1, store_id, request);
+			jsonArray = getDeviceInfoByStoreId(connection, 1, store_id);
 			if(jsonArray.length()==0) {
 				return ResponseEntity.status(HttpStatus.NOT_FOUND).contentType(MediaType.TEXT_PLAIN).body("Unable to find ECPOS info.");
 			}
@@ -545,12 +548,10 @@ public class StoreRestController {
 			Long statusLookupId = jsonObj.getLong("status_lookup_id");
 			if(statusLookupId==3)
 				return ResponseEntity.status(HttpStatus.CONFLICT).contentType(MediaType.TEXT_PLAIN).body("ECPOS is already inactive.");
-
 			
 			Long id = jsonObj.getLong("id");
-			if(!updateDeviceStatus(id, 3, request))
-				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Failed to terminate ECPOS.");
-		
+			if(!updateDeviceStatus(connection, id, 3))
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Failed to terminate ECPOS.");	
 			
 		}catch(Exception ex) {
 			ex.printStackTrace();
@@ -576,10 +577,11 @@ public class StoreRestController {
 		ResultSet rs = null;
 		
 		try {
-			if(!getEcposStatus(store_id, request))
+			connection = dbConnectionUtil.retrieveConnection(request);
+			if(!getEcposStatus(connection, store_id))
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("ECPOS is disabled.");
 			
-			jsonArray = getDeviceInfoByStoreId(1, store_id, request);
+			jsonArray = getDeviceInfoByStoreId(connection, 1, store_id);
 			if(jsonArray.length()==0) {
 				return ResponseEntity.status(HttpStatus.NOT_FOUND).contentType(MediaType.TEXT_PLAIN).body("Unable to find ECPOS info.");
 			}
@@ -593,9 +595,8 @@ public class StoreRestController {
 				return ResponseEntity.status(HttpStatus.CONFLICT).contentType(MediaType.TEXT_PLAIN).body("ECPOS is already reactivated.");
 			
 			Long id = jsonObj.getLong("id");
-			if(!updateDeviceStatus(id, 1, request))
+			if(!updateDeviceStatus(connection, id, 1))
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Failed to reactivate ECPOS.");		
-		
 			
 		}catch(Exception ex) {
 			ex.printStackTrace();
@@ -636,7 +637,7 @@ public class StoreRestController {
 				jsonObj.put("id", rs.getLong("id"));		
 				jsonObj.put("backend_id", rs.getString("backend_id"));
 				jsonObj.put("store_name", rs.getString("store_name"));				
-				jsonObj.put("byod", getDeviceInfoByStoreId(2, store_id, request));
+				jsonObj.put("byod", getDeviceInfoByStoreId(connection, 2, store_id));
 			}
 			
 		}catch(Exception ex) {
@@ -662,7 +663,8 @@ public class StoreRestController {
 		ResultSet rs = null;
 		
 		try {
-			int rowAffected = createDeviceInfo(2, store_id, request);
+			connection = dbConnectionUtil.retrieveConnection(request);
+			int rowAffected = createDeviceInfo(connection, 2, store_id);
 			if(rowAffected==0)
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Failed to generate BYOD activation info.");
 					
@@ -690,7 +692,8 @@ public class StoreRestController {
 		ResultSet rs = null;
 		
 		try {
-			jsonObj = getDeviceInfoByActivationId(activation_id, request);
+			connection = dbConnectionUtil.retrieveConnection(request);
+			jsonObj = getDeviceInfoByActivationId(connection, activation_id);
 			if(jsonObj == null) {
 				return ResponseEntity.status(HttpStatus.NOT_FOUND).contentType(MediaType.TEXT_PLAIN).body("Unable to find BYOD info.");
 			}
@@ -700,9 +703,8 @@ public class StoreRestController {
 				return ResponseEntity.status(HttpStatus.CONFLICT).contentType(MediaType.TEXT_PLAIN).body("BYOD is already inactive.");
 			
 			Long id = jsonObj.getLong("id");
-			if(!updateDeviceStatus(id, 3, request))
+			if(!updateDeviceStatus(connection, id, 3))
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Failed to terminate BYOD.");
-		
 			
 		}catch(Exception ex) {
 			ex.printStackTrace();
@@ -728,7 +730,8 @@ public class StoreRestController {
 		ResultSet rs = null;
 		
 		try {
-			jsonObj = getDeviceInfoByActivationId(activation_id, request);
+			connection = dbConnectionUtil.retrieveConnection(request);
+			jsonObj = getDeviceInfoByActivationId(connection, activation_id);
 			if(jsonObj == null) {
 				return ResponseEntity.status(HttpStatus.NOT_FOUND).contentType(MediaType.TEXT_PLAIN).body("Unable to find BYOD info.");
 			}
@@ -738,7 +741,7 @@ public class StoreRestController {
 				return ResponseEntity.status(HttpStatus.CONFLICT).contentType(MediaType.TEXT_PLAIN).body("BYOD is already reactivated.");
 			
 			Long id = jsonObj.getLong("id");
-			if(!updateDeviceStatus(id, 1, request))
+			if(!updateDeviceStatus(connection, id, 1))
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Failed to reactivate BYOD.");			
 			
 		}catch(Exception ex) {
@@ -769,10 +772,9 @@ public class StoreRestController {
 		
 		try {
 			connection = dbConnectionUtil.retrieveConnection(request);
-
-			 stmt = connection.prepareStatement("SELECT * FROM store WHERE id = ?");
-			 stmt.setLong(1, store_id);
-			 rs = (ResultSet) stmt.executeQuery();
+			stmt = connection.prepareStatement("SELECT * FROM store WHERE id = ?");
+			stmt.setLong(1, store_id);
+			rs = (ResultSet) stmt.executeQuery();
 			
 			jsonObj = new JSONObject();
 			if(rs.next()) {
@@ -780,7 +782,7 @@ public class StoreRestController {
 				jsonObj.put("id", rs.getLong("id"));		
 				jsonObj.put("backend_id", rs.getString("backend_id"));
 				jsonObj.put("store_name", rs.getString("store_name"));				
-				jsonObj.put("kiosk", getDeviceInfoByStoreId(3, store_id, request));
+				jsonObj.put("kiosk", getDeviceInfoByStoreId(connection, 3, store_id));
 			}
 			
 		}catch(Exception ex) {
@@ -806,7 +808,8 @@ public class StoreRestController {
 		ResultSet rs = null;
 		
 		try {
-			int rowAffected = createDeviceInfo(3, store_id, request);
+			connection = dbConnectionUtil.retrieveConnection(request);
+			int rowAffected = createDeviceInfo(connection, 3, store_id);
 			if(rowAffected==0)
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Failed to generate KIOSK activation info.");
 					
@@ -834,7 +837,8 @@ public class StoreRestController {
 		ResultSet rs = null;
 		
 		try {
-			jsonObj = getDeviceInfoByActivationId(activation_id, request);
+			connection = dbConnectionUtil.retrieveConnection(request);
+			jsonObj = getDeviceInfoByActivationId(connection, activation_id);
 			if(jsonObj == null) {
 				return ResponseEntity.status(HttpStatus.NOT_FOUND).contentType(MediaType.TEXT_PLAIN).body("Unable to find KIOSK info.");
 			}
@@ -844,7 +848,7 @@ public class StoreRestController {
 				return ResponseEntity.status(HttpStatus.CONFLICT).contentType(MediaType.TEXT_PLAIN).body("KIOSK is already inactive.");
 			
 			Long id = jsonObj.getLong("id");
-			if(!updateDeviceStatus(id, 3, request))
+			if(!updateDeviceStatus(connection, id, 3))
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Failed to terminate KIOSK.");
 		
 			
@@ -872,7 +876,8 @@ public class StoreRestController {
 		ResultSet rs = null;
 		
 		try {
-			jsonObj = getDeviceInfoByActivationId(activation_id,request);
+			connection = dbConnectionUtil.retrieveConnection(request);
+			jsonObj = getDeviceInfoByActivationId(connection, activation_id);
 			if(jsonObj == null) {
 				return ResponseEntity.status(HttpStatus.NOT_FOUND).contentType(MediaType.TEXT_PLAIN).body("Unable to find KIOSK info.");
 			}
@@ -882,7 +887,7 @@ public class StoreRestController {
 				return ResponseEntity.status(HttpStatus.CONFLICT).contentType(MediaType.TEXT_PLAIN).body("KIOSK is already reactivated.");
 			
 			Long id = jsonObj.getLong("id");
-			if(!updateDeviceStatus(id, 1, request))
+			if(!updateDeviceStatus(connection, id, 1))
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Failed to reactivate KIOSK.");			
 			
 		}catch(Exception ex) {
@@ -901,8 +906,7 @@ public class StoreRestController {
 	
 	/*End KIOSK API*/
 	
-	public boolean getEcposStatus(long store_id, HttpServletRequest request) {	
-		Connection connection = null;
+	public boolean getEcposStatus(Connection connection, long store_id) throws Exception {	
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		int count = 1;
@@ -910,137 +914,116 @@ public class StoreRestController {
 		boolean flag = false;
 		
 		try {
-			connection = dbConnectionUtil.retrieveConnection(request);
-			stmt = connection.prepareStatement("SELECT ecpos FROM store WHERE id = ? ");
-			
+			stmt = connection.prepareStatement("SELECT ecpos FROM store WHERE id = ? ");	
 			stmt.setLong(count++, store_id);
-			rs = (ResultSet) stmt.executeQuery();
-			 
+			rs = stmt.executeQuery();			 
 			if(rs.next()) {
 				flag = rs.getBoolean("ecpos");
 			}
 			
 		}catch(Exception ex) {
-			ex.printStackTrace();
+			throw ex;
 		} finally {
-			if (connection != null) {
-				try {
-					connection.close();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+			if (rs != null) {
+				rs.close();
+			}
+			if (stmt != null) {
+				stmt.close();
 			}
 		}
 		return flag;
 	}
 	
-	private String getDevicePrefix(long deviceTypeId, HttpServletRequest request) {	
-		Connection connection = null;
+	private String getDevicePrefix(Connection connection, long deviceTypeId) throws Exception {	
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		int count = 1;
 		String prefix = "";
 		
 		try {
-			connection = dbConnectionUtil.retrieveConnection(request);
-			stmt = connection.prepareStatement("SELECT prefix FROM device_type_lookup WHERE id = ? ");
-			
+			stmt = connection.prepareStatement("SELECT prefix FROM device_type_lookup WHERE id = ? ");		
 			stmt.setLong(count++, deviceTypeId);
-			rs = (ResultSet) stmt.executeQuery();
-			 
+			rs = stmt.executeQuery();		 
 			if(rs.next()) {
 				prefix = rs.getString("prefix");
 			}
 			
 		}catch(Exception ex) {
-			ex.printStackTrace();
+			throw ex;
 		} finally {
-			if (connection != null) {
-				try {
-					connection.close();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+			if (rs != null) {
+				rs.close();
+			}
+			if (stmt != null) {
+				stmt.close();
 			}
 		}
 		return prefix;
 	}
 	
-	private boolean checkDeviceInfoExist(long deviceTypeId, long referenceId, HttpServletRequest request) {	
-		Connection connection = null;
+	private boolean checkDeviceInfoExist(Connection connection, long deviceTypeId, long referenceId) throws Exception {	
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		int count = 1;
 		boolean exist = false;
 		
 		try {
-			connection = dbConnectionUtil.retrieveConnection(request);
-			stmt = connection.prepareStatement("SELECT * FROM device_info WHERE device_type_lookup_id = ? AND ref_id = ? ");
-			
+			stmt = connection.prepareStatement("SELECT * FROM device_info WHERE device_type_lookup_id = ? AND ref_id = ? ");	
 			stmt.setLong(count++, deviceTypeId);
 			stmt.setLong(count++, referenceId);
-			rs = (ResultSet) stmt.executeQuery();
-			
+			rs = stmt.executeQuery();			
 			if(rs.next()) {
 				exist = true;
 			}
 			
 		}catch(Exception ex) {
-			ex.printStackTrace();
+			throw ex;
 		} finally {
-			if (connection != null) {
-				try {
-					connection.close();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+			if (rs != null) {
+				rs.close();
+			}
+			if (stmt != null) {
+				stmt.close();
 			}
 		}
 		return exist;
 	}
 	
-	private int createDeviceInfo(long deviceTypeId, long referenceId, HttpServletRequest request) {	
-		Connection connection = null;
+	private int createDeviceInfo(Connection connection, long deviceTypeId, long referenceId) throws Exception {	
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		int count = 1;
 		int result = 0;
 		
 		try {
-			String prefix = getDevicePrefix(deviceTypeId, request);
+			String prefix = getDevicePrefix(connection, deviceTypeId);				
 			
-			connection = dbConnectionUtil.retrieveConnection(request);
-			stmt = connection.prepareStatement("INSERT INTO device_info (activation_id, activation_key, status_lookup_id, device_type_lookup_id, ref_id, created_date) "
-					+ "VALUES (?, ? ,? ,? ,? , GETDATE()); SELECT SCOPE_IDENTITY();");
-			
+			stmt = connection.prepareStatement("INSERT INTO device_info (activation_id, activation_key, status_lookup_id, device_type_lookup_id, ref_id, created_date, group_category_id) "
+					+ "VALUES (?, ? ,? ,? ,? , GETDATE(), 0); SELECT SCOPE_IDENTITY();");	
 			stmt.setString(count++, byodUtil.createUniqueActivationId(prefix));
 			stmt.setString(count++, byodUtil.createRandomDigit(16));
 			stmt.setInt(count++, 1);
 			stmt.setLong(count++, deviceTypeId);
 			stmt.setLong(count++, referenceId);
-
-			rs = (ResultSet) stmt.executeQuery();
-			
+			rs = stmt.executeQuery();		
 			if(rs.next()) {
 				result = rs.getInt(1);
 			}
 			
 		}catch(Exception ex) {
-			ex.printStackTrace();
+			throw ex;
 		} finally {
-			if (connection != null) {
-				try {
-					connection.close();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+			if (rs != null) {
+				rs.close();
+			}
+			if (stmt != null) {
+				stmt.close();
 			}
 		}
 		return result;
 	}
 	
-	private JSONArray getDeviceInfoByStoreId(long deviceTypeId, long referenceId, HttpServletRequest request) {	
-		Connection connection = null;
+	private JSONArray getDeviceInfoByStoreId(Connection connection, long deviceTypeId, long referenceId) throws Exception {	
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		JSONObject jsonObj = null;
@@ -1048,15 +1031,11 @@ public class StoreRestController {
 		int count = 1;
 		
 		try {
-			connection = dbConnectionUtil.retrieveConnection(request);
 			stmt = connection.prepareStatement("SELECT a.*, b.name AS status FROM device_info a "
-					+ "INNER JOIN status_lookup b ON a.status_lookup_id = b.id WHERE a.device_type_lookup_id = ? AND a.ref_id = ? ORDER BY a.created_date DESC");
-			
+					+ "INNER JOIN status_lookup b ON a.status_lookup_id = b.id WHERE a.device_type_lookup_id = ? AND a.ref_id = ? ORDER BY a.created_date DESC");	
 			stmt.setLong(count++, deviceTypeId);
 			stmt.setLong(count++, referenceId);
-
-			rs = (ResultSet) stmt.executeQuery();
-			
+			rs = stmt.executeQuery();	
 			while(rs.next()) {
 				jsonObj = new JSONObject();
 				jsonObj.put("id", rs.getLong("id"));
@@ -1070,21 +1049,19 @@ public class StoreRestController {
 			}
 			
 		}catch(Exception ex) {
-			ex.printStackTrace();
+			throw ex;
 		} finally {
-			if (connection != null) {
-				try {
-					connection.close();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+			if (rs != null) {
+				rs.close();
+			}
+			if (stmt != null) {
+				stmt.close();
 			}
 		}
 		return jsonArray;
 	}
 	
-	private JSONObject getDeviceInfoByActivationId(String activationId, HttpServletRequest request) {	
-		Connection connection = null;
+	private JSONObject getDeviceInfoByActivationId(Connection connection, String activationId) throws Exception {	
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		JSONObject jsonObj = null;
@@ -1092,14 +1069,10 @@ public class StoreRestController {
 		int count = 1;
 		
 		try {
-			connection = dbConnectionUtil.retrieveConnection(request);
 			stmt = connection.prepareStatement("SELECT a.*, b.name AS status FROM device_info a "
-					+ "INNER JOIN status_lookup b ON a.status_lookup_id = b.id WHERE a.activation_id = ?");
-			
+					+ "INNER JOIN status_lookup b ON a.status_lookup_id = b.id WHERE a.activation_id = ?");			
 			stmt.setString(count++, activationId);
-
-			rs = (ResultSet) stmt.executeQuery();
-			
+			rs = stmt.executeQuery();	
 			if(rs.next()) {
 				jsonObj = new JSONObject();
 				jsonObj.put("id", rs.getLong("id"));
@@ -1112,50 +1085,48 @@ public class StoreRestController {
 			}
 			
 		}catch(Exception ex) {
-			ex.printStackTrace();
+			throw ex;
 		} finally {
-			if (connection != null) {
-				try {
-					connection.close();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+			if (rs != null) {
+				rs.close();
+			}
+			if (stmt != null) {
+				stmt.close();
 			}
 		}
 		return jsonObj;
 	}
 	
-	private boolean updateDeviceStatus(long id, long statusTypeId, HttpServletRequest request) {	
-		Connection connection = null;
+	private boolean updateDeviceStatus(Connection connection, long id, long statusTypeId) throws Exception {	
 		PreparedStatement stmt = null;
 		int count = 1;
 		boolean flag = false;
+		String sqlStatement = "";
 		
 		try {
-			connection = dbConnectionUtil.retrieveConnection(request);
-			stmt = connection.prepareStatement("UPDATE device_info SET status_lookup_id = ?, mac_address = NULL, last_update_date = GETDATE() WHERE id = ? ;");
-			
+			if(statusTypeId==3) {
+				// deactivate
+				// update group_category_id to 0
+				sqlStatement = "UPDATE device_info SET status_lookup_id = ?, mac_address = NULL, last_update_date = GETDATE(), group_category_id = 0 WHERE id = ?;";
+			}
+			else {
+				sqlStatement = "UPDATE device_info SET status_lookup_id = ?, mac_address = NULL, last_update_date = GETDATE() WHERE id = ?;";
+			}
+			stmt = connection.prepareStatement(sqlStatement);
 			stmt.setLong(count++, statusTypeId);
 			stmt.setLong(count++, id);
-
-			int rowAffected = stmt.executeUpdate();
-			
+			int rowAffected = stmt.executeUpdate();		
 			if(rowAffected==1) {
 				flag = true;
 			}
 			
 		}catch(Exception ex) {
-			ex.printStackTrace();
+			throw ex;
 		} finally {
-			if (connection != null) {
-				try {
-					connection.close();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+			if (stmt != null) {
+				stmt.close();
 			}
 		}
 		return flag;
 	}
-	
 }
