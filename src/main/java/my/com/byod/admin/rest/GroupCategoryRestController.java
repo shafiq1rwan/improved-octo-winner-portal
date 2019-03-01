@@ -959,7 +959,7 @@ public class GroupCategoryRestController {
 				String tmpOn = "SET IDENTITY_INSERT [dbo].["+insertTable+"] ON;\r\n";
 				String tmpOff = "\r\nSET IDENTITY_INSERT [dbo].["+insertTable+"] OFF;";
 				query = tmpOn + query.substring(0, query.indexOf("(")+1) + "id, " + query.substring(query.indexOf("(")+1);
-				query = query.substring(0, query.lastIndexOf("(")+1) + "?, " + query.substring(query.lastIndexOf("(")+1) + tmpOff;
+				query = query.substring(0,  query.indexOf("(", query.indexOf("(")+1)+1 ) + "?, " + query.substring(query.indexOf("(", query.indexOf("(")+1)+1) + tmpOff;
 			}
 			System.out.println(query);
 			System.out.println(parameters.length);
