@@ -35,6 +35,8 @@ public class LanguagePackEN {
 	public String dialog_cart_add_success_title;
 	public String dialog_cart_edit_success_title;
 	public String dialog_delete_cart_item_title;
+	public String dialog_send_order_success_title;
+	public String dialog_send_order_failed_title;
 	public String dialog_button_ok;
 	public String dialog_button_yes;
 	public String dialog_button_no;
@@ -188,6 +190,18 @@ public class LanguagePackEN {
 	}
 	public void setDialog_delete_cart_item_title(String dialog_delete_cart_item_title) {
 		this.dialog_delete_cart_item_title = dialog_delete_cart_item_title;
+	}
+	public String getDialog_send_order_success_title() {
+		return dialog_send_order_success_title;
+	}
+	public void setDialog_send_order_success_title(String dialog_send_order_success_title) {
+		this.dialog_send_order_success_title = dialog_send_order_success_title;
+	}
+	public String getDialog_send_order_failed_title() {
+		return dialog_send_order_failed_title;
+	}
+	public void setDialog_send_order_failed_title(String dialog_send_order_failed_title) {
+		this.dialog_send_order_failed_title = dialog_send_order_failed_title;
 	}
 	public String getDialog_button_ok() {
 		return dialog_button_ok;

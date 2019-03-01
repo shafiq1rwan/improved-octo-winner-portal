@@ -45,4 +45,8 @@
 	<!--  Dialog Display[START] -->
 	<jsp:include page="/WEB-INF/order/views/sop_subviews/sop_dialog.jsp" />
 	<!--  Dialog Display[END] -->
+	
+	<!--  Loading Display[START] -->
+	<jsp:include page="/WEB-INF/order/views/sop_subviews/sop_spinner_load.jsp" />
+	<!--  Loading Display[END] -->
 </body>

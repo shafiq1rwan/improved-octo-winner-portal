@@ -27,6 +27,8 @@ language-pack-en:
   dialog_cart_edit_success_title: "Item Editted Successfully!"
   dialog_reset_cart_title: "Are you sure you want to clear your cart by returning to main page?"
   dialog_delete_cart_item_title: "Are you sure you want to delete the item from cart?"
+  dialog_send_order_success_title: "Order Created Successfully!"
+  dialog_send_order_failed_title: "Order Failed to Create!"
   dialog_button_ok: "OK"
   dialog_button_yes: "Yes"
   dialog_button_no: "No"

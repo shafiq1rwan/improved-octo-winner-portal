@@ -16,12 +16,10 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 	$scope.priceTag;
 	$scope.storeName;
 	$scope.tableId;
-	$scope.checkNo;
 	$scope.cart
 	$scope.cartTotalPrice;
 	/*Dialog Config*/
 	$scope.isAllowKeyboardDismissal = false;
-	$scope.isAllowBackdropClick = false;
 	$scope.dialogData = {};
 	/*Variables*/
 	$scope.isLoadingFailed;
@@ -593,7 +591,7 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 		$scope.dialogData.button2 = dialogOption.button2;
 		$scope.dialogData.isButton1 = typeof $scope.dialogData.button1 !== "undefined";
 		$scope.dialogData.isButton2 = typeof $scope.dialogData.button2 !== "undefined";
-		$("div#modal-dialog").modal({backdrop: $scope.isAllowBackdropClick, keyboard: $scope.isAllowKeyboardDismissal});
+		$("div#modal-dialog").modal({backdrop: 'static', keyboard: $scope.isAllowKeyboardDismissal});
 	}
 	
 	/*Menu Loading*/
@@ -615,7 +613,6 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 					$scope.menuList = response.data.menuList;
 					$scope.storeName = response.data.storeName;
 					$scope.tableId = response.data.tableId;
-					$scope.checkNo = response.data.checkNo;
 					$scope.priceTag = response.data.priceTag;
 					$scope.imagePath = response.data.imagePath;
 					
@@ -687,8 +684,18 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 	}
 	
 	/*Other Function*/
+	$scope.showSpinnerLoading = function(loadingText) {
+		$("div#spinner-loading-modal").modal({backdrop: 'static', keyboard: $scope.isAllowKeyboardDismissal, show: false});
+		$scope.loadingText = loadingText;
+		$("div#spinner-loading-modal").modal('show');
+	}
+	$scope.hideSpinnerLoading = function() {
+		$timeout(function() {
+			$("div#spinner-loading-modal").modal('hide');
+		}, 100);
+	}
 	$scope.sendCartData = function() {
-		console.log($scope.cart);
+		$scope.showSpinnerLoading("Creating Order...");
 		$http({
 			method: 'POST',
 			headers: {
@@ -696,21 +703,50 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 			},
 			data: {
 				cartData: $scope.cart,
+				token: $routeParams.token
 			},
 			url: '${pageContext.request.contextPath}/order/sendOrder'
 		}).then(function (response) {
+			$scope.hideSpinnerLoading();
 			if (response != null && response.data != null && response.data.resultCode != null) {
 				if (response.data.resultCode == "00") {
-					console.log("Success");
+					$scope.sendCartSuccess();
 				} else {
-					console.log("Failed");
+					$scope.sendCartFailed();
 				}
 			} else {
-				$scope.loadFailed();
+				$scope.sendCartFailed();
 			}
 		}, function (error) {
-			$scope.loadFailed();
+			$scope.hideSpinnerLoading();
+			$scope.sendCartFailed();
 	    });
+	}
+	$scope.sendCartSuccess = function() {
+		var dialogOption = {};
+		dialogOption.title = $scope.currentLanguageData.dialog_send_order_success_title;
+		dialogOption.message = "";
+		dialogOption.button1 = {
+				name: $scope.currentLanguageData.dialog_button_ok,
+				fn: function() {
+					$("div#item-category-overlay").fadeOut(300);
+					$("div#modal-dialog").modal("hide");
+				}
+		}
+		$scope.displayDialog(dialogOption);
+	}
+	$scope.sendCartFailed = function() {
+		var dialogOption = {};
+		dialogOption.title = $scope.currentLanguageData.dialog_send_order_failed_title;
+		dialogOption.message = "";
+		dialogOption.button1 = {
+				name: $scope.currentLanguageData.dialog_button_ok,
+				fn: function() {
+					$("div#item-category-overlay").fadeOut(300);
+					$("div#modal-dialog").modal("hide");
+				}
+		}
+		$scope.displayDialog(dialogOption);
 	}
 	
 	/*Init Function*/
