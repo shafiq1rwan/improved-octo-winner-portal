@@ -325,6 +325,7 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 			(
 				id BIGINT IDENTITY(1,1) NOT NULL,
 				store_id BIGINT NOT NULL,
+				check_id BIGINT NOT NULL,
 				check_number BIGINT NOT NULL,
 				device_type BIGINT NOT NULL,
 				staff_id BIGINT NULL,
