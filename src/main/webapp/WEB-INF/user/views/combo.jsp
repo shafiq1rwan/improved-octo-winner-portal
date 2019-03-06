@@ -38,7 +38,7 @@
 										data-toggle="modal" data-target="#comboItemSelectionModal" 
 										ng-click="changeComboItemType('MI')">
 										<span class="btn-label"><i class="fa fa-plus"></i></span>
-										Assign Item/Item Group
+										Assign Item / Item Group
 									</button>
 	
 								</div>
@@ -100,17 +100,18 @@
 						</div>
 
 						<div class="modal-body">
-							<div class="form-section">
-
-							  <ul class="nav nav-pills" role="tablist">
-							    <li class="nav-item">
-							      <a class="nav-link active" data-toggle="pill" href="#mi" ng-click="changeComboItemType('MI')">Menu Item</a>
-							    </li>
-							    <li class="nav-item">
-							      <a class="nav-link" data-toggle="pill" href="#g" ng-click="changeComboItemType('G')">Item Group</a>
-							    </li>
-							  </ul>
-		
+							<div class="row">
+								<div class="col-12 col-md-12 col-sm-12 col-xs-12 pb-3">
+								  <ul class="nav nav-pills" role="tablist">
+								    <li class="nav-item">
+								      <a class="nav-link active" data-toggle="pill" href="#mi" ng-click="changeComboItemType('MI')">Menu Item</a>
+								    </li>
+								    <li class="nav-item">
+								      <a class="nav-link" data-toggle="pill" href="#g" ng-click="changeComboItemType('G')">Item Group</a>
+								    </li>
+								  </ul>
+								</div>
+							</div>
 								<div class="row">
 									<div class="col-12 col-md-12 col-sm-12 col-xs-12">
 										<div class="">
@@ -132,8 +133,7 @@
 									</div>
 								</div>							
 
-								
-							</div>
+				
 						</div>
 
 						<div class="modal-footer">

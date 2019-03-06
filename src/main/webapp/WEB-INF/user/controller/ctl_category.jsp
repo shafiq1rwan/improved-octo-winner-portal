@@ -29,6 +29,14 @@
 		$(document).ready(function() {
 			$scope.refreshCategoryTable();
 			
+			$("textarea").keydown(function(e){
+				if (e.keyCode == 13)
+				{
+				    // prevent default behavior
+				    e.preventDefault();
+				}
+			});
+			
 			$('input[type=file]').change(function(event) {
 				var element = event.target.id;			
 				var _URL = window.URL || window.webkitURL;
@@ -166,7 +174,7 @@
 						}
 					}
 				},
-				  "dom": 'Bfrtip',
+				  "dom": 'Blrtip',
 				   "buttons": [
 				        {
 				            text: 'Save',
@@ -206,7 +214,7 @@
 					{"data": "id", "width": "20%",
 						 "render": function ( data, type, full, meta ) {
 							 	var id = full.id;
-							    return '<div class="d-flex justify-content-start"><button ng-click="getCategoryMenuItem('+ id +')" type="button" data-toggle="modal" data-backdrop="static" data-keyboard="false" data-target="#menuItemModal" class="btn btn-outline-primary custom-fontsize"><i class="far fa-list-ul"></i> Manage Items</button><button ng-click="removeCategory('+ id +')" type="button" class="btn btn-outline-danger custom-fontsize"><i class="far fa-minus-circle"></i> Remove</button></div>'	
+							    return '<div class="d-flex justify-content-start"><button ng-click="getCategoryMenuItem('+ id +')" type="button" data-toggle="modal" data-backdrop="static" data-keyboard="false" data-target="#menuItemModal" class="btn btn-outline-primary ml-1 mr-1 custom-fontsize"><i class="far fa-list-ul"></i> Manage Items</button><button ng-click="removeCategory('+ id +')" type="button" class="btn btn-outline-danger ml-1 mr-1 custom-fontsize"><i class="far fa-minus-circle"></i> Remove</button></div>'	
 						 }
 					}
 					],			

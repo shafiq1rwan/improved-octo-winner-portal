@@ -142,7 +142,6 @@
 			
 	 		combo_item_table = $('#comboItem_dtable').DataTable({
 				"data" : combo_items.data,
-				"scrollY": '25vh',
 				"select": true,
 				"destroy" : true,
 				"order" : [ [ 0, "asc" ] ] ,

@@ -1,11 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <style>
-.form-section {
-	padding-left: 15px;
-	border-left: 2px solid #FF851B;
-}
-
 .table-wrapper-scroll-y {
 display: block;
 max-height: 200px;

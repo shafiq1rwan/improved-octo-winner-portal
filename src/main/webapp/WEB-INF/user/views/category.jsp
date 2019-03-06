@@ -198,8 +198,9 @@
 							</button>
 						</div>
 
-						<div class="modal-body">	
-						<div class="container">
+						<div class="modal-body">
+						<div class="form-section">	
+						
 							<div class="row">
 								<div class="col-8 col-sm-8 col-md-8 col-lg-8 col-xl-8">						
 									<input class="form-control" id="searchbox-input" type="text" placeholder="Search..">
@@ -239,9 +240,9 @@
 										</div>
 									</div>							
 									
-								</div>
-							</div>
 								
+							</div>
+							</div>	
 					
 						</div>
 

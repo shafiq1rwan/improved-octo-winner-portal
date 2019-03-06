@@ -89,27 +89,19 @@
 						</div>
 
 						<div class="modal-body">
-							<div class="form-section">
-								<div class="row">
-									<div class="col-12 col-md-12 col-sm-12 col-xs-12">
-										<div class="">
-											<table class="table table-bordered table-hover display nowrap" 
-											 id="modifierGroup_dtable" style="width: 100%">
-												<thead>
-													<tr>
-														<th></th>
-														<th>Id</th>
-														<th>Name</th>
-													</tr>
-												</thead>
-												<tbody>
-												</tbody>	
-											</table>
-										</div>
-									</div>
-								</div>							
-
-								
+							<div class="table-responsive">
+								<table class="table table-bordered table-hover display nowrap" 
+								 id="modifierGroup_dtable" style="width: 100%">
+									<thead>
+										<tr>
+											<th></th>
+											<th>Id</th>
+											<th>Name</th>
+										</tr>
+									</thead>
+									<tbody>
+									</tbody>	
+								</table>
 							</div>
 						</div>
 

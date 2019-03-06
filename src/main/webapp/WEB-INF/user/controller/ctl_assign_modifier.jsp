@@ -29,7 +29,7 @@
 							}
 						}
 					},
-					  "dom": 'Bfrtip',
+					  "dom": 'Blrtip',
 					   "buttons": [
 					        {
 					            text: 'Save',
@@ -50,9 +50,6 @@
 					    ],
 					"destroy" : true,
 			 		"rowReorder": { "selector": 'td:nth-child(2)',"enable": false,"dataSrc":'sequence', "update": true},
-				    "scrollY": 180,
-			        "paging": false,
-			        "searching": false, 
 					"order" : [ [ 0, "asc" ] ] ,
 					"columns" : [ 
 						{"data" : "sequence", "width":"5%"},
@@ -126,7 +123,6 @@
 			
 			modifier_group_selection_table = $('#modifierGroup_dtable').DataTable({
 				"data" : modifier_groups,
-				"scrollY": '25vh',
 				"select": true,
 				"destroy" : true,
 				"order" : [ [ 0, "asc" ] ] ,

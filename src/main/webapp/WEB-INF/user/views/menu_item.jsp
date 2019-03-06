@@ -198,44 +198,38 @@
 							</button>
 						</div>
 
-						<div class="modal-body">	
-								<div class="row">
-									<div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
-										<div class="pull-right" ng-if ="reordering_action === false">
-													<button type="button"
-														class="btn btn-info btn-primary bg-aqua"
-														ng-click ="addNewTier()">
-														<span class="btn-label"><i class="fa fa-plus"></i></span>
-														Insert New Tier
-													</button>	
-										</div>
-									</div>
-								</div>		
-						<div class="form-section" style="margin-top: 15px;">			
+						<div class="modal-body">								
 								<div class="row">	
 									<div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
 										<ul class="list-group no-bullets" id="sortableList">
-										  <li class="list-group-item" ng-repeat="x in tierItems">										  	
-										  	<h5 ng-if="reordering_action"><i class="fas fa-arrows-alt pull-right"></i></h5>							  	
-										  	<div class="row">
-											  	<div class="col-6 col-md-6">
-													  	<h5>Name</h5>
+										  <li class="list-group-item" ng-repeat="x in tierItems">										  						  	
+										  	<!-- <div class="row" style="word-break: break-word;">
+											  	<div class="col-6 col-md-6">										
+													  	<h6>Name</h6>
 													  	<p>{{x.name}}</p>
 												</div>
 												<div class="col-6 col-md-6">	
-													  	<h5>Quantity</h5>
+													  	<h6>Quantity</h6>
 													  	<p>{{x.quantity}}</p>
 												</div>
 	
-											</div> 
-											<div class="row">
-												<div class="col-6 col-md-6">
-														<h5><i ng-click="openEditTier('update', x.id)" class="fa fa-edit pull-left" ng-if ="!reordering_action"></i></h5>
-												</div>						 	
-												<div class="col-6 col-md-6">
-														 <h5><i ng-click="removeExistingTier(x.id)" class="fa fa-trash pull-right" ng-if ="!reordering_action"></i></h5>
+											</div> -->
+											<div class="d-flex justify-content-between">
+												<div class="col-5 col-md-5">
+											  		<h6>Name</h6>
+													<p>{{x.name}}</p>
 												</div>
-											</div>
+												<div class="col-3 col-md-3">
+													<h6>Quantity</h6>
+													<p>{{x.quantity}}</p>
+												</div>
+											  	<div class="col-3 col-md-3">
+											  		<button class="btn btn-outline-danger border-0 pull-right" type="button" ng-click="removeExistingTier(x.id)" ng-if ="!reordering_action"><i class="fa fa-window-close"></i></button>
+											  		<button class="btn btn-outline-success border-0 pull-right" type="button" ng-click="openEditTier('update', x.id)"  ng-if ="!reordering_action"><i class="fa fa-edit"></i></button>											  										  	
+											  		<h5 ng-if="reordering_action"><i class="fas fa-arrows-alt pull-right"></i></h5>		
+												</div>
+											</div> 
+							
 										  </li>
 										</ul>
 										<div ng-if="tierItems.length === 0">
@@ -244,13 +238,19 @@
 									</div>
 								</div>
 								
-							</div>
+							
 						</div>
 
 						<div class="modal-footer">
-							<button class="btn btn-primary" type="submit" ng-if ="tierItems.length > 1" ng-hide="reordering_action" ng-click="reorderTierItems()">Reorder</button>
-							<button class="btn btn-info" type="submit" ng-if ="reordering_action" ng-click="saveReordering()">Save</button>
-							<button class="btn btn-danger" type="submit" ng-if ="reordering_action" ng-click="cancelReordering()">Cancel</button>				
+							<button class="btn btn-secondary" type="submit" ng-if ="tierItems.length > 1" ng-hide="reordering_action" ng-click="reorderTierItems()"><span class="btn-label"><i class="fa fa-random"></i></span>Reorder</button>
+							<button class="btn btn-danger" type="submit" ng-if ="reordering_action" ng-click="cancelReordering()">Cancel</button>
+							<button class="btn btn-info" type="submit" ng-if ="reordering_action" ng-click="saveReordering()">Save</button>							
+							<button type="button" ng-if ="reordering_action === false"
+														class="btn btn-primary"
+														ng-click ="addNewTier()">
+														<span class="btn-label"><i class="fa fa-plus"></i></span>
+														Insert New Tier
+													</button>				
 						</div>
 					</form>
 

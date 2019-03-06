@@ -1321,4 +1321,13 @@ ul.example li.placeholder:before {
 
 .modal { overflow: auto !important; }
 
+.dt-buttons {
+	float: right !important;
+}
+
+.form-section {
+	padding-left: 15px;
+	border-left: 2px solid #FF851B;
+}
+
 /* End Scrollable list */
