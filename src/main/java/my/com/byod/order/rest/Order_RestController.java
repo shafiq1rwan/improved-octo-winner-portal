@@ -357,8 +357,27 @@ public class Order_RestController {
 
 								JSONArray subList = new JSONArray();
 								for (int y = 0; y < comboList.length(); y++) {
-									JSONArray comboObjList = comboList.getJSONObject(y).getJSONArray("itemList");
+									int tierQuantity = 0;
+									int qTierQuantity = 0;
+									JSONObject comboObjDetail = comboList.getJSONObject(y);
+									JSONArray comboObjList = comboObjDetail.getJSONArray("itemList");
 									System.out.println("Combo Data " + y + ": " + comboObjList);
+									System.out.println("Combo Other Data: " + comboObjDetail);
+									
+									sqlStatement = "SELECT combo_detail_quantity FROM combo_detail WHERE id = ?";
+									PreparedStatement ps2 = connection.prepareStatement(sqlStatement);
+									ps2.setInt(1, Integer.parseInt(comboObjDetail.getString("id")));
+									ResultSet rs2 = ps2.executeQuery();
+									if (rs2.next()) {
+										qTierQuantity = rs2.getInt("combo_detail_quantity");
+										System.out.println("Tier Quantity: " + qTierQuantity);
+									} else {
+										isCheckSuccess = false;
+										resultCode = "E02";
+										resultMessage = "Item Does Not Exist";
+										break Main;
+									}
+									rs2.close();
 
 									for (int z = 0; z < comboObjList.length(); z++) {
 										JSONObject comboDetailObj = comboObjList.getJSONObject(z);
@@ -372,15 +391,15 @@ public class Order_RestController {
 										if (subQuantity > 0) {
 											System.out.println("Has Selected");
 											sqlStatement = "SELECT backend_id, menu_item_base_price, menu_item_type, is_active FROM menu_item WHERE id = ?";
-											PreparedStatement ps2 = connection.prepareStatement(sqlStatement);
-											ps2.setInt(1, Integer.parseInt(comboDetailObj.getString("id")));
-											ResultSet rs2 = ps2.executeQuery();
+											PreparedStatement ps3 = connection.prepareStatement(sqlStatement);
+											ps3.setInt(1, Integer.parseInt(comboDetailObj.getString("id")));
+											ResultSet rs3 = ps3.executeQuery();
 
-											if (rs2.next()) {
-												String qSubBackendID = rs2.getString("backend_id");
-												double qSubPrice = rs2.getDouble("menu_item_base_price");
-												String qSubObjType = rs2.getString("menu_item_type");
-												boolean isSubActive = rs2.getInt("is_active") == 1;
+											if (rs3.next()) {
+												String qSubBackendID = rs3.getString("backend_id");
+												double qSubPrice = rs3.getDouble("menu_item_base_price");
+												String qSubObjType = rs3.getString("menu_item_type");
+												boolean isSubActive = rs3.getInt("is_active") == 1;
 
 												if (isSubActive) {
 													if (qSubObjType.equals("0")) {
@@ -388,11 +407,13 @@ public class Order_RestController {
 															System.out.println("Without Modifier");
 															
 															JSONObject subOrderObj = new JSONObject();
+															subOrderObj.put("combo_detail_id", Integer.parseInt(comboObjDetail.getString("id")));
 															subOrderObj.put("id", qSubBackendID);
 															subOrderObj.put("price", qSubPrice);
 															subOrderObj.put("quantity", subQuantity);
 															subList.put(subOrderObj);
 															qTotalPrice += qSubPrice * subQuantity;
+															tierQuantity += subQuantity;
 														} else {
 															System.out.println("With Modifier");
 															
@@ -408,14 +429,14 @@ public class Order_RestController {
 																	System.out.println("Modifier Data " + z + ": " + modifierObj);
 
 																	sqlStatement = "SELECT backend_id, menu_item_base_price, menu_item_type, is_active FROM menu_item WHERE id = ?";
-																	PreparedStatement ps3 = connection.prepareStatement(sqlStatement);
-																	ps3.setInt(1, Integer.parseInt(modifierObj.getString("id")));
-																	ResultSet rs3 = ps3.executeQuery();
-																	if (rs3.next()) {
-																		String qModBackendID = rs3.getString("backend_id");
-																		double qModPrice = rs3.getDouble("menu_item_base_price");
-																		String qModObjType = rs3.getString("menu_item_type");
-																		boolean isModActive = rs3.getInt("is_active") == 1;
+																	PreparedStatement ps4 = connection.prepareStatement(sqlStatement);
+																	ps4.setInt(1, Integer.parseInt(modifierObj.getString("id")));
+																	ResultSet rs4 = ps4.executeQuery();
+																	if (rs4.next()) {
+																		String qModBackendID = rs4.getString("backend_id");
+																		double qModPrice = rs4.getDouble("menu_item_base_price");
+																		String qModObjType = rs4.getString("menu_item_type");
+																		boolean isModActive = rs4.getInt("is_active") == 1;
 
 																		if (isModActive) {
 																			if (qModObjType.equals("2")) {
@@ -442,16 +463,18 @@ public class Order_RestController {
 																		resultMessage = "Item Does Not Exist";
 																		break Main;
 																	}
-																	rs3.close();
+																	rs4.close();
 																}
 																
 																JSONObject modObj = new JSONObject();
+																modObj.put("combo_detail_id", Integer.parseInt(comboObjDetail.getString("id")));
 																modObj.put("id", qSubBackendID);
 																modObj.put("price", qSubPrice);
 																modObj.put("quantity", 1);
 																modObj.put("sub", modList);
 																subList.put(modObj);
 																qTotalPrice += qSubPrice;
+																tierQuantity += 1;
 															}
 														}
 													} else {
@@ -472,8 +495,15 @@ public class Order_RestController {
 												resultMessage = "Item Does Not Exist";
 												break Main;
 											}
-											rs2.close();
+											rs3.close();
 										}
+									}
+									
+									if (tierQuantity != qTierQuantity) {
+										isCheckSuccess = false;
+										resultCode = "E05";
+										resultMessage = "Tier Invalid Quantity";
+										break Main;
 									}
 								}
 								

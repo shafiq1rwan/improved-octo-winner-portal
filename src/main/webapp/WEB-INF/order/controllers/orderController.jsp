@@ -145,6 +145,7 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 				
 				var tierObject = {};
 				tierObject.name = tierData.name;
+				tierObject.id = tierData.id;
 				tierObject.totalPrice = "0.00";
 				tierObject.isTierCompleted = false;
 				tierObject.quantity = parseInt(tierData.quantity);
