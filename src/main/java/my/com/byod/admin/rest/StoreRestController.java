@@ -3,6 +3,7 @@ package my.com.byod.admin.rest;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -98,20 +99,40 @@ public class StoreRestController {
 
 	@PostMapping("/edit")
 	public ResponseEntity<?> editStore(@RequestBody Store store, HttpServletRequest request, HttpServletResponse response) {
+		Connection connection = null;
 		try {
-			Connection connection = dbConnectionUtil.retrieveConnection(request);
+			connection = dbConnectionUtil.retrieveConnection(request);
 			String brandId = byodUtil.getGeneralConfig(connection, "BRAND_ID");
-			connection.close();
 			Store existingStore = storeService.findStoreById(store.getId());
-			if (existingStore.getId() == 0)
+			if (existingStore.getId() == 0) {
+				connection.close();
 				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-
+			}
 			int rowAffected = storeService.editStore(store.getId(), store, brandId);
-			if (rowAffected == 0)
+			if (rowAffected == 0) {
+				connection.close();
 				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-
+			}
+			else {
+				// terminate ecpos for ecpos status 0 at store	
+				JSONArray jsonArray = getDeviceInfoByStoreId(connection, 1, store.getId());
+				if(jsonArray.length()!=0) {
+					// ecpos only one record
+					JSONObject jsonObj = jsonArray.getJSONObject(0);
+					if(!getEcposStatus(connection, store.getId())) {
+						updateDeviceStatus(connection, jsonObj.getLong("id") ,3);
+					}
+				}
+			}
+			connection.close();
 			return new ResponseEntity<>(HttpStatus.OK);
 		} catch (Exception ex) {
+			try {
+				connection.close();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			return new ResponseEntity<String>(ex.getMessage(), HttpStatus.CONFLICT);
 		}
 	}

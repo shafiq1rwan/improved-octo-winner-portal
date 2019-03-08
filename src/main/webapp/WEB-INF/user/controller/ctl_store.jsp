@@ -262,7 +262,21 @@
 		
 		$(document).ready(function() {				
 			$scope.refreshTable();		
-		
+			
+			$('#exampleRadios2').click(function(){
+				if($scope.action=='update'){
+				    if ($(this).is(':checked'))
+				    {
+				    	swal({
+							  title: "Alert",
+							  text: "Updating ECPOS to other POS will terminate existing ECPOS",
+							  icon: "warning",
+							  dangerMode: true,
+							});
+				    }
+				}
+			  });
+			
 			$('input[type=file]').change(function(event) {
 				var element = event.target.id;			
 				var _URL = window.URL || window.webkitURL;

@@ -295,7 +295,6 @@ if it's not present, don't show loader */
 <jsp:include page="/WEB-INF/user/controller/ctl_profile.jsp" />
 <jsp:include page="/WEB-INF/user/controller/ctl_menu.jsp" />
 <jsp:include page="/WEB-INF/user/controller/ctl_add_menu.jsp" />
-<jsp:include page="/WEB-INF/user/controller/ctl_menu_dashboard.jsp" />
 <jsp:include page="/WEB-INF/user/controller/ctl_ecpos.jsp" />
 <jsp:include page="/WEB-INF/user/controller/ctl_byod.jsp" />
 <jsp:include page="/WEB-INF/user/controller/ctl_kiosk.jsp" />
