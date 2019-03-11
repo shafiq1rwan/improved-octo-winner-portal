@@ -3,6 +3,10 @@ package my.com.byod.order.rest;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -13,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
+import my.com.byod.admin.util.ByodUtil;
 import my.com.byod.admin.util.DbConnectionUtil;
 import my.com.byod.logger.Logger;
 import my.com.byod.order.configuration.LanguageConfiguration;
@@ -200,18 +206,14 @@ public class Order_RestController {
 		return result.toString();
 	}
 
-	@RequestMapping(value = "/order/sendOrder", method = { RequestMethod.POST })
-	public String SendOrder(HttpServletRequest request, HttpServletResponse response, @RequestBody String bodyData) {
+	@RequestMapping(value = "/order/checkOrder", method = { RequestMethod.POST })
+	public String CheckOrder(HttpServletRequest request, HttpServletResponse response, @RequestBody String bodyData) {
 		JSONObject result = new JSONObject();
 		String resultCode = "E01";
 		String resultMessage = "Server error. Please try again later.";
 		Connection connection = null;
-		String sqlStatement = null;
 
 		try {
-			boolean isCheckSuccess = true;
-			JSONArray sendOrderList = new JSONArray();
-
 			JSONObject parsedData = new JSONObject(bodyData);
 			JSONArray cartData = parsedData.getJSONArray("cartData");
 			String token = parsedData.getString("token");
@@ -221,327 +223,58 @@ public class Order_RestController {
 			String decryptedTokenString = AESEncryption.decrypt(token);
 			String[] tokenSplitArry = decryptedTokenString.split("\\|;");
 			String brandId = tokenSplitArry[0];
-			System.out.println("BrandID: " + brandId);
+			String checkNo = tokenSplitArry[3];
 
 			connection = dbConnectionUtil.getConnection(Long.parseLong(brandId));
+			JSONObject verifyResult = verifyOrder(cartData, connection);
+			JSONArray sendOrderList = verifyResult.getJSONArray("sendOrderList");
+			boolean isCheckSuccess = verifyResult.getBoolean("isCheckSuccess");
+			resultCode = verifyResult.getString("resultMessage");
+			resultMessage = verifyResult.getString("resultMessage");
 
-			DecimalFormat df = new DecimalFormat("#0.00");
-
-			Main: for (int x = 0; x < cartData.length(); x++) {
-				System.out.println("--New Order--");
-				JSONObject cartObj = cartData.getJSONObject(x);
-				/* Sent Data */
-				int mainObjID = Integer.parseInt(cartObj.getString("id"));
-				String objType = cartObj.getString("type");
-				double totalPrice = Double.parseDouble(cartObj.getString("totalPrice"));
-				int quantity = cartObj.getInt("quantity");
-				/* Query Data */
-				double qTotalPrice = 0.0;
-
-				/* Main Object Check */
-				sqlStatement = "SELECT backend_id, menu_item_base_price, menu_item_type, is_active FROM menu_item WHERE id = ?";
-				PreparedStatement ps1 = connection.prepareStatement(sqlStatement);
-				ps1.setInt(1, mainObjID);
-				ResultSet rs1 = ps1.executeQuery();
-				if (rs1.next()) {
-					String qMainBackendID = rs1.getString("backend_id");
-					double qMainPrice = rs1.getDouble("menu_item_base_price");
-					String qMainObjType = rs1.getString("menu_item_type");
-					boolean isMainActive = rs1.getInt("is_active") == 1;
-
-					if (isMainActive) {
-						if (qMainObjType.equals(objType)) {
-							if (objType.equalsIgnoreCase("0")) {
-								/* Alacarte */
-								System.out.println("Alacarte Order");
-
-								JSONObject modifierData = cartObj.has("modifierData") && !cartObj.isNull("modifierData")
-										? cartObj.getJSONObject("modifierData")
-										: null;
-								if (modifierData != null) {
-									JSONArray modifierList = modifierData.has("modifierGroupData")
-											&& !modifierData.isNull("modifierGroupData")
-													? modifierData.getJSONArray("modifierGroupData")
-													: null;
-									if (modifierList != null && modifierList.length() > 0) {
-										System.out.println("With Modifier");
-										for (int y = 0; y < modifierList.length(); y++) {
-											JSONArray modifierObjList = modifierList.getJSONArray(y);
-											System.out.println("Modifier Item " + y);
-											JSONArray subList = new JSONArray();
-											for (int z = 0; z < modifierObjList.length(); z++) {
-												JSONObject modAlacarteObj = new JSONObject();
-												JSONObject modifierObj = modifierObjList.getJSONObject(z)
-														.getJSONObject("selectedModifier");
-												System.out.println("Modifier Data " + z + ": " + modifierObj);
-
-												sqlStatement = "SELECT backend_id, menu_item_base_price, menu_item_type, is_active FROM menu_item WHERE id = ?";
-												PreparedStatement ps2 = connection.prepareStatement(sqlStatement);
-												ps2.setInt(1, Integer.parseInt(modifierObj.getString("id")));
-												ResultSet rs2 = ps2.executeQuery();
-												if (rs2.next()) {
-													String qModBackendID = rs2.getString("backend_id");
-													double qModPrice = rs2.getDouble("menu_item_base_price");
-													String qModObjType = rs2.getString("menu_item_type");
-													boolean isModActive = rs2.getInt("is_active") == 1;
-
-													if (isModActive) {
-														if (qModObjType.equals("2")) {
-															modAlacarteObj.put("id", qModBackendID);
-															modAlacarteObj.put("price", qModPrice);
-															qTotalPrice += qModPrice;
-
-															subList.put(modAlacarteObj);
-														} else {
-															isCheckSuccess = false;
-															resultCode = "E04";
-															resultMessage = "Invalid Item Type";
-															break Main;
-														}
-													} else {
-														isCheckSuccess = false;
-														resultCode = "E03";
-														resultMessage = "Item Not Active";
-														break Main;
-													}
-												} else {
-													isCheckSuccess = false;
-													resultCode = "E02";
-													resultMessage = "Item Does Not Exist";
-													break Main;
-												}
-												rs2.close();
-											}
-
-											JSONObject mainOrderObj = new JSONObject();
-											mainOrderObj.put("id", qMainBackendID);
-											mainOrderObj.put("price", qMainPrice);
-											mainOrderObj.put("quantity", 1);
-											mainOrderObj.put("sub", subList);
-											mainOrderObj.put("type", qMainObjType);
-											sendOrderList.put(mainOrderObj);
-											qTotalPrice += qMainPrice;
-										}
-									}
-								} else {
-									JSONObject mainOrderObj = new JSONObject();
-									mainOrderObj.put("id", qMainBackendID);
-									mainOrderObj.put("price", qMainPrice);
-									mainOrderObj.put("quantity", quantity);
-									mainOrderObj.put("type", qMainObjType);
-									sendOrderList.put(mainOrderObj);
-									qTotalPrice += qMainPrice * quantity;
-								}
-
-								System.out.println(df.format(qTotalPrice));
-								System.out.println(df.format(totalPrice));
-								/* Final Alacarte Check */
-								if (!df.format(qTotalPrice).equals(df.format(totalPrice))) {
-									isCheckSuccess = false;
-									resultCode = "E05";
-									resultMessage = "Untallied Price";
-									break Main;
-								}
-							} else if (objType.equalsIgnoreCase("1")) {
-								/* Combo */
-								System.out.println("Combo Order");
-								JSONArray comboList = cartObj.has("comboData") && !cartObj.isNull("comboData")
-										? cartObj.getJSONArray("comboData")
-										: null;
-
-								JSONObject mainOrderObj = new JSONObject();
-								mainOrderObj.put("id", qMainBackendID);
-								mainOrderObj.put("price", qMainPrice);
-								mainOrderObj.put("quantity", quantity);
-								qTotalPrice += qMainPrice * quantity;
-
-								JSONArray subList = new JSONArray();
-								for (int y = 0; y < comboList.length(); y++) {
-									int tierQuantity = 0;
-									int qTierQuantity = 0;
-									JSONObject comboObjDetail = comboList.getJSONObject(y);
-									JSONArray comboObjList = comboObjDetail.getJSONArray("itemList");
-									System.out.println("Combo Data " + y + ": " + comboObjList);
-									System.out.println("Combo Other Data: " + comboObjDetail);
-									
-									sqlStatement = "SELECT combo_detail_quantity FROM combo_detail WHERE id = ?";
-									PreparedStatement ps2 = connection.prepareStatement(sqlStatement);
-									ps2.setInt(1, Integer.parseInt(comboObjDetail.getString("id")));
-									ResultSet rs2 = ps2.executeQuery();
-									if (rs2.next()) {
-										qTierQuantity = rs2.getInt("combo_detail_quantity");
-										System.out.println("Tier Quantity: " + qTierQuantity);
-									} else {
-										isCheckSuccess = false;
-										resultCode = "E02";
-										resultMessage = "Item Does Not Exist";
-										break Main;
-									}
-									rs2.close();
-
-									for (int z = 0; z < comboObjList.length(); z++) {
-										JSONObject comboDetailObj = comboObjList.getJSONObject(z);
-										System.out.println("Combo Detail Data " + z + ": " + comboDetailObj);
-										int subQuantity = comboDetailObj.getInt("selectedQuantity");
-										JSONArray modifierDataList = comboDetailObj.has("modifierGroupData")
-												&& !comboDetailObj.isNull("modifierGroupData")
-														? comboDetailObj.getJSONArray("modifierGroupData")
-														: null;
-
-										if (subQuantity > 0) {
-											System.out.println("Has Selected");
-											sqlStatement = "SELECT backend_id, menu_item_base_price, menu_item_type, is_active FROM menu_item WHERE id = ?";
-											PreparedStatement ps3 = connection.prepareStatement(sqlStatement);
-											ps3.setInt(1, Integer.parseInt(comboDetailObj.getString("id")));
-											ResultSet rs3 = ps3.executeQuery();
-
-											if (rs3.next()) {
-												String qSubBackendID = rs3.getString("backend_id");
-												double qSubPrice = rs3.getDouble("menu_item_base_price");
-												String qSubObjType = rs3.getString("menu_item_type");
-												boolean isSubActive = rs3.getInt("is_active") == 1;
-
-												if (isSubActive) {
-													if (qSubObjType.equals("0")) {
-														if (modifierDataList == null) {
-															System.out.println("Without Modifier");
-															
-															JSONObject subOrderObj = new JSONObject();
-															subOrderObj.put("combo_detail_id", Integer.parseInt(comboObjDetail.getString("id")));
-															subOrderObj.put("id", qSubBackendID);
-															subOrderObj.put("price", qSubPrice);
-															subOrderObj.put("quantity", subQuantity);
-															subList.put(subOrderObj);
-															qTotalPrice += qSubPrice * subQuantity;
-															tierQuantity += subQuantity;
-														} else {
-															System.out.println("With Modifier");
-															
-															System.out.println(modifierDataList);
-															for (int a = 0; a < modifierDataList.length(); a++) {
-																JSONArray modifierObjList = modifierDataList.getJSONArray(a);
-																System.out.println("Modifier Item " + y);
-																JSONArray modList = new JSONArray();
-																for (int b = 0; b < modifierObjList.length(); b++) {
-																	JSONObject modAlacarteObj = new JSONObject();
-																	JSONObject modifierObj = modifierObjList.getJSONObject(b)
-																			.getJSONObject("selectedModifier");
-																	System.out.println("Modifier Data " + z + ": " + modifierObj);
-
-																	sqlStatement = "SELECT backend_id, menu_item_base_price, menu_item_type, is_active FROM menu_item WHERE id = ?";
-																	PreparedStatement ps4 = connection.prepareStatement(sqlStatement);
-																	ps4.setInt(1, Integer.parseInt(modifierObj.getString("id")));
-																	ResultSet rs4 = ps4.executeQuery();
-																	if (rs4.next()) {
-																		String qModBackendID = rs4.getString("backend_id");
-																		double qModPrice = rs4.getDouble("menu_item_base_price");
-																		String qModObjType = rs4.getString("menu_item_type");
-																		boolean isModActive = rs4.getInt("is_active") == 1;
-
-																		if (isModActive) {
-																			if (qModObjType.equals("2")) {
-																				modAlacarteObj.put("id", qModBackendID);
-																				modAlacarteObj.put("price", qModPrice);
-																				qTotalPrice += qModPrice;
-
-																				modList.put(modAlacarteObj);
-																			} else {
-																				isCheckSuccess = false;
-																				resultCode = "E04";
-																				resultMessage = "Invalid Item Type";
-																				break Main;
-																			}
-																		} else {
-																			isCheckSuccess = false;
-																			resultCode = "E03";
-																			resultMessage = "Item Not Active";
-																			break Main;
-																		}
-																	} else {
-																		isCheckSuccess = false;
-																		resultCode = "E02";
-																		resultMessage = "Item Does Not Exist";
-																		break Main;
-																	}
-																	rs4.close();
-																}
-																
-																JSONObject modObj = new JSONObject();
-																modObj.put("combo_detail_id", Integer.parseInt(comboObjDetail.getString("id")));
-																modObj.put("id", qSubBackendID);
-																modObj.put("price", qSubPrice);
-																modObj.put("quantity", 1);
-																modObj.put("sub", modList);
-																subList.put(modObj);
-																qTotalPrice += qSubPrice;
-																tierQuantity += 1;
-															}
-														}
-													} else {
-														isCheckSuccess = false;
-														resultCode = "E04";
-														resultMessage = "Invalid Item Type";
-														break Main;
-													}
-												} else {
-													isCheckSuccess = false;
-													resultCode = "E03";
-													resultMessage = "Item Not Active";
-													break Main;
-												}
-											} else {
-												isCheckSuccess = false;
-												resultCode = "E02";
-												resultMessage = "Item Does Not Exist";
-												break Main;
-											}
-											rs3.close();
-										}
-									}
-									
-									if (tierQuantity != qTierQuantity) {
-										isCheckSuccess = false;
-										resultCode = "E05";
-										resultMessage = "Tier Invalid Quantity";
-										break Main;
-									}
-								}
-								
-								mainOrderObj.put("type", qMainObjType);
-								mainOrderObj.put("sub", subList);
-								sendOrderList.put(mainOrderObj);
-							} else {
-								isCheckSuccess = false;
-								resultCode = "E04";
-								resultMessage = "Invalid Item Type";
-								break Main;
-							}
-						} else {
-							isCheckSuccess = false;
-							resultCode = "E04";
-							resultMessage = "Invalid Item Type";
-							break Main;
-						}
-					} else {
-						isCheckSuccess = false;
-						resultCode = "E03";
-						resultMessage = "Item Not Active";
-						break Main;
-					}
-				} else {
-					isCheckSuccess = false;
-					resultCode = "E02";
-					resultMessage = "Item Does Not Exist";
-					break Main;
-				}
-				rs1.close();
-			}
-
-			System.out.println(sendOrderList);
+			JSONObject sendData = new JSONObject();
+			sendData.put("order", sendOrderList);
+			sendData.put("checkNumber", checkNo);
+			sendData.put("hashData", ByodUtil.genSecureHash("SHA-256", "CheckOrder".concat(sendOrderList.toString().concat(checkNo))));
+			System.out.println(sendData);
 
 			if (isCheckSuccess) {
-				resultCode = "00";
-				resultMessage = "Success";
+				String url = "http://localhost:8081/device/order/checking";
+				URL object = new URL(url);
+				HttpURLConnection con = (HttpURLConnection) object.openConnection();
+				con.setDoOutput(true);
+				con.setDoInput(true);
+				con.setRequestProperty("Content-Type", "application/json");
+				con.setRequestProperty("Accept", "application/json");
+				con.setRequestMethod("POST");
+
+				OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
+				wr.write(sendData.toString());
+				wr.flush();
+
+				StringBuilder sb = new StringBuilder();
+				int httpResult = con.getResponseCode();
+				if (httpResult == HttpURLConnection.HTTP_OK) {
+					BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), "utf-8"));
+					String line = null;
+					while ((line = br.readLine()) != null) {
+						sb.append(line + "\n");
+					}
+					br.close();
+					
+					JSONObject returnObject = new JSONObject(sb.toString());
+					System.out.println(returnObject);
+					if (returnObject.has("resultCode") && returnObject.getString("resultCode").equals("00")) {
+						resultCode = "00";
+						resultMessage = "Success";
+					} else {
+						resultCode = "E06";
+						resultMessage = "Verification Failed.";
+					}
+				} else {
+					resultCode = "E07";
+					resultMessage = "POS Invalid Response";
+				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -561,5 +294,441 @@ public class Order_RestController {
 		}
 
 		return result.toString();
+	}
+	
+	@RequestMapping(value = "/order/sendOrder", method = { RequestMethod.POST })
+	public String SendOrder(HttpServletRequest request, HttpServletResponse response, @RequestBody String bodyData) {
+		JSONObject result = new JSONObject();
+		String resultCode = "E01";
+		String resultMessage = "Server error. Please try again later.";
+		Connection connection = null;
+		
+		//device type, order type, table number, check number and also order
+
+		try {
+			JSONObject parsedData = new JSONObject(bodyData);
+			JSONArray cartData = parsedData.getJSONArray("cartData");
+			String token = parsedData.getString("token");
+			System.out.println("Cart Data: " + cartData);
+			System.out.println("Token: " + token);
+
+			String decryptedTokenString = AESEncryption.decrypt(token);
+			String[] tokenSplitArry = decryptedTokenString.split("\\|;");
+			String brandId = tokenSplitArry[0];
+			String tableId = tokenSplitArry[2];
+			String checkNo = tokenSplitArry[3];
+
+			connection = dbConnectionUtil.getConnection(Long.parseLong(brandId));
+			JSONObject verifyResult = verifyOrder(cartData, connection);
+			JSONArray sendOrderList = verifyResult.getJSONArray("sendOrderList");
+			boolean isCheckSuccess = verifyResult.getBoolean("isCheckSuccess");
+			resultCode = verifyResult.getString("resultMessage");
+			resultMessage = verifyResult.getString("resultMessage");
+
+			JSONObject sendData = new JSONObject();
+			sendData.put("order", sendOrderList);
+			// 1-Table, 2-Take Away
+			sendData.put("orderType", 1);
+			sendData.put("deviceType", "byod");
+			sendData.put("checkNumber", checkNo);
+			sendData.put("tableNumber", tableId);
+			sendData.put("hashData", ByodUtil.genSecureHash("SHA-256", "SendOrder".concat(sendOrderList.toString().concat(checkNo).concat(tableId))));
+			System.out.println(sendData);
+
+			if (isCheckSuccess) {
+				String url = "http://localhost:8081/device/order/submit";
+				URL object = new URL(url);
+				HttpURLConnection con = (HttpURLConnection) object.openConnection();
+				con.setDoOutput(true);
+				con.setDoInput(true);
+				con.setRequestProperty("Content-Type", "application/json");
+				con.setRequestProperty("Accept", "application/json");
+				con.setRequestMethod("POST");
+
+				OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
+				wr.write(sendData.toString());
+				wr.flush();
+
+				StringBuilder sb = new StringBuilder();
+				int httpResult = con.getResponseCode();
+				if (httpResult == HttpURLConnection.HTTP_OK) {
+					BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), "utf-8"));
+					String line = null;
+					while ((line = br.readLine()) != null) {
+						sb.append(line + "\n");
+					}
+					br.close();
+					
+					JSONObject returnObject = new JSONObject(sb.toString());
+					System.out.println(returnObject);
+					if (returnObject.has("resultCode") && returnObject.getString("resultCode").equals("00")) {
+						resultCode = "00";
+						resultMessage = "Success";
+					} else {
+						resultCode = "E06";
+						resultMessage = "Verification Failed.";
+					}
+				} else {
+					resultCode = "E07";
+					resultMessage = "POS Invalid Response";
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+				}
+			}
+
+			try {
+				result.put("resultCode", resultCode);
+				result.put("resultMessage", resultMessage);
+			} catch (Exception e) {
+			}
+		}
+
+		return result.toString();
+	}
+	
+	private JSONObject verifyOrder(JSONArray cartData, Connection connection) throws Exception {
+		JSONObject verifyOrderResult = new JSONObject();
+		
+		String resultCode = "E01";
+		String resultMessage = "Server error. Please try again later.";
+		String sqlStatement = null;
+		boolean isCheckSuccess = true;
+		JSONArray sendOrderList = new JSONArray();
+		DecimalFormat df = new DecimalFormat("#0.00");
+		
+		Main: for (int x = 0; x < cartData.length(); x++) {
+			System.out.println("--New Order--");
+			JSONObject cartObj = cartData.getJSONObject(x);
+			/* Sent Data */
+			int mainObjID = Integer.parseInt(cartObj.getString("id"));
+			String objType = cartObj.getString("type");
+			double totalPrice = Double.parseDouble(cartObj.getString("totalPrice"));
+			int quantity = cartObj.getInt("quantity");
+			/* Query Data */
+			double qTotalPrice = 0.0;
+
+			/* Main Object Check */
+			sqlStatement = "SELECT backend_id, menu_item_base_price, menu_item_type, is_active FROM menu_item WHERE id = ?";
+			PreparedStatement ps1 = connection.prepareStatement(sqlStatement);
+			ps1.setInt(1, mainObjID);
+			ResultSet rs1 = ps1.executeQuery();
+			if (rs1.next()) {
+				String qMainBackendID = rs1.getString("backend_id");
+				double qMainPrice = rs1.getDouble("menu_item_base_price");
+				String qMainObjType = rs1.getString("menu_item_type");
+				boolean isMainActive = rs1.getInt("is_active") == 1;
+
+				if (isMainActive) {
+					if (qMainObjType.equals(objType)) {
+						if (objType.equalsIgnoreCase("0")) {
+							/* Alacarte */
+							System.out.println("Alacarte Order");
+
+							JSONObject modifierData = cartObj.has("modifierData") && !cartObj.isNull("modifierData")
+									? cartObj.getJSONObject("modifierData")
+									: null;
+							if (modifierData != null) {
+								JSONArray modifierList = modifierData.has("modifierGroupData")
+										&& !modifierData.isNull("modifierGroupData")
+												? modifierData.getJSONArray("modifierGroupData")
+												: null;
+								if (modifierList != null && modifierList.length() > 0) {
+									System.out.println("With Modifier");
+									for (int y = 0; y < modifierList.length(); y++) {
+										JSONArray modifierObjList = modifierList.getJSONArray(y);
+										System.out.println("Modifier Item " + y);
+										JSONArray subList = new JSONArray();
+										for (int z = 0; z < modifierObjList.length(); z++) {
+											JSONObject modAlacarteObj = new JSONObject();
+											JSONObject modifierObj = modifierObjList.getJSONObject(z)
+													.getJSONObject("selectedModifier");
+											System.out.println("Modifier Data " + z + ": " + modifierObj);
+
+											sqlStatement = "SELECT backend_id, menu_item_base_price, menu_item_type, is_active FROM menu_item WHERE id = ?";
+											PreparedStatement ps2 = connection.prepareStatement(sqlStatement);
+											ps2.setInt(1, Integer.parseInt(modifierObj.getString("id")));
+											ResultSet rs2 = ps2.executeQuery();
+											if (rs2.next()) {
+												String qModBackendID = rs2.getString("backend_id");
+												double qModPrice = rs2.getDouble("menu_item_base_price");
+												String qModObjType = rs2.getString("menu_item_type");
+												boolean isModActive = rs2.getInt("is_active") == 1;
+
+												if (isModActive) {
+													if (qModObjType.equals("2")) {
+														modAlacarteObj.put("id", qModBackendID);
+														modAlacarteObj.put("price", qModPrice);
+														qTotalPrice += qModPrice;
+
+														subList.put(modAlacarteObj);
+													} else {
+														isCheckSuccess = false;
+														resultCode = "E04";
+														resultMessage = "Invalid Item Type";
+														break Main;
+													}
+												} else {
+													isCheckSuccess = false;
+													resultCode = "E03";
+													resultMessage = "Item Not Active";
+													break Main;
+												}
+											} else {
+												isCheckSuccess = false;
+												resultCode = "E02";
+												resultMessage = "Item Does Not Exist";
+												break Main;
+											}
+											rs2.close();
+										}
+
+										JSONObject mainOrderObj = new JSONObject();
+										mainOrderObj.put("id", qMainBackendID);
+										mainOrderObj.put("price", qMainPrice);
+										mainOrderObj.put("quantity", 1);
+										mainOrderObj.put("sub", subList);
+										mainOrderObj.put("type", qMainObjType);
+										sendOrderList.put(mainOrderObj);
+										qTotalPrice += qMainPrice;
+									}
+								}
+							} else {
+								JSONObject mainOrderObj = new JSONObject();
+								mainOrderObj.put("id", qMainBackendID);
+								mainOrderObj.put("price", qMainPrice);
+								mainOrderObj.put("quantity", quantity);
+								mainOrderObj.put("type", qMainObjType);
+								sendOrderList.put(mainOrderObj);
+								qTotalPrice += qMainPrice * quantity;
+							}
+
+							System.out.println(df.format(qTotalPrice));
+							System.out.println(df.format(totalPrice));
+							/* Final Alacarte Check */
+							if (!df.format(qTotalPrice).equals(df.format(totalPrice))) {
+								isCheckSuccess = false;
+								resultCode = "E05";
+								resultMessage = "Untallied Price";
+								break Main;
+							}
+						} else if (objType.equalsIgnoreCase("1")) {
+							/* Combo */
+							System.out.println("Combo Order");
+							JSONArray comboList = cartObj.has("comboData") && !cartObj.isNull("comboData")
+									? cartObj.getJSONArray("comboData")
+									: null;
+
+							JSONObject mainOrderObj = new JSONObject();
+							mainOrderObj.put("id", qMainBackendID);
+							mainOrderObj.put("price", qMainPrice);
+							mainOrderObj.put("quantity", quantity);
+							qTotalPrice += qMainPrice * quantity;
+
+							JSONArray subList = new JSONArray();
+							for (int y = 0; y < comboList.length(); y++) {
+								int tierQuantity = 0;
+								int qTierQuantity = 0;
+								JSONObject comboObjDetail = comboList.getJSONObject(y);
+								JSONArray comboObjList = comboObjDetail.getJSONArray("itemList");
+								System.out.println("Combo Data " + y + ": " + comboObjList);
+								System.out.println("Combo Other Data: " + comboObjDetail);
+
+								sqlStatement = "SELECT combo_detail_quantity FROM combo_detail WHERE id = ?";
+								PreparedStatement ps2 = connection.prepareStatement(sqlStatement);
+								ps2.setInt(1, Integer.parseInt(comboObjDetail.getString("id")));
+								ResultSet rs2 = ps2.executeQuery();
+								if (rs2.next()) {
+									qTierQuantity = rs2.getInt("combo_detail_quantity");
+									System.out.println("Tier Quantity: " + qTierQuantity);
+								} else {
+									isCheckSuccess = false;
+									resultCode = "E02";
+									resultMessage = "Item Does Not Exist";
+									break Main;
+								}
+								rs2.close();
+
+								for (int z = 0; z < comboObjList.length(); z++) {
+									JSONObject comboDetailObj = comboObjList.getJSONObject(z);
+									System.out.println("Combo Detail Data " + z + ": " + comboDetailObj);
+									int subQuantity = comboDetailObj.getInt("selectedQuantity");
+									JSONArray modifierDataList = comboDetailObj.has("modifierGroupData")
+											&& !comboDetailObj.isNull("modifierGroupData")
+													? comboDetailObj.getJSONArray("modifierGroupData")
+													: null;
+
+									if (subQuantity > 0) {
+										System.out.println("Has Selected");
+										sqlStatement = "SELECT backend_id, menu_item_base_price, menu_item_type, is_active FROM menu_item WHERE id = ?";
+										PreparedStatement ps3 = connection.prepareStatement(sqlStatement);
+										ps3.setInt(1, Integer.parseInt(comboDetailObj.getString("id")));
+										ResultSet rs3 = ps3.executeQuery();
+
+										if (rs3.next()) {
+											String qSubBackendID = rs3.getString("backend_id");
+											double qSubPrice = rs3.getDouble("menu_item_base_price");
+											String qSubObjType = rs3.getString("menu_item_type");
+											boolean isSubActive = rs3.getInt("is_active") == 1;
+
+											if (isSubActive) {
+												if (qSubObjType.equals("0")) {
+													if (modifierDataList == null) {
+														System.out.println("Without Modifier");
+
+														JSONObject subOrderObj = new JSONObject();
+														subOrderObj.put("combo_detail_id",
+																Integer.parseInt(comboObjDetail.getString("id")));
+														subOrderObj.put("id", qSubBackendID);
+														subOrderObj.put("price", qSubPrice);
+														subOrderObj.put("quantity", subQuantity);
+														subList.put(subOrderObj);
+														qTotalPrice += qSubPrice * subQuantity;
+														tierQuantity += subQuantity;
+													} else {
+														System.out.println("With Modifier");
+
+														System.out.println(modifierDataList);
+														for (int a = 0; a < modifierDataList.length(); a++) {
+															JSONArray modifierObjList = modifierDataList
+																	.getJSONArray(a);
+															System.out.println("Modifier Item " + y);
+															JSONArray modList = new JSONArray();
+															for (int b = 0; b < modifierObjList.length(); b++) {
+																JSONObject modAlacarteObj = new JSONObject();
+																JSONObject modifierObj = modifierObjList
+																		.getJSONObject(b)
+																		.getJSONObject("selectedModifier");
+																System.out.println(
+																		"Modifier Data " + z + ": " + modifierObj);
+
+																sqlStatement = "SELECT backend_id, menu_item_base_price, menu_item_type, is_active FROM menu_item WHERE id = ?";
+																PreparedStatement ps4 = connection
+																		.prepareStatement(sqlStatement);
+																ps4.setInt(1, Integer
+																		.parseInt(modifierObj.getString("id")));
+																ResultSet rs4 = ps4.executeQuery();
+																if (rs4.next()) {
+																	String qModBackendID = rs4
+																			.getString("backend_id");
+																	double qModPrice = rs4
+																			.getDouble("menu_item_base_price");
+																	String qModObjType = rs4
+																			.getString("menu_item_type");
+																	boolean isModActive = rs4
+																			.getInt("is_active") == 1;
+
+																	if (isModActive) {
+																		if (qModObjType.equals("2")) {
+																			modAlacarteObj.put("id", qModBackendID);
+																			modAlacarteObj.put("price", qModPrice);
+																			qTotalPrice += qModPrice;
+
+																			modList.put(modAlacarteObj);
+																		} else {
+																			isCheckSuccess = false;
+																			resultCode = "E04";
+																			resultMessage = "Invalid Item Type";
+																			break Main;
+																		}
+																	} else {
+																		isCheckSuccess = false;
+																		resultCode = "E03";
+																		resultMessage = "Item Not Active";
+																		break Main;
+																	}
+																} else {
+																	isCheckSuccess = false;
+																	resultCode = "E02";
+																	resultMessage = "Item Does Not Exist";
+																	break Main;
+																}
+																rs4.close();
+															}
+
+															JSONObject modObj = new JSONObject();
+															modObj.put("combo_detail_id", Integer
+																	.parseInt(comboObjDetail.getString("id")));
+															modObj.put("id", qSubBackendID);
+															modObj.put("price", qSubPrice);
+															modObj.put("quantity", 1);
+															modObj.put("sub", modList);
+															subList.put(modObj);
+															qTotalPrice += qSubPrice;
+															tierQuantity += 1;
+														}
+													}
+												} else {
+													isCheckSuccess = false;
+													resultCode = "E04";
+													resultMessage = "Invalid Item Type";
+													break Main;
+												}
+											} else {
+												isCheckSuccess = false;
+												resultCode = "E03";
+												resultMessage = "Item Not Active";
+												break Main;
+											}
+										} else {
+											isCheckSuccess = false;
+											resultCode = "E02";
+											resultMessage = "Item Does Not Exist";
+											break Main;
+										}
+										rs3.close();
+									}
+								}
+
+								if (tierQuantity != qTierQuantity) {
+									isCheckSuccess = false;
+									resultCode = "E05";
+									resultMessage = "Tier Invalid Quantity";
+									break Main;
+								}
+							}
+
+							mainOrderObj.put("type", qMainObjType);
+							mainOrderObj.put("sub", subList);
+							sendOrderList.put(mainOrderObj);
+						} else {
+							isCheckSuccess = false;
+							resultCode = "E04";
+							resultMessage = "Invalid Item Type";
+							break Main;
+						}
+					} else {
+						isCheckSuccess = false;
+						resultCode = "E04";
+						resultMessage = "Invalid Item Type";
+						break Main;
+					}
+				} else {
+					isCheckSuccess = false;
+					resultCode = "E03";
+					resultMessage = "Item Not Active";
+					break Main;
+				}
+			} else {
+				isCheckSuccess = false;
+				resultCode = "E02";
+				resultMessage = "Item Does Not Exist";
+				break Main;
+			}
+			rs1.close();
+		}
+		
+		verifyOrderResult.put("isCheckSuccess", isCheckSuccess);
+		verifyOrderResult.put("resultCode", resultCode);
+		verifyOrderResult.put("resultMessage", resultMessage);
+		verifyOrderResult.put("sendOrderList", sendOrderList);
+		
+		return verifyOrderResult;
 	}
 }

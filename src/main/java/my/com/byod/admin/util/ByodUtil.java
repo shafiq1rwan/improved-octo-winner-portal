@@ -195,7 +195,7 @@ public class ByodUtil {
 		return imageName + ".png";
 	}
 	
-	public String genSecureHash(String mdInstance, String originalString) {
+	public static String genSecureHash(String mdInstance, String originalString) {
 		MessageDigest md = null;
 		byte[] ba = null;
 		
