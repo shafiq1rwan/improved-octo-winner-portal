@@ -1300,7 +1300,7 @@ public class DeviceConfigRestController {
 		try {
 			//connection = dataSource.getConnection();
 			sqlStatement = "SELECT id, tax_charge_id, backend_id, store_name, store_logo_path, store_address, store_longitude, store_latitude, store_country, store_currency, " + 
-					"store_table_count, store_start_operating_time, store_end_operating_time, last_update_date, is_publish, created_date FROM store WHERE id = ? ";
+					"store_table_count, store_start_operating_time, store_end_operating_time, last_update_date, is_publish, created_date, store_contact_person, store_contact_hp_number, store_contact_email FROM store WHERE id = ? ";
 			ps1 = connection.prepareStatement(sqlStatement);
 			ps1.setLong(1, storeId);
 			rs1 = ps1.executeQuery();	
@@ -1323,6 +1323,9 @@ public class DeviceConfigRestController {
 				result.put("lastUpdateDate", rs1.getString("last_update_date"));
 				result.put("isPublish", rs1.getLong("is_publish"));
 				result.put("createdDate", rs1.getString("created_date"));
+				result.put("contactPerson", rs1.getString("store_contact_person"));
+				result.put("mobileNumber", rs1.getString("store_contact_hp_number"));
+				result.put("email", rs1.getString("store_contact_email"));
 			}
 			
 		} catch (Exception ex) {

@@ -198,7 +198,7 @@
 				})
 				.then((willCreate) => {
 				  if (willCreate) {
-					  
+					  $('#loading_modal').modal('toggle');
 					  $http({
 							method : 'GET',
 							headers : {'Content-Type' : 'application/json'},
@@ -206,13 +206,16 @@
 						})
 						.then(function successCallback(response) {
 							if(response.status==200){
+								$('#loading_modal').modal('toggle');
+								
 								swal("Activation ID is generated", {
 									icon: "success",
 								});
 								
 								$scope.getDeviceInfo();
 							}
-						 }, function errorCallback(response) {	
+						 }, function errorCallback(response) {
+							$('#loading_modal').modal('toggle');
 					    	swal({
 								  title: "Error",
 								  text:  response.data,
@@ -257,6 +260,45 @@
 								  dangerMode: true,
 							});					
 						});				 
+				}					 
+			});
+		}
+		
+		$scope.resendActivationInfo = function(){		
+			swal({
+				  title: "Are you sure?",
+				  text: "Do you want to resend ECPOS activation email?",
+				  icon: "warning",
+				  buttons: true,
+				  dangerMode: true,
+				})
+				.then((willCreate) => {
+				  if (willCreate) {
+					  $('#loading_modal').modal('toggle');
+					  $http({
+							method : 'POST',
+							headers : {'Content-Type' : 'application/json'},
+							url : '${pageContext.request.contextPath}/menu/store/resendAct?store_id='+$scope.store.id+'&activation_id='+$scope.ecpos.activation_id
+						})
+						.then(function successCallback(response) {
+							console.log(response);
+							$('#loading_modal').modal('toggle');
+							if(response.status==200){
+								//console.log(response);
+								swal("Successfully resend ECPOS activation email.", {
+									icon: "success",
+								});
+							}
+						 }, function errorCallback(response) {
+							 console.log(response);
+							 $('#loading_modal').modal('toggle');
+							 swal({
+								  title: "Error",
+								  text: response.data,
+								  icon: "warning",
+								  dangerMode: true,
+							});		
+						});		 
 				}					 
 			});
 		}
@@ -324,7 +366,7 @@
 		
 		$scope.getDeviceInfo();
 		
-		$(document).ready(function() {	
+		$(document).ready(function() {
 			$scope.refreshTable();
 		});
 	});

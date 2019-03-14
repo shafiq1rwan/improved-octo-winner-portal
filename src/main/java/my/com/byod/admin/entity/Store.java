@@ -45,6 +45,15 @@ public class Store {
 	@JsonProperty("store_ecpos")
 	private boolean ecpos;
 	
+	@JsonProperty("store_contact_person")
+	private String contactPerson;
+	
+	@JsonProperty("store_contact_hp_number")
+	private String mobileNumber;
+	
+	@JsonProperty("store_contact_email")
+	private String email;
+	
 	public Store() {
 	}
 
@@ -150,6 +159,30 @@ public class Store {
 
 	public void setEcpos(boolean ecpos) {
 		this.ecpos = ecpos;
+	}
+	
+	public String getContactPerson() {
+		return contactPerson;
+	}
+
+	public void setContactPerson(String contactPerson) {
+		this.contactPerson = contactPerson;
+	}
+	
+	public String getMobileNumber() {
+		return mobileNumber;
+	}
+
+	public void setMobileNumber(String mobileNumber) {
+		this.mobileNumber = mobileNumber;
+	}
+	
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
 	}
 
 }

@@ -53,6 +53,9 @@ public class StoreRepository {
 		store.setOperatingStartTime(rs.getTime("store_start_operating_time"));
 		store.setOperatingEndTime(rs.getTime("store_end_operating_time"));
 		store.setEcpos(rs.getBoolean("ecpos"));
+		store.setContactPerson(rs.getString("store_contact_person"));
+		store.setMobileNumber(rs.getString("store_contact_hp_number"));
+		store.setEmail(rs.getString("store_contact_email"));
 		return store;
 	};
 
@@ -92,11 +95,11 @@ public class StoreRepository {
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(dbConnectionUtil.setupDataSource(request));
 		return jdbcTemplate.update(
 				"INSERT INTO store(backend_id,store_name,store_logo_path,store_address,store_longitude,store_latitude,store_country,store_currency, "
-				+ "store_table_count, is_publish, store_start_operating_time, store_end_operating_time, ecpos, created_date) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,GETDATE());",
+				+ "store_table_count, is_publish, store_start_operating_time, store_end_operating_time, ecpos, store_contact_person, store_contact_hp_number, store_contact_email, created_date) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,GETDATE());",
 				new Object[] { store.getBackendId(), store.getName(), store.getLogoPath(),
 						store.getLocation().getAddress(), store.getLocation().getLongitude(),
 						store.getLocation().getLatitude(), store.getLocation().getCountry(), store.getCurrency(),
-						store.getTableCount(), store.isPublish(), store.getOperatingStartTime(), store.getOperatingEndTime(), store.getEcpos()});
+						store.getTableCount(), store.isPublish(), store.getOperatingStartTime(), store.getOperatingEndTime(), store.getEcpos(), store.getContactPerson(), store.getMobileNumber(), store.getEmail()});
 		
 		/*jdbcTemplate.update( new PreparedStatementCreator() {
 	        public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
@@ -125,21 +128,21 @@ public class StoreRepository {
 	public int editStore(Long id, Store store, String image) {
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(dbConnectionUtil.setupDataSource(request));
 		return jdbcTemplate.update(
-				"UPDATE store SET store_name = ?,store_logo_path = ?,store_address = ?,store_longitude = ?,store_latitude = ?,store_country = ?,store_currency = ?, store_table_count = ?, is_publish = ?, store_start_operating_time = ?, store_end_operating_time = ?, last_update_date = GETDATE(), ecpos = ? WHERE id = ?",
+				"UPDATE store SET store_name = ?,store_logo_path = ?,store_address = ?,store_longitude = ?,store_latitude = ?,store_country = ?,store_currency = ?, store_table_count = ?, is_publish = ?, store_start_operating_time = ?, store_end_operating_time = ?, last_update_date = GETDATE(), ecpos = ?, store_contact_person = ?, store_contact_hp_number = ?, store_contact_email = ?  WHERE id = ?",
 				new Object[] { store.getName(), image, store.getLocation().getAddress(),
 						store.getLocation().getLongitude(), store.getLocation().getLatitude(),
 						store.getLocation().getCountry(), store.getCurrency(), store.getTableCount(),
-						store.isPublish(), store.getOperatingStartTime(), store.getOperatingEndTime(), store.getEcpos(), id });
+						store.isPublish(), store.getOperatingStartTime(), store.getOperatingEndTime(), store.getEcpos(), store.getContactPerson(), store.getMobileNumber(), store.getEmail(), id });
 	}
 	
 	public int editStore(Long id, Store store) {
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(dbConnectionUtil.setupDataSource(request));
 		return jdbcTemplate.update(
-				"UPDATE store SET store_name = ?,store_address = ?,store_longitude = ?,store_latitude = ?,store_country = ?,store_currency = ?, store_table_count = ?, is_publish = ?, store_start_operating_time = ?, store_end_operating_time = ?, last_update_date = GETDATE(), ecpos = ? WHERE id = ?",
+				"UPDATE store SET store_name = ?,store_address = ?,store_longitude = ?,store_latitude = ?,store_country = ?,store_currency = ?, store_table_count = ?, is_publish = ?, store_start_operating_time = ?, store_end_operating_time = ?, last_update_date = GETDATE(), ecpos = ?, store_contact_person = ?, store_contact_hp_number = ?, store_contact_email = ? WHERE id = ?",
 				new Object[] { store.getName(), store.getLocation().getAddress(),
 						store.getLocation().getLongitude(), store.getLocation().getLatitude(),
 						store.getLocation().getCountry(), store.getCurrency(), store.getTableCount(),
-						store.isPublish(), store.getOperatingStartTime(), store.getOperatingEndTime(), store.getEcpos(), id });
+						store.isPublish(), store.getOperatingStartTime(), store.getOperatingEndTime(), store.getEcpos(), store.getContactPerson(), store.getMobileNumber(), store.getEmail(), id });
 	}
 
 	public int editStoreGroupCategoryId(Long groupCategoryId, Long id) {

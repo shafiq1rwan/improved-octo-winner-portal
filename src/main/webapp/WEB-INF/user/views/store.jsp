@@ -77,6 +77,7 @@
 		      </div>
 		      <div class="modal-body">		       									  
 					<div class="form-section">
+						<h6 class="pb-2 text-secondary">Store Information</h6>
 						<div class="row">
 							<div class="col-8 col-sm-8 col-md-8 col-lg-8 col-xl-8">
 								<div class="form-group">
@@ -162,11 +163,37 @@
 						</div>								
 					</div>
 					<hr>
-					<div>
+					<div class="form-section">
+						<h6 class="pb-2 text-secondary">Contact Person Information</h6>
+						<div class="row">
+							<div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
+								<div class="form-group">
+									<label class="login-label">Name</label>
+									<input class="form-control" name="storeContactPerson" placeholder="Name" ng-model="store.contactPerson" type="text" required> 
+								</div>
+							</div>
+							<div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
+								<div class="form-group">
+									<label class="login-label">Mobile Number</label>
+									<input class="form-control" name="storeMobileNumber" placeholder="Mobile Number" ng-model="store.mobileNumber" type="text" required> 
+								</div>
+							</div>				
+						</div>
+						<div class="row">
+							<div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
+								<div class="form-group">
+									<label class="login-label">Email</label>
+									<input class="form-control" name="storeEmail" placeholder="Email" ng-model="store.email" type="email" required> 
+								</div>
+							</div>			
+						</div>
+					</div>	
+					<hr>
+					<div class="form-section">
+						<h6 class="pb-2 text-secondary">POS Setting</h6>
 						<div class="row">
 							<div class="col-4 col-sm-4 col-md-4 col-lg-4 col-xl-4">
 								<div class="form-group">
-									<label class="login-label">POS Setting</label>
 									<div class="form-check">
 									  <input class="form-check-input" type="radio" ng-model="store.ecpos" id="exampleRadios1" ng-value=true checked>
 									  <label class="form-check-label" for="exampleRadios1">
@@ -182,27 +209,7 @@
 								</div>
 							</div>							
 						</div>
-						<div class="row" ng-show="store.pos==1 && action=='update'">
-							<div class="col-4 col-sm-4 col-md-4 col-lg-4 col-xl-4">
-								<div class="form-group">
-									<label class="login-label">Backend ID</label>
-									<input class="form-control" name="storeSecureHash" ng-model="store.secureHash" type="text" disabled> 							
-								</div>
-							</div>
-							<div class="col-4 col-sm-4 col-md-4 col-lg-4 col-xl-4">
-								<div class="form-group">
-									<label class="login-label">Activation ID</label>
-									<input class="form-control" name="storeSecureHash" ng-model="store.secureHash" type="text" disabled> 							
-								</div>
-							</div>
-							<div class="col-4 col-sm-4 col-md-4 col-lg-4 col-xl-4">
-								<div class="form-group">
-									<label class="login-label">Activation Key</label>
-									<input class="form-control" name="storeSecureHash" ng-model="store.secureHash" type="text" disabled> 							
-								</div>
-							</div>
-						</div>
-					</div>				 									
+					</div>			 									
 		      </div>
 		      <div class="modal-footer">
 		      	<button class="btn btn-primary" ng-show="action=='create'" type="submit" ng-click="submitStore()"> Submit</button>

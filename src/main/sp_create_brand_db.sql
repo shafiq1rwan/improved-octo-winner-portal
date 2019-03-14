@@ -156,6 +156,9 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 				store_table_count INT DEFAULT 0,
 				store_start_operating_time time NOT NULL,
 				store_end_operating_time time NOT NULL,
+				store_contact_person VARCHAR(150) NOT NULL,
+				store_contact_hp_number VARCHAR(50) NOT NULL,
+				store_contact_email VARCHAR(150) NOT NULL,
 				last_update_date datetime,
 				is_publish BIT DEFAULT 0,
 				ecpos BIT DEFAULT 0,
@@ -171,7 +174,7 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 				staff_password NVARCHAR(200) NOT NULL,
 				staff_role INT NOT NULL,
 				staff_contact_hp_number NVARCHAR(50) NOT NULL,
-				staff_contact_email VARCHAR(320) NOT NULL,
+				staff_contact_email VARCHAR(150) NOT NULL,
 				is_active BIT DEFAULT 1 NOT NULL,
 				created_date DATETIME NOT NULL,
 				last_update_date DATETIME

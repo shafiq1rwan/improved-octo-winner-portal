@@ -571,6 +571,7 @@ public class GroupCategoryRestController {
 			
 		}catch(Exception ex) {
 			ex.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Server error. Please try again later."); 
 		} finally {
 			if (connection != null) {
 				try {

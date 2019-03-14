@@ -28,6 +28,7 @@ import my.com.byod.admin.entity.Store;
 import my.com.byod.admin.service.StoreService;
 import my.com.byod.admin.util.ByodUtil;
 import my.com.byod.admin.util.DbConnectionUtil;
+import my.com.byod.admin.util.UserEmailUtil;
 import my.com.byod.order.util.AESEncryption;
 
 @RestController
@@ -48,6 +49,9 @@ public class StoreRestController {
 	
 	@Autowired
 	private DbConnectionUtil dbConnectionUtil;	
+	
+	@Autowired
+	private UserEmailUtil userEmailUtil;
 	
 	// Store
 	@GetMapping("")
@@ -101,6 +105,7 @@ public class StoreRestController {
 	public ResponseEntity<?> editStore(@RequestBody Store store, HttpServletRequest request, HttpServletResponse response) {
 		Connection connection = null;
 		try {
+			System.out.println("my email:" + store.getEmail());
 			connection = dbConnectionUtil.retrieveConnection(request);
 			String brandId = byodUtil.getGeneralConfig(connection, "BRAND_ID");
 			Store existingStore = storeService.findStoreById(store.getId());
@@ -477,20 +482,26 @@ public class StoreRestController {
 	
 	@GetMapping(value = {"/ecpos/activate"}, produces = "application/json")
 	public ResponseEntity<?> activateECPOS(@RequestParam("store_id") Long store_id, HttpServletRequest request, HttpServletResponse response) {
-		JSONArray jsonArray = new JSONArray();
 		JSONObject jsonObj = null;
 		Connection connection = null;
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
 		
 		try {
 			connection = dbConnectionUtil.retrieveConnection(request);
 			if(checkDeviceInfoExist(connection, 1, store_id))
 				return ResponseEntity.status(HttpStatus.CONFLICT).contentType(MediaType.TEXT_PLAIN).body("ECPOS has already been activated.");
 			
-			int rowAffected = createDeviceInfo(connection, 1, store_id);
-			if(rowAffected==0)
+			String activationId = createDeviceInfo(connection, 1, store_id);
+			if(activationId==null || activationId.equals(""))
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Failed to generate ECPOS activation info.");
+			else {
+				Store store = storeService.findStoreById(store_id);
+				// send email
+				String brandId = byodUtil.getGeneralConfig(connection, "BRAND_ID");
+				String email = store.getEmail();
+				JSONObject activationInfo = getDeviceInfoByActivationId(connection, activationId);
+				if(!userEmailUtil.sendActivationInfo(store.getContactPerson(), activationInfo, brandId, email))
+					return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Activation success but failed to send activation email.");
+			}
 					
 		}catch(Exception ex) {
 			ex.printStackTrace();
@@ -685,10 +696,18 @@ public class StoreRestController {
 		
 		try {
 			connection = dbConnectionUtil.retrieveConnection(request);
-			int rowAffected = createDeviceInfo(connection, 2, store_id);
-			if(rowAffected==0)
+			String activationId = createDeviceInfo(connection, 2, store_id);
+			if(activationId==null || activationId.equals(""))
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Failed to generate BYOD activation info.");
-					
+			else {
+				Store store = storeService.findStoreById(store_id);
+				// send email
+				String brandId = byodUtil.getGeneralConfig(connection, "BRAND_ID");
+				String email = store.getEmail();
+				JSONObject activationInfo = getDeviceInfoByActivationId(connection, activationId);
+				if(!userEmailUtil.sendActivationInfo(store.getContactPerson(), activationInfo, brandId, email))
+					return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Activation success but failed to send activation email.");
+			}	
 		}catch(Exception ex) {
 			ex.printStackTrace();
 		} finally {
@@ -830,10 +849,18 @@ public class StoreRestController {
 		
 		try {
 			connection = dbConnectionUtil.retrieveConnection(request);
-			int rowAffected = createDeviceInfo(connection, 3, store_id);
-			if(rowAffected==0)
+			String activationId = createDeviceInfo(connection, 3, store_id);
+			if(activationId==null || activationId.equals(""))
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Failed to generate KIOSK activation info.");
-					
+			else {
+				Store store = storeService.findStoreById(store_id);
+				// send email
+				String brandId = byodUtil.getGeneralConfig(connection, "BRAND_ID");
+				String email = store.getEmail();
+				JSONObject activationInfo = getDeviceInfoByActivationId(connection, activationId);
+				if(!userEmailUtil.sendActivationInfo(store.getContactPerson(), activationInfo, brandId, email))
+					return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Activation success but failed to send activation email.");
+			}			
 		}catch(Exception ex) {
 			ex.printStackTrace();
 		} finally {
@@ -927,6 +954,35 @@ public class StoreRestController {
 	
 	/*End KIOSK API*/
 	
+	@PostMapping(value = {"/resendAct"}, produces = "application/json")
+	public ResponseEntity<?> resendActivationInfo(@RequestParam("store_id") Long store_id, @RequestParam("activation_id") String activationId, HttpServletRequest request, HttpServletResponse response) {
+		Connection connection = null;
+		
+		try {
+			connection = dbConnectionUtil.retrieveConnection(request);
+			Store store = storeService.findStoreById(store_id);
+			// send email
+			String brandId = byodUtil.getGeneralConfig(connection, "BRAND_ID");
+			String email = store.getEmail();
+			JSONObject activationInfo = getDeviceInfoByActivationId(connection, activationId);
+			if(!userEmailUtil.sendActivationInfo(store.getContactPerson(), activationInfo, brandId, email))
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Failed to resend activation email.");
+			
+		}catch(Exception ex) {
+			ex.printStackTrace();
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Server error. Please try again later.");
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return new ResponseEntity<>(HttpStatus.OK);
+	}
+	
 	public boolean getEcposStatus(Connection connection, long store_id) throws Exception {	
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
@@ -1010,25 +1066,25 @@ public class StoreRestController {
 		return exist;
 	}
 	
-	private int createDeviceInfo(Connection connection, long deviceTypeId, long referenceId) throws Exception {	
+	private String createDeviceInfo(Connection connection, long deviceTypeId, long referenceId) throws Exception {	
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		int count = 1;
-		int result = 0;
+		String result = null;
 		
 		try {
 			String prefix = getDevicePrefix(connection, deviceTypeId);				
-			
+			String activationId = byodUtil.createUniqueActivationId(prefix);
 			stmt = connection.prepareStatement("INSERT INTO device_info (activation_id, activation_key, status_lookup_id, device_type_lookup_id, ref_id, created_date, group_category_id) "
 					+ "VALUES (?, ? ,? ,? ,? , GETDATE(), 0); SELECT SCOPE_IDENTITY();");	
-			stmt.setString(count++, byodUtil.createUniqueActivationId(prefix));
+			stmt.setString(count++, activationId);
 			stmt.setString(count++, byodUtil.createRandomDigit(16));
 			stmt.setInt(count++, 1);
 			stmt.setLong(count++, deviceTypeId);
 			stmt.setLong(count++, referenceId);
 			rs = stmt.executeQuery();		
 			if(rs.next()) {
-				result = rs.getInt(1);
+				result = activationId;
 			}
 			
 		}catch(Exception ex) {
@@ -1090,8 +1146,10 @@ public class StoreRestController {
 		int count = 1;
 		
 		try {
-			stmt = connection.prepareStatement("SELECT a.*, b.name AS status FROM device_info a "
-					+ "INNER JOIN status_lookup b ON a.status_lookup_id = b.id WHERE a.activation_id = ?");			
+			stmt = connection.prepareStatement("SELECT a.*, b.name AS status, c.name AS device FROM device_info a "
+					+ "INNER JOIN status_lookup b ON a.status_lookup_id = b.id "
+					+ "INNER JOIN device_type_lookup c ON a.device_type_lookup_id = c.id "
+					+ "WHERE a.activation_id = ?");			
 			stmt.setString(count++, activationId);
 			rs = stmt.executeQuery();	
 			if(rs.next()) {
@@ -1103,6 +1161,7 @@ public class StoreRestController {
 				jsonObj.put("created_date", rs.getString("created_date"));
 				jsonObj.put("status_lookup_id", rs.getLong("status_lookup_id"));
 				jsonObj.put("status", rs.getString("status"));
+				jsonObj.put("device", rs.getString("device"));
 			}
 			
 		}catch(Exception ex) {

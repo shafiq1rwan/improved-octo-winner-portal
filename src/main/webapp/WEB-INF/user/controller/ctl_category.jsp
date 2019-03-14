@@ -564,7 +564,7 @@
 			
 			  // drag and drop list
 			   var sortable = Sortable.create($('#sortableList')[0], {
-			   		handle: ".fa-reorder",
+			   		handle: ".fa-arrows-alt",
 			   		scroll: true,
 			   		// Element is chosen
 			   		onChoose: function (/**Event*/evt) {

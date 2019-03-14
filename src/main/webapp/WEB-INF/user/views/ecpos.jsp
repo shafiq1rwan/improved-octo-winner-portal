@@ -89,7 +89,7 @@
 							<div class="card-footer">
 								<div class="btn-toolbar justify-content-end" role="toolbar" aria-label="Toolbar with button groups">
 									<button type="button" ng-show="showActivation" ng-click="generateActivation()" class="btn btn-success">Generate Activation ID</button>															
-			  						<button type="button" class="btn btn-outline-secondary">Resend Activation ID</button>
+			  						<button type="button" ng-click="resendActivationInfo()" class="btn btn-outline-secondary">Resend Activation ID</button>
 			  						<button type="button" ng-click="reactivateDevice()" class="btn btn-outline-secondary">Reactivate ECPOS</button>
 			  						<button type="button" ng-click="terminateDevice()" class="btn btn-outline-secondary">Terminate ECPOS</button>		  				
 								</div>	
@@ -209,6 +209,21 @@
 		    </div>
 		</div>
 	</div>
+	
+	<!-- Loading Modal [START] -->
+	<div class="modal fade" data-backdrop="static" id="loading_modal" role="dialog">
+		<div class="modal-dialog h-100 d-flex flex-column justify-content-center my-0 modal-sm">
+		<div class="modal-content">
+			<div class="modal-body">
+				<div class="text-center">
+					<img style="width:75%" src="${pageContext.request.contextPath}/assets/images/byodadmin/gif/loading.gif"><br>
+						<span>Loading...</span>
+				</div>
+			</div>
+		</div>
+		</div>
+	</div>
+	<!-- Loading Modal [END] -->
 </div>
 </body>
 </html>

@@ -30,7 +30,10 @@
 								$scope.store.latitude == null || $scope.store.latitude=='' ||
 									$scope.store.country == null || $scope.store.country=='' || 
 										$scope.store.operatingStartTime == null || $scope.store.operatingStartTime=='' || 
-											$scope.store.operatingEndTime == null || $scope.store.operatingEndTime==''){
+											$scope.store.operatingEndTime == null || $scope.store.operatingEndTime=='' ||
+												$scope.store.contactPerson == null || $scope.store.contactPerson=='' ||
+													$scope.store.mobileNumber == null || $scope.store.mobileNumber=='' ||
+														$scope.store.email == null || $scope.store.email==''){
 			}
 			else if($scope.action=='create' && $scope.store.imagePath == null || $scope.action=='create' && $scope.store.imagePath==''){
 				swal({
@@ -99,7 +102,10 @@
 					store_logo_path: $scope.uploadImage?$scope.store.imagePath: null,
 					store_start_operating_time: $scope.store.operatingStartTime,
 					store_end_operating_time: $scope.store.operatingEndTime,
-					store_ecpos : $scope.store.ecpos
+					store_ecpos : $scope.store.ecpos,
+					store_contact_person : $scope.store.contactPerson,
+					store_contact_hp_number : $scope.store.mobileNumber,
+					store_contact_email : $scope.store.email
 				}
 				
 			console.log(postdata);
@@ -235,6 +241,9 @@
 						$scope.store.operatingStartTime = response.data.store_start_operating_time;
 						$scope.store.operatingEndTime = response.data.store_end_operating_time;
 						$scope.store.ecpos = response.data.store_ecpos;
+						$scope.store.contactPerson = response.data.store_contact_person;
+						$scope.store.mobileNumber = response.data.store_contact_hp_number;
+						$scope.store.email = response.data.store_contact_email;
 						
 						 $('#operatingStartTime').datetimepicker({
 							    defaultDate: moment($scope.store.operatingStartTime, "HH:mm:ss"),

@@ -157,8 +157,8 @@
 							  					<h6 class="text-info">{{item.backend_id}}</h6>				  				
 											</div>
 											<div class="pr-1">
-												<button class="btn btn-outline-danger border-0" type="button" ng-click="unassignItem(item.id)"><i class="fa fa-times-rectangle"></i></button>
-												<i class="fa fa-reorder pull-right"></i>
+												<button class="btn btn-outline-danger border-0" type="button" ng-click="unassignItem(item.id)"><i class="fa fa-window-close"></i></button>
+												<i class="fas fa-arrows-alt pull-right"></i>
 											</div>
 											
 											</div>
