@@ -83,8 +83,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		        	if(user!=null) {
 		        		response.sendRedirect(request.getContextPath()+"/user/signin/error/*");
 		        	} else {
-		        		//response.sendRedirect(request.getContextPath()+"/user/signin/error/not-exist");
-		        	} 
+		        		response.sendRedirect(request.getContextPath()+"/user/signin/error/not-exist");
+		        	}
 		          })
 		          .permitAll()
 	          .and()

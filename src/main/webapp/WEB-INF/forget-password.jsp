@@ -14,6 +14,8 @@
 <script src="${pageContext.request.contextPath}/assets/plugins/angular-1.7.4/js/angular-route.min.js"></script>
 <script src="${pageContext.request.contextPath}/assets/plugins/jquery-3.3.1/js/jquery-3.3.1.min.js"></script>
 
+<script src="${pageContext.request.contextPath}/assets/plugins/bootstrap-4.1.3/js/bootstrap.bundle.min.js"></script>
+
 <style>
 .form-signin input[type="text"] {
 	margin-bottom: 5px;
@@ -103,6 +105,21 @@
 			</div>
 		</div>
 	</div>
+	
+			<!-- Loading Modal [START] -->
+			<div class="modal fade" data-backdrop="static" id="loading_modal" role="dialog">
+				<div class="modal-dialog modal-sm">
+				<div class="modal-content">
+					<div class="modal-body">
+						<div class="text-center">
+							<img style="width:75%" src="${pageContext.request.contextPath}/img/gif/loading.gif"><br>
+								<span>Synchronizing Data...</span>
+						</div>
+					</div>
+				</div>
+				</div>
+			</div>
+			<!-- Loading Modal [END] -->
 
 </body>
 
@@ -114,32 +131,36 @@ app.controller('ctl_forget_password', function($scope, $http, $location) {
 	$scope.successMessage = '';
 	
 	$scope.submitData = function(){	
+		$('#loading_modal').modal('show');
 		
-		
-		//put waiting modal here
-
 		if($scope.forget_password.email == null ||$scope.forget_password.email == ''){
 		} else {		
+			
+			var jsonData = JSON.stringify({
+				email : $scope.forget_password.email
+			});
+			
+			console.log(jsonData);
+			
 			$http({
 				method : 'POST',
-				headers : {'Content-Type' : 'application/json'},
-				url : '${pageContext.request.contextPath}/forget-password/send',
-				data : JSON.stringify({'email':$scope.forget_password.email})
+				url : '${pageContext.request.contextPath}/forget-password/send-reset-email',
+				data : jsonData
 			})
 			.then(
 				function(response) {
-					console.log(response.data);
-			/* 		if(response.data.responseCode === "00"){			
+					console.log("HH " + response.data.responseCode);
+			 		if(response.data.responseCode === "00"){			
 						$scope.successMessage = response.data.successMessage;		
 						console.log(response.data.successMessage);
 					} else if(response.data.responseCode === "01"){
 						$scope.errorMessage = response.data.errorMessage;
 						console.log(response.data.errorMessage);
-					} */
+					}
+					$('#loading_modal').modal('hide');
 				},
 				function(response) {
-					//it trigget it instead
-					console.log(response.data);
+					$('#loading_modal').modal('hide');
 			});
 		}
 	}

@@ -8,6 +8,8 @@
 		$scope.brands = [];
 		$scope.brand_id = 0;
 		
+		$scope.selectable_brands = [];
+		
 		$scope.assigned_brands = [];
 		
 		$scope.access_rights = [];
@@ -37,6 +39,8 @@
 					$scope.role = response.data.role;
 					$scope.users = response.data.user_list;
 					$scope.roles = response.data.role_list.filter(r => r!= $scope.role);
+					$scope.selectable_brands = response.data.brand_list;
+					
 					refreshUserTable($scope.users);
 				},
 				function(response) {
@@ -232,7 +236,8 @@
 						'address' : $scope.user.address,
 						'username' : $scope.user.username,
 						'enabled' : $scope.user.enabled || false,
-						'role' : $scope.user.authority
+						'role' : $scope.user.authority,
+						'brand' : $scope.user.brand || null
 				};
 				var postData = JSON.stringify(data);
 					
@@ -241,6 +246,8 @@
 				
 				var userUrl = $scope.action == 'create'?'signup':'edit';
 				
+				$('#loading_modal').modal('show');
+				
  				$http({
 					method : 'POST',
 					headers : {'Content-Type' : 'application/json'},
@@ -248,15 +255,18 @@
 					data : postData
 				})
 				.then(
-					function(response) {			
+					function(response) {
+						console.log("HHH");
+						$('#loading_modal').modal('hide');
 						$scope.resetModal();
 						$('#userModal').modal('toggle');
 						getUserInfo();
 					},
-					function(response) {			
-						alert(response.data);
-						$scope.resetModal();
-						$('#userModal').modal('toggle');
+					function(response) {
+						$('#loading_modal').modal('hide');
+						alert(response.data.responseMessage);
+						//$scope.resetModal();
+						//$('#userModal').modal('toggle');
 				});
 				
 			}

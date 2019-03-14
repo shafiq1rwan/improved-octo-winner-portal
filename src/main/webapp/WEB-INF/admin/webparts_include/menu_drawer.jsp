@@ -1,5 +1,9 @@
 <%
 	String role = (String)session.getAttribute("role");
+	if(role.isEmpty() || role == null){
+		 String redirectURL = "/logout";
+		 response.sendRedirect(redirectURL);
+	}
 %>
 <!-- Left Sidebar -->
 <div class="left main-sidebar">

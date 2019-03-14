@@ -82,4 +82,34 @@ public class ApplicationUserServiceImp implements ApplicationUserService {
 		passwordResetTokenRepo.createToken(myToken);
 	}
 
+	@Override
+	public int editUser(ApplicationUser user, String role) {
+		int rowAffected = applicationUserRepo.editUser(user);
+		if(rowAffected!= 0) {
+			jdbcTemplate.update("UPDATE authorities SET authority = ? WHERE user_id = ?",
+					new Object[] { role, user.getId()});
+		}		
+		return rowAffected;
+	}
+
+	@Override
+	public boolean findUserByUsername(String username, Long id) {
+		return applicationUserRepo.findUserByUsername(username, id);
+	}
+
+	@Override
+	public boolean findUserByEmail(String email, Long id) {
+		return applicationUserRepo.findUserByEmail(email, id);
+	}
+
+	@Override
+	public boolean findUserByMobileNumber(String mobileNumber, Long id) {
+		return applicationUserRepo.findUserByMobileNumber(mobileNumber, id);
+	}
+
+	@Override
+	public int assignedNewUserToBrand(Long userId, Long brandId) {
+		return applicationUserRepo.assignedNewUserToBrand(userId, brandId);
+	}
+
 }

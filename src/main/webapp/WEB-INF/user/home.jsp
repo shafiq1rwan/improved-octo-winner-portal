@@ -115,14 +115,16 @@ if it's not present, don't show loader */
 			templateUrl : "${pageContext.request.contextPath}/user/views/store",
 			controller : "ctl_store",
 			resolve : {
-		       	checkSession:checkSession
+		       	checkSession:checkSession,
+		    	checkPageAccess:checkPageAccess('store')
 		       }
 		})
 		.when("/Router_group_category", {
 			templateUrl : "${pageContext.request.contextPath}/user/views/groupCategory",
 			controller : "ctl_group_category",
 			resolve : {
-		       	checkSession:checkSession
+		       	checkSession:checkSession,
+		       	checkPageAccess:checkPageAccess('group-category')
 		       }
 		})
 		.when("/Router_profile", {
@@ -196,21 +198,24 @@ if it's not present, don't show loader */
 			templateUrl : '${pageContext.request.contextPath}/user/views/itemGroup',	
 			controller : "ctl_item_group",
 			resolve : {
-		       	checkSession:checkSession
+		       	checkSession:checkSession,
+		       	checkPageAccess:checkPageAccess('menu-item')
 		       }
 		})
 		.when('/Router_modifier_group', {
 			templateUrl : '${pageContext.request.contextPath}/user/views/modifierGroup',	
 			controller : "ctl_modifier_group",
 			resolve : {
-		       	checkSession:checkSession
+		       	checkSession:checkSession,
+		       	checkPageAccess:checkPageAccess('menu-item')
 		       }
 		})
 		.when('/Router_menu_item', {
 			templateUrl : '${pageContext.request.contextPath}/user/views/menuItem',	
 			controller : "ctl_menu_item",
 			resolve : {
-		       	checkSession:checkSession
+		       	checkSession:checkSession,
+		      	checkPageAccess:checkPageAccess('menu-item')
 		       }
 		})
 		.when('/Router_combo/:id', {
@@ -237,7 +242,8 @@ if it's not present, don't show loader */
 			},
 			controller : "ctl_setting",
 			resolve : {
-		       	checkSession:checkSession
+		       	checkSession:checkSession,
+		       	checkPageAccess:checkPageAccess('setting')
 		    }
 		});
 	});
@@ -258,6 +264,27 @@ if it's not present, don't show loader */
 			    return deferred.promise;
 			}
 		})
+	};
+	
+	var checkPageAccess = function(type) {
+		return function($location, $q){
+			console.log("APIs Type " + type)
+				$.ajax({
+					type : "GET",
+					url : "${pageContext.request.contextPath}/user/checkaccessrights/" + type,
+					contentType : "application/json",
+					success : function(resultData) {
+						var deferred = $q.defer();
+					    if (resultData == "authorized") {
+					        deferred.resolve();
+					    } else {
+					        deferred.reject();
+					        window.location.href = "${pageContext.request.contextPath}/user/views/unauthorized";
+					    }
+					    return deferred.promise;
+					}
+				})
+		}
 	};
 </script>
 	

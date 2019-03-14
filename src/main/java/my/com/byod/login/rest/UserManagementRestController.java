@@ -101,6 +101,13 @@ public class UserManagementRestController {
 				return ResponseEntity.badRequest().contentType(MediaType.TEXT_PLAIN).body("Cannot create new user");
 			}
 			else {
+				//register with selected brand
+				int rowAffected = 0;
+				if(jsonData.has("brand") && !jsonData.isNull("brand")) {
+					rowAffected = applicationUserService.assignedNewUserToBrand(userId, jsonData.getLong("brand"));				
+					if(rowAffected == 0)
+						return ResponseEntity.badRequest().contentType(MediaType.TEXT_PLAIN).body("Cannot assign user to brand");
+				}			
 				//send email
 				boolean sendStatus = userEmailUtil.sendUserRegisterPassword(user.getUsername(),randomPass,user.getEmail());
 				if(!sendStatus) {
@@ -118,7 +125,7 @@ public class UserManagementRestController {
 		return ResponseEntity.ok(null);
 	}
 	
-/*	@PostMapping(value = "/edit/")
+	@PostMapping(value = "/edit")
 	public ResponseEntity<?> editUser(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody String data) {
 		try {
@@ -130,21 +137,22 @@ public class UserManagementRestController {
 			user.setMobileNumber(jsonData.getString("mobileNumber"));
 			user.setAddress(jsonData.getString("address"));
 			user.setUsername(jsonData.getString("username"));
-			user.setPassword(jsonData.getString("password"));
 			user.setEnabled(jsonData.getBoolean("enabled"));
 
-			if (applicationUserService.findUserByEmail(user.getEmail()) != null)
+			if (applicationUserService.findUserByEmail(user.getEmail(), user.getId()))
 				throw new IllegalArgumentException(
 						constructJsonResponse("01", user.getEmail() + " already being taken"));
-			else if (applicationUserService.findUserByUsername(user.getUsername()) != null)
+
+			if (applicationUserService.findUserByUsername(user.getUsername(), user.getId()))
 				throw new IllegalArgumentException(
 						constructJsonResponse("02", user.getUsername() + " already being taken"));
-			else if (applicationUserService.findUserByMobileNumber(user.getMobileNumber()) != null)
+
+			if (applicationUserService.findUserByMobileNumber(user.getMobileNumber(), user.getId()))
 				throw new IllegalArgumentException(
 						constructJsonResponse("03", user.getMobileNumber() + " already being taken"));
-
 			
-			if (userId == 0)
+			int rowAffected = applicationUserService.editUser(user, jsonData.getString("role"));
+			if (rowAffected == 0)
 				return ResponseEntity.badRequest().contentType(MediaType.TEXT_PLAIN).body("Cannot edit existing user");
 		} catch (IllegalArgumentException ex) {
 			ex.printStackTrace();
@@ -155,11 +163,7 @@ public class UserManagementRestController {
 					.body("Internal Server Error");
 		}
 		return ResponseEntity.ok(null);
-	}*/
-	
-	
-	
-	
+	}
 
 	private String constructJsonResponse(String errorCode, String errorMessage) {
 		JSONObject responseData = new JSONObject();
@@ -176,6 +180,7 @@ public class UserManagementRestController {
 	public ResponseEntity<?> findUsers(HttpServletRequest request, HttpServletResponse response){		
 		JSONObject jsonUserResult = new JSONObject();
 		JSONArray jsonUserArray = new JSONArray();
+		JSONArray jsonBrandArray = new JSONArray();
 		
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		String username = auth.getName();
@@ -183,7 +188,9 @@ public class UserManagementRestController {
 	
 		try {
 			String sql = "";
+			String brandSql = "";
 			List<Map<String, Object>> users = new ArrayList<Map<String, Object>>();
+			List<Map<String, Object>> brands = new ArrayList<Map<String, Object>>();
 			List<String> roleList = new ArrayList<String>(Arrays.asList("ROLE_ADMIN","ROLE_USER"));
 			
 			if(role.equals("ROLE_SUPER_ADMIN")) {
@@ -192,6 +199,9 @@ public class UserManagementRestController {
 						+ "WHERE a.authority != ?";
 
 				users = jdbcTemplate.queryForList(sql, new Object[] {role});
+				
+				brandSql = "SELECT * FROM brands";
+				brands = jdbcTemplate.queryForList(brandSql);
 			} else if(role.equals("ROLE_ADMIN")){
 				List<Long> brandIds = jdbcTemplate.queryForList("SELECT b.id FROM brands b "
 						+ "INNER JOIN users_brands ub ON b.id = ub.brand_id "
@@ -212,6 +222,11 @@ public class UserManagementRestController {
 					
 					users = template.queryForList(sql, paramMap);
 				}
+				
+				brandSql = "SELECT b.* FROM brands b INNER JOIN users_brands ub "
+						+ "ON b.id = ub.brand_id INNER JOIN users u "
+						+ "ON ub.user_id = u.id WHERE u.username = ?";
+				brands = jdbcTemplate.queryForList(brandSql, new Object[] {username});
 			}
 			
 			if(!users.isEmpty()) {
@@ -221,9 +236,17 @@ public class UserManagementRestController {
 					}
 			}
 
+			if(!brands.isEmpty()) {
+				for(Map<String, Object> brand:brands) {
+					JSONObject jsonObj = new JSONObject(brand);
+					jsonBrandArray.put(jsonObj);
+				}
+			}
+
 			jsonUserResult.put("role", role);
 			jsonUserResult.put("role_list", new JSONArray(roleList));
 			jsonUserResult.put("user_list", jsonUserArray);
+			jsonUserResult.put("brand_list", jsonBrandArray);
 			
 			System.out.println("Users Data: " + jsonUserResult.toString());
 		} catch(Exception ex) {
@@ -378,12 +401,11 @@ public class UserManagementRestController {
 		PreparedStatement stmt = null;
 
 		try {
-			
 			JSONObject jsonObject = new JSONObject(data);
 			Long userId = jsonObject.getLong("user_id");
 			Long brandId = jsonObject.getLong("brand_id");
 			JSONArray permissionArray = jsonObject.optJSONArray("permissions");
-			
+	
 			connection = dataSource.getConnection();	
 			
 			String updateSql = "UPDATE users_brands SET permission = ? WHERE brand_id = ? AND user_id = ?";
@@ -392,8 +414,8 @@ public class UserManagementRestController {
 			if(permissionArray.length()==0) {
 				binaryString = String.format("%-8s", "0").replace(" ", "0");
 			} else {
-				String binaryTempString = "";
-				for(int i =0; i<permissionArray.length();i++) {
+				String binaryTempString = "0"; //because store is always false
+				for(int i =0; i<permissionArray.length();i++) {	
 					JSONObject jsonPermissionObj = permissionArray.getJSONObject(i);
 					binaryTempString += jsonPermissionObj.getBoolean("exist")?"1":"0";
 				}
@@ -427,12 +449,6 @@ public class UserManagementRestController {
 				}
 			}
 		}
-		
-		
-		
-		
-		
-		
 	}
 	
 	@GetMapping("/access-rights")
@@ -453,8 +469,8 @@ public class UserManagementRestController {
 			rs = stmt.executeQuery();
 			
 			if(!rs.next()) {
-				System.out.println("New Record");
-				stmt2 = connection.prepareStatement("SELECT *, exist = CAST(0 AS BIT) FROM permission_lookup");
+				//new records
+				stmt2 = connection.prepareStatement("SELECT *, exist = CAST(0 AS BIT) FROM permission_lookup WHERE id != 1");
 				rs2 = stmt2.executeQuery();
 				
 				while(rs2.next()) {
@@ -466,7 +482,7 @@ public class UserManagementRestController {
 					jsonAccessRightsArray.put(jsonAccessRightObj);
 				}
 			} else{
-				System.out.println("Already exist");
+				//existing records 
 				String permission = rs.getString("permission");
 				List<String> accessRights = new ArrayList<String>();
 				
@@ -489,7 +505,7 @@ public class UserManagementRestController {
 			    	System.out.println(permissionBooleans[j]);
 			    }
 			    
-			    for(int k=0; k<accessRights.size();k++) {
+			    for(int k=1; k<accessRights.size();k++) { //bypass the first store
 			    	int index = k+1;
 			    	JSONObject jsonObject = new JSONObject();
 			    	jsonObject.put("id", index);
@@ -557,6 +573,55 @@ public class UserManagementRestController {
 			}
 		}
 	}
+	
+
+/*	@GetMapping("/brands")
+	public ResponseEntity<?> findBrandForNewUser(HttpServletRequest request, HttpServletResponse response){
+		JSONArray jsonBrandArray = new JSONArray();
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		
+		try {
+			Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+			String username = auth.getName();
+			String role = auth.getAuthorities().iterator().next().toString();
+			
+		
+			if(role.equals("ROLE_SUPER_ADMIN")) {
+				
+				
+				
+				
+			}
+			
+			
+			
+			
+			
+			
+			
+			//admin
+
+			
+			
+			
+			
+			
+		} catch(Exception ex) {
+			ex.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Cannot retrieve brands info. Please try again later.");
+		} finally {
+			if(connection!=null) {
+				try {
+					connection.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+*/
 
 	
 

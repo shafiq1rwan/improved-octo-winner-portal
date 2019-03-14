@@ -7,6 +7,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -72,6 +74,28 @@ public class UserLoginRestController {
 		return ResponseEntity.status(HttpStatus.OK).body(status);
 	}
 	
+	//USER - CHECK ACCESS RIGHTS
+	@RequestMapping(value = {"/checkaccessrights/{access}"}, method = RequestMethod.GET)
+	public ResponseEntity<String> check_access_rights(HttpServletRequest request, @PathVariable("access") String access) throws JSONException{
+		HttpSession session = request.getSession();
+		JSONObject accessRight = (JSONObject) session.getAttribute("access_rights");
+		String authorized = null;
+		
+		if(accessRight!=null) {
+			if(accessRight.getJSONObject("accessRights").getBoolean(access)) {
+				authorized = "authorized";
+			}
+		}
+		return ResponseEntity.status(HttpStatus.OK).body(authorized);
+	}
+	
+	@RequestMapping(value = { "/views/unauthorized" }, method = RequestMethod.GET)
+	public ModelAndView viewUnauthorized() {
+		ModelAndView model = new ModelAndView();
+		model.setViewName("/user/views/unauthorized");
+		return model;
+	}
+
 	@RequestMapping(value = "/signin/error/{condition}", method = RequestMethod.GET)
 	public ModelAndView user_signin_fail(@PathVariable String condition) {
 		ModelAndView model = new ModelAndView();

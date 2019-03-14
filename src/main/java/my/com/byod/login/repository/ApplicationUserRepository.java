@@ -46,6 +46,19 @@ public class ApplicationUserRepository {
     }
     
     @Transactional(readOnly = true)
+    public boolean findUserByEmail(String email, Long userId) {
+        if (email == null || userId == null) {
+            throw new IllegalArgumentException("Email or user id cannot be null");
+        }
+        try {
+            Integer result = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM users WHERE email = ? AND id != ?", new Object[] {email, userId}, Integer.class);
+            return result>0;
+        } catch (EmptyResultDataAccessException notFound) {
+            return true;
+        }
+    }
+    
+    @Transactional(readOnly = true)
     public ApplicationUser findUserByMobileNumber(String mobileNumber) {
         if (mobileNumber == null) {
             throw new IllegalArgumentException("Mobile number cannot be null");
@@ -54,6 +67,19 @@ public class ApplicationUserRepository {
             return jdbcTemplate.queryForObject("SELECT * FROM users WHERE mobileNumber = ?", new Object[] {mobileNumber}, applicationUserRowMapper);
         } catch (EmptyResultDataAccessException notFound) {
             return null;
+        }
+    }
+    
+    @Transactional(readOnly = true)
+    public boolean findUserByMobileNumber(String mobileNumber, Long userId) {
+        if (mobileNumber == null || userId == null) {
+            throw new IllegalArgumentException("Mobile Number or user id cannot be null");
+        }
+        try {
+            Integer result = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM users WHERE mobileNumber = ? AND id != ?", new Object[] {mobileNumber, userId}, Integer.class);
+            return result>0;
+        } catch (EmptyResultDataAccessException notFound) {
+            return true;
         }
     }
     
@@ -80,6 +106,19 @@ public class ApplicationUserRepository {
             return jdbcTemplate.queryForObject("SELECT * FROM users WHERE LOWER(username) = LOWER(?)", new Object[] {username}, applicationUserRowMapper);
         } catch (EmptyResultDataAccessException notFound) {
             return null;
+        }
+    }
+    
+    @Transactional(readOnly = true)
+    public boolean findUserByUsername(String username, Long userId) {
+        if (username == null || userId == null) {
+            throw new IllegalArgumentException("Username or user id cannot be null");
+        }
+        try {
+            Integer result = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM users WHERE username = ? AND id != ?", new Object[] {username, userId}, Integer.class);
+            return result>0;
+        } catch (EmptyResultDataAccessException notFound) {
+            return true;
         }
     }
     
@@ -117,6 +156,15 @@ public class ApplicationUserRepository {
             return (Long) keyHolder.getKey().longValue();
     }
     
+    public int editUser(final ApplicationUser user) {
+        if (user == null) {
+            throw new IllegalArgumentException("user data cannot be null");
+        }
+        
+        return jdbcTemplate.update("UPDATE users SET name = ?, email = ?, mobileNumber = ?, address = ?, username = ?, enabled = ? WHERE id = ?", 
+        		new Object[] {user.getName(),user.getEmail(), user.getMobileNumber(), user.getAddress(), user.getUsername(), user.isEnabled(), user.getId()});
+    }
+    
     public int updatePassword(final String updatedPassword, final Long userId) {
         if (userId == null) {
             throw new IllegalArgumentException("User id cannot be null");
@@ -131,6 +179,20 @@ public class ApplicationUserRepository {
     	}
     }
     
+    public int assignedNewUserToBrand(final Long userId, final Long brandId) {
+        if (userId == null) {
+            throw new IllegalArgumentException("User id cannot be null");
+        } else if(brandId == null) {
+        	throw new IllegalArgumentException("Brand id cannot be null");
+        }
+    	
+    	try {
+    		return jdbcTemplate.update("INSERT INTO users_brands(user_id, brand_id) VALUES(?,?)", new Object[] {userId, brandId});
+    	} catch(Exception ex) {
+    		return 0;
+    	}
+    }
+
 	private RowMapper<ApplicationUser> applicationUserRowMapper = (rs, rowNum) -> {
 		ApplicationUser user = new ApplicationUser();
 		user.setId(rs.getLong("id"));

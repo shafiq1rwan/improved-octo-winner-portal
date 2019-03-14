@@ -4,6 +4,11 @@
 <%
 	JSONObject accessRight = (JSONObject) session.getAttribute("access_rights");
 	try {
+		
+		if(accessRight.toString() == null){
+			 String redirectURL = "/user/signin";
+			 response.sendRedirect(redirectURL);
+		}
 %>
 <!-- Left Sidebar -->
 <div class="left main-sidebar">

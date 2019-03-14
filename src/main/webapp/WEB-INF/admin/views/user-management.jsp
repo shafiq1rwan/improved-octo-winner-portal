@@ -128,15 +128,7 @@
 								<label class="login-label">Password</label>
 								<input class="form-control" name="password" placeholder="Password" ng-model="user.password" type="password" required> 
 							</div>
-						</div>		 -->			
-					</div>
-					<div class="row">
-						<div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
-							<div class="custom-control custom-checkbox">
-								<input type="checkbox" name="enabled" ng-model="user.enabled" class="custom-control-input" id="enabled">
-								<label class="custom-control-label" for="enabled">Enabled</label>							
-							</div>
-						</div>	
+						</div>		 -->	
 						
 						<div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
 							<div class="form-group">
@@ -148,7 +140,27 @@
 								</select>
 							</div>
 						</div>
+			
+					</div>
+					<div class="row">
+						<div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
+							<div class="custom-control custom-checkbox">
+								<input type="checkbox" name="enabled" ng-model="user.enabled" class="custom-control-input" id="enabled">
+								<label class="custom-control-label" for="enabled">Enabled</label>							
+							</div>
+						</div>	
 						
+						<div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6" ng-if="action=='create'">
+							<div class="form-group">
+								<label class="login-label">Brand</label>
+								<select class="form-control" ng-model="user.brand" 
+									ng-options="brand.id as brand.name for brand in selectable_brands"
+									required>
+										<option value="" disabled>-- SELECT --</option>
+								</select>
+							</div>
+						</div>
+
 					</div>
 				</div>				       									  				 									
 		      </div>
@@ -303,7 +315,21 @@
 	</div>
 	<!-- ACCESS RIGHTS MODAL ENDED -->
 	
-	
+	<!-- Loading Modal [START] -->
+		<div class="modal fade" data-backdrop="static" id="loading_modal" role="dialog">
+			<div class="modal-dialog modal-sm">
+			<div class="modal-content">
+				<div class="modal-body">
+					<div class="text-center">
+						<img style="width:75%" src="${pageContext.request.contextPath}/img/gif/loading.gif"><br>
+							<span>Processing Data...</span>
+					</div>
+				</div>
+			</div>
+			</div>
+		</div>
+	<!-- Loading Modal [END] -->
+
 	</div>
 </body>
 </html>
