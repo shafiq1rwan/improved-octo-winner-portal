@@ -30,7 +30,7 @@ public class ForgetPasswordRestController {
 
 	@PostMapping(value = "/send-reset-email")
 	public String sendForgetPasswordEmail(@RequestBody String data) {
-		System.out.println("");
+		System.out.println("my data :" + data);
 		JSONObject jsonResult = new JSONObject();
 		
 		try {

@@ -55,7 +55,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		http 
 		.csrf().disable()
 		.authorizeRequests()
-				.antMatchers("/user/signin/**","/order/**","/api/device/**","/byod-menu/**","/forget-password**","/byod-img/**","/reset-password/view*").permitAll()
+				.antMatchers("/user/signin/**","/order/**","/api/device/**","/byod-menu/**","/forget-password/**","/byod-img/**","/reset-password/view*").permitAll()
 				.antMatchers("/byod/byod-panel/**").access("hasAnyRole('ROLE_SUPER_ADMIN','ROLE_ADMIN','ROLE_USER')")
 				.antMatchers("/reset-password/reset*").hasAuthority("CHANGE_PASSWORD_PRIVILEGE")
 				.anyRequest().authenticated()

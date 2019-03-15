@@ -106,20 +106,20 @@
 		</div>
 	</div>
 	
-			<!-- Loading Modal [START] -->
-			<div class="modal fade" data-backdrop="static" id="loading_modal" role="dialog">
-				<div class="modal-dialog modal-sm">
-				<div class="modal-content">
-					<div class="modal-body">
-						<div class="text-center">
-							<img style="width:75%" src="${pageContext.request.contextPath}/img/gif/loading.gif"><br>
-								<span>Synchronizing Data...</span>
-						</div>
-					</div>
-				</div>
+	<!-- Loading Modal [START] -->
+	<div class="modal fade" data-backdrop="static" id="loading_modal" role="dialog">
+		<div class="modal-dialog h-100 d-flex flex-column justify-content-center my-0 modal-sm">
+		<div class="modal-content">
+			<div class="modal-body">
+				<div class="text-center">
+					<img style="width:75%" src="${pageContext.request.contextPath}/assets/images/byodadmin/gif/loading.gif"><br>
+						<span>Sending Email</span>
 				</div>
 			</div>
-			<!-- Loading Modal [END] -->
+		</div>
+		</div>
+	</div>
+	<!-- Loading Modal [END] -->
 
 </body>
 
@@ -149,7 +149,7 @@ app.controller('ctl_forget_password', function($scope, $http, $location) {
 			})
 			.then(
 				function(response) {
-					console.log("HH " + response.data.responseCode);
+					console.log(response.data);
 			 		if(response.data.responseCode === "00"){			
 						$scope.successMessage = response.data.successMessage;		
 						console.log(response.data.successMessage);
