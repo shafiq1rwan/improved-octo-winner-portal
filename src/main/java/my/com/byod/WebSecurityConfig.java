@@ -56,7 +56,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		.csrf().disable()
 		.authorizeRequests()
 				.antMatchers("/user/signin/**","/order/**","/api/device/**","/byod-menu/**","/forget-password/**","/byod-img/**","/reset-password/view*").permitAll()
-				.antMatchers("/byod/byod-panel/**").access("hasAnyRole('ROLE_SUPER_ADMIN','ROLE_ADMIN','ROLE_USER')")
+				.antMatchers("/byod/byod-panel/**").access("hasAnyRole('ROLE_SUPER_ADMIN','ROLE_SUPER_GROUP_ADMIN','ROLE_ADMIN','ROLE_USER')")
 				.antMatchers("/reset-password/reset*").hasAuthority("CHANGE_PASSWORD_PRIVILEGE")
 				.anyRequest().authenticated()
 	          .and()
@@ -69,7 +69,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		        	  String role = user.getAuthorities().iterator().next().toString();
 		        	  
 		        	  if(user!=null && role !=null) {
-		        		  if(role.equals("ROLE_SUPER_ADMIN") || role.equals("ROLE_ADMIN") || role.equals("ROLE_USER"))
+		        		  if(role.equals("ROLE_SUPER_ADMIN") || role.equals("ROLE_SUPER_GROUP_ADMIN") ||role.equals("ROLE_ADMIN") || role.equals("ROLE_USER"))
 		        		  {
 		        				HttpSession session = request.getSession();
 		        		    	session.setAttribute("role", role);

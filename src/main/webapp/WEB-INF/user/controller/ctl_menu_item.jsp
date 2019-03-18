@@ -453,6 +453,7 @@
 						$scope.menu_item.backend_id = response.data.backend_id;
 						$scope.menu_item.menu_item_name = response.data.menu_item_name;
 						$scope.menu_item.menu_item_alt_name = response.data.menu_item_alt_name;
+						$scope.menu_item.menu_item_barcode = response.data.menu_item_barcode;
 						$scope.menu_item.menu_item_description = response.data.menu_item_description;
 						$scope.menu_item.image_path = "${pageContext.request.contextPath}" + response.data.menu_item_image_path;
 						$scope.menu_item.menu_item_base_price = response.data.menu_item_base_price;
@@ -528,6 +529,7 @@
 					"menu_item_name": $scope.menu_item.menu_item_name,
 					"menu_item_alt_name" : $scope.menu_item.menu_item_alt_name,
 					"menu_item_backend_id" : $scope.menu_item.backend_id,
+					"menu_item_barcode" : $scope.menu_item.menu_item_barcode || null,
 					"menu_item_description": $scope.menu_item.menu_item_description || null,
 					"menu_item_image_path": $scope.upload_image?$scope.menu_item.image_path: null,
 					"menu_item_base_price": $scope.menu_item.menu_item_base_price || 0.00,

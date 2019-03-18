@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -191,7 +192,8 @@ public class UserManagementRestController {
 			String brandSql = "";
 			List<Map<String, Object>> users = new ArrayList<Map<String, Object>>();
 			List<Map<String, Object>> brands = new ArrayList<Map<String, Object>>();
-			List<String> roleList = new ArrayList<String>(Arrays.asList("ROLE_ADMIN","ROLE_USER"));
+			List<String> roleList = new ArrayList<String>(Arrays.asList("ROLE_SUPER_GROUP_ADMIN","ROLE_ADMIN","ROLE_USER"));
+			List<String> filteredRoleList = null;
 			
 			if(role.equals("ROLE_SUPER_ADMIN")) {
 				sql = "SELECT u.id, u.name, u.email, u.mobileNumber, u.address, u.username, u.enabled, a.authority "
@@ -202,6 +204,8 @@ public class UserManagementRestController {
 				
 				brandSql = "SELECT * FROM brands";
 				brands = jdbcTemplate.queryForList(brandSql);
+				
+				filteredRoleList = roleList;
 			} else if(role.equals("ROLE_ADMIN")){
 				List<Long> brandIds = jdbcTemplate.queryForList("SELECT b.id FROM brands b "
 						+ "INNER JOIN users_brands ub ON b.id = ub.brand_id "
@@ -227,6 +231,36 @@ public class UserManagementRestController {
 						+ "ON b.id = ub.brand_id INNER JOIN users u "
 						+ "ON ub.user_id = u.id WHERE u.username = ?";
 				brands = jdbcTemplate.queryForList(brandSql, new Object[] {username});
+				
+				filteredRoleList = roleList.stream().filter(r -> !r.equals(role) && !r.equals("ROLE_SUPER_GROUP_ADMIN")).collect(Collectors.toList());
+			} 
+			else if(role.equals("ROLE_SUPER_GROUP_ADMIN")) {
+				List<Long> brandIds = jdbcTemplate.queryForList("SELECT b.id FROM brands b "
+						+ "INNER JOIN users_brands ub ON b.id = ub.brand_id "
+						+ "INNER JOIN users u ON ub.user_id = u.id "
+						+ "WHERE u.username = ?", 
+						new Object[] {username}, Long.class);
+				
+				if(!brandIds.isEmpty()) {
+					sql = "SELECT u.id, u.name, u.email, u.mobileNumber, u.address, u.username, u.enabled, a.authority "
+							+ "FROM users u INNER JOIN authorities a ON u.id = a.user_id "
+							+ "INNER JOIN users_brands ub ON u.id = ub.user_id "
+							+ "WHERE a.authority NOT IN('ROLE_SUPER_ADMIN','ROLE_SUPER_GROUP_ADMIN') "
+							+ "AND ub.brand_id IN(:ids)";
+					
+					Map<String, List<Long>> paramMap = Collections.singletonMap("ids", brandIds);
+					NamedParameterJdbcTemplate template = 
+						    new NamedParameterJdbcTemplate(dataSource);
+					
+					users = template.queryForList(sql, paramMap);
+				}
+
+				brandSql = "SELECT b.* FROM brands b INNER JOIN users_brands ub "
+						+ "ON b.id = ub.brand_id INNER JOIN users u "
+						+ "ON ub.user_id = u.id WHERE u.username = ?";
+				brands = jdbcTemplate.queryForList(brandSql, new Object[] {username});
+
+				filteredRoleList = roleList.stream().filter(r -> !r.equals(role)).collect(Collectors.toList());
 			}
 			
 			if(!users.isEmpty()) {
@@ -244,7 +278,7 @@ public class UserManagementRestController {
 			}
 
 			jsonUserResult.put("role", role);
-			jsonUserResult.put("role_list", new JSONArray(roleList));
+			jsonUserResult.put("role_list", new JSONArray(filteredRoleList));
 			jsonUserResult.put("user_list", jsonUserArray);
 			jsonUserResult.put("brand_list", jsonBrandArray);
 			
@@ -515,7 +549,6 @@ public class UserManagementRestController {
 			    	jsonAccessRightsArray.put(jsonObject);
 			    }
 			}
-			System.out.println("Result: " + jsonAccessRightsArray.toString());
 			return ResponseEntity.ok(jsonAccessRightsArray.toString());
 		}
 		catch(SQLException ex) {
@@ -573,56 +606,6 @@ public class UserManagementRestController {
 			}
 		}
 	}
-	
-
-/*	@GetMapping("/brands")
-	public ResponseEntity<?> findBrandForNewUser(HttpServletRequest request, HttpServletResponse response){
-		JSONArray jsonBrandArray = new JSONArray();
-		Connection connection = null;
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
 		
-		try {
-			Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-			String username = auth.getName();
-			String role = auth.getAuthorities().iterator().next().toString();
-			
-		
-			if(role.equals("ROLE_SUPER_ADMIN")) {
-				
-				
-				
-				
-			}
-			
-			
-			
-			
-			
-			
-			
-			//admin
-
-			
-			
-			
-			
-			
-		} catch(Exception ex) {
-			ex.printStackTrace();
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Cannot retrieve brands info. Please try again later.");
-		} finally {
-			if(connection!=null) {
-				try {
-					connection.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-	}
-*/
-
-	
 
 }

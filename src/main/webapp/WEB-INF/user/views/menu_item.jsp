@@ -145,6 +145,11 @@
 											<label for="menuItemAltName">Alternate Name</label>
     										<input type="text" class="form-control" id="menuItemAltName" placeholder="Alternate Name" ng-model = "menu_item.menu_item_alt_name" maxlength="20"/>
 										</div>
+										
+										<div class="form-group">
+											<label for="menuItemBarcode">Barcode Number</label>
+    										<input type="text" class="form-control" id="menuItemBarcode" placeholder="Barcode Number" ng-model = "menu_item.menu_item_barcode" />
+										</div>
 									</div>
 								</div>
 							

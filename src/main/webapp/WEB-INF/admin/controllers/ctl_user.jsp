@@ -38,7 +38,8 @@
 				function(response) {
 					$scope.role = response.data.role;
 					$scope.users = response.data.user_list;
-					$scope.roles = response.data.role_list.filter(r => r!= $scope.role);
+					//$scope.roles = response.data.role_list.filter(r => r!= $scope.role);
+					$scope.roles = response.data.role_list;
 					$scope.selectable_brands = response.data.brand_list;
 					
 					refreshUserTable($scope.users);

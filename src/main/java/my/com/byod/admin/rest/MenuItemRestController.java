@@ -101,6 +101,7 @@ public class MenuItemRestController {
 				jsonMenuItemObj.put("backend_id", rs.getString("backend_id"));
 				jsonMenuItemObj.put("modifier_group_id", rs.getLong("modifier_group_id"));
 				jsonMenuItemObj.put("menu_item_name", rs.getString("menu_item_name"));
+				jsonMenuItemObj.put("menu_item_barcode", rs.getString("menu_item_barcode"));
 				jsonMenuItemObj.put("menu_item_description", rs.getString("menu_item_description"));
 				jsonMenuItemObj.put("menu_item_image_path", rs.getString("menu_item_image_path"));
 				jsonMenuItemObj.put("menu_item_base_price", rs.getBigDecimal("menu_item_base_price"));
@@ -155,6 +156,7 @@ public class MenuItemRestController {
 				jsonMenuItemObj.put("backend_id", rs.getString("backend_id"));
 				jsonMenuItemObj.put("modifier_group_id", rs.getLong("modifier_group_id"));
 				jsonMenuItemObj.put("menu_item_name", rs.getString("menu_item_name"));
+				jsonMenuItemObj.put("menu_item_barcode", rs.getString("menu_item_barcode"));
 				jsonMenuItemObj.put("menu_item_description", rs.getString("menu_item_description"));
 				jsonMenuItemObj.put("menu_item_image_path", displayFilePath + brandId + "/" + rs.getString("menu_item_image_path"));
 				jsonMenuItemObj.put("menu_item_base_price", rs.getBigDecimal("menu_item_base_price"));
@@ -241,6 +243,7 @@ public class MenuItemRestController {
 				jsonResult.put("backend_id", rs.getString("backend_id"));
 				jsonResult.put("menu_item_name", rs.getString("menu_item_name"));
 				jsonResult.put("menu_item_alt_name", rs.getString("menu_item_alt_name"));
+				jsonResult.put("menu_item_barcode", rs.getString("menu_item_barcode"));
 				jsonResult.put("menu_item_description", rs.getString("menu_item_description"));
 				jsonResult.put("menu_item_image_path", displayFilePath + brandId + "/" + rs.getString("menu_item_image_path"));
 				jsonResult.put("menu_item_base_price", rs.getBigDecimal("menu_item_base_price"));
@@ -285,12 +288,22 @@ public class MenuItemRestController {
 					: jsonMenuItemData.getString("menu_item_description");
 			String altName = jsonMenuItemData.isNull("menu_item_alt_name") ? null 
 					: jsonMenuItemData.getString("menu_item_alt_name");
-
-			String sqlStatement = "INSERT INTO menu_item (backend_id, menu_item_name, menu_item_alt_name, menu_item_description, menu_item_image_path, menu_item_base_price, menu_item_type,is_taxable, is_discountable, created_date) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, GETDATE());";
+			String barcode = jsonMenuItemData.isNull("menu_item_barcode") ? null
+					: jsonMenuItemData.getString("menu_item_barcode");
+			
+			if(barcode!=null) {
+				int existingBarcode = checkingExistingBarcode(barcode, request);
+				if(existingBarcode > 0) {
+					return ResponseEntity.status(HttpStatus.CONFLICT).contentType(MediaType.TEXT_PLAIN).body("Duplication Barcode Found");
+				}
+			}
+			
+			String sqlStatement = "INSERT INTO menu_item (backend_id, menu_item_name, menu_item_alt_name, menu_item_barcode, menu_item_description, menu_item_image_path, menu_item_base_price, menu_item_type,is_taxable, is_discountable, created_date) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, GETDATE());";
 			stmt = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
 			stmt.setString(1, jsonMenuItemData.getString("menu_item_backend_id"));
 			stmt.setString(2, jsonMenuItemData.getString("menu_item_name"));
 			stmt.setString(3, altName);
+			stmt.setString(3, barcode);
 			stmt.setString(4, description);
 			stmt.setString(5, imagePath);
 			stmt.setBigDecimal(6, BigDecimal.valueOf(jsonMenuItemData.getDouble("menu_item_base_price")));
@@ -306,6 +319,7 @@ public class MenuItemRestController {
 					jsonMenuItemData.getString("menu_item_backend_id"),
 					jsonMenuItemData.getString("menu_item_name")==null?"null":"'"+jsonMenuItemData.getString("menu_item_name")+"'",
 					altName==null?"null":"'"+altName+"'",
+					barcode==null?"null":"'"+barcode+"'",
 					description==null?"null":"'"+description+"'",
 					imagePath==null?"null":"'"+imagePath+"'",
 					String.valueOf(jsonMenuItemData.getDouble("menu_item_base_price")),
@@ -334,7 +348,6 @@ public class MenuItemRestController {
 				try {
 					rs.close();
 				} catch (SQLException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -369,32 +382,43 @@ public class MenuItemRestController {
 						: jsonMenuItemData.getString("menu_item_description");
 				String altName = jsonMenuItemData.isNull("menu_item_alt_name") ? null 
 						: jsonMenuItemData.getString("menu_item_alt_name");
+				String barcode = jsonMenuItemData.isNull("menu_item_barcode") ? null
+						: jsonMenuItemData.getString("menu_item_barcode");
+
+				if(barcode!=null) {
+					int existingBarcode = checkingExistingBarcode(jsonMenuItemData.getLong("id"), barcode, request);
+					if(existingBarcode > 0) {
+						return ResponseEntity.status(HttpStatus.CONFLICT).contentType(MediaType.TEXT_PLAIN).body("Duplication Barcode Found");
+					}
+				}
 
 				String sqlStatement = ""; 
 				if(imagePath == null) {
-					sqlStatement = "UPDATE menu_item SET backend_id = ?, menu_item_name = ?, menu_item_alt_name = ?, menu_item_description =?, menu_item_base_price = ?, menu_item_type = ?, is_taxable = ? , is_discountable = ? WHERE id = ?;";
+					sqlStatement = "UPDATE menu_item SET backend_id = ?, menu_item_name = ?, menu_item_alt_name = ?, menu_item_barcode = ?, menu_item_description =?, menu_item_base_price = ?, menu_item_type = ?, is_taxable = ? , is_discountable = ? WHERE id = ?;";
 				} else {
-					sqlStatement = "UPDATE menu_item SET backend_id = ?, menu_item_name = ?, menu_item_alt_name = ?, menu_item_description =?, menu_item_base_price = ?, menu_item_type = ?, is_taxable = ? , is_discountable = ?, menu_item_image_path = ? WHERE id = ?;";
+					sqlStatement = "UPDATE menu_item SET backend_id = ?, menu_item_name = ?, menu_item_alt_name = ?, menu_item_barcode = ?, menu_item_description =?, menu_item_base_price = ?, menu_item_type = ?, is_taxable = ? , is_discountable = ?, menu_item_image_path = ? WHERE id = ?;";
 				}
 				
 				stmt = connection.prepareStatement(sqlStatement);
 				stmt.setString(1, jsonMenuItemData.getString("menu_item_backend_id"));
 				stmt.setString(2, jsonMenuItemData.getString("menu_item_name"));
 				stmt.setString(3, altName);
-				stmt.setString(4, description);
-				stmt.setBigDecimal(5, BigDecimal.valueOf(jsonMenuItemData.getDouble("menu_item_base_price")));
-				stmt.setInt(6, jsonMenuItemData.getInt("menu_item_type"));
-				stmt.setBoolean(7, jsonMenuItemData.getBoolean("is_taxable"));
-				stmt.setBoolean(8, jsonMenuItemData.getBoolean("is_discountable"));
+				stmt.setString(4, barcode);
+				stmt.setString(5, description);
+				stmt.setBigDecimal(6, BigDecimal.valueOf(jsonMenuItemData.getDouble("menu_item_base_price")));
+				stmt.setInt(7, jsonMenuItemData.getInt("menu_item_type"));
+				stmt.setBoolean(8, jsonMenuItemData.getBoolean("is_taxable"));
+				stmt.setBoolean(9, jsonMenuItemData.getBoolean("is_discountable"));
 				
 				if(imagePath == null) {
-					stmt.setLong(9, jsonMenuItemData.getLong("id"));
+					stmt.setLong(10, jsonMenuItemData.getLong("id"));
 					
 					// logging to file	
 					parameters = new String[] {
 							jsonMenuItemData.getString("menu_item_backend_id"),
 							jsonMenuItemData.getString("menu_item_name")==null?"null":"'"+jsonMenuItemData.getString("menu_item_name")+"'",
-							altName == null?"null":"'"+altName+"'",		
+							altName == null?"null":"'"+altName+"'",	
+							barcode == null?"null":"'"+barcode+"'",
 							description==null?"null":"'"+description+"'",
 							String.valueOf(jsonMenuItemData.getDouble("menu_item_base_price")),
 							String.valueOf(jsonMenuItemData.getInt("menu_item_type")),
@@ -402,14 +426,15 @@ public class MenuItemRestController {
 							String.valueOf(jsonMenuItemData.getBoolean("is_discountable")?1:0),
 							String.valueOf(jsonMenuItemData.getLong("id"))};	
 				} else {
-					stmt.setString(9, imagePath);
-					stmt.setLong(10, jsonMenuItemData.getLong("id"));
+					stmt.setString(10, imagePath);
+					stmt.setLong(11, jsonMenuItemData.getLong("id"));
 					
 					// logging to file
 					parameters = new String[] {
 							jsonMenuItemData.getString("menu_item_backend_id"),
 							jsonMenuItemData.getString("menu_item_name")==null?"null":"'"+jsonMenuItemData.getString("menu_item_name")+"'",
 							altName == null?"null":"'" + altName + "'",
+							barcode == null?"null":"'" + barcode + "'",		
 							description==null?"null":"'"+description+"'",
 							String.valueOf(jsonMenuItemData.getDouble("menu_item_base_price")),
 							String.valueOf(jsonMenuItemData.getInt("menu_item_type")),
@@ -550,6 +575,7 @@ public class MenuItemRestController {
 				jsonMenuItemObj.put("id", rs.getLong("id"));
 				jsonMenuItemObj.put("backend_id", rs.getString("backend_id"));
 				jsonMenuItemObj.put("menu_item_name", rs.getString("menu_item_name"));
+				jsonMenuItemObj.put("menu_item_barcode", rs.getString("menu_item_barcode"));
 				jsonMenuItemObj.put("menu_item_image_path", displayFilePath + brandId + "/" + rs.getString("menu_item_image_path"));
 				jsonMenuItemObj.put("menu_item_base_price", rs.getBigDecimal("menu_item_base_price"));
 				jsonMenuItemObj.put("menu_item_type_name", rs.getString("menu_item_type_name"));
@@ -590,6 +616,7 @@ public class MenuItemRestController {
 				jsonMenuItemObj.put("id", rs.getLong("id"));
 				jsonMenuItemObj.put("backend_id", rs.getString("backend_id"));
 				jsonMenuItemObj.put("menu_item_name", rs.getString("menu_item_name"));
+				jsonMenuItemObj.put("menu_item_barcode", rs.getString("menu_item_barcode"));
 				jsonMenuItemObj.put("menu_item_image_path", rs.getString("menu_item_image_path"));
 				jsonMenuItemObj.put("menu_item_base_price", rs.getBigDecimal("menu_item_base_price"));
 				jsonMenuItemObj.put("menu_item_type_name", rs.getString("menu_item_type_name"));
@@ -703,6 +730,73 @@ public class MenuItemRestController {
 			}
 		}
 		return existingBackendId;
+	}
+	
+	private int checkingExistingBarcode(String barcode, HttpServletRequest request) throws Exception {
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		int existingBarcode = 0;
+		
+		try {
+			connection = dbConnectionUtil.retrieveConnection(request);
+			stmt = connection.prepareStatement("SELECT COUNT(menu_item_barcode) as 'existingBarcode' FROM menu_item WHERE menu_item_barcode = ?");
+			stmt.setString(1, barcode);
+			rs = (ResultSet) stmt.executeQuery();
+			
+			if(rs.next()) {
+				existingBarcode = rs.getInt("existingBarcode");
+			} else {
+				existingBarcode = -1;
+			}
+			
+			System.out.println(existingBarcode);
+			
+		} catch(Exception ex) {
+			throw ex;
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+				}
+			}
+		}
+		return existingBarcode;
+	}
+
+	private int checkingExistingBarcode(Long menuItemId, String barcode, HttpServletRequest request) throws Exception {
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		int existingBarcode = 0;
+		
+		try {
+			connection = dbConnectionUtil.retrieveConnection(request);
+			stmt = connection.prepareStatement("SELECT COUNT(menu_item_barcode) as 'existingBarcode' FROM menu_item WHERE menu_item_barcode = ? AND id !=?");
+			stmt.setString(1, barcode);
+			stmt.setLong(2, menuItemId);
+			rs = (ResultSet) stmt.executeQuery();
+			
+			if(rs.next()) {
+				existingBarcode = rs.getInt("existingBarcode");
+			} else {
+				existingBarcode = -1;
+			}
+			
+			System.out.println(existingBarcode);
+			
+		} catch(Exception ex) {
+			throw ex;
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+				}
+			}
+		}
+		return existingBarcode;
 	}
 
 }
