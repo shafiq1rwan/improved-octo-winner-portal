@@ -26,8 +26,7 @@
 				$scope.store.currency == null || $scope.store.currency=='' ||
 					$scope.store.address == null || $scope.store.address=='' ||
 						$scope.store.tableCount == null || $scope.store.tableCount=='' ||
-							$scope.store.longitude == null || $scope.store.longitude=='' ||
-								$scope.store.latitude == null || $scope.store.latitude=='' ||
+							$scope.store.longitude == null || $scope.store.latitude == null || 
 									$scope.store.country == null || $scope.store.country=='' || 
 										$scope.store.operatingStartTime == null || $scope.store.operatingStartTime=='' || 
 											$scope.store.operatingEndTime == null || $scope.store.operatingEndTime=='' ||
@@ -244,7 +243,6 @@
 						$scope.store.contactPerson = response.data.store_contact_person;
 						$scope.store.mobileNumber = response.data.store_contact_hp_number;
 						$scope.store.email = response.data.store_contact_email;
-						
 						 $('#operatingStartTime').datetimepicker({
 							    defaultDate: moment($scope.store.operatingStartTime, "HH:mm:ss"),
 							    format: 'LT'
