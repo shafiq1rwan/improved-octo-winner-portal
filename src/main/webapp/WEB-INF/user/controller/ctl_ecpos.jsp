@@ -198,7 +198,7 @@
 				})
 				.then((willCreate) => {
 				  if (willCreate) {
-					  $('#loading_modal').modal('toggle');
+					  //$('#loading_modal').modal('toggle');
 					  $http({
 							method : 'GET',
 							headers : {'Content-Type' : 'application/json'},
@@ -206,7 +206,7 @@
 						})
 						.then(function successCallback(response) {
 							if(response.status==200){
-								$('#loading_modal').modal('toggle');
+								//$('#loading_modal').modal('toggle');
 								
 								swal("Activation ID is generated", {
 									icon: "success",
@@ -215,7 +215,7 @@
 								$scope.getDeviceInfo();
 							}
 						 }, function errorCallback(response) {
-							$('#loading_modal').modal('toggle');
+							//$('#loading_modal').modal('toggle');
 					    	swal({
 								  title: "Error",
 								  text:  response.data,

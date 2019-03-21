@@ -493,7 +493,7 @@ public class StoreRestController {
 			String activationId = createDeviceInfo(connection, 1, store_id);
 			if(activationId==null || activationId.equals(""))
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Failed to generate ECPOS activation info.");
-			else {
+			/*else {
 				Store store = storeService.findStoreById(store_id);
 				// send email
 				String brandId = byodUtil.getGeneralConfig(connection, "BRAND_ID");
@@ -501,7 +501,7 @@ public class StoreRestController {
 				JSONObject activationInfo = getDeviceInfoByActivationId(connection, activationId);
 				if(!userEmailUtil.sendActivationInfo(store.getContactPerson(), activationInfo, brandId, email))
 					return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Activation success but failed to send activation email.");
-			}
+			}*/
 					
 		}catch(Exception ex) {
 			ex.printStackTrace();
@@ -699,7 +699,7 @@ public class StoreRestController {
 			String activationId = createDeviceInfo(connection, 2, store_id);
 			if(activationId==null || activationId.equals(""))
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Failed to generate BYOD activation info.");
-			else {
+			/*else {
 				Store store = storeService.findStoreById(store_id);
 				// send email
 				String brandId = byodUtil.getGeneralConfig(connection, "BRAND_ID");
@@ -707,7 +707,7 @@ public class StoreRestController {
 				JSONObject activationInfo = getDeviceInfoByActivationId(connection, activationId);
 				if(!userEmailUtil.sendActivationInfo(store.getContactPerson(), activationInfo, brandId, email))
 					return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Activation success but failed to send activation email.");
-			}	
+			}*/	
 		}catch(Exception ex) {
 			ex.printStackTrace();
 		} finally {
@@ -852,7 +852,7 @@ public class StoreRestController {
 			String activationId = createDeviceInfo(connection, 3, store_id);
 			if(activationId==null || activationId.equals(""))
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Failed to generate KIOSK activation info.");
-			else {
+			/*else {
 				Store store = storeService.findStoreById(store_id);
 				// send email
 				String brandId = byodUtil.getGeneralConfig(connection, "BRAND_ID");
@@ -860,7 +860,7 @@ public class StoreRestController {
 				JSONObject activationInfo = getDeviceInfoByActivationId(connection, activationId);
 				if(!userEmailUtil.sendActivationInfo(store.getContactPerson(), activationInfo, brandId, email))
 					return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Activation success but failed to send activation email.");
-			}			
+			}	*/		
 		}catch(Exception ex) {
 			ex.printStackTrace();
 		} finally {
