@@ -27,6 +27,8 @@ language-pack-cn:
   dialog_cart_edit_success_title: "商品已成功被修改！"
   dialog_reset_cart_title: "您确定要返回主页而清除购物车吗？"
   dialog_delete_cart_item_title: "您确定要从购物车中删除该商品吗？"
+  dialog_send_order_success_title: "订单创建成功!"
+  dialog_send_order_failed_title: "订单无法创建!"
   dialog_button_ok: "确定"
   dialog_button_yes: "是的"
   dialog_button_no: "不是"
