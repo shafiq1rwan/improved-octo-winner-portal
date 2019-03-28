@@ -3,6 +3,7 @@ package my.com.byod.admin.rest;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -37,29 +38,24 @@ public class TaxChargeRestController {
 	@Autowired
 	private DbConnectionUtil dbConnectionUtil;
 	
+	@Autowired
+	private GroupCategoryRestController groupCategoryRestController;
+	
 	@GetMapping(value = "/getAllCharge", produces = "application/json")
-	public ResponseEntity<?> getAllCharge(HttpServletRequest request, HttpServletResponse response, @RequestParam("chargeType") int chargeType){
+	public ResponseEntity<?> getAllCharge(@RequestParam("group_category_id") Long groupCategoryId, HttpServletRequest request, HttpServletResponse response){
 		JSONArray jsonTaxChargeArray = new JSONArray();
 		Connection connection = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		
 		try {
-			String query = "SELECT * FROM tax_charge";
-			
-			switch(chargeType) {
-			case 0:
-				break;
-			case 1:
-				query += " WHERE charge_type = 1";
-				break;
-			case 2:
-				query += " WHERE charge_type = 2";
-				break;
-			}
+			String query = "SELECT a.* FROM tax_charge a "
+					+ "INNER JOIN group_category_tax_charge b ON a.id = b.tax_charge_id "
+					+ "WHERE b.group_category_id = ? ";
 			
 			connection = dbConnectionUtil.retrieveConnection(request);
 			stmt = connection.prepareStatement(query);
+			stmt.setLong(1, groupCategoryId);
 			rs = (ResultSet) stmt.executeQuery();
 			
 			while(rs.next()) {
@@ -90,6 +86,45 @@ public class TaxChargeRestController {
 
 	}
 	
+	@GetMapping(value = "/getChargeById", produces = "application/json")
+	public ResponseEntity<?> getAllChargeById(@RequestParam("id") Long id, HttpServletRequest request, HttpServletResponse response){
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		JSONObject jsonTaxChargeObj = new JSONObject();
+		
+		try {
+			String query = "SELECT * FROM tax_charge WHERE id = ? ";
+			connection = dbConnectionUtil.retrieveConnection(request);
+			stmt = connection.prepareStatement(query);
+			stmt.setLong(1, id);
+			rs = (ResultSet) stmt.executeQuery();
+			
+			if(rs.next()) {
+				jsonTaxChargeObj.put("id", rs.getLong("id"));				
+				jsonTaxChargeObj.put("tax_charge_name", rs.getString("tax_charge_name"));
+				jsonTaxChargeObj.put("rate", rs.getInt("rate"));		
+				jsonTaxChargeObj.put("charge_type", rs.getInt("charge_type"));
+				jsonTaxChargeObj.put("is_active", rs.getBoolean("is_active"));
+				jsonTaxChargeObj.put("created_date", rs.getDate("created_date"));
+			}
+			
+			return ResponseEntity.ok(jsonTaxChargeObj.toString());
+		} catch(Exception ex) {
+			ex.printStackTrace();
+			return ResponseEntity.badRequest().body(ex.getMessage());
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+
+	}
+	
 	@GetMapping(value = "/getAllChargeType", produces = "application/json")
 	public ResponseEntity<?> getAllChargeType(HttpServletRequest request, HttpServletResponse response){
 		JSONArray jsonChargeTypeArray = new JSONArray();
@@ -104,8 +139,8 @@ public class TaxChargeRestController {
 			
 			while(rs.next()) {
 				JSONObject jsonChargeTypeObj = new JSONObject();
-				jsonChargeTypeObj.put("charge_type_number", rs.getInt("charge_type_number"));				
-				jsonChargeTypeObj.put("charge_type_name", rs.getString("charge_type_name"));							
+				jsonChargeTypeObj.put("id", rs.getInt("charge_type_number"));				
+				jsonChargeTypeObj.put("tax_name", rs.getString("charge_type_name"));							
 				jsonChargeTypeArray.put(jsonChargeTypeObj);
 			}
 			
@@ -122,24 +157,49 @@ public class TaxChargeRestController {
 				}
 			}
 		}
-
 	}
 	
 	@PostMapping(value = "/createTaxCharge", produces = "application/json")
 	public ResponseEntity<?> createTaxCharge(HttpServletRequest request, HttpServletResponse response, @RequestBody String data){
 		Connection connection = null;
 		PreparedStatement stmt = null;
+		ResultSet rs = null;
 		
 		try {
 			JSONObject jsonTaxChargeData = new JSONObject(data);
 			connection = dbConnectionUtil.retrieveConnection(request);
-			stmt = connection.prepareStatement("INSERT INTO tax_charge(tax_charge_name, rate, charge_type, is_active) VALUES (?,?,?,?)");
-				stmt.setString(1, jsonTaxChargeData.getString("tax_charge_name"));
-				stmt.setInt(2, jsonTaxChargeData.getInt("rate"));
-				stmt.setInt(3, jsonTaxChargeData.getInt("charge_type"));
-				stmt.setBoolean(4, jsonTaxChargeData.getBoolean("is_active"));
-				stmt.executeUpdate();			
-			
+			String sqlStatement = "INSERT INTO tax_charge(tax_charge_name, rate, charge_type, is_active, created_date) VALUES (?,?,?,?,GETDATE());";
+			stmt = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
+			stmt.setString(1, jsonTaxChargeData.getString("tax_charge_name"));
+			stmt.setInt(2, jsonTaxChargeData.getInt("rate"));
+			stmt.setInt(3, jsonTaxChargeData.getInt("charge_type"));
+			stmt.setBoolean(4, jsonTaxChargeData.getBoolean("is_active"));
+			rs = stmt.executeQuery();
+			if(rs.next()) {
+				Long id = rs.getLong(1);
+				
+				// logging to file	
+				String [] parameters = {
+						String.valueOf(id),
+						jsonTaxChargeData.getString("tax_charge_name")==null?"null":"'"+jsonTaxChargeData.getString("tax_charge_name")+"'",
+						String.valueOf(jsonTaxChargeData.getInt("rate")),
+						String.valueOf(jsonTaxChargeData.getInt("charge_type")),
+						String.valueOf(jsonTaxChargeData.getBoolean("is_active")?1:0)};	
+				groupCategoryRestController.logActionToFile(connection, sqlStatement, parameters, jsonTaxChargeData.getLong("group_category_id"), null, 0, "tax_charge");	
+				
+				sqlStatement = "INSERT INTO group_category_tax_charge (group_category_id, tax_charge_id) VALUES (?,?);";
+				stmt = connection.prepareStatement(sqlStatement);
+				stmt.setLong(1, jsonTaxChargeData.getLong("group_category_id"));
+				stmt.setLong(2, id);
+				stmt.executeUpdate();
+				
+				// logging to file	
+				String [] parameters2 = {
+						String.valueOf(jsonTaxChargeData.getLong("group_category_id")),
+						String.valueOf(id)};	
+				groupCategoryRestController.logActionToFile(connection, sqlStatement, parameters2, jsonTaxChargeData.getLong("group_category_id"), null, 0, null);	
+			}
+				
 			return ResponseEntity.ok(null);
 		}catch (DuplicateKeyException ex) {
 			ex.printStackTrace();
@@ -167,13 +227,23 @@ public class TaxChargeRestController {
 		try {
 			JSONObject jsonTaxChargeData = new JSONObject(data);
 			connection = dbConnectionUtil.retrieveConnection(request);
-			stmt = connection.prepareStatement("UPDATE tax_charge SET tax_charge_name =?, rate =?, charge_type =?, is_active = ? WHERE id = ?");
-				stmt.setString(1, jsonTaxChargeData.getString("tax_charge_name"));
-				stmt.setInt(2, jsonTaxChargeData.getInt("rate"));
-				stmt.setInt(3, jsonTaxChargeData.getInt("charge_type"));
-				stmt.setBoolean(4, jsonTaxChargeData.getBoolean("is_active"));
-				stmt.setLong(5, jsonTaxChargeData.getLong("id"));
-				stmt.executeUpdate();			
+			String sqlStatement = "UPDATE tax_charge SET tax_charge_name = ?, rate = ?, charge_type = ?, is_active = ? WHERE id = ?;";
+			stmt = connection.prepareStatement(sqlStatement);
+			stmt.setString(1, jsonTaxChargeData.getString("tax_charge_name"));
+			stmt.setInt(2, jsonTaxChargeData.getInt("rate"));
+			stmt.setInt(3, jsonTaxChargeData.getInt("charge_type"));
+			stmt.setBoolean(4, jsonTaxChargeData.getBoolean("is_active"));
+			stmt.setLong(5, jsonTaxChargeData.getLong("id"));
+			stmt.executeUpdate();
+			
+			// logging to file	
+			String [] parameters = {
+					jsonTaxChargeData.getString("tax_charge_name")==null?"null":"'"+jsonTaxChargeData.getString("tax_charge_name")+"'",
+					String.valueOf(jsonTaxChargeData.getInt("rate")),
+					String.valueOf(jsonTaxChargeData.getInt("charge_type")),
+					String.valueOf(jsonTaxChargeData.getBoolean("is_active")?1:0),
+					String.valueOf(jsonTaxChargeData.getLong("id"))};	
+			groupCategoryRestController.logActionToFile(connection, sqlStatement, parameters, jsonTaxChargeData.getLong("group_category_id"), null, 0, null);		
 			
 			return ResponseEntity.ok(null);
 		}catch (DuplicateKeyException ex) {
@@ -192,38 +262,6 @@ public class TaxChargeRestController {
 				}
 			}
 		}
-	}
-	
-/*	@PostMapping(value = "/applyChargeToMenuItem", produces = "application/json")
-	public ResponseEntity<?> applyChargeToMenuItem(HttpServletRequest request, HttpServletResponse response, @RequestBody String data){	
-		Connection connection = null;
-		PreparedStatement stmt = null;
-		
-		try {
-	
-			
-			return ResponseEntity.ok(null);
-		}catch (DuplicateKeyException ex) {
-			ex.printStackTrace();
-			return new ResponseEntity<>(HttpStatus.CONFLICT);
-		}
-		catch(Exception ex) {
-			ex.printStackTrace();
-			return ResponseEntity.badRequest().body(ex.getMessage());
-		} finally {
-			if (connection != null) {
-				try {
-					connection.close();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}
-
-	}*/
-	
-	
-	
-	
+	}	
 	
 }

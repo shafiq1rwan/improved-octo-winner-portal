@@ -149,7 +149,17 @@
 					                </div>
 					            </div>
 					        </div>
-					    </div>					
+					    </div>
+					    <div class="row">
+					    	<div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">			
+								<div class="form-group">
+									<label class="login-label">Store Type</label>
+									<select class="form-control" ng-model="store.storeType" ng-options="x.store_type_name for x in storeType track by x.id" required>
+										<option value="" disabled>Please choose a store type</option>
+									</select>
+								</div>																	
+							</div>
+						</div>					
 						<div class="row">
 							 <div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
 							 	<div class="form-group">
@@ -209,7 +219,29 @@
 								</div>
 							</div>							
 						</div>
-					</div>			 									
+					</div>
+					<hr>
+					<div class="form-section">
+						<h6 class="pb-2 text-secondary">Payment Delay Setting</h6>
+						<div class="row">
+							<div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">			
+								<div class="form-group">
+									<label class="login-label">BYOD</label>
+									<select class="form-control" ng-model="store.byodPaymentDelayType" ng-options="x.payment_delay_name for x in paymentDelayType track by x.id" required>
+										<option value="" disabled>Please choose a payment type</option>
+									</select>
+								</div>																	
+							</div>
+							<div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">			
+								<div class="form-group">
+									<label class="login-label">KIOSK</label>
+									<select class="form-control" ng-model="store.kioskPaymentDelayType" ng-options="x.payment_delay_name for x in paymentDelayType track by x.id" required>
+										<option value="" disabled>Please choose a payment type</option>
+									</select>
+								</div>																	
+							</div>						
+						</div>
+					</div>					 									
 		      </div>
 		      <div class="modal-footer">
 		      	<button class="btn btn-primary" ng-show="action=='create'" type="submit" ng-click="submitStore()"> Submit</button>

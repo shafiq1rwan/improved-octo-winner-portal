@@ -1299,8 +1299,8 @@ public class DeviceConfigRestController {
 		JSONObject result = null;
 		try {
 			//connection = dataSource.getConnection();
-			sqlStatement = "SELECT id, tax_charge_id, backend_id, store_name, store_logo_path, store_address, store_longitude, store_latitude, store_country, store_currency, " + 
-					"store_table_count, store_start_operating_time, store_end_operating_time, last_update_date, is_publish, created_date, store_contact_person, store_contact_hp_number, store_contact_email FROM store WHERE id = ? ";
+			sqlStatement = "SELECT id, backend_id, store_name, store_logo_path, store_address, store_longitude, store_latitude, store_country, store_currency, " + 
+					"store_table_count, store_start_operating_time, store_end_operating_time, last_update_date, is_publish, created_date, store_contact_person, store_contact_hp_number, store_contact_email, store_type_id, kiosk_payment_delay_id, byod_payment_delay_id FROM store WHERE id = ? ";
 			ps1 = connection.prepareStatement(sqlStatement);
 			ps1.setLong(1, storeId);
 			rs1 = ps1.executeQuery();	
@@ -1308,7 +1308,6 @@ public class DeviceConfigRestController {
 			if (rs1.next()) {
 				result = new JSONObject();
 				result.put("storeId", rs1.getLong("id"));
-				result.put("taxChargeId", rs1.getLong("tax_charge_id"));
 				result.put("backEndId", rs1.getString("backend_id"));
 				result.put("name", rs1.getString("store_name"));
 				result.put("logoPath", byodUrl + displayImagePath + brandId + "/" + rs1.getString("store_logo_path"));
@@ -1326,6 +1325,9 @@ public class DeviceConfigRestController {
 				result.put("contactPerson", rs1.getString("store_contact_person"));
 				result.put("mobileNumber", rs1.getString("store_contact_hp_number"));
 				result.put("email", rs1.getString("store_contact_email"));
+				result.put("storeTypeId", rs1.getLong("store_type_id"));
+				result.put("kioskPaymentDelayId", rs1.getLong("kiosk_payment_delay_id"));
+				result.put("byodPaymentDelayId", rs1.getLong("byod_payment_delay_id"));
 			}
 			
 		} catch (Exception ex) {
@@ -1652,7 +1654,9 @@ public class DeviceConfigRestController {
 				"menu_item_promo_period",
 				"menu_item_tax_charge",
 				"modifier_group",
-				"modifier_item_sequence"};
+				"modifier_item_sequence",
+				"tax_charge",
+				"group_category_tax_charge"};
 		try {
 			for(String table : tableNames) {
 				sqlStatement = "EXEC sp_generate_inserts ?";

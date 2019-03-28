@@ -46,7 +46,7 @@
 						$scope.staff.mobilePhone == null || $scope.staff.mobilePhone=='' ||
 							$scope.staff.username == null || $scope.staff.username=='' ||
 								$scope.staff.password == null || $scope.staff.password=='' ||
-									$scope.staff.role.id == null || $scope.staff.role.id==''){
+									$scope.staff.role == null || $scope.staff.role==''){
 			}
 			else{
 				if($scope.action=='create'){

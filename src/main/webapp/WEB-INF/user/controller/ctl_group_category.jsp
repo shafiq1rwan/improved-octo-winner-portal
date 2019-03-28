@@ -4,7 +4,9 @@
 	
 		$scope.group_category = {};
 		$scope.stores = [];
-		$scope.action = "";
+		$scope.action = '';
+		$scope.taxAction = '';
+		$scope.tax = {};
 		var ori_store_array = [];
 		var store_array = [];
 		var store_with_group_category_array = [];
@@ -197,7 +199,7 @@
 					{"data": "id", "width": "27%",
 					 "render": function ( data, type, full, meta ) {
 						 	var id = full.id;
-						    return '<div class="d-flex justify-content-start"><a ng-href= "${pageContext.request.contextPath}/user/#!Router_group_category_category/'+id+'" class="btn btn-outline-info ml-1 mr-1 custom-fontsize"><i class="far fa-edit"></i> Edit Category</a><button class="btn btn-outline-danger ml-1 mr-1 custom-fontsize" ng-click="publishMenu('+id+')"><i class="far fa-upload"></i> Publish Menu</button></div>'			   
+						    return '<div class="d-flex justify-content-start"><a ng-href= "${pageContext.request.contextPath}/user/#!Router_group_category_category/'+id+'" class="btn btn-outline-info ml-1 mr-1 custom-fontsize"><i class="far fa-edit"></i> Edit Category</a><button class="btn btn-outline-success ml-1 mr-1 custom-fontsize" ng-click="openTaxListModal('+id+')"><i class="far fa-usd-square"></i> View Tax Setting</button><button class="btn btn-outline-danger ml-1 mr-1 custom-fontsize" ng-click="publishMenu('+id+')"><i class="far fa-upload"></i> Publish Menu</button></div>'			   
 					 }
 					}
 					],
@@ -293,7 +295,160 @@
 					});
 			});
 		}
-
+			
+		// tax setting
+		$scope.refreshTaxList = function(){
+			// get tax charge type
+			$http({
+				method : 'GET',
+				headers : {'Content-Type' : 'application/json'},
+				url : '${pageContext.request.contextPath}/menu/charge/getAllChargeType'			
+			})
+			.then(function(response) {
+				if (response.status == "400") {
+					alert("Unable to get charge type");
+				} else if(response.status == "200") {
+					console.log(response.data);	
+					$scope.taxType = response.data;
+				}
+			});	
+			
+			var table = $('#taxList_dtable').DataTable({
+				"ajax" : {
+					"url" : "${pageContext.request.contextPath}/menu/charge/getAllCharge?group_category_id=" + $scope.group_category.id,
+					"dataSrc": function ( json ) {                
+		                return json;
+		            },  
+					"statusCode" : {
+						403 : function() {
+							alert("Session TIME OUT");
+							$(location).attr('href', '${pageContext.request.contextPath}/user');
+						}
+					}
+				},
+				destroy : true,
+				"order" : [ [ 0, "asc" ] ] ,
+				"columns" : [ 
+					{"data" : "id", "width": "4%"},
+					{"data" : "tax_charge_name"},
+					{"data" : "rate"},
+					{"data" : "is_active", "width": "15%"}
+					]		
+			});
+			
+			$('#taxList_dtable tbody').off('click', 'tr td:nth-child(-n+3)');
+			$('#taxList_dtable tbody').on('click', 'tr td:nth-child(-n+3)', function() {
+				$scope.tax = {
+						type:{}
+				};
+				
+				$http({
+					method : 'GET',
+					headers : {'Content-Type' : 'application/json'},
+					url : '${pageContext.request.contextPath}/menu/charge/getChargeById?id='+table.row(this).data().id			
+				})
+				.then(function(response) {
+					if (response.status == "404") {
+						alert("Unable to find tax detail");
+					} else if(response.status == "200") {
+						console.log(response.data);
+						$scope.tax.id = response.data.id;
+						$scope.tax.name = response.data.tax_charge_name;
+						$scope.tax.type.id = response.data.charge_type;
+						$scope.tax.rate = response.data.rate;
+						$scope.tax.is_active = response.data.is_active;
+						$scope.taxAction = 'update';
+						$('#taxListModal').modal('hide');
+						$('#taxDetailModal').modal({backdrop: 'static', keyboard: false});					
+					}
+				});						
+			});
+		}
+		$scope.openTaxListModal = function(groupCategoryId){
+			$scope.group_category.id = groupCategoryId;
+			$scope.refreshTaxList();	
+			$('#taxListModal').modal({backdrop: 'static', keyboard: false});
+		}
+		
+		$scope.closeTaxListModal = function(){
+			$('#taxListModal').modal('hide');
+		}
+		
+		$scope.openTaxDetailModal = function(action){
+			$scope.taxAction = action;
+			$('#taxListModal').modal('hide');
+			$('#taxDetailModal').modal({backdrop: 'static', keyboard: false});
+		}	
+		
+		$scope.closeTaxDetailModal = function(){
+			$('#taxDetailModal').modal('hide');
+			$scope.resetTaxDetailModal();
+			$('#taxListModal').modal('show');
+		}
+		
+		$scope.postTaxRequest = function(){
+			if($scope.tax.name==null || $scope.tax.name=='' ||
+					$scope.tax.rate==null || $scope.tax.rate=='' ||
+						$scope.tax.type==null || $scope.tax.type==''){
+				
+			}
+			else{		
+				var postdata = {
+						id: $scope.taxAction =='create' ? undefined: $scope.tax.id ,
+						tax_charge_name : $scope.tax.name,
+						rate : $scope.tax.rate,
+						charge_type : $scope.tax.type.id,
+						is_active : $scope.tax.is_active,
+						group_category_id : $scope.group_category.id
+					}
+					
+				console.log(postdata);
+				
+				$http({
+					method : 'POST',
+					headers : {'Content-Type' : 'application/json'},
+					url : $scope.taxAction=='create'?'${pageContext.request.contextPath}/menu/charge/createTaxCharge':'${pageContext.request.contextPath}/menu/charge/editTaxCharge',
+					data : postdata
+				})
+				.then(function(response) {
+	
+					if (response.status == "403") {
+						alert("Session TIME OUT");
+						$(location).attr('href','${pageContext.request.contextPath}/user');			
+					} else if(response.status == "200") {
+						// ok
+						if($scope.taxAction=='create'){
+							swal("Tax is created", {
+								icon: "success",
+							});
+						}
+						else if($scope.taxAction=='update'){
+							swal("Tax is updated", {
+								icon: "success",
+							});
+						}
+						$('#taxDetailModal').modal('hide');
+						$scope.resetTaxDetailModal();
+						$scope.refreshTaxList();
+						$('#taxListModal').modal({backdrop: 'static', keyboard: false});
+					}
+				}, function(response){
+					if($scope.taxAction=='create')
+						swal({
+						  title: "Failed to create tax",
+						  text: response.data,
+						  icon: "warning",
+						  dangerMode: true,
+						});
+				});
+			}
+		}
+		
+		// reset tax detail modal
+		$scope.resetTaxDetailModal = function(){
+			$scope.taxAction = '';
+			$scope.tax = {};
+		}	
 		
 		
 		

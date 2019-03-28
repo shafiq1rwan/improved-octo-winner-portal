@@ -145,6 +145,106 @@ overflow-y: auto;
 				</div>
 			</div>
 		</div>
+		
+		<!-- Tax List Modal -->
+	<div class="modal fade" id="taxListModal" role="dialog" aria-labelledby="taxListModal" aria-hidden="true">
+		<div class="modal-dialog modal-lg">
+		    <div class="modal-content">
+		    <form id="staffListForm" method="POST" accept-charset="UTF-8" role="form" class="form-signin">
+		      <div class="modal-header">
+		        <h5>Tax List</h5>	
+		        <button type="button" class="close" ng-click="closeTaxListModal()" aria-label="Close">
+		          <span aria-hidden="true">&times;</span>
+		        </button>
+		      </div>
+		      <div class="modal-body">
+		      		<div class="table-responsive">
+						<table id="taxList_dtable" class="table table-bordered table-hover display" style="width:100%">
+							<thead>
+								<tr>
+									<th>ID</th>
+									<th>Name</th>
+									<th>Rate (Percentage %)</th>
+									<th>Active Status</th>
+								</tr>
+							</thead>										
+							<tbody>									
+							</tbody>
+						</table>
+					</div>			       									  				 									
+		      </div>
+		      <div class="modal-footer">
+		      	<button type="button" class="btn btn-social pull-right btn-primary bg-aqua" ng-click="openTaxDetailModal('create')">
+					<span class="btn-label"><i class="fa fa-plus"></i></span> Add Tax
+				</button>
+		      </div>
+		       </form>		      
+		    </div>
+		</div>
+	</div>
+	
+	<!-- Tax Detail Modal -->
+		<div class="modal fade" id="taxDetailModal" role="dialog"
+			aria-labelledby="taxModal" aria-hidden="true">
+			<div class="modal-dialog modal-lg">
+				<div class="modal-content">
+					<form id="modifierGroupForm" method="POST" accept-charset="UTF-8"
+						role="form" class="form-signin">
+						<div class="modal-header">
+							<h5 class="modal-title">Tax Detail</h5>
+							<button type="button" class="close" ng-click="closeTaxDetailModal()" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+						<div class="modal-body">
+							<div class="form-section">							
+								<div class="row">
+									<div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">			
+										<div class="form-group">
+											<label class="login-label">Name</label>
+											<input class="form-control" name="taxName" type="text" ng-model="tax.name" required> 
+										</div>																	
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">		
+										<div class="form-group">
+											<label class="login-label">Rate (Percentage %)</label>
+											<input class="form-control" name="taxRate" type="number" min="1" max="100" step="1" ng-model="tax.rate" required> 
+										</div>																	
+									</div>
+									<div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">			
+										<div class="form-group">
+											<label class="login-label">Tax Type</label>
+											<select class="form-control" ng-model="tax.type" ng-options="x.tax_name for x in taxType track by x.id" required>
+												<option value="" disabled>Please choose a tax type</option>
+											</select>
+										</div>																	
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">			
+										<div class="form-group">
+											<div class="custom-control custom-checkbox">
+												<input type="checkbox" name="taxStatus" ng-model="tax.is_active" class="custom-control-input" id="customCheck1">
+												<label class="custom-control-label" for="customCheck1">Active</label>
+											</div>
+										</div>																	
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="modal-footer">						
+							<button class="btn btn-primary" type="submit" ng-show="taxAction=='create'" ng-click="postTaxRequest()">Submit</button>
+							<button class="btn btn-primary" type="submit" ng-show="taxAction=='update'" ng-click="postTaxRequest()">Update</button>
+						</div>
+					</form>
+
+				</div>
+			</div>
+		</div>
+		<!-- END Modal -->
+		
 	</div>
 </body>
 </html>

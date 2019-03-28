@@ -32,7 +32,10 @@
 											$scope.store.operatingEndTime == null || $scope.store.operatingEndTime=='' ||
 												$scope.store.contactPerson == null || $scope.store.contactPerson=='' ||
 													$scope.store.mobileNumber == null || $scope.store.mobileNumber=='' ||
-														$scope.store.email == null || $scope.store.email==''){
+														$scope.store.email == null || $scope.store.email=='' ||
+															$scope.store.storeType == null || $scope.store.storeType =='' ||
+																$scope.store.kioskPaymentDelayType == null || $scope.store.kioskPaymentDelayType =='' ||
+																	$scope.store.byodPaymentDelayType == null || $scope.store.byodPaymentDelayType ==''){
 			}
 			else if($scope.action=='create' && $scope.store.imagePath == null || $scope.action=='create' && $scope.store.imagePath==''){
 				swal({
@@ -104,7 +107,10 @@
 					store_ecpos : $scope.store.ecpos,
 					store_contact_person : $scope.store.contactPerson,
 					store_contact_hp_number : $scope.store.mobileNumber,
-					store_contact_email : $scope.store.email
+					store_contact_email : $scope.store.email,
+					store_type_id : $scope.store.storeType.id,
+					kiosk_payment_delay_id : $scope.store.kioskPaymentDelayType.id,
+					byod_payment_delay_id : $scope.store.byodPaymentDelayType.id
 				}
 				
 			console.log(postdata);
@@ -119,7 +125,7 @@
 
 				if (response.status == "403") {
 					alert("Session TIME OUT");
-					$(location).attr('href','${pageContext.request.contextPath}/admin');			
+					$(location).attr('href','${pageContext.request.contextPath}/user');			
 				} else if(response.status == "200") {
 					// ok
 					if($scope.action=='create'){
@@ -167,6 +173,36 @@
 		var previewDefault;
 		
 		$scope.refreshTable = function(){
+			// get store type
+			$http({
+				method : 'GET',
+				headers : {'Content-Type' : 'application/json'},
+				url : '${pageContext.request.contextPath}/menu/store/getStoreType'			
+			})
+			.then(function(response) {
+				if (response.status == "400") {
+					alert("Unable to get store type");
+				} else if(response.status == "200") {
+					console.log(response.data);	
+					$scope.storeType = response.data;
+				}
+			});
+			
+			// get payment delay type
+			$http({
+				method : 'GET',
+				headers : {'Content-Type' : 'application/json'},
+				url : '${pageContext.request.contextPath}/menu/store/getPaymentDelayType'			
+			})
+			.then(function(response) {
+				if (response.status == "400") {
+					alert("Unable to get payment delay type");
+				} else if(response.status == "200") {
+					console.log(response.data);	
+					$scope.paymentDelayType = response.data;
+				}
+			});	
+			
 			var table = $('#store_dtable').DataTable({
 				"ajax" : {
 					"url" : "${pageContext.request.contextPath}/menu/store",
@@ -216,7 +252,12 @@
 			        return;
 			    }
 				
-				$scope.action = 'update';	
+				$scope.action = 'update';
+				$scope.store = {
+					storeType:{},
+					kioskPaymentDelayType:{},
+					byodPaymentDelayType:{}
+				}; 
 				$scope.store.id = table.row(this).data().id;
 				$http({
 					method : 'GET',
@@ -243,6 +284,9 @@
 						$scope.store.contactPerson = response.data.store_contact_person;
 						$scope.store.mobileNumber = response.data.store_contact_hp_number;
 						$scope.store.email = response.data.store_contact_email;
+						$scope.store.storeType.id = response.data.store_type_id;
+						$scope.store.kioskPaymentDelayType.id = response.data.kiosk_payment_delay_id;
+						$scope.store.byodPaymentDelayType.id = response.data.byod_payment_delay_id;
 						 $('#operatingStartTime').datetimepicker({
 							    defaultDate: moment($scope.store.operatingStartTime, "HH:mm:ss"),
 							    format: 'LT'
@@ -251,7 +295,7 @@
 							    defaultDate: moment($scope.store.operatingEndTime, "HH:mm:ss"),
 							    format: 'LT'
 							  });
-						$('#storeModal').modal('toggle');
+						 $('#storeModal').modal({backdrop: 'static', keyboard: false});	
 					}
 				});
 			});

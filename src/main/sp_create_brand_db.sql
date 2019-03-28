@@ -149,7 +149,7 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 			(
 				id BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,
 				group_category_id BIGINT DEFAULT 0,
-				tax_charge_id BIGINT DEFAULT 0,
+				store_type_id BIGINT DEFAULT 0,
 				backend_id NVARCHAR(50) NOT NULL UNIQUE,
 				store_name NVARCHAR(150) NOT NULL UNIQUE,
 				store_logo_path NVARCHAR(MAX),
@@ -167,6 +167,8 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 				last_update_date datetime,
 				is_publish BIT DEFAULT 0,
 				ecpos BIT DEFAULT 0,
+				byod_payment_delay_id BIGINT DEFAULT 0,
+				kiosk_payment_delay_id BIGINT DEFAULT 0,
 				created_date DATETIME NOT NULL
 			);
 
@@ -191,6 +193,18 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 				role_name NVARCHAR(50) NOT NULL UNIQUE
 			);
 
+			CREATE TABLE store_type_lookup
+			(
+				id BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,
+				store_type_name NVARCHAR(50) NOT NULL UNIQUE
+			);
+
+			CREATE TABLE payment_delay_lookup
+			(
+				id BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,
+				payment_delay_name NVARCHAR(50) NOT NULL UNIQUE
+			);
+
 			CREATE TABLE table_log
 			(
 				id BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,
@@ -205,7 +219,7 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 			CREATE TABLE tax_charge
 			(
 				id BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,
-				tax_charge_name NVARCHAR(100) NOT NULL UNIQUE,
+				tax_charge_name NVARCHAR(100) NOT NULL,
 				rate INT DEFAULT 0,
 				charge_type INT DEFAULT 1,
 				is_active BIT DEFAULT 0,
@@ -218,9 +232,9 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 				charge_type_name NVARCHAR(50) NOT NULL UNIQUE
 			);
 
-			CREATE TABLE menu_item_tax_charge
+			CREATE TABLE group_category_tax_charge
 			(
-				menu_item_id BIGINT NOT NULL,
+				group_category_id BIGINT NOT NULL,
 				tax_charge_id BIGINT NOT NULL
 			);
 
@@ -488,8 +502,10 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 			);
 
 			INSERT INTO role_lookup VALUES (''Admin''),(''Store Manager'');
+			INSERT INTO store_type_lookup VALUES (''Retail''),(''F&B'');
+			INSERT INTO payment_delay_lookup VALUES (''Instant'', ''Delay'', ''Instant/Delay'')
 
-			INSERT INTO charge_type_lookup VALUES (0, ''None''),(1, ''Tax''),(2, ''Charge'');
+			INSERT INTO charge_type_lookup VALUES (1, ''Total Tax''),(2, ''Overall Tax'');
 
 			INSERT INTO device_type_lookup (id, name, prefix, backend_sequence, modified_date) VALUES (1, ''ECPOS'', ''EC'', 0, GETDATE())
 			INSERT INTO device_type_lookup (id, name, prefix, backend_sequence, modified_date) VALUES (2, ''BYOD'', ''BD'', 0, GETDATE())

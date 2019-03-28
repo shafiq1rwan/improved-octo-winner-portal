@@ -141,7 +141,75 @@ public class StoreRestController {
 			return new ResponseEntity<String>(ex.getMessage(), HttpStatus.CONFLICT);
 		}
 	}
-
+	
+	@GetMapping(value = "/getStoreType", produces = "application/json")
+	public ResponseEntity<?> getStoreType(HttpServletRequest request, HttpServletResponse response){
+		JSONArray jsonArr = new JSONArray();
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		
+		try {
+			connection = dbConnectionUtil.retrieveConnection(request);
+			stmt = connection.prepareStatement("SELECT * FROM store_type_lookup");
+			rs = (ResultSet) stmt.executeQuery();
+			
+			while(rs.next()) {
+				JSONObject jsonObj = new JSONObject();
+				jsonObj.put("id", rs.getLong("id"));				
+				jsonObj.put("store_type_name", rs.getString("store_type_name"));							
+				jsonArr.put(jsonObj);
+			}
+			
+			return ResponseEntity.ok(jsonArr.toString());
+		} catch(Exception ex) {
+			ex.printStackTrace();
+			return ResponseEntity.badRequest().body(ex.getMessage());
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
+	@GetMapping(value = "/getPaymentDelayType", produces = "application/json")
+	public ResponseEntity<?> getPaymentDelayType(HttpServletRequest request, HttpServletResponse response){
+		JSONArray jsonArr = new JSONArray();
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		
+		try {
+			connection = dbConnectionUtil.retrieveConnection(request);
+			stmt = connection.prepareStatement("SELECT * FROM payment_delay_lookup ORDER BY id");
+			rs = (ResultSet) stmt.executeQuery();
+			
+			while(rs.next()) {
+				JSONObject jsonObj = new JSONObject();
+				jsonObj.put("id", rs.getLong("id"));				
+				jsonObj.put("payment_delay_name", rs.getString("payment_delay_name"));							
+				jsonArr.put(jsonObj);
+			}
+			
+			return ResponseEntity.ok(jsonArr.toString());
+		} catch(Exception ex) {
+			ex.printStackTrace();
+			return ResponseEntity.badRequest().body(ex.getMessage());
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
 	@PostMapping("/edit/groupCategory")
 	public ResponseEntity<Void> editStoreGroupCategoryId(@RequestParam("storeId") Long storeId,
 			@RequestParam("groupCategoryId") Long groupCategoryId, HttpServletRequest request, HttpServletResponse response) {

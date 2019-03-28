@@ -54,6 +54,15 @@ public class Store {
 	@JsonProperty("store_contact_email")
 	private String email;
 	
+	@JsonProperty("store_type_id")
+	private Long storeTypeId;
+	
+	@JsonProperty("kiosk_payment_delay_id")
+	private Long kioskPaymentDelayId;
+	
+	@JsonProperty("byod_payment_delay_id")
+	private Long byodPaymentDelayId;
+	
 	public Store() {
 	}
 
@@ -183,6 +192,30 @@ public class Store {
 
 	public void setEmail(String email) {
 		this.email = email;
+	}
+	
+	public Long getStoreTypeId() {
+		return storeTypeId;
+	}
+
+	public void setStoreTypeId(Long storeTypeId) {
+		this.storeTypeId = storeTypeId;
+	}
+	
+	public Long getKioskPaymentDelayId() {
+		return kioskPaymentDelayId;
+	}
+
+	public void setKioskPaymentDelayId(Long kioskPaymentDelayId) {
+		this.kioskPaymentDelayId = kioskPaymentDelayId;
+	}
+	
+	public Long getByodPaymentDelayId() {
+		return byodPaymentDelayId;
+	}
+
+	public void setByodPaymentDelayId(Long byodPaymentDelayId) {
+		this.byodPaymentDelayId = byodPaymentDelayId;
 	}
 
 }

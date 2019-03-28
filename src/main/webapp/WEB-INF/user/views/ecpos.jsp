@@ -179,7 +179,7 @@
 						<div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
 							<div class="form-group">
 								<label class="login-label">Role</label>
-								<select class="form-control" ng-model="staff.role" ng-options="x.role_name for x in roleList track by x.id">
+								<select class="form-control" ng-model="staff.role" ng-options="x.role_name for x in roleList track by x.id" required>
 								<option value="" disabled>Please choose a role</option>
 								</select>
 							</div>
