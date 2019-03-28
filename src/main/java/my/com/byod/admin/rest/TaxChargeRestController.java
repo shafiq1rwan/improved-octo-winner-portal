@@ -193,11 +193,11 @@ public class TaxChargeRestController {
 				stmt.setLong(2, id);
 				stmt.executeUpdate();
 				
-				// logging to file	
+				/*// logging to file	
 				String [] parameters2 = {
 						String.valueOf(jsonTaxChargeData.getLong("group_category_id")),
 						String.valueOf(id)};	
-				groupCategoryRestController.logActionToFile(connection, sqlStatement, parameters2, jsonTaxChargeData.getLong("group_category_id"), null, 0, null);	
+				groupCategoryRestController.logActionToFile(connection, sqlStatement, parameters2, jsonTaxChargeData.getLong("group_category_id"), null, 0, null);	*/
 			}
 				
 			return ResponseEntity.ok(null);

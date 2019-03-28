@@ -503,7 +503,7 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 
 			INSERT INTO role_lookup VALUES (''Admin''),(''Store Manager'');
 			INSERT INTO store_type_lookup VALUES (''Retail''),(''F&B'');
-			INSERT INTO payment_delay_lookup VALUES (''Instant'', ''Delay'', ''Instant/Delay'')
+			INSERT INTO payment_delay_lookup VALUES (''Pay Now/Later''), (''Pay Now''), (''Pay Later'')
 
 			INSERT INTO charge_type_lookup VALUES (1, ''Total Tax''),(2, ''Overall Tax'');
 

@@ -1655,8 +1655,7 @@ public class DeviceConfigRestController {
 				"menu_item_tax_charge",
 				"modifier_group",
 				"modifier_item_sequence",
-				"tax_charge",
-				"group_category_tax_charge"};
+				"tax_charge"};
 		try {
 			for(String table : tableNames) {
 				sqlStatement = "EXEC sp_generate_inserts ?";
@@ -1666,6 +1665,11 @@ public class DeviceConfigRestController {
 				if(table.equals("category")) {
 					sqlStatement += ", @from = \"from category where group_category_id = "+groupCategoryId+"\"";
 					sqlStatement2 += ", @from = \"from category where group_category_id = "+groupCategoryId+"\"";
+				}
+				// filter for group category
+				if(table.equals("tax_charge")) {
+					sqlStatement += ", @from = \"from tax_charge a INNER JOIN group_category_tax_charge b ON a.id = b.tax_charge_id where group_category_id = "+groupCategoryId+"\"";					
+					sqlStatement2 += ", @from = \"from tax_charge a INNER JOIN group_category_tax_charge b ON a.id = b.tax_charge_id where group_category_id = "+groupCategoryId+"\"";					
 				}
 					
 				ps1 = connection.prepareStatement(sqlStatement);
