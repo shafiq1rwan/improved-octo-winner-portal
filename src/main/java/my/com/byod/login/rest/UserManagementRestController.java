@@ -214,7 +214,7 @@ public class UserManagementRestController {
 						new Object[] {username}, Long.class);
 				
 				if(!brandIds.isEmpty()) {
-					sql = "SELECT u.id, u.name, u.email, u.mobileNumber, u.address, u.username, u.enabled, a.authority "
+					sql = "SELECT DISTINCT u.id, u.name, u.email, u.mobileNumber, u.address, u.username, u.enabled, a.authority "
 							+ "FROM users u INNER JOIN authorities a ON u.id = a.user_id "
 							+ "INNER JOIN users_brands ub ON u.id = ub.user_id "
 							+ "WHERE a.authority NOT IN('ROLE_SUPER_ADMIN','ROLE_ADMIN') "
@@ -242,7 +242,7 @@ public class UserManagementRestController {
 						new Object[] {username}, Long.class);
 				
 				if(!brandIds.isEmpty()) {
-					sql = "SELECT u.id, u.name, u.email, u.mobileNumber, u.address, u.username, u.enabled, a.authority "
+					sql = "SELECT DISTINCT u.id, u.name, u.email, u.mobileNumber, u.address, u.username, u.enabled, a.authority "
 							+ "FROM users u INNER JOIN authorities a ON u.id = a.user_id "
 							+ "INNER JOIN users_brands ub ON u.id = ub.user_id "
 							+ "WHERE a.authority NOT IN('ROLE_SUPER_ADMIN','ROLE_SUPER_GROUP_ADMIN') "

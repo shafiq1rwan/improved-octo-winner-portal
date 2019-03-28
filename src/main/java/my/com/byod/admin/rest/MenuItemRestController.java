@@ -303,13 +303,13 @@ public class MenuItemRestController {
 			stmt.setString(1, jsonMenuItemData.getString("menu_item_backend_id"));
 			stmt.setString(2, jsonMenuItemData.getString("menu_item_name"));
 			stmt.setString(3, altName);
-			stmt.setString(3, barcode);
-			stmt.setString(4, description);
-			stmt.setString(5, imagePath);
-			stmt.setBigDecimal(6, BigDecimal.valueOf(jsonMenuItemData.getDouble("menu_item_base_price")));
-			stmt.setInt(7, jsonMenuItemData.getInt("menu_item_type"));
-			stmt.setBoolean(8, jsonMenuItemData.getBoolean("is_taxable"));
-			stmt.setBoolean(9, jsonMenuItemData.getBoolean("is_discountable"));
+			stmt.setString(4, barcode);
+			stmt.setString(5, description);
+			stmt.setString(6, imagePath);
+			stmt.setBigDecimal(7, BigDecimal.valueOf(jsonMenuItemData.getDouble("menu_item_base_price")));
+			stmt.setInt(8, jsonMenuItemData.getInt("menu_item_type"));
+			stmt.setBoolean(9, jsonMenuItemData.getBoolean("is_taxable"));
+			stmt.setBoolean(10, jsonMenuItemData.getBoolean("is_discountable"));
 			
 			rs = stmt.executeQuery();
 			if(rs.next()) {

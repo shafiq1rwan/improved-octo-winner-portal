@@ -247,7 +247,9 @@
 				
 				var userUrl = $scope.action == 'create'?'signup':'edit';
 				
-				$('#loading_modal').modal('show');
+				if(userUrl == 'signup'){
+					$('#loading_modal').modal('show');
+				}
 				
  				$http({
 					method : 'POST',
@@ -257,14 +259,17 @@
 				})
 				.then(
 					function(response) {
-						console.log("HHH");
-						$('#loading_modal').modal('hide');
+						if(userUrl == 'signup'){
+							$('#loading_modal').modal('hide');
+						}
 						$scope.resetModal();
 						$('#userModal').modal('toggle');
 						getUserInfo();
 					},
 					function(response) {
-						$('#loading_modal').modal('hide');
+						if(userUrl == 'signup'){
+							$('#loading_modal').modal('hide');
+						}
 						alert(response.data.responseMessage);
 						//$scope.resetModal();
 						//$('#userModal').modal('toggle');
