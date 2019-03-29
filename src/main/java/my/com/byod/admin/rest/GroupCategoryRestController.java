@@ -737,7 +737,7 @@ public class GroupCategoryRestController {
 		PreparedStatement ps1 = null;
 		ResultSet rs1 = null;
 		try {
-			sqlStatement = "SELECT mi.id, mi.menu_item_name, mi.menu_item_description, mi.menu_item_type, mi.menu_item_image_path, mi.menu_item_base_price FROM category_menu_item cmi, menu_item mi WHERE cmi.category_id = ? AND cmi.menu_item_id = mi.id and mi.is_active = 1 ORDER BY category_menu_item_sequence ASC";
+			sqlStatement = "SELECT mi.id, mi.menu_item_name, mi.menu_item_description, mi.menu_item_type, mi.menu_item_image_path, mi.menu_item_base_price, mi.is_taxable FROM category_menu_item cmi, menu_item mi WHERE cmi.category_id = ? AND cmi.menu_item_id = mi.id and mi.is_active = 1 ORDER BY category_menu_item_sequence ASC";
 			ps1 = connection.prepareStatement(sqlStatement);
 			ps1.setInt(1, categoryID);
 			rs1 = ps1.executeQuery();
@@ -750,7 +750,7 @@ public class GroupCategoryRestController {
 				menuItem.put("type", rs1.getString("menu_item_type"));
 				menuItem.put("path", rs1.getString("menu_item_image_path"));
 				menuItem.put("price", String.format("%.2f", rs1.getDouble("menu_item_base_price")));
-
+				menuItem.put("is_taxable", rs1.getLong("is_taxable"));
 				menuList.put(menuItem);
 				
 				// first time publish menu
