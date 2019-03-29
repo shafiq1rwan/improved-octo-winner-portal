@@ -18,6 +18,7 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 	$scope.tableId;
 	$scope.cart
 	$scope.cartTotalPrice;
+	$scope.taxList;
 	/*Dialog Config*/
 	$scope.isAllowKeyboardDismissal = false;
 	$scope.dialogData = {};
@@ -36,6 +37,7 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 	$scope.isReadyForCart;
 	$scope.isProcessingCartData;
 	$scope.totalItemPrice;
+	$scope.taxDisplayList = [];
 	$scope.cart = [];
 	$scope.editCartItem;
 	
@@ -549,6 +551,8 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 	    	total += parseFloat($scope.cart[i].totalPrice);
 	    }
 	    $scope.cartTotalPrice = total.toFixed(2);
+	    
+	    
 	}
 	$scope.editCart = function(cartItem) {
 		$scope.editCartItem = cartItem;

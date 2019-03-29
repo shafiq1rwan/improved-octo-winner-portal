@@ -8,7 +8,7 @@
 				</button>
 			</div>
 		</div>
-		<div class="body-content">
+		<div class="body-content scrollable-y">
 			<div class="h-100 d-flex flex-column">
 				<div class="w-100 flex-fill d-flex flex-column align-self-center">
 					<div

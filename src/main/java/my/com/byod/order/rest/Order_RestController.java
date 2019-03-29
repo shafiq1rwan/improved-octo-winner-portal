@@ -163,7 +163,6 @@ public class Order_RestController {
 						}
 
 						result.put("tableId", tableId);
-						result.put("checkNo", checkNo);
 						result.put("storeName", rs1.getString("store_name"));
 						result.put("priceTag", rs1.getString("store_currency"));
 						result.put("imagePath", imagePath + brandId + "/");
