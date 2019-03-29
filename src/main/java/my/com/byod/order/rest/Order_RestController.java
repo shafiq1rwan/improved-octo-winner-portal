@@ -28,7 +28,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
-import my.com.byod.admin.rest.TaxChargeRestController;
 import my.com.byod.admin.util.ByodUtil;
 import my.com.byod.admin.util.DbConnectionUtil;
 import my.com.byod.logger.Logger;
@@ -52,9 +51,6 @@ public class Order_RestController {
 
 	@Autowired
 	private DbConnectionUtil dbConnectionUtil;
-	
-	@Autowired
-	private TaxChargeRestController taxChargeRestController;
 	
 	private static final String folName = "byodFE";
 
@@ -170,7 +166,7 @@ public class Order_RestController {
 						result.put("paymentType", rs1.getInt("byod_payment_delay_id"));
 						result.put("imagePath", imagePath + brandId + "/");
 						result.put("menuList", categoryList);
-						result.put("taxList", taxChargeRestController.getTaxChargeByGroupCategoryId(connection, rs1.getLong("group_category_id")));
+						result.put("taxList", getTaxChargeByGroupCategoryId(connection, rs1.getLong("group_category_id")));
 
 						resultCode = "00";
 						resultMessage = "Success";
@@ -733,5 +729,39 @@ public class Order_RestController {
 		verifyOrderResult.put("sendOrderList", sendOrderList);
 		
 		return verifyOrderResult;
+	}
+	
+	private JSONArray getTaxChargeByGroupCategoryId(Connection connection, Long groupCategoryId) throws Exception {
+		JSONArray jsonTaxChargeArray = new JSONArray();
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		
+		try {
+			String query = "SELECT a.* FROM tax_charge a "
+					+ "INNER JOIN group_category_tax_charge b ON a.id = b.tax_charge_id "
+					+ "WHERE b.group_category_id = ? AND a.is_active = 1 ";
+			
+			stmt = connection.prepareStatement(query);
+			stmt.setLong(1, groupCategoryId);
+			rs = (ResultSet) stmt.executeQuery();
+			
+			while(rs.next()) {
+				JSONObject jsonTaxChargeObj = new JSONObject();
+				jsonTaxChargeObj.put("id", rs.getLong("id"));				
+				jsonTaxChargeObj.put("tax_charge_name", rs.getString("tax_charge_name"));
+				jsonTaxChargeObj.put("rate", rs.getInt("rate"));		
+				jsonTaxChargeObj.put("charge_type", rs.getInt("charge_type"));			
+				jsonTaxChargeArray.put(jsonTaxChargeObj);
+			}
+			
+		} catch(Exception ex) {
+			throw ex;
+		} finally {
+			if(stmt!=null)
+				stmt.close();
+			if (rs!=null)
+				rs.close();
+		}
+		return jsonTaxChargeArray;
 	}
 }
