@@ -83,9 +83,9 @@ public class BrandManagementRestController {
 					jsonObj.add(obj);
 				}
 				brandArray = new JSONArray(jsonObj);
-				jsonResult.put("role", role);
 				jsonResult.put("brands", brandArray);
 			}
+			jsonResult.put("role", role);
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			return ResponseEntity.badRequest().contentType(MediaType.TEXT_PLAIN)
