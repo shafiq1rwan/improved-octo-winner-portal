@@ -1652,7 +1652,6 @@ public class DeviceConfigRestController {
 				"menu_item_group_sequence",
 				"menu_item_modifier_group",
 				"menu_item_promo_period",
-				"menu_item_tax_charge",
 				"modifier_group",
 				"modifier_item_sequence",
 				"tax_charge"};
@@ -1671,7 +1670,7 @@ public class DeviceConfigRestController {
 					sqlStatement += ", @from = \"from tax_charge a INNER JOIN group_category_tax_charge b ON a.id = b.tax_charge_id where group_category_id = "+groupCategoryId+"\"";					
 					sqlStatement2 += ", @from = \"from tax_charge a INNER JOIN group_category_tax_charge b ON a.id = b.tax_charge_id where group_category_id = "+groupCategoryId+"\"";					
 				}
-					
+				
 				ps1 = connection.prepareStatement(sqlStatement);
 				ps1.setString(1, table);
 				rs1 = ps1.executeQuery();			

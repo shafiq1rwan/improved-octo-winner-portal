@@ -1,3 +1,4 @@
+USE tenant;
 CREATE TABLE users
 (
 	id BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,
@@ -65,7 +66,7 @@ INSERT INTO users("name",email,mobileNumber,"address",username,"password","enabl
 INSERT INTO authorities(user_id,authority)VALUES(1,'ROLE_SUPER_ADMIN'),(2,'ROLE_ADMIN'),(3,'ROLE_ADMIN'),(4,'ROLE_USER'),(5,'ROLE_USER');
 
 INSERT INTO users("name",email,mobileNumber,"address",username,"password","enabled") VALUES ('cg', 'cg@mpsb.net','010-3456789','usj21','CG','$2a$10$wohHqv2iUEhboYehz8AP8eVvnIreAeH4ZTZYyubCE8JkLbzjEK4c2',1);
-INSERT INTO authorities(user_id,authority)VALUES(6,'ROLE_SUPER_GROUP_ADMIN'),
+INSERT INTO authorities(user_id,authority)VALUES(6,'ROLE_SUPER_GROUP_ADMIN')
 
 -- Patch sample brand
 INSERT INTO brands("name", brand_db_domain, brand_db_name, brand_db_user, brand_db_password, brand_db_port)
