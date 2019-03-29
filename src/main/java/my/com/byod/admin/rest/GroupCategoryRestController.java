@@ -750,7 +750,7 @@ public class GroupCategoryRestController {
 				menuItem.put("type", rs1.getString("menu_item_type"));
 				menuItem.put("path", rs1.getString("menu_item_image_path"));
 				menuItem.put("price", String.format("%.2f", rs1.getDouble("menu_item_base_price")));
-				menuItem.put("is_taxable", rs1.getLong("is_taxable"));
+				menuItem.put("is_taxable", rs1.getString("is_taxable"));
 				menuList.put(menuItem);
 				
 				// first time publish menu
@@ -845,7 +845,7 @@ public class GroupCategoryRestController {
 		PreparedStatement ps1 = null;
 		ResultSet rs1 = null;
 		try {
-			sqlStatement = "SELECT id, menu_item_name, menu_item_image_path, menu_item_base_price FROM menu_item WHERE id = ? AND is_active = 1";
+			sqlStatement = "SELECT id, menu_item_name, menu_item_image_path, menu_item_base_price, is_taxable FROM menu_item WHERE id = ? AND is_active = 1";
 			ps1 = connection.prepareStatement(sqlStatement);
 			ps1.setInt(1, menuItemID);
 			rs1 = ps1.executeQuery();
@@ -855,6 +855,7 @@ public class GroupCategoryRestController {
 			menuItem.put("name", rs1.getString("menu_item_name"));
 			menuItem.put("path", rs1.getString("menu_item_image_path"));
 			menuItem.put("price", rs1.getString("menu_item_base_price"));
+			menuItem.put("is_taxable", rs1.getString("is_taxable"));
 			
 			// first time publish menu
 			/*if(firstPublish && rs1.getString("menu_item_image_path")!=null && !rs1.getString("menu_item_image_path").equals(""))
@@ -881,7 +882,7 @@ public class GroupCategoryRestController {
 		PreparedStatement ps1 = null;
 		ResultSet rs1 = null;
 		try {
-			sqlStatement = "SELECT mi.id, mi.menu_item_name, mi.menu_item_image_path, mi.menu_item_base_price FROM menu_item mi, menu_item_group_sequence migs WHERE migs.menu_item_group_id = ? AND mi.id = migs.menu_item_id ORDER BY migs.menu_item_group_sequence ASC";
+			sqlStatement = "SELECT mi.id, mi.menu_item_name, mi.menu_item_image_path, mi.menu_item_base_price, mi.is_taxable FROM menu_item mi, menu_item_group_sequence migs WHERE migs.menu_item_group_id = ? AND mi.id = migs.menu_item_id ORDER BY migs.menu_item_group_sequence ASC";
 			ps1 = connection.prepareStatement(sqlStatement);
 			ps1.setInt(1, itemGroupID);
 			rs1 = ps1.executeQuery();
@@ -892,6 +893,7 @@ public class GroupCategoryRestController {
 				menuItem.put("name", rs1.getString("menu_item_name"));
 				menuItem.put("path", rs1.getString("menu_item_image_path"));
 				menuItem.put("price", rs1.getString("menu_item_base_price"));
+				menuItem.put("is_taxable", rs1.getString("is_taxable"));
 
 				menuItemList.put(menuItem);
 				
@@ -931,7 +933,7 @@ public class GroupCategoryRestController {
 				modifierGroupData.put("name", rs1.getString("modifier_group_name"));
 
 				JSONArray modifierList = new JSONArray();
-				sqlStatement = "SELECT mi.id, mi.menu_item_name, mi.menu_item_base_price FROM menu_item mi, modifier_item_sequence mis WHERE mis.modifier_group_id = ? AND mi.id = mis.menu_item_id AND mi.is_active = 1 ORDER BY mis.modifier_item_sequence ASC";
+				sqlStatement = "SELECT mi.id, mi.menu_item_name, mi.menu_item_base_price, mi.is_taxable FROM menu_item mi, modifier_item_sequence mis WHERE mis.modifier_group_id = ? AND mi.id = mis.menu_item_id AND mi.is_active = 1 ORDER BY mis.modifier_item_sequence ASC";
 				ps2 = connection.prepareStatement(sqlStatement);
 				ps2.setInt(1, Integer.parseInt(rs1.getString("modifier_group_id")));
 				rs2 = ps2.executeQuery();
@@ -940,6 +942,7 @@ public class GroupCategoryRestController {
 					modifierData.put("id", rs2.getString("id"));
 					modifierData.put("name", rs2.getString("menu_item_name"));
 					modifierData.put("price", rs2.getString("menu_item_base_price"));
+					modifierData.put("is_taxable", rs2.getString("is_taxable"));
 
 					modifierList.put(modifierData);
 				}
