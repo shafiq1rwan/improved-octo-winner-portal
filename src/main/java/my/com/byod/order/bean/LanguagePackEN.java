@@ -27,6 +27,7 @@ public class LanguagePackEN {
 	public String cart_summary;
 	public String cart_total;
 	public String cart_subtotal;
+	public String cart_send_order;
 	public String cart_checkout;
 	
 	public String edit_item_detail_editCart;
@@ -154,6 +155,12 @@ public class LanguagePackEN {
 	}
 	public void setCart_subtotal(String cart_subtotal) {
 		this.cart_subtotal = cart_subtotal;
+	}
+	public String getCart_send_order() {
+		return cart_send_order;
+	}
+	public void setCart_send_order(String cart_send_order) {
+		this.cart_send_order = cart_send_order;
 	}
 	public String getCart_checkout() {
 		return cart_checkout;

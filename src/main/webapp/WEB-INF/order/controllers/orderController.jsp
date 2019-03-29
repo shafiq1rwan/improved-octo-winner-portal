@@ -9,6 +9,7 @@ function removeFromArray(array, element) {
 
 byodApp.controller('OrderController', function($scope, $http, $routeParams, $timeout) {
 	/*Config Data*/
+	$scope.paymentType;
 	$scope.localeData;
 	$scope.languageData;
 	$scope.imagePath;
@@ -16,9 +17,11 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 	$scope.priceTag;
 	$scope.storeName;
 	$scope.tableId;
-	$scope.cart
+	$scope.cart = [];
+	$scope.cartSubtotalPrice;
 	$scope.cartTotalPrice;
-	$scope.taxList;
+	$scope.taxList = [];
+	$scope.taxDisplayList = [];
 	/*Dialog Config*/
 	$scope.isAllowKeyboardDismissal = false;
 	$scope.dialogData = {};
@@ -37,8 +40,6 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 	$scope.isReadyForCart;
 	$scope.isProcessingCartData;
 	$scope.totalItemPrice;
-	$scope.taxDisplayList = [];
-	$scope.cart = [];
 	$scope.editCartItem;
 	
 	$scope.changeLocale = function(data) {
@@ -546,13 +547,48 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 		}
 	}
 	$scope.getCartTotal = function() {
-		var total = 0;
+		var subtotal = 0;
 	    for (var i = 0; i < $scope.cart.length; i++){
-	    	total += parseFloat($scope.cart[i].totalPrice);
+	    	subtotal += parseFloat($scope.cart[i].totalPrice);
 	    }
-	    $scope.cartTotalPrice = total.toFixed(2);
+	    $scope.cartSubtotalPrice = subtotal.toFixed(2);
 	    
+	    $scope.taxDisplayList = [];
+	    /*Process Type 1*/
+	    var totalTax = 0.00;
+	    for (var i = 0; i < $scope.taxList.length; i++) {
+	    	var curTax = $scope.taxList[i];
+	    	if (curTax.charge_type == 1) {
+	    		var taxPrice = subtotal * curTax.rate / 100;
+	    		var taxObj = {};
+		    	taxObj.name = curTax.tax_charge_name;
+		    	taxObj.rate = curTax.rate;
+		    	taxObj.price = taxPrice.toFixed(2);
+		    	
+		    	totalTax += parseFloat(taxPrice.toFixed(2));
+		    	
+		    	$scope.taxDisplayList.push(taxObj);
+	    	}
+	    }
 	    
+	    /*Process Type 2*/
+	    var overallTax = 0.00;
+	    for (var i = 0; i < $scope.taxList.length; i++) {
+	    	var curTax = $scope.taxList[i];
+	    	if (curTax.charge_type == 2) {
+	    		var taxPrice = (subtotal + totalTax) * curTax.rate / 100;
+	    		var taxObj = {};
+		    	taxObj.name = curTax.tax_charge_name;
+		    	taxObj.rate = curTax.rate;
+		    	taxObj.price = taxPrice.toFixed(2);
+		    	
+		    	overallTax += taxPrice.toFixed(2);
+		    	
+		    	$scope.taxDisplayList.push(taxObj);
+	    	}
+	    }
+	    
+	    $scope.cartTotalPrice = (parseFloat($scope.cartSubtotalPrice) + parseFloat(totalTax) + parseFloat(overallTax)).toFixed(2);
 	}
 	$scope.editCart = function(cartItem) {
 		$scope.editCartItem = cartItem;
@@ -620,6 +656,8 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 					$scope.tableId = response.data.tableId;
 					$scope.priceTag = response.data.priceTag;
 					$scope.imagePath = response.data.imagePath;
+					$scope.taxList = response.data.taxList;
+					$scope.paymentType = response.data.paymentType;
 					
 					$scope.loadLanguageData();
 				} else {

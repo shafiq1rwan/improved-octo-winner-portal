@@ -129,7 +129,7 @@ public class Order_RestController {
 			storeLog += "Check No: " + checkNo + System.lineSeparator();
 
 			connection = dbConnectionUtil.getConnection(Long.parseLong(brandId));
-			sqlStatement = "SELECT a.group_category_id, a.store_name, a.store_currency, b.publish_version_id, c.menu_file_path FROM store a "
+			sqlStatement = "SELECT a.group_category_id, a.store_name, a.store_currency, a.byod_payment_delay_id, b.publish_version_id, c.menu_file_path FROM store a "
 					+ "INNER JOIN group_category b ON b.id = a.group_category_id "
 					+ "LEFT JOIN publish_version c ON c.id = b.publish_version_id "
 					+ "WHERE a.is_publish = 1 AND a.id = ?";
@@ -167,6 +167,7 @@ public class Order_RestController {
 						result.put("tableId", tableId);
 						result.put("storeName", rs1.getString("store_name"));
 						result.put("priceTag", rs1.getString("store_currency"));
+						result.put("paymentType", rs1.getInt("byod_payment_delay_id"));
 						result.put("imagePath", imagePath + brandId + "/");
 						result.put("menuList", categoryList);
 						result.put("taxList", taxChargeRestController.getTaxChargeByGroupCategoryId(connection, rs1.getLong("group_category_id")));

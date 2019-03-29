@@ -20,6 +20,7 @@ language-pack-en:
   cart_summary: "Cart Summary"
   cart_total: "Total"
   cart_subtotal: "Subtotal"
+  cart_send_order: "Send Order"
   cart_checkout: "Checkout"
   edit_item_detail_editCart: "Edit Cart"
   

@@ -20,6 +20,7 @@ language-pack-cn:
   cart_summary: "购物车汇总"
   cart_total: "总计"
   cart_subtotal: "小计"
+  cart_send_order: "发送订单"
   cart_checkout: "结账"
   edit_item_detail_editCart: "修改购物车"
   

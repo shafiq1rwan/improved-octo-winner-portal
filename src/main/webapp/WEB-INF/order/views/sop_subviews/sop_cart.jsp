@@ -92,7 +92,7 @@
 						</div>
 						<div class="row ml-0 mr-0">
 							<div class="col-7 pl-0 pr-0 xs-resp-font text-truncate">
-								<b>{{currentLanguageData.cart_total}}</b>
+								<b>{{currentLanguageData.cart_subtotal}}</b>
 							</div>
 							<div class="col-5 pl-0 pr-0 xs-resp-font text-right">
 								<b>{{priceTag}}{{cartItem.totalPrice}}</b>
@@ -107,6 +107,24 @@
 					<div class="col-12 cart-item pl-1 pr-1 mb-2">
 						<div class="row ml-0 mr-0">
 							<div class="col-7 pl-0 pr-0 xs-resp-font text-truncate">
+								<b>{{currentLanguageData.cart_subtotal}}</b>
+							</div>
+							<div class="col-5 pl-0 pr-0 xs-resp-font text-right">
+								<b>{{priceTag}}{{cartSubtotalPrice}}</b>
+							</div>
+						</div>
+					</div>
+					<div class="col-12 cart-item pl-1 pr-1 mb-2">
+						<div class="row ml-0 mr-0" ng-repeat="taxObj in taxDisplayList">
+							<div class="col-7 pl-0 pr-0 xs-resp-font text-truncate">
+								<b>{{taxObj.name}}&nbsp;{{taxObj.rate}}%</b>
+							</div>
+							<div class="col-5 pl-0 pr-0 xs-resp-font text-right">
+								<b>{{priceTag}}{{taxObj.price}}</b>
+							</div>
+						</div>
+						<div class="row ml-0 mr-0">
+							<div class="col-7 pl-0 pr-0 xs-resp-font text-truncate">
 								<b>{{currentLanguageData.cart_total}}</b>
 							</div>
 							<div class="col-5 pl-0 pr-0 xs-resp-font text-right">
@@ -116,9 +134,13 @@
 					</div>
 				</div>
 			</div>
-			<div class="pt-1 pb-1 align-self-center" ng-show="cart.length > 0">
+			<div class="pt-1 pb-1 align-self-center" ng-show="cart.length > 0 && paymentType == 1">
 				<button class="btn btn-primary btn-main sm-resp-font" type="button"
 					ng-click="sendCartData()">{{currentLanguageData.cart_checkout}}&nbsp;({{priceTag}}{{cartTotalPrice}})</button>
+			</div>
+			<div class="pt-1 pb-1 align-self-center" ng-show="cart.length > 0 && paymentType == 3">
+				<button class="btn btn-primary btn-main sm-resp-font" type="button"
+					ng-click="sendCartData()">{{currentLanguageData.cart_send_order}}</button>
 			</div>
 		</div>
 	</div>
