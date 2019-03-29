@@ -44,32 +44,10 @@ public class TaxChargeRestController {
 	@GetMapping(value = "/getAllCharge", produces = "application/json")
 	public ResponseEntity<?> getAllCharge(@RequestParam("group_category_id") Long groupCategoryId, HttpServletRequest request, HttpServletResponse response){
 		JSONArray jsonTaxChargeArray = new JSONArray();
-		Connection connection = null;
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-		
+		Connection connection = null;	
 		try {
-			String query = "SELECT a.* FROM tax_charge a "
-					+ "INNER JOIN group_category_tax_charge b ON a.id = b.tax_charge_id "
-					+ "WHERE b.group_category_id = ? ";
-			
 			connection = dbConnectionUtil.retrieveConnection(request);
-			stmt = connection.prepareStatement(query);
-			stmt.setLong(1, groupCategoryId);
-			rs = (ResultSet) stmt.executeQuery();
-			
-			while(rs.next()) {
-				JSONObject jsonTaxChargeObj = new JSONObject();
-				jsonTaxChargeObj.put("id", rs.getLong("id"));				
-				jsonTaxChargeObj.put("tax_charge_name", rs.getString("tax_charge_name"));
-				jsonTaxChargeObj.put("rate", rs.getInt("rate"));		
-				jsonTaxChargeObj.put("charge_type", rs.getInt("charge_type"));
-				jsonTaxChargeObj.put("is_active", rs.getBoolean("is_active"));
-				jsonTaxChargeObj.put("created_date", rs.getDate("created_date"));
-								
-				jsonTaxChargeArray.put(jsonTaxChargeObj);
-			}
-			
+			jsonTaxChargeArray = getTaxChargeByGroupCategoryId(connection, groupCategoryId);
 			return ResponseEntity.ok(jsonTaxChargeArray.toString());
 		} catch(Exception ex) {
 			ex.printStackTrace();
@@ -262,6 +240,43 @@ public class TaxChargeRestController {
 				}
 			}
 		}
-	}	
+	}
+	
+	public JSONArray getTaxChargeByGroupCategoryId(Connection connection, Long groupCategoryId) throws Exception {
+		JSONArray jsonTaxChargeArray = new JSONArray();
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		
+		try {
+			String query = "SELECT a.* FROM tax_charge a "
+					+ "INNER JOIN group_category_tax_charge b ON a.id = b.tax_charge_id "
+					+ "WHERE b.group_category_id = ? ";
+			
+			stmt = connection.prepareStatement(query);
+			stmt.setLong(1, groupCategoryId);
+			rs = (ResultSet) stmt.executeQuery();
+			
+			while(rs.next()) {
+				JSONObject jsonTaxChargeObj = new JSONObject();
+				jsonTaxChargeObj.put("id", rs.getLong("id"));				
+				jsonTaxChargeObj.put("tax_charge_name", rs.getString("tax_charge_name"));
+				jsonTaxChargeObj.put("rate", rs.getInt("rate"));		
+				jsonTaxChargeObj.put("charge_type", rs.getInt("charge_type"));
+				jsonTaxChargeObj.put("is_active", rs.getBoolean("is_active"));
+				jsonTaxChargeObj.put("created_date", rs.getDate("created_date"));
+								
+				jsonTaxChargeArray.put(jsonTaxChargeObj);
+			}
+			
+		} catch(Exception ex) {
+			throw ex;
+		} finally {
+			if(stmt!=null)
+				stmt.close();
+			if (rs!=null)
+				rs.close();
+		}
+		return jsonTaxChargeArray;
+	}
 	
 }

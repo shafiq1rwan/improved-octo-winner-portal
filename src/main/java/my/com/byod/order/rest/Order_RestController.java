@@ -14,10 +14,8 @@ import java.text.DecimalFormat;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.sql.DataSource;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
+import my.com.byod.admin.rest.TaxChargeRestController;
 import my.com.byod.admin.util.ByodUtil;
 import my.com.byod.admin.util.DbConnectionUtil;
 import my.com.byod.logger.Logger;
@@ -53,7 +52,10 @@ public class Order_RestController {
 
 	@Autowired
 	private DbConnectionUtil dbConnectionUtil;
-
+	
+	@Autowired
+	private TaxChargeRestController taxChargeRestController;
+	
 	private static final String folName = "byodFE";
 
 	@RequestMapping(value = "/order/getLanguagePack", method = { RequestMethod.POST })
@@ -167,6 +169,7 @@ public class Order_RestController {
 						result.put("priceTag", rs1.getString("store_currency"));
 						result.put("imagePath", imagePath + brandId + "/");
 						result.put("menuList", categoryList);
+						result.put("taxList", taxChargeRestController.getTaxChargeByGroupCategoryId(connection, rs1.getLong("group_category_id")));
 
 						resultCode = "00";
 						resultMessage = "Success";
