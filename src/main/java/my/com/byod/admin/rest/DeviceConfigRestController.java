@@ -332,12 +332,14 @@ public class DeviceConfigRestController {
 				JSONObject storeInfo = getStoreInfo(connection, storeId, brandId);
 				
 				if(deviceInfo.getLong("deviceType")==1) {
+					// ecpos
 					JSONArray ecposStaffInfo = getEcposStaffInfo(connection, storeId);
 					JSONArray ecposStaffRole = getEcposStaffRole(connection);
 					result.put("staffInfo", ecposStaffInfo);
 					result.put("staffRole", ecposStaffRole);
 				}
-				else if(deviceInfo.getLong("deviceType")==2) {
+				else if(deviceInfo.getLong("deviceType")==3) {
+					// kiosk
 					JSONArray taxList = getTaxChargeByGroupCategoryId(connection, deviceInfo.getLong("groupCategoryId"));
 					result.put("taxList", taxList);
 				}
