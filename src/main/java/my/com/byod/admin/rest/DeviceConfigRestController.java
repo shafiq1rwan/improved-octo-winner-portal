@@ -17,7 +17,6 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
@@ -27,11 +26,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -39,6 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import my.com.byod.admin.util.ByodUtil;
 import my.com.byod.admin.util.DbConnectionUtil;
+import my.com.byod.order.rest.Order_RestController;
 
 @RestController
 @RequestMapping("/api/device")
@@ -332,12 +330,19 @@ public class DeviceConfigRestController {
 			else {
 				// sync store
 				JSONObject storeInfo = getStoreInfo(connection, storeId, brandId);
-				JSONArray ecposStaffInfo = getEcposStaffInfo(connection, storeId);
-				JSONArray ecposStaffRole = getEcposStaffRole(connection);
-				result.put("storeInfo", storeInfo);	
-				result.put("staffInfo", ecposStaffInfo);
-				result.put("staffRole", ecposStaffRole);
 				
+				if(deviceInfo.getLong("deviceType")==1) {
+					JSONArray ecposStaffInfo = getEcposStaffInfo(connection, storeId);
+					JSONArray ecposStaffRole = getEcposStaffRole(connection);
+					result.put("staffInfo", ecposStaffInfo);
+					result.put("staffRole", ecposStaffRole);
+				}
+				else if(deviceInfo.getLong("deviceType")==2) {
+					JSONArray taxList = getTaxChargeByGroupCategoryId(connection, deviceInfo.getLong("groupCategoryId"));
+					result.put("taxList", taxList);
+				}
+				
+				result.put("storeInfo", storeInfo);				
 				resultCode = "00";
 				resultMessage = "Successful store synchronization.";
 			}
@@ -1600,7 +1605,7 @@ public class DeviceConfigRestController {
 		JSONObject result = null;
 		try {
 			//connection = dataSource.getConnection();
-			sqlStatement = "SELECT * FROM device_info a "
+			sqlStatement = "SELECT a.status_lookup_id, a.device_type_lookup_id, a.mac_address, a.group_category_id, b.is_publish FROM device_info a "
 					+ "INNER JOIN store b ON b.id = a.ref_id AND a.group_category_id = b.group_category_id "
 					+ "WHERE a.activation_id = ? AND a.ref_id = ?";
 			ps1 = connection.prepareStatement(sqlStatement);
@@ -1614,6 +1619,7 @@ public class DeviceConfigRestController {
 				result.put("deviceType", rs1.getLong("device_type_lookup_id"));
 				result.put("mac_address", rs1.getString("mac_address")==null?"":rs1.getString("mac_address"));
 				result.put("storeStatus", rs1.getLong("is_publish"));
+				result.put("groupCategoryId", rs1.getLong("group_category_id"));
 			}
 			
 		} catch (Exception ex) {
@@ -1729,4 +1735,37 @@ public class DeviceConfigRestController {
 		}
 	}
 	
+	private JSONArray getTaxChargeByGroupCategoryId(Connection connection, Long groupCategoryId) throws Exception {
+		JSONArray jsonTaxChargeArray = new JSONArray();
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		
+		try {
+			String query = "SELECT a.* FROM tax_charge a "
+					+ "INNER JOIN group_category_tax_charge b ON a.id = b.tax_charge_id "
+					+ "WHERE b.group_category_id = ? AND a.is_active = 1 ";
+			
+			stmt = connection.prepareStatement(query);
+			stmt.setLong(1, groupCategoryId);
+			rs = (ResultSet) stmt.executeQuery();
+			
+			while(rs.next()) {
+				JSONObject jsonTaxChargeObj = new JSONObject();
+				jsonTaxChargeObj.put("id", rs.getLong("id"));				
+				jsonTaxChargeObj.put("tax_charge_name", rs.getString("tax_charge_name"));
+				jsonTaxChargeObj.put("rate", rs.getInt("rate"));		
+				jsonTaxChargeObj.put("charge_type", rs.getInt("charge_type"));			
+				jsonTaxChargeArray.put(jsonTaxChargeObj);
+			}
+			
+		} catch(Exception ex) {
+			throw ex;
+		} finally {
+			if(stmt!=null)
+				stmt.close();
+			if (rs!=null)
+				rs.close();
+		}
+		return jsonTaxChargeArray;
+	}
 }
