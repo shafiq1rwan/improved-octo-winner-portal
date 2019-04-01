@@ -22,6 +22,8 @@ language-pack-cn:
   cart_subtotal: "小计"
   cart_send_order: "发送订单"
   cart_checkout: "结账"
+  cart_pay_now: "现在付款"
+  cart_pay_later: "以后支付"
   edit_item_detail_editCart: "修改购物车"
   
   dialog_cart_add_success_title: "商品已成功添加到购物车！"

@@ -22,6 +22,8 @@ language-pack-en:
   cart_subtotal: "Subtotal"
   cart_send_order: "Send Order"
   cart_checkout: "Checkout"
+  cart_pay_now: "Pay Now"
+  cart_pay_later: "Pay Later"
   edit_item_detail_editCart: "Edit Cart"
   
   dialog_cart_add_success_title: "Item Added to Cart Successfully!"

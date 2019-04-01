@@ -14,7 +14,8 @@
 					<div
 						class="w-100 flex-fill card d-flex flex-column align-self-center scrollable-y">
 						<div class="w-100 align-self-center text-center">
-							<img class="max-img-height" src="${pageContext.request.contextPath}{{imagePath}}{{selectedItem.path}}"
+							<img class="max-img-height"
+								src="${pageContext.request.contextPath}{{imagePath}}{{selectedItem.path}}"
 								alt="{{selectedItem.name}}">
 						</div>
 						<div class="w-100 align-self-center text-center">
@@ -125,33 +126,32 @@
 							</div>
 						</div>
 					</div>
-					<div class="mt-2 mb-2">
-						<div class="row ml-0 mr-0">
-							<div
-								class="col-8 col-sm-8 col-md-8 col-lg-9 col-xl-9 d-flex flex-row pr-0">
-								<div
-									class="w-100 align-self-center text-limiter two-liner sm-resp-font">
-									<b>{{currentLanguageData.item_detail_totalPrice}}</b>
-								</div>
-							</div>
-							<div
-								class="col-4 col-sm-4 col-md-4 col-lg-3 col-xl-3 d-flex flex-row pl-0">
-								<div
-									class="w-100 align-self-center flex-fill d-flex flex-column">
-									<div class="text-right text-nowrap sm-resp-font">{{priceTag}}{{totalItemPrice}}</div>
-								</div>
-							</div>
-						</div>
-						<div class="row ml-1 mr-0 d-flex flex-column"
-							ng-show="isReadyForCart">
-							<button
-								class="btn btn-primary btn-main sm-resp-font align-self-center"
-								type="button" ng-click="addToCart()">
-								<span class="resp-font cart-icon"></span>&nbsp;{{currentLanguageData.item_detail_addToCart}}
-							</button>
-						</div>
+				</div>
+			</div>
+		</div>
+		<div class="mt-2 mb-2">
+			<div class="row ml-0 mr-0">
+				<div
+					class="col-8 col-sm-8 col-md-8 col-lg-9 col-xl-9 d-flex flex-row pr-0">
+					<div
+						class="w-100 align-self-center text-limiter two-liner sm-resp-font">
+						<b>{{currentLanguageData.item_detail_totalPrice}}</b>
 					</div>
 				</div>
+				<div
+					class="col-4 col-sm-4 col-md-4 col-lg-3 col-xl-3 d-flex flex-row pl-0">
+					<div class="w-100 align-self-center flex-fill d-flex flex-column">
+						<div class="text-right text-nowrap sm-resp-font">{{priceTag}}{{totalItemPrice}}</div>
+					</div>
+				</div>
+			</div>
+			<div class="row ml-1 mr-0 d-flex flex-column"
+				ng-show="isReadyForCart">
+				<button
+					class="btn btn-primary btn-main sm-resp-font align-self-center"
+					type="button" ng-click="addToCart()">
+					<span class="resp-font cart-icon"></span>&nbsp;{{currentLanguageData.item_detail_addToCart}}
+				</button>
 			</div>
 		</div>
 	</div>

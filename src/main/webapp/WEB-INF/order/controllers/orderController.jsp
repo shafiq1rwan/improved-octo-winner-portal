@@ -651,6 +651,7 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 		}).then(function (response) {
 			if (response != null && response.data != null && response.data.resultCode != null) {
 				if (response.data.resultCode == "00") {
+					console.log(response.data);
 					$scope.menuList = response.data.menuList;
 					$scope.storeName = response.data.storeName;
 					$scope.tableId = response.data.tableId;

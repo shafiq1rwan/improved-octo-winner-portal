@@ -100,8 +100,9 @@
 						</div>
 						<div
 							class="row ml-0 mr-0 pt-1 pb-1 pl-1 pr-1 d-flex flex-row justify-content-end md-resp-font">
-							<i class="fas fa-edit mr-2" ng-click="editCart(cartItem)"></i>
-							<i class="fas fa-trash-alt mr-2" ng-click="deleteFromCart(cartItem)"></i>
+							<i class="fas fa-edit mr-2" ng-click="editCart(cartItem)"></i> <i
+								class="fas fa-trash-alt mr-2"
+								ng-click="deleteFromCart(cartItem)"></i>
 						</div>
 					</div>
 					<div class="col-12 cart-item pl-1 pr-1 mb-2">
@@ -134,11 +135,20 @@
 					</div>
 				</div>
 			</div>
-			<div class="pt-1 pb-1 align-self-center" ng-show="cart.length > 0 && paymentType == 1">
+			<div class="pt-1 pb-1 align-self-center"
+				ng-show="cart.length > 0 && paymentType == 1">
+				<button class="btn btn-primary btn-main sm-resp-font" type="button"
+					ng-click="sendCartData()">{{currentLanguageData.cart_pay_later}}</button>
+				<button class="btn btn-primary btn-main sm-resp-font" type="button"
+					ng-click="sendCartData()">{{currentLanguageData.cart_pay_now}}&nbsp;({{priceTag}}{{cartTotalPrice}})</button>
+			</div>
+			<div class="pt-1 pb-1 align-self-center"
+				ng-show="cart.length > 0 && paymentType == 2">
 				<button class="btn btn-primary btn-main sm-resp-font" type="button"
 					ng-click="sendCartData()">{{currentLanguageData.cart_checkout}}&nbsp;({{priceTag}}{{cartTotalPrice}})</button>
 			</div>
-			<div class="pt-1 pb-1 align-self-center" ng-show="cart.length > 0 && paymentType == 3">
+			<div class="pt-1 pb-1 align-self-center"
+				ng-show="cart.length > 0 && paymentType == 3">
 				<button class="btn btn-primary btn-main sm-resp-font" type="button"
 					ng-click="sendCartData()">{{currentLanguageData.cart_send_order}}</button>
 			</div>

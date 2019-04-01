@@ -28,6 +28,8 @@ public class LanguagePackEN {
 	public String cart_total;
 	public String cart_subtotal;
 	public String cart_send_order;
+	public String cart_pay_now;
+	public String cart_pay_later;
 	public String cart_checkout;
 	
 	public String edit_item_detail_editCart;
@@ -161,6 +163,18 @@ public class LanguagePackEN {
 	}
 	public void setCart_send_order(String cart_send_order) {
 		this.cart_send_order = cart_send_order;
+	}
+	public String getCart_pay_now() {
+		return cart_pay_now;
+	}
+	public void setCart_pay_now(String cart_pay_now) {
+		this.cart_pay_now = cart_pay_now;
+	}
+	public String getCart_pay_later() {
+		return cart_pay_later;
+	}
+	public void setCart_pay_later(String cart_pay_later) {
+		this.cart_pay_later = cart_pay_later;
 	}
 	public String getCart_checkout() {
 		return cart_checkout;
