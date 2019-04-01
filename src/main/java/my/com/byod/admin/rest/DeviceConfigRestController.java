@@ -24,6 +24,7 @@ import java.util.zip.ZipOutputStream;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.sql.DataSource;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -36,7 +37,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import my.com.byod.admin.util.ByodUtil;
 import my.com.byod.admin.util.DbConnectionUtil;
-import my.com.byod.order.rest.Order_RestController;
 
 @RestController
 @RequestMapping("/api/device")
@@ -62,6 +62,9 @@ public class DeviceConfigRestController {
 	
 	@Autowired
 	private DbConnectionUtil dbConnectionUtil;
+	
+	@Autowired
+	DataSource dataSource;
 	
 	@RequestMapping(value = "/activation", method = { RequestMethod.POST })
 	public String activation(HttpServletRequest request, HttpServletResponse response,
@@ -89,78 +92,83 @@ public class DeviceConfigRestController {
 		System.out.println("activationKey:"+ activationKey);
 		System.out.println("type:"+ type);
 		try {
-			connection = dbConnectionUtil.getConnection(brandId);
-			connection.setAutoCommit(false);
-			deviceInfo = verifyActivation(connection, activationId, activationKey, type);
-			if(deviceInfo==null) {
-				resultCode = "E02";
-				resultMessage = "Invalid activation info";
-			}		
-			else if(deviceInfo.getLong("statusLookupId")==2) {
-				// already activated
-				resultCode = "E03";
-				resultMessage = "Activation info is already being used.";
-			}
-			else if(deviceInfo.getLong("statusLookupId")==3) {
-				// already terminated
-				resultCode = "E04";
-				resultMessage = "Activation info is already terminated.";
-			}
-			else if(deviceInfo.getLong("storeStatus")==0) {
-				// store status is not active
-				resultCode = "E06";
-				resultMessage = "Store info is not published.";
-			}
-			else if(activateDevice(connection, deviceInfo.getLong("id"), macAddress, deviceInfo.getLong("groupCategoryId"))) {
-				// successful activation
-				
-				// ecpos retrieve extra info
-				if(type==1) {
-					JSONArray ecposStaffInfo = getEcposStaffInfo(connection, deviceInfo.getLong("refId"));
-					JSONArray ecposStaffRole = getEcposStaffRole(connection);					
-					if(ecposStaffInfo.length()==0) {
-						resultCode = "E07";
-						resultMessage = "Please create at least one staff login before activation.";
-						throw new IllegalArgumentException("There is no staff login info.");
-					}		
-					result.put("staffInfo", ecposStaffInfo);
-					result.put("staffRole", ecposStaffRole);
+			if(checkBrandExist(brandId)) {
+				connection = dbConnectionUtil.getConnection(brandId);
+				connection.setAutoCommit(false);
+				deviceInfo = verifyActivation(connection, activationId, activationKey, type);
+				if(deviceInfo==null) {
+					resultCode = "E02";
+					resultMessage = "Invalid activation info";
+				}		
+				else if(deviceInfo.getLong("statusLookupId")==2) {
+					// already activated
+					resultCode = "E03";
+					resultMessage = "Activation info is already being used.";
 				}
-				
-				connection.commit();
-				connection.setAutoCommit(true);
-				
-				JSONObject storeInfo = getStoreInfo(connection, deviceInfo.getLong("refId"), brandId);
-				result.put("storeInfo", storeInfo);
-				
-				menuInfo = getLatestMenuFile(connection, deviceInfo.getLong("refId"));
-				if(menuInfo!=null) {
-					menuFile = menuInfo.getString("menuFilePath");
-					Long groupCategoryId = menuInfo.getLong("groupCategoryId");
-					String url = byodUrl + displayFilePath + brandId + "/" + groupCategoryId;
-					String menuFilePath = url + "/latest/menuFilePath.json";
-					String imageFilePath = url + "/latest/image.zip";	
-					String queryFilePath = url + "/latest/query.txt";
-					String queryFilePath2 = url + "/latest/queryMySql.txt";
-					result.put("menuFilePath", menuFilePath);
-					result.put("imageFilePath", imageFilePath);
-					result.put("queryFilePath", queryFilePath);
-					result.put("queryMySqlFilePath", queryFilePath2);
-					result.put("versionCount", menuInfo.getLong("versionCount"));
-					resultCode = "00";
-					resultMessage = "Successful device activation and menu synchronization.";
+				else if(deviceInfo.getLong("statusLookupId")==3) {
+					// already terminated
+					resultCode = "E04";
+					resultMessage = "Activation info is already terminated.";
+				}
+				else if(deviceInfo.getLong("storeStatus")==0) {
+					// store status is not active
+					resultCode = "E06";
+					resultMessage = "Store info is not published.";
+				}
+				else if(activateDevice(connection, deviceInfo.getLong("id"), macAddress, deviceInfo.getLong("groupCategoryId"))) {
+					// successful activation
+					
+					// ecpos retrieve extra info
+					if(type==1) {
+						JSONArray ecposStaffInfo = getEcposStaffInfo(connection, deviceInfo.getLong("refId"));
+						JSONArray ecposStaffRole = getEcposStaffRole(connection);					
+						if(ecposStaffInfo.length()==0) {
+							resultCode = "E07";
+							resultMessage = "Please create at least one staff login before activation.";
+							throw new IllegalArgumentException("There is no staff login info.");
+						}		
+						result.put("staffInfo", ecposStaffInfo);
+						result.put("staffRole", ecposStaffRole);
+					}
+					
+					connection.commit();
+					connection.setAutoCommit(true);
+					
+					JSONObject storeInfo = getStoreInfo(connection, deviceInfo.getLong("refId"), brandId);
+					result.put("storeInfo", storeInfo);
+					
+					menuInfo = getLatestMenuFile(connection, deviceInfo.getLong("refId"));
+					if(menuInfo!=null) {
+						menuFile = menuInfo.getString("menuFilePath");
+						Long groupCategoryId = menuInfo.getLong("groupCategoryId");
+						String url = byodUrl + displayFilePath + brandId + "/" + groupCategoryId;
+						String menuFilePath = url + "/latest/menuFilePath.json";
+						String imageFilePath = url + "/latest/image.zip";	
+						String queryFilePath = url + "/latest/query.txt";
+						String queryFilePath2 = url + "/latest/queryMySql.txt";
+						result.put("menuFilePath", menuFilePath);
+						result.put("imageFilePath", imageFilePath);
+						result.put("queryFilePath", queryFilePath);
+						result.put("queryMySqlFilePath", queryFilePath2);
+						result.put("versionCount", menuInfo.getLong("versionCount"));
+						resultCode = "00";
+						resultMessage = "Successful device activation and menu synchronization.";
+					}
+					else {
+						result.put("versionCount", Long.valueOf("0"));
+						resultCode = "01";
+						resultMessage = "Successful device activation. Please proceed to publish menu.";
+					}
 				}
 				else {
-					result.put("versionCount", Long.valueOf("0"));
-					resultCode = "01";
-					resultMessage = "Successful device activation. Please proceed to publish menu.";
-				}
+					resultCode = "E05";
+					resultMessage = "Failed to activate device.";
+				}	
 			}
-			else {
-				resultCode = "E05";
-				resultMessage = "Failed to activate device.";
+			else {			
+				resultCode = "E02";
+				resultMessage = "Invalid activation info";
 			}
-				
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			try {
@@ -340,8 +348,6 @@ public class DeviceConfigRestController {
 				}
 				else if(deviceInfo.getLong("deviceType")==3) {
 					// kiosk
-					JSONArray taxList = getTaxChargeByGroupCategoryId(connection, deviceInfo.getLong("groupCategoryId"));
-					result.put("taxList", taxList);
 				}
 				
 				result.put("storeInfo", storeInfo);				
@@ -1737,37 +1743,34 @@ public class DeviceConfigRestController {
 		}
 	}
 	
-	private JSONArray getTaxChargeByGroupCategoryId(Connection connection, Long groupCategoryId) throws Exception {
-		JSONArray jsonTaxChargeArray = new JSONArray();
+	private boolean checkBrandExist(Long brandId) throws Exception {
+		Connection connection = null;
 		PreparedStatement stmt = null;
+		String sqlStatement = null;
 		ResultSet rs = null;
-		
+		boolean flag = false;
 		try {
-			String query = "SELECT a.* FROM tax_charge a "
-					+ "INNER JOIN group_category_tax_charge b ON a.id = b.tax_charge_id "
-					+ "WHERE b.group_category_id = ? AND a.is_active = 1 ";
-			
-			stmt = connection.prepareStatement(query);
-			stmt.setLong(1, groupCategoryId);
-			rs = (ResultSet) stmt.executeQuery();
-			
-			while(rs.next()) {
-				JSONObject jsonTaxChargeObj = new JSONObject();
-				jsonTaxChargeObj.put("id", rs.getLong("id"));				
-				jsonTaxChargeObj.put("tax_charge_name", rs.getString("tax_charge_name"));
-				jsonTaxChargeObj.put("rate", rs.getInt("rate"));		
-				jsonTaxChargeObj.put("charge_type", rs.getInt("charge_type"));			
-				jsonTaxChargeArray.put(jsonTaxChargeObj);
+			connection = dataSource.getConnection();
+			sqlStatement = "SELECT * FROM brands WHERE id = ? ";
+			stmt = connection.prepareStatement(sqlStatement);
+			stmt.setLong(1, brandId);
+			rs = stmt.executeQuery();
+			if(rs.next()) {
+				flag = true;
 			}
-			
-		} catch(Exception ex) {
+		} catch (Exception ex) {
 			throw ex;
 		} finally {
-			if(stmt!=null)
+			if(connection!=null) {
+				connection.close();
+			}
+			if(stmt!=null) {
 				stmt.close();
-			if (rs!=null)
+			}
+			if(rs!=null) {
 				rs.close();
+			}
 		}
-		return jsonTaxChargeArray;
+		return flag;
 	}
 }
