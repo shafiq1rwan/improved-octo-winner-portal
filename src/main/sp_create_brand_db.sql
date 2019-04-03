@@ -353,11 +353,9 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 				order_type BIGINT NOT NULL,
 				table_number INT NULL,
 				total_item_quantity INT NOT NULL,
-				subtotal_amount DECIMAL(25, 4) NOT NULL,
-				total_tax_amount DECIMAL(25, 4) NULL,
-				total_service_charge_amount DECIMAL(25, 4) NULL,
 				total_amount DECIMAL(25, 4) NOT NULL,
-				total_amount_rounding_adjustment DECIMAL(25, 4) NOT NULL,
+				total_amount_with_tax DECIMAL(25, 4) NOT NULL,
+				total_amount_with_tax_rounding_adjustment DECIMAL(25, 4) NOT NULL,
 				grand_total_amount DECIMAL(25, 4) NOT NULL,
 				deposit_amount DECIMAL(25, 4) NOT NULL,
 				tender_amount DECIMAL(25, 4) NOT NULL,
@@ -365,6 +363,15 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 				check_status BIGINT NOT NULL,
 				created_date DATETIME NOT NULL,
 				updated_date DATETIME NULL
+			);
+			
+			CREATE TABLE [check_tax_charge] 
+			(
+				store_id BIGINT NOT NULL,
+				check_id BIGINT NOT NULL,
+				check_number BIGINT NOT NULL,
+				tax_charge_id BIGINT NULL,
+				total_charge_amount DECIMAL(25, 4) NOT NULL
 			);
 
 			CREATE TABLE check_detail 
@@ -380,12 +387,7 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 				menu_item_code nvarchar(50) NOT NULL,
 				menu_item_name nvarchar(150) NOT NULL,
 				menu_item_price DECIMAL(25, 4) NOT NULL,
-				tax_rate INT NULL,
-				service_charge_rate INT NULL,
 				quantity INT NOT NULL,
-				subtotal_amount DECIMAL(25, 4) NOT NULL,
-				total_tax_amount DECIMAL(25, 4) NULL,
-				total_service_charge_amount DECIMAL(25, 4) NULL,
 				total_amount DECIMAL(25, 4) NOT NULL,
 				check_detail_status BIGINT NOT NULL,
 				transaction_id BIGINT NULL,

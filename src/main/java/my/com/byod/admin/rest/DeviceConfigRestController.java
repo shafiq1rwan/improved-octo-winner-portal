@@ -521,72 +521,53 @@ public class DeviceConfigRestController {
 			SimpleDateFormat datetimeFormatter = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 			
 			insertionSqlStatement = "INSERT INTO check_detail (store_id, check_detail_id, check_id, check_number, device_type, parent_check_detail_id, "
-					+ "menu_item_id, menu_item_code, menu_item_name, menu_item_price, "
-					+ "tax_rate, service_charge_rate, quantity, "
-					+ "subtotal_amount, total_tax_amount, total_service_charge_amount, total_amount, "
+					+ "menu_item_id, menu_item_code, menu_item_name, menu_item_price, quantity, total_amount, "
 					+ "check_detail_status, transaction_id, created_date, updated_date) VALUES "
-					+ "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+					+ "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 			
-			updateSqlStatement = "UPDATE check_detail SET store_id = ?, check_id = ?, check_number = ?, device_type = ?, parent_check_detail_id =?, "
-					+ "menu_item_id = ?, menu_item_code = ?, menu_item_name = ?, menu_item_price = ?, "
-					+ "tax_rate = ?, service_charge_rate = ?, quantity = ?, subtotal_amount = ?, "
-					+ "total_tax_amount = ?, total_service_charge_amount = ?, total_amount = ?, check_detail_status = ?, transaction_id = ?, "
-					+ "created_date = ?, updated_date = ? WHERE check_detail_id = ?";
+			updateSqlStatement = "UPDATE check_detail SET check_id = ?, check_number = ?, device_type = ?, parent_check_detail_id =?, "
+					+ "menu_item_id = ?, menu_item_code = ?, menu_item_name = ?, menu_item_price = ?, quantity = ?, total_amount = ?, "
+					+ "check_detail_status = ?, transaction_id = ?, created_date = ?, updated_date = ? WHERE check_detail_id = ? and store_id = ?";
 
-			searchExistingCheckDetailSqlStatement = "SELECT check_detail_id FROM check_detail WHERE check_detail_id = ?";
+			searchExistingCheckDetailSqlStatement = "SELECT * FROM check_detail WHERE check_detail_id = ? and store_id = ?";
 
 			for(int a = 0; a < checkDetails.length(); a++) {
 				JSONObject obj = checkDetails.getJSONObject(a);
 
 				PreparedStatement ps1 = connection.prepareStatement(searchExistingCheckDetailSqlStatement);
 				ps1.setLong(1, obj.getLong("check_detail_id"));
+				ps1.setLong(2, storeId);
 				ResultSet rs = ps1.executeQuery();
 				
 				//detect existing, update
 				if(rs.next()) {
 					stmt =  connection.prepareStatement(updateSqlStatement);
 
-					stmt.setLong(1, storeId);
-					stmt.setLong(2, obj.getLong("check_id"));
-					stmt.setLong(3, obj.getLong("check_number"));
-					stmt.setLong(4, obj.getLong("device_type"));	
+					stmt.setLong(1, obj.getLong("check_id"));
+					stmt.setLong(2, obj.getLong("check_number"));
+					stmt.setLong(3, obj.getLong("device_type"));	
 					
-					if(obj.isNull("parent_check_detail_id")) stmt.setNull(5, java.sql.Types.BIGINT);
-					else stmt.setLong(5, obj.getLong("parent_check_detail_id"));
+					if(obj.isNull("parent_check_detail_id")) stmt.setNull(4, java.sql.Types.BIGINT);
+					else stmt.setLong(4, obj.getLong("parent_check_detail_id"));
 			
-					stmt.setLong(6, obj.getLong("menu_item_id"));
-					stmt.setString(7, obj.getString("menu_item_code"));
-					stmt.setString(8, obj.getString("menu_item_name"));
-					stmt.setBigDecimal(9, BigDecimal.valueOf(obj.getDouble("menu_item_price")));
+					stmt.setLong(5, obj.getLong("menu_item_id"));
+					stmt.setString(6, obj.getString("menu_item_code"));
+					stmt.setString(7, obj.getString("menu_item_name"));
+					stmt.setBigDecimal(8, BigDecimal.valueOf(obj.getDouble("menu_item_price")));
+					stmt.setInt(9, obj.getInt("quantity"));
+					stmt.setBigDecimal(10, BigDecimal.valueOf(obj.getDouble("total_amount")));
+					stmt.setLong(11, obj.getLong("check_detail_status"));	
 					
-					if(obj.isNull("tax_rate"))stmt.setNull(10, java.sql.Types.INTEGER);
-					else stmt.setInt(10, obj.getInt("tax_rate"));
+					if(obj.isNull("transaction_id")) stmt.setNull(12, java.sql.Types.BIGINT);
+					else stmt.setLong(12, obj.getLong("transaction_id"));
 					
-					if(obj.isNull("service_charge_rate"))stmt.setNull(11, java.sql.Types.INTEGER);
-					else stmt.setInt(11, obj.getInt("service_charge_rate"));
+					stmt.setTimestamp(13, new Timestamp(datetimeFormatter.parse(obj.getString("created_date")).getTime()));
 					
-					stmt.setInt(12, obj.getInt("quantity"));
+					if(obj.isNull("updated_date")) stmt.setNull(14, java.sql.Types.TIMESTAMP);
+					else stmt.setTimestamp(14, new Timestamp(datetimeFormatter.parse(obj.getString("updated_date")).getTime()));
 					
-					stmt.setBigDecimal(13, BigDecimal.valueOf(obj.getDouble("subtotal_amount")));
-					
-					if(obj.isNull("total_tax_amount"))stmt.setNull(14, java.sql.Types.DECIMAL);
-					else stmt.setBigDecimal(14, BigDecimal.valueOf(obj.getDouble("total_tax_amount")));
-					
-					if(obj.isNull("total_service_charge_amount"))stmt.setNull(15, java.sql.Types.DECIMAL);
-					else stmt.setBigDecimal(15, BigDecimal.valueOf(obj.getDouble("total_service_charge_amount")));
-
-					stmt.setBigDecimal(16, BigDecimal.valueOf(obj.getDouble("total_amount")));
-					stmt.setLong(17, obj.getLong("check_detail_status"));	
-					
-					if(obj.isNull("transaction_id")) stmt.setNull(18, java.sql.Types.BIGINT);
-					else stmt.setLong(18, obj.getLong("transaction_id"));
-					
-					stmt.setTimestamp(19, new Timestamp(datetimeFormatter.parse(obj.getString("created_date")).getTime()));
-					
-					if(obj.isNull("updated_date")) stmt.setNull(20, java.sql.Types.TIMESTAMP);
-					else stmt.setTimestamp(20, new Timestamp(datetimeFormatter.parse(obj.getString("updated_date")).getTime()));
-					
-					stmt.setLong(21, obj.getLong("check_detail_id"));
+					stmt.setLong(15, obj.getLong("check_detail_id"));
+					stmt.setLong(16, storeId);
 					
 					stmt.executeUpdate();
 					stmt.close();
@@ -606,32 +587,17 @@ public class DeviceConfigRestController {
 					stmt.setString(8, obj.getString("menu_item_code"));
 					stmt.setString(9, obj.getString("menu_item_name"));
 					stmt.setBigDecimal(10, BigDecimal.valueOf(obj.getDouble("menu_item_price")));	
+					stmt.setInt(11, obj.getInt("quantity"));
+					stmt.setBigDecimal(12, BigDecimal.valueOf(obj.getDouble("total_amount")));
+					stmt.setLong(13, obj.getLong("check_detail_status"));		
 					
-					if(obj.isNull("tax_rate"))stmt.setNull(11, java.sql.Types.INTEGER);
-					else stmt.setInt(11, obj.getInt("tax_rate"));
+					if(obj.isNull("transaction_id")) stmt.setNull(14, java.sql.Types.BIGINT);
+					else stmt.setLong(14, obj.getLong("transaction_id"));
 					
-					if(obj.isNull("service_charge_rate"))stmt.setNull(12, java.sql.Types.INTEGER);
-					else stmt.setInt(12, obj.getInt("service_charge_rate"));
-
-					stmt.setInt(13, obj.getInt("quantity"));
-					stmt.setBigDecimal(14, BigDecimal.valueOf(obj.getDouble("subtotal_amount")));
+					stmt.setTimestamp(15, new Timestamp(datetimeFormatter.parse(obj.getString("created_date")).getTime()));
 					
-					if(obj.isNull("total_tax_amount"))stmt.setNull(15, java.sql.Types.DECIMAL);
-					else stmt.setBigDecimal(15, BigDecimal.valueOf(obj.getDouble("total_tax_amount")));
-					
-					if(obj.isNull("total_service_charge_amount"))stmt.setNull(16, java.sql.Types.DECIMAL);
-					else stmt.setBigDecimal(16, BigDecimal.valueOf(obj.getDouble("total_service_charge_amount")));
-					
-					stmt.setBigDecimal(17, BigDecimal.valueOf(obj.getDouble("total_amount")));
-					stmt.setLong(18, obj.getLong("check_detail_status"));		
-					
-					if(obj.isNull("transaction_id")) stmt.setNull(19, java.sql.Types.BIGINT);
-					else stmt.setLong(19, obj.getLong("transaction_id"));
-					
-					stmt.setTimestamp(20, new Timestamp(datetimeFormatter.parse(obj.getString("created_date")).getTime()));
-					
-					if(obj.isNull("updated_date")) stmt.setNull(21, java.sql.Types.TIMESTAMP);
-					else stmt.setTimestamp(21, new Timestamp(datetimeFormatter.parse(obj.getString("updated_date")).getTime()));
+					if(obj.isNull("updated_date")) stmt.setNull(16, java.sql.Types.TIMESTAMP);
+					else stmt.setTimestamp(16, new Timestamp(datetimeFormatter.parse(obj.getString("updated_date")).getTime()));
 
 					stmt.executeUpdate();
 					stmt.close();
@@ -654,8 +620,11 @@ public class DeviceConfigRestController {
 	//not yet tested
 	private boolean performCheckOperations(Connection connection, JSONArray checks, Long storeId) throws Exception {
 		String searchExistingCheckDetailSqlStatement = null;
+		String searchExistingCheckDetailSqlStatement2 = null;
 		String insertionSqlStatement = null;
+		String insertionSqlStatement2 = null;
 		String updateSqlStatement = null;
+		String updateSqlStatement2 = null;
 		PreparedStatement stmt = null;
 		boolean flag = false;
 		
@@ -663,59 +632,96 @@ public class DeviceConfigRestController {
 			SimpleDateFormat datetimeFormatter = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 			
 			insertionSqlStatement = "INSERT INTO [check](store_id, check_id, check_number, staff_id, order_type, table_number, "
-					+ "total_item_quantity, subtotal_amount, total_tax_amount, total_service_charge_amount, total_amount, total_amount_rounding_adjustment, "
+					+ "total_item_quantity, total_amount, total_amount_with_tax, total_amount_with_tax_rounding_adjustment, "
 					+ "grand_total_amount, deposit_amount, tender_amount, overdue_amount, "
 					+ "check_status, created_date, updated_date) VALUES "
-					+ "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+					+ "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 			
-			updateSqlStatement = "UPDATE [check] SET store_id = ?, check_number = ?, staff_id = ?, order_type = ?, table_number = ?, total_item_quantity = ?, "
-					+ "subtotal_amount = ?, total_tax_amount = ?, total_service_charge_amount = ?, total_amount = ?, total_amount_rounding_adjustment = ?, "
+			insertionSqlStatement2 = "INSERT INTO [check_tax_charge](store_id, check_id, check_number, tax_charge_id, total_charge_amount) VALUES "
+					+ "(?, ?, ?, ?, ?)";
+			
+			updateSqlStatement = "UPDATE [check] SET check_number = ?, staff_id = ?, order_type = ?, table_number = ?, total_item_quantity = ?, "
+					+ "total_amount = ?, total_amount_with_tax = ?, total_amount_with_tax_rounding_adjustment = ?, "
 					+ "grand_total_amount = ?, deposit_amount = ?, tender_amount = ?, overdue_amount = ?, "
-					+ "check_status = ?, created_date = ?, updated_date = ? WHERE check_id = ?";
+					+ "check_status = ?, created_date = ?, updated_date = ? WHERE check_id = ? and store_id = ?";
+			
+			updateSqlStatement2 = "UPDATE [check_tax_charge] SET check_number = ?, tax_charge_id = ?, total_charge_amount = ? WHERE check_id = ? and store_id = ?";
 
-			searchExistingCheckDetailSqlStatement = "SELECT check_id FROM [check] WHERE check_id = ?";
+			searchExistingCheckDetailSqlStatement = "SELECT check_id FROM [check] WHERE check_id = ? and store_id = ?";
+			
+			searchExistingCheckDetailSqlStatement2 = "SELECT check_id FROM [check_tax_charge] WHERE check_id = ? and store_id = ?";
 			
 			for(int a=0; a<checks.length(); a++) {
 				JSONObject obj = checks.getJSONObject(a);
 				
 				PreparedStatement ps1 = connection.prepareStatement(searchExistingCheckDetailSqlStatement);
 				ps1.setLong(1, obj.getLong("check_id"));
+				ps1.setLong(2, storeId);
 				ResultSet rs = ps1.executeQuery();
 				
 				//detect existing, update
 				if(rs.next()) {
 					stmt =  connection.prepareStatement(updateSqlStatement);
 					
-					stmt.setLong(1, storeId);
-					stmt.setLong(2, obj.getLong("check_number"));
-					stmt.setLong(3, obj.getLong("staff_id"));
-					stmt.setLong(4, obj.getLong("order_type"));
-					stmt.setInt(5, obj.getInt("table_number"));
-					stmt.setInt(6, obj.getInt("total_item_quantity"));
-					stmt.setBigDecimal(7, BigDecimal.valueOf(obj.getDouble("subtotal_amount")));
+					stmt.setLong(1, obj.getLong("check_number"));
+					stmt.setLong(2, obj.getLong("staff_id"));
+					stmt.setLong(3, obj.getLong("order_type"));
+					stmt.setInt(4, obj.getInt("table_number"));
+					stmt.setInt(5, obj.getInt("total_item_quantity"));
+					stmt.setBigDecimal(6, BigDecimal.valueOf(obj.getDouble("total_amount")));
+					stmt.setBigDecimal(7, BigDecimal.valueOf(obj.getDouble("total_amount_with_tax")));
+					stmt.setBigDecimal(8, BigDecimal.valueOf(obj.getDouble("total_amount_with_tax_rounding_adjustment")));			
+					stmt.setBigDecimal(9, BigDecimal.valueOf(obj.getDouble("grand_total_amount")));	
+					stmt.setBigDecimal(10, BigDecimal.valueOf(obj.getDouble("deposit_amount")));
+					stmt.setBigDecimal(11, BigDecimal.valueOf(obj.getDouble("tender_amount")));
+					stmt.setBigDecimal(12, BigDecimal.valueOf(obj.getDouble("overdue_amount")));	
+					stmt.setLong(13, obj.getLong("check_status"));
+					stmt.setTimestamp(14, new Timestamp(datetimeFormatter.parse(obj.getString("created_date")).getTime()));
 					
-					if(obj.isNull("total_tax_amount")) stmt.setNull(8, java.sql.Types.DECIMAL);
-					else stmt.setBigDecimal(8, BigDecimal.valueOf(obj.getDouble("total_tax_amount")));
-					
-					if(obj.isNull("total_service_charge_amount")) stmt.setNull(9, java.sql.Types.DECIMAL);
-					else stmt.setBigDecimal(9, BigDecimal.valueOf(obj.getDouble("total_service_charge_amount")));
+					if(obj.isNull("updated_date")) stmt.setNull(15, java.sql.Types.TIMESTAMP);
+					else stmt.setTimestamp(15, new Timestamp(datetimeFormatter.parse(obj.getString("updated_date")).getTime()));
 
-					stmt.setBigDecimal(10, BigDecimal.valueOf(obj.getDouble("total_amount")));	
-					stmt.setBigDecimal(11, BigDecimal.valueOf(obj.getDouble("total_amount_rounding_adjustment")));			
-					stmt.setBigDecimal(12, BigDecimal.valueOf(obj.getDouble("grand_total_amount")));	
-					stmt.setBigDecimal(13, BigDecimal.valueOf(obj.getDouble("deposit_amount")));
-					stmt.setBigDecimal(14, BigDecimal.valueOf(obj.getDouble("tender_amount")));
-					stmt.setBigDecimal(15, BigDecimal.valueOf(obj.getDouble("overdue_amount")));	
-					stmt.setLong(16, obj.getLong("check_status"));
-					stmt.setTimestamp(17, new Timestamp(datetimeFormatter.parse(obj.getString("created_date")).getTime()));
-					
-					if(obj.isNull("updated_date")) stmt.setNull(18, java.sql.Types.TIMESTAMP);
-					else stmt.setTimestamp(18,new Timestamp(datetimeFormatter.parse(obj.getString("updated_date")).getTime()));
-
-					stmt.setLong(19, obj.getLong("check_id"));
+					stmt.setLong(16, obj.getLong("check_id"));
+					stmt.setLong(17, storeId);
 
 					stmt.executeUpdate();
 					stmt.close();
+					
+					if (obj.has("taxCharges") && !obj.isNull("taxCharges") && obj.getJSONArray("taxCharges").length() > 0) {
+						for (int b= 0; b < obj.getJSONArray("taxCharges").length(); b++) {
+							JSONObject taxCharge = obj.getJSONArray("taxCharges").getJSONObject(b);
+							
+							PreparedStatement ps2 = connection.prepareStatement(searchExistingCheckDetailSqlStatement2);
+							ps2.setLong(1, taxCharge.getLong("check_id"));
+							ps2.setLong(2, storeId);
+							ResultSet rs2 = ps2.executeQuery();
+							
+							if (rs2.next()) {
+								stmt =  connection.prepareStatement(updateSqlStatement2);
+								
+								stmt.setLong(1, taxCharge.getLong("check_number"));				
+								stmt.setLong(2, taxCharge.getLong("tax_charge_id"));
+								stmt.setBigDecimal(3, new BigDecimal(taxCharge.getString("total_charge_amount")));
+								stmt.setLong(4, taxCharge.getLong("check_id"));	
+								stmt.setLong(5, storeId);
+								
+								stmt.executeUpdate();
+								stmt.close();
+							} else {
+								stmt =  connection.prepareStatement(insertionSqlStatement2);
+								stmt.setLong(1, storeId);
+								stmt.setLong(2, taxCharge.getLong("check_id"));	
+								stmt.setLong(3, taxCharge.getLong("check_number"));				
+								stmt.setLong(4, taxCharge.getLong("tax_charge_id"));
+								stmt.setBigDecimal(5, new BigDecimal(taxCharge.getString("total_charge_amount")));
+								
+								stmt.executeUpdate();
+								stmt.close();
+							}
+							ps2.close();
+							rs2.close();
+						}
+					}
 				} else {
 					stmt =  connection.prepareStatement(insertionSqlStatement);
 					
@@ -726,28 +732,37 @@ public class DeviceConfigRestController {
 					stmt.setLong(5, obj.getLong("order_type"));
 					stmt.setInt(6, obj.getInt("table_number"));
 					stmt.setInt(7, obj.getInt("total_item_quantity"));		
-					stmt.setBigDecimal(8, BigDecimal.valueOf(obj.getDouble("subtotal_amount")));
+					stmt.setBigDecimal(8, BigDecimal.valueOf(obj.getDouble("total_amount")));
+					stmt.setBigDecimal(9, BigDecimal.valueOf(obj.getDouble("total_amount_with_tax")));
+					stmt.setBigDecimal(10, BigDecimal.valueOf(obj.getDouble("total_amount_with_tax_rounding_adjustment")));
+					stmt.setBigDecimal(11, BigDecimal.valueOf(obj.getDouble("grand_total_amount")));
+					stmt.setBigDecimal(12, BigDecimal.valueOf(obj.getDouble("deposit_amount")));
+					stmt.setBigDecimal(13, BigDecimal.valueOf(obj.getDouble("tender_amount")));
+					stmt.setBigDecimal(14, BigDecimal.valueOf(obj.getDouble("overdue_amount")));
+					stmt.setLong(15, obj.getLong("check_status"));		
+					stmt.setTimestamp(16, new Timestamp(datetimeFormatter.parse(obj.getString("created_date")).getTime()));
 					
-					if(obj.isNull("total_tax_amount")) stmt.setNull(9, java.sql.Types.DECIMAL);
-					else stmt.setBigDecimal(9, BigDecimal.valueOf(obj.getDouble("total_tax_amount")));
-					
-					if(obj.isNull("total_service_charge_amount")) stmt.setNull(10, java.sql.Types.DECIMAL);
-					else stmt.setBigDecimal(10, BigDecimal.valueOf(obj.getDouble("total_service_charge_amount")));
-					
-					stmt.setBigDecimal(11, BigDecimal.valueOf(obj.getDouble("total_amount")));
-					stmt.setBigDecimal(12, BigDecimal.valueOf(obj.getDouble("total_amount_rounding_adjustment")));
-					stmt.setBigDecimal(13, BigDecimal.valueOf(obj.getDouble("grand_total_amount")));
-					stmt.setBigDecimal(14, BigDecimal.valueOf(obj.getDouble("deposit_amount")));
-					stmt.setBigDecimal(15, BigDecimal.valueOf(obj.getDouble("tender_amount")));
-					stmt.setBigDecimal(16, BigDecimal.valueOf(obj.getDouble("overdue_amount")));
-					stmt.setLong(17, obj.getLong("check_status"));		
-					stmt.setTimestamp(18, new Timestamp(datetimeFormatter.parse(obj.getString("created_date")).getTime()));
-					
-					if(obj.isNull("updated_date")) stmt.setNull(19, java.sql.Types.TIMESTAMP);
-					else stmt.setTimestamp(19,new Timestamp(datetimeFormatter.parse(obj.getString("updated_date")).getTime()));
+					if(obj.isNull("updated_date")) stmt.setNull(17, java.sql.Types.TIMESTAMP);
+					else stmt.setTimestamp(17,new Timestamp(datetimeFormatter.parse(obj.getString("updated_date")).getTime()));
 					
 					stmt.executeUpdate();
 					stmt.close();
+					
+					if (obj.has("taxCharges") && !obj.isNull("taxCharges") && obj.getJSONArray("taxCharges").length() > 0) {
+						for (int b= 0; b < obj.getJSONArray("taxCharges").length(); b++) {
+							JSONObject taxCharge = obj.getJSONArray("taxCharges").getJSONObject(b);
+							
+							stmt =  connection.prepareStatement(insertionSqlStatement2);
+							stmt.setLong(1, storeId);
+							stmt.setLong(2, taxCharge.getLong("check_id"));	
+							stmt.setLong(3, taxCharge.getLong("check_number"));				
+							stmt.setLong(4, taxCharge.getLong("tax_charge_id"));
+							stmt.setBigDecimal(5, new BigDecimal(taxCharge.getString("total_charge_amount")));
+							
+							stmt.executeUpdate();
+							stmt.close();
+						}
+					}
 				}	
 				ps1.close();
 				rs.close();
@@ -765,8 +780,7 @@ public class DeviceConfigRestController {
 	}
 	
 	//not yet tested
-	private boolean performTransactionOperations(Connection connection, JSONArray transactions, Long storeId) throws Exception
-	{
+	private boolean performTransactionOperations(Connection connection, JSONArray transactions, Long storeId) throws Exception {
 		String searchExistingCheckDetailSqlStatement = null;
 		String insertionSqlStatement = null;
 		String updateSqlStatement = null;
@@ -785,7 +799,7 @@ public class DeviceConfigRestController {
 											+ "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? , ?, ? , ?, ? , ?, ? , ?, ?, ?," 
 											+ " ?, ? , ?, ?, ? , ?, ? , ?, ? , ?, ? , ? , ?, ?, ? ,? ,?, ?)";
 			
-			updateSqlStatement = "UPDATE [transaction] SET store_id = ?, staff_id = ?, check_id = ?, check_number = ?, transaction_type = ?, payment_method = ?, payment_type = ?, "
+			updateSqlStatement = "UPDATE [transaction] SET staff_id = ?, check_id = ?, check_number = ?, transaction_type = ?, payment_method = ?, payment_type = ?, "
 					+ "terminal_serial_number = ?, transaction_currency = ?, transaction_amount = ?, transaction_tips = ?, "
 					+ "transaction_status = ?, unique_trans_number = ?, qr_content = ?, created_date = ?, "
 					+ "response_code = ? ,response_message = ?, updated_date = ?, wifi_ip = ?, wifi_port = ?, approval_code = ?, "
@@ -793,149 +807,149 @@ public class DeviceConfigRestController {
 					+ "invoice_number = ?, merchant_info = ?, card_issuer_name = ?, masked_card_number = ?, card_expiry_date = ?, "
 					+ "batch_number = ?, rrn = ?, card_issuer_id = ?, cardholder_name = ?, aid = ?, app_label = ?, tc = ?, terminal_verification_result =?, "
 					+ "original_trace_number = ?, trace_number = ?, qr_issuer_type = ?, mpay_mid = ?, mpay_tid = ?, "
-					+ "qr_ref_id = ?, qr_user_id = ?, qr_amount_myr = ?, qr_amount_rmb = ? WHERE transaction_id = ?";
+					+ "qr_ref_id = ?, qr_user_id = ?, qr_amount_myr = ?, qr_amount_rmb = ? WHERE transaction_id = ? and store_id = ?";
 			
-			searchExistingCheckDetailSqlStatement = "SELECT transaction_id FROM [transaction] WHERE transaction_id = ?";
+			searchExistingCheckDetailSqlStatement = "SELECT transaction_id FROM [transaction] WHERE transaction_id = ? and store_id = ?";
 			
 			for(int a=0; a<transactions.length(); a++) {
 				JSONObject obj = transactions.getJSONObject(a);
 				
 				PreparedStatement ps1 = connection.prepareStatement(searchExistingCheckDetailSqlStatement);
 				ps1.setLong(1, obj.getLong("transaction_id"));
+				ps1.setLong(2, storeId);
 				ResultSet rs = ps1.executeQuery();
 			
 				//detect existing, update
 				if(rs.next()) {
 					stmt =  connection.prepareStatement(updateSqlStatement);
 					
-					stmt.setLong(1, storeId);
-					stmt.setLong(2, obj.getLong("staff_id"));
-					stmt.setLong(3, obj.getLong("check_id"));
-					stmt.setLong(4, obj.getLong("check_number"));
-					stmt.setLong(5, obj.getLong("transaction_type"));
-					stmt.setLong(6, obj.getLong("payment_method"));
-					stmt.setLong(7, obj.getLong("payment_type"));
+					stmt.setLong(1, obj.getLong("staff_id"));
+					stmt.setLong(2, obj.getLong("check_id"));
+					stmt.setLong(3, obj.getLong("check_number"));
+					stmt.setLong(4, obj.getLong("transaction_type"));
+					stmt.setLong(5, obj.getLong("payment_method"));
+					stmt.setLong(6, obj.getLong("payment_type"));
 					
-					if(obj.isNull("terminal_serial_number")) stmt.setNull(8, java.sql.Types.NVARCHAR);
-					else stmt.setString(8,obj.getString("terminal_serial_number"));
+					if(obj.isNull("terminal_serial_number")) stmt.setNull(7, java.sql.Types.NVARCHAR);
+					else stmt.setString(7,obj.getString("terminal_serial_number"));
 
-					stmt.setString(9, obj.getString("transaction_currency"));	
-					stmt.setBigDecimal(10, BigDecimal.valueOf(obj.getDouble("transaction_amount")));
+					stmt.setString(8, obj.getString("transaction_currency"));	
+					stmt.setBigDecimal(9, BigDecimal.valueOf(obj.getDouble("transaction_amount")));
 					
-					if(obj.isNull("transaction_tips")) stmt.setNull(11, java.sql.Types.DECIMAL);
-					else stmt.setBigDecimal(11, BigDecimal.valueOf(obj.getDouble("transaction_tips")));
+					if(obj.isNull("transaction_tips")) stmt.setNull(10, java.sql.Types.DECIMAL);
+					else stmt.setBigDecimal(10, BigDecimal.valueOf(obj.getDouble("transaction_tips")));
 
-					stmt.setLong(12, obj.getLong("transaction_status"));
+					stmt.setLong(11, obj.getLong("transaction_status"));
 					
-					if(obj.isNull("unique_trans_number")) stmt.setNull(13, java.sql.Types.NVARCHAR);
-					else stmt.setString(13, obj.getString("unique_trans_number"));
+					if(obj.isNull("unique_trans_number")) stmt.setNull(12, java.sql.Types.NVARCHAR);
+					else stmt.setString(12, obj.getString("unique_trans_number"));
 					
-					if(obj.isNull("qr_content")) stmt.setNull(14, java.sql.Types.NVARCHAR);
-					else stmt.setString(14, obj.getString("qr_content"));
+					if(obj.isNull("qr_content")) stmt.setNull(13, java.sql.Types.NVARCHAR);
+					else stmt.setString(13, obj.getString("qr_content"));
 
-					stmt.setTimestamp(15, new Timestamp(datetimeFormatter.parse(obj.getString("created_date")).getTime()));				
+					stmt.setTimestamp(14, new Timestamp(datetimeFormatter.parse(obj.getString("created_date")).getTime()));				
 					
-					if(obj.isNull("response_code")) stmt.setNull(16, java.sql.Types.NVARCHAR);
-					else stmt.setString(16, obj.getString("response_code"));
+					if(obj.isNull("response_code")) stmt.setNull(15, java.sql.Types.NVARCHAR);
+					else stmt.setString(15, obj.getString("response_code"));
 					
-					if(obj.isNull("response_message")) stmt.setNull(17, java.sql.Types.NVARCHAR);
-					else stmt.setString(17, obj.getString("response_message"));
+					if(obj.isNull("response_message")) stmt.setNull(16, java.sql.Types.NVARCHAR);
+					else stmt.setString(16, obj.getString("response_message"));
 					
-					if(obj.isNull("updated_date")) stmt.setNull(18, java.sql.Types.TIMESTAMP);
-					else stmt.setTimestamp(18, new Timestamp(datetimeFormatter.parse(obj.getString("updated_date")).getTime()));
+					if(obj.isNull("updated_date")) stmt.setNull(17, java.sql.Types.TIMESTAMP);
+					else stmt.setTimestamp(17, new Timestamp(datetimeFormatter.parse(obj.getString("updated_date")).getTime()));
 
-					if(obj.isNull("wifi_ip")) stmt.setNull(19, java.sql.Types.NVARCHAR);
-					else stmt.setString(19, obj.getString("wifi_ip"));
+					if(obj.isNull("wifi_ip")) stmt.setNull(18, java.sql.Types.NVARCHAR);
+					else stmt.setString(18, obj.getString("wifi_ip"));
 					
-					if(obj.isNull("wifi_port")) stmt.setNull(20, java.sql.Types.NVARCHAR);
-					else stmt.setString(20, obj.getString("wifi_port"));
+					if(obj.isNull("wifi_port")) stmt.setNull(19, java.sql.Types.NVARCHAR);
+					else stmt.setString(19, obj.getString("wifi_port"));
 					
-					if(obj.isNull("approval_code")) stmt.setNull(21, java.sql.Types.NVARCHAR);
-					else stmt.setString(21, obj.getString("approval_code"));		
+					if(obj.isNull("approval_code")) stmt.setNull(20, java.sql.Types.NVARCHAR);
+					else stmt.setString(20, obj.getString("approval_code"));		
 					
-					if(obj.isNull("bank_mid")) stmt.setNull(22, java.sql.Types.NVARCHAR);
-					else stmt.setString(22, obj.getString("bank_mid"));
+					if(obj.isNull("bank_mid")) stmt.setNull(21, java.sql.Types.NVARCHAR);
+					else stmt.setString(21, obj.getString("bank_mid"));
 					
-					if(obj.isNull("bank_tid")) stmt.setNull(23, java.sql.Types.NVARCHAR);
-					else stmt.setString(23, obj.getString("bank_tid"));			
+					if(obj.isNull("bank_tid")) stmt.setNull(22, java.sql.Types.NVARCHAR);
+					else stmt.setString(22, obj.getString("bank_tid"));			
 					
-					if(obj.isNull("transaction_date")) stmt.setNull(24, java.sql.Types.NVARCHAR);
-					else stmt.setString(24, obj.getString("transaction_date"));
+					if(obj.isNull("transaction_date")) stmt.setNull(23, java.sql.Types.NVARCHAR);
+					else stmt.setString(23, obj.getString("transaction_date"));
 
-					if(obj.isNull("transaction_time")) stmt.setNull(25, java.sql.Types.NVARCHAR);
-					else stmt.setString(25, obj.getString("transaction_time"));
+					if(obj.isNull("transaction_time")) stmt.setNull(24, java.sql.Types.NVARCHAR);
+					else stmt.setString(24, obj.getString("transaction_time"));
 					
-					if(obj.isNull("original_invoice_number")) stmt.setNull(26, java.sql.Types.NVARCHAR);
-					else stmt.setString(26, obj.getString("original_invoice_number"));
+					if(obj.isNull("original_invoice_number")) stmt.setNull(25, java.sql.Types.NVARCHAR);
+					else stmt.setString(25, obj.getString("original_invoice_number"));
 					
-					if(obj.isNull("invoice_number")) stmt.setNull(27, java.sql.Types.NVARCHAR);
-					else stmt.setString(27, obj.getString("invoice_number"));	
+					if(obj.isNull("invoice_number")) stmt.setNull(26, java.sql.Types.NVARCHAR);
+					else stmt.setString(26, obj.getString("invoice_number"));	
 						
-					if(obj.isNull("merchant_info")) stmt.setNull(28, java.sql.Types.NVARCHAR);
-					else stmt.setString(28, obj.getString("merchant_info"));
+					if(obj.isNull("merchant_info")) stmt.setNull(27, java.sql.Types.NVARCHAR);
+					else stmt.setString(27, obj.getString("merchant_info"));
 					
-					if(obj.isNull("card_issuer_name")) stmt.setNull(29, java.sql.Types.NVARCHAR);
-					else stmt.setString(29, obj.getString("card_issuer_name"));
+					if(obj.isNull("card_issuer_name")) stmt.setNull(28, java.sql.Types.NVARCHAR);
+					else stmt.setString(28, obj.getString("card_issuer_name"));
 						
-					if(obj.isNull("masked_card_number")) stmt.setNull(30, java.sql.Types.NVARCHAR);
-					else stmt.setString(30, obj.getString("masked_card_number"));
+					if(obj.isNull("masked_card_number")) stmt.setNull(29, java.sql.Types.NVARCHAR);
+					else stmt.setString(29, obj.getString("masked_card_number"));
 					
-					if(obj.isNull("card_expiry_date")) stmt.setNull(31, java.sql.Types.NVARCHAR);
-					else stmt.setString(31, obj.getString("card_expiry_date"));
+					if(obj.isNull("card_expiry_date")) stmt.setNull(30, java.sql.Types.NVARCHAR);
+					else stmt.setString(30, obj.getString("card_expiry_date"));
 						
-					if(obj.isNull("batch_number")) stmt.setNull(32, java.sql.Types.NVARCHAR);
-					else stmt.setString(32, obj.getString("batch_number"));
+					if(obj.isNull("batch_number")) stmt.setNull(31, java.sql.Types.NVARCHAR);
+					else stmt.setString(31, obj.getString("batch_number"));
 					
-					if(obj.isNull("rrn")) stmt.setNull(33, java.sql.Types.NVARCHAR);
-					else stmt.setString(33, obj.getString("rrn"));		
+					if(obj.isNull("rrn")) stmt.setNull(32, java.sql.Types.NVARCHAR);
+					else stmt.setString(32, obj.getString("rrn"));		
 						
-					if(obj.isNull("card_issuer_id")) stmt.setNull(34, java.sql.Types.NVARCHAR);
-					else stmt.setString(34, obj.getString("card_issuer_id"));
+					if(obj.isNull("card_issuer_id")) stmt.setNull(33, java.sql.Types.NVARCHAR);
+					else stmt.setString(33, obj.getString("card_issuer_id"));
 					
-					if(obj.isNull("cardholder_name")) stmt.setNull(35, java.sql.Types.NVARCHAR);
-					else stmt.setString(35, obj.getString("cardholder_name"));
+					if(obj.isNull("cardholder_name")) stmt.setNull(34, java.sql.Types.NVARCHAR);
+					else stmt.setString(34, obj.getString("cardholder_name"));
 					
-					if(obj.isNull("aid")) stmt.setNull(36, java.sql.Types.NVARCHAR);
-					else stmt.setString(36, obj.getString("aid"));
+					if(obj.isNull("aid")) stmt.setNull(35, java.sql.Types.NVARCHAR);
+					else stmt.setString(35, obj.getString("aid"));
 					
-					if(obj.isNull("app_label")) stmt.setNull(37, java.sql.Types.NVARCHAR);
-					else stmt.setString(37, obj.getString("app_label"));
+					if(obj.isNull("app_label")) stmt.setNull(36, java.sql.Types.NVARCHAR);
+					else stmt.setString(36, obj.getString("app_label"));
 						
-					if(obj.isNull("tc")) stmt.setNull(38, java.sql.Types.NVARCHAR);
-					else stmt.setString(38, obj.getString("tc"));
+					if(obj.isNull("tc")) stmt.setNull(37, java.sql.Types.NVARCHAR);
+					else stmt.setString(37, obj.getString("tc"));
 					
+					if(obj.isNull("terminal_verification_result")) stmt.setNull(38, java.sql.Types.NVARCHAR);
+					else stmt.setString(38, obj.getString("terminal_verification_result"));
 					
-					if(obj.isNull("terminal_verification_result")) stmt.setNull(39, java.sql.Types.NVARCHAR);
-					else stmt.setString(39, obj.getString("terminal_verification_result"));
+					if(obj.isNull("original_trace_number")) stmt.setNull(39, java.sql.Types.NVARCHAR);
+					else stmt.setString(39, obj.getString("original_trace_number"));
 					
-					if(obj.isNull("original_trace_number")) stmt.setNull(40, java.sql.Types.NVARCHAR);
-					else stmt.setString(40, obj.getString("original_trace_number"));
-					
-					if(obj.isNull("trace_number")) stmt.setNull(41, java.sql.Types.NVARCHAR);
-					else stmt.setString(41, obj.getString("trace_number"));
+					if(obj.isNull("trace_number")) stmt.setNull(40, java.sql.Types.NVARCHAR);
+					else stmt.setString(40, obj.getString("trace_number"));
 						
-					if(obj.isNull("qr_issuer_type")) stmt.setNull(42, java.sql.Types.NVARCHAR);
-					else stmt.setString(42, obj.getString("qr_issuer_type"));	
+					if(obj.isNull("qr_issuer_type")) stmt.setNull(41, java.sql.Types.NVARCHAR);
+					else stmt.setString(41, obj.getString("qr_issuer_type"));	
 						
-					if(obj.isNull("mpay_mid")) stmt.setNull(43, java.sql.Types.NVARCHAR);
-					else stmt.setString(43, obj.getString("mpay_mid"));
+					if(obj.isNull("mpay_mid")) stmt.setNull(42, java.sql.Types.NVARCHAR);
+					else stmt.setString(42, obj.getString("mpay_mid"));
 								
-					if(obj.isNull("mpay_tid")) stmt.setNull(44, java.sql.Types.NVARCHAR);
-					else stmt.setString(44, obj.getString("mpay_tid"));		
+					if(obj.isNull("mpay_tid")) stmt.setNull(43, java.sql.Types.NVARCHAR);
+					else stmt.setString(43, obj.getString("mpay_tid"));		
 						
-					if(obj.isNull("qr_ref_id")) stmt.setNull(45, java.sql.Types.NVARCHAR);
-					else stmt.setString(45, obj.getString("qr_ref_id"));	
+					if(obj.isNull("qr_ref_id")) stmt.setNull(44, java.sql.Types.NVARCHAR);
+					else stmt.setString(44, obj.getString("qr_ref_id"));	
 							
-					if(obj.isNull("qr_user_id")) stmt.setNull(46, java.sql.Types.NVARCHAR);
-					else stmt.setString(46, obj.getString("qr_user_id"));
+					if(obj.isNull("qr_user_id")) stmt.setNull(45, java.sql.Types.NVARCHAR);
+					else stmt.setString(45, obj.getString("qr_user_id"));
 					
-					if(obj.isNull("qr_amount_myr")) stmt.setNull(47, java.sql.Types.NVARCHAR);
-					else stmt.setString(47, obj.getString("qr_amount_myr"));
+					if(obj.isNull("qr_amount_myr")) stmt.setNull(46, java.sql.Types.NVARCHAR);
+					else stmt.setString(46, obj.getString("qr_amount_myr"));
 						
-					if(obj.isNull("qr_amount_rmb")) stmt.setNull(48, java.sql.Types.NVARCHAR);
-					else stmt.setString(48, obj.getString("qr_amount_rmb"));
+					if(obj.isNull("qr_amount_rmb")) stmt.setNull(47, java.sql.Types.NVARCHAR);
+					else stmt.setString(47, obj.getString("qr_amount_rmb"));
 
-					stmt.setLong(49, obj.getLong("transaction_id"));	
+					stmt.setLong(48, obj.getLong("transaction_id"));	
+					stmt.setLong(49, storeId);
 					
 					stmt.executeUpdate();
 					stmt.close();
@@ -1102,72 +1116,73 @@ public class DeviceConfigRestController {
 			insertionSqlStatement = "INSERT INTO [settlement](store_id, settlement_id, staff_id ,nii_type, settlement_status, created_date, response_code, response_message, updated_date, wifi_ip, wifi_port, merchant_info, bank_mid, bank_tid, batch_number, transaction_date, transaction_time, batch_total, nii) "
 					+ "VALUES (?, ?, ?, ? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,?)";
 			
-			updateSqlStatement = "UPDATE [settlement] SET store_id = ?, staff_id = ?, nii_type = ?, "
+			updateSqlStatement = "UPDATE [settlement] SET staff_id = ?, nii_type = ?, "
 					+ "settlement_status = ?, created_date = ?, response_code = ?, response_message = ?, "
 					+ "updated_date = ?, wifi_ip = ?, wifi_port = ?, merchant_info = ?, "
 					+ "bank_mid = ? , bank_tid = ?, batch_number = ?, transaction_date = ?, transaction_time = ?, "
-					+ "batch_total = ?, nii = ? WHERE settlement_id = ?";
+					+ "batch_total = ?, nii = ? WHERE settlement_id = ? and store_id = ?";
 
-			searchExistingCheckDetailSqlStatement = "SELECT settlement_id FROM [settlement] WHERE settlement_id = ?";
+			searchExistingCheckDetailSqlStatement = "SELECT settlement_id FROM [settlement] WHERE settlement_id = ? and store_id = ?";
 
 			for(int a=0; a<settlements.length(); a++) {
 				JSONObject obj = settlements.getJSONObject(a);
 				
 				PreparedStatement ps1 = connection.prepareStatement(searchExistingCheckDetailSqlStatement);
 				ps1.setLong(1, obj.getLong("settlement_id"));
+				ps1.setLong(2, storeId);
 				ResultSet rs = ps1.executeQuery();
 				
 				//detect existing, update
 				if(rs.next()) {
 					stmt =  connection.prepareStatement(updateSqlStatement);
 					
-					stmt.setLong(1, storeId);
-					stmt.setLong(2, obj.getLong("staff_id"));
-					stmt.setLong(3, obj.getLong("nii_type"));	
-					stmt.setLong(4, obj.getLong("settlement_status"));
-					stmt.setTimestamp(5, new Timestamp(datetimeFormatter.parse(obj.getString("created_date")).getTime()));
+					stmt.setLong(1, obj.getLong("staff_id"));
+					stmt.setLong(2, obj.getLong("nii_type"));	
+					stmt.setLong(3, obj.getLong("settlement_status"));
+					stmt.setTimestamp(4, new Timestamp(datetimeFormatter.parse(obj.getString("created_date")).getTime()));
 					
-					if(obj.isNull("response_code")) stmt.setNull(6, java.sql.Types.NVARCHAR);
-					else stmt.setString(6, obj.getString("response_code"));
+					if(obj.isNull("response_code")) stmt.setNull(5, java.sql.Types.NVARCHAR);
+					else stmt.setString(5, obj.getString("response_code"));
 					
-					if(obj.isNull("response_message")) stmt.setNull(7, java.sql.Types.NVARCHAR);
-					else stmt.setString(7, obj.getString("response_message"));
+					if(obj.isNull("response_message")) stmt.setNull(6, java.sql.Types.NVARCHAR);
+					else stmt.setString(6, obj.getString("response_message"));
 					
-					if(obj.isNull("updated_date")) stmt.setNull(8, java.sql.Types.TIMESTAMP);
-					else stmt.setTimestamp(8, new Timestamp(datetimeFormatter.parse(obj.getString("updated_date")).getTime()));	
+					if(obj.isNull("updated_date")) stmt.setNull(7, java.sql.Types.TIMESTAMP);
+					else stmt.setTimestamp(7, new Timestamp(datetimeFormatter.parse(obj.getString("updated_date")).getTime()));	
 					
-					if(obj.isNull("wifi_ip")) stmt.setNull(9, java.sql.Types.NVARCHAR);
-					else stmt.setString(9,obj.getString("wifi_ip"));
+					if(obj.isNull("wifi_ip")) stmt.setNull(8, java.sql.Types.NVARCHAR);
+					else stmt.setString(8,obj.getString("wifi_ip"));
 					
-					if(obj.isNull("wifi_port")) stmt.setNull(10, java.sql.Types.NVARCHAR);
-					else stmt.setString(10, obj.getString("wifi_port"));		
+					if(obj.isNull("wifi_port")) stmt.setNull(9, java.sql.Types.NVARCHAR);
+					else stmt.setString(9, obj.getString("wifi_port"));		
 						
-					if(obj.isNull("merchant_info")) stmt.setNull(11, java.sql.Types.NVARCHAR);
-					else stmt.setString(11, obj.getString("merchant_info"));	
+					if(obj.isNull("merchant_info")) stmt.setNull(10, java.sql.Types.NVARCHAR);
+					else stmt.setString(10, obj.getString("merchant_info"));	
 					
-					if(obj.isNull("bank_mid")) stmt.setNull(12, java.sql.Types.NVARCHAR);
-					else stmt.setString(12, obj.getString("bank_mid"));
+					if(obj.isNull("bank_mid")) stmt.setNull(11, java.sql.Types.NVARCHAR);
+					else stmt.setString(11, obj.getString("bank_mid"));
 				
-					if(obj.isNull("bank_tid")) stmt.setNull(13, java.sql.Types.NVARCHAR);
-					else stmt.setString(13, obj.getString("bank_tid"));
+					if(obj.isNull("bank_tid")) stmt.setNull(12, java.sql.Types.NVARCHAR);
+					else stmt.setString(12, obj.getString("bank_tid"));
 				
-					if(obj.isNull("batch_number")) stmt.setNull(14, java.sql.Types.NVARCHAR);
-					else stmt.setString(14, obj.getString("batch_number"));
+					if(obj.isNull("batch_number")) stmt.setNull(13, java.sql.Types.NVARCHAR);
+					else stmt.setString(13, obj.getString("batch_number"));
 						
-					if(obj.isNull("transaction_date")) stmt.setNull(15, java.sql.Types.NVARCHAR);
-					else stmt.setString(15, obj.getString("transaction_date"));
+					if(obj.isNull("transaction_date")) stmt.setNull(14, java.sql.Types.NVARCHAR);
+					else stmt.setString(14, obj.getString("transaction_date"));
 							
-					if(obj.isNull("transaction_time")) stmt.setNull(16, java.sql.Types.NVARCHAR);
-					else stmt.setString(16, obj.getString("transaction_time"));	
+					if(obj.isNull("transaction_time")) stmt.setNull(15, java.sql.Types.NVARCHAR);
+					else stmt.setString(15, obj.getString("transaction_time"));	
 								
-					if(obj.isNull("batch_total")) stmt.setNull(17, java.sql.Types.NVARCHAR);
-					else stmt.setString(17, obj.getString("batch_total"));
+					if(obj.isNull("batch_total")) stmt.setNull(16, java.sql.Types.NVARCHAR);
+					else stmt.setString(16, obj.getString("batch_total"));
 									
-					if(obj.isNull("nii")) stmt.setNull(18, java.sql.Types.NVARCHAR);
-					else stmt.setString(18, obj.getString("nii"));				
+					if(obj.isNull("nii")) stmt.setNull(17, java.sql.Types.NVARCHAR);
+					else stmt.setString(17, obj.getString("nii"));				
 					
-					stmt.setLong(19, obj.getLong("settlement_id"));
-
+					stmt.setLong(18, obj.getLong("settlement_id"));
+					stmt.setLong(19, storeId);
+					
 					stmt.executeUpdate();
 					stmt.close();
 				} else {
