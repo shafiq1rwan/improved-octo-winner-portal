@@ -21,8 +21,10 @@
 			<img class="align-self-center"
 				src="${pageContext.request.contextPath}${applicationData.getMainLogoPath()}"
 				alt="${applicationData.getAppName()}" height="60%">
-			<div>
-				<!-- Empty Content -->
+			<div class="align-self-center mr-1">
+				<button type="button" ng-click="getCheckData()" class="empty-btn badge-btn">
+					<i class="fal fa-list-alt xl-resp-font main-text-color"></i>
+				</button>
 			</div>
 		</div>
 		<div class="body-content">

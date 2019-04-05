@@ -40,7 +40,7 @@
 								<b>x{{cartItem.quantity}}</b>
 							</div>
 							<div class="col-3 pl-0 pr-0 xs-resp-font text-right">
-								<b>{{priceTag}}{{cartItem.price}}</b>
+								<b>{{priceTag}}{{cartItem.totalPrice}}</b>
 							</div>
 						</div>
 						<div class="row ml-0 mr-0" ng-if="cartItem.modifierData"

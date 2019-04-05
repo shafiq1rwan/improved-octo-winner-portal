@@ -10,6 +10,10 @@
 	<jsp:include page="/WEB-INF/order/views/sop_subviews/sop_landing.jsp" />
 	<!-- Landing Display[END] -->
 	
+	<!-- Check List Display[START] -->
+	<jsp:include page="/WEB-INF/order/views/sop_subviews/sop_checklist.jsp" />
+	<!-- Check List Display[END] -->
+	
 	<!-- Category Display[START] -->
 	<jsp:include page="/WEB-INF/order/views/sop_subviews/sop_category.jsp" />
 	<!-- Category Display[END] -->

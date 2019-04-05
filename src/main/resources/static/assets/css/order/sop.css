@@ -137,6 +137,10 @@ div#landing-overlay {
 div#item-category-overlay {
 	z-index: 2;
 }
+div#check-list-overlay {
+	background: #E2E2E2;
+	z-index: 2;
+}
 div#item-list-overlay {
 	z-index: 3;
 }

@@ -26,7 +26,7 @@
 					class="col-6 col-sm-6 col-md-4 col-lg-4 col-xl-3 sub-card-container"
 					ng-repeat="data in menuList">
 					<div class="card" ng-click="switchToView('itemList', data)">
-						<img class="max-img-height card-img-top" ng-src="${pageContext.request.contextPath}{{imagePath}}{{data.path}}"
+						<img class="max-img-height card-img-top" ng-src="${pageContext.request.contextPath}/{{imagePath}}{{data.path}}"
 							alt="{{data.name}}">
 						<div class="card-body d-flex flex-row">
 							<div

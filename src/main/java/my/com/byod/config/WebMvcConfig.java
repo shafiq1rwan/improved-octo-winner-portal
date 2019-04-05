@@ -18,11 +18,11 @@ public class WebMvcConfig implements WebMvcConfigurer{
 	@Override
 	 public void addResourceHandlers(ResourceHandlerRegistry registry) {
 		 registry
-		 	.addResourceHandler(uploadPath + "**","/byod" + uploadPath +"**")
+		 	.addResourceHandler(uploadPath + "**","/byod/" + uploadPath +"**")
 		 	.addResourceLocations("file:///C:" + uploadPath);
 		 
 		 registry
-		 	.addResourceHandler(menuPath + "**","/byod" + menuPath +"**")
+		 	.addResourceHandler(menuPath + "**","/byod/" + menuPath +"**")
 		 	.addResourceLocations("file:///C:" + menuPath);
 	 }
 }

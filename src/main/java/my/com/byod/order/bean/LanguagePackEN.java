@@ -23,6 +23,9 @@ public class LanguagePackEN {
 	public String tier_selection_itemRemaining;
 	public String tier_selection_done;
 	
+	public String order_list_empty_message;
+	public String order_list_order_time;
+	
 	public String cart_empty_message;
 	public String cart_summary;
 	public String cart_total;
@@ -34,6 +37,10 @@ public class LanguagePackEN {
 	
 	public String edit_item_detail_editCart;
 	
+	public String loading_create_order;
+	public String loading_retrieve_order;
+		  
+	public String dialog_retrieve_order_failed_title;
 	public String dialog_reset_cart_title;
 	public String dialog_cart_add_success_title;
 	public String dialog_cart_edit_success_title;
@@ -134,6 +141,18 @@ public class LanguagePackEN {
 	public void setTier_selection_done(String tier_selection_done) {
 		this.tier_selection_done = tier_selection_done;
 	}
+	public String getOrder_list_empty_message() {
+		return order_list_empty_message;
+	}
+	public void setOrder_list_empty_message(String order_list_empty_message) {
+		this.order_list_empty_message = order_list_empty_message;
+	}
+	public String getOrder_list_order_time() {
+		return order_list_order_time;
+	}
+	public void setOrder_list_order_time(String order_list_order_time) {
+		this.order_list_order_time = order_list_order_time;
+	}
 	public String getCart_empty_message() {
 		return cart_empty_message;
 	}
@@ -187,6 +206,24 @@ public class LanguagePackEN {
 	}
 	public void setEdit_item_detail_editCart(String edit_item_detail_editCart) {
 		this.edit_item_detail_editCart = edit_item_detail_editCart;
+	}
+	public String getLoading_create_order() {
+		return loading_create_order;
+	}
+	public void setLoading_create_order(String loading_create_order) {
+		this.loading_create_order = loading_create_order;
+	}
+	public String getLoading_retrieve_order() {
+		return loading_retrieve_order;
+	}
+	public void setLoading_retrieve_order(String loading_retrieve_order) {
+		this.loading_retrieve_order = loading_retrieve_order;
+	}
+	public String getDialog_retrieve_order_failed_title() {
+		return dialog_retrieve_order_failed_title;
+	}
+	public void setDialog_retrieve_order_failed_title(String dialog_retrieve_order_failed_title) {
+		this.dialog_retrieve_order_failed_title = dialog_retrieve_order_failed_title;
 	}
 	public String getDialog_reset_cart_title() {
 		return dialog_reset_cart_title;

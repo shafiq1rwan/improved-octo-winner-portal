@@ -15,7 +15,7 @@
 						class="w-100 flex-fill card d-flex flex-column align-self-center scrollable-y">
 						<div class="w-100 align-self-center text-center">
 							<img class="max-img-height"
-								src="${pageContext.request.contextPath}{{imagePath}}{{selectedItem.path}}"
+								src="${pageContext.request.contextPath}/{{imagePath}}{{selectedItem.path}}"
 								alt="{{selectedItem.name}}">
 						</div>
 						<div class="w-100 align-self-center text-center">
@@ -150,7 +150,7 @@
 				<button
 					class="btn btn-primary btn-main sm-resp-font align-self-center"
 					type="button" ng-click="editToCart()">
-					<span class="resp-font cart-icon"></span>&nbsp;{{currentLanguageData.edit_item_detail_editCart}}
+					<i class="fal fa-cart-arrow-down"></i>&nbsp;{{currentLanguageData.edit_item_detail_editCart}}
 				</button>
 			</div>
 		</div>

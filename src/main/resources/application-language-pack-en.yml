@@ -16,6 +16,8 @@ language-pack-en:
   tier_selection_selection: "Selection"
   tier_selection_itemRemaining: "Item(s) Remaining"
   tier_selection_done: "Done"
+  order_list_empty_message: "The order list is empty. Please proceed to order."
+  order_list_order_time: "Order Time"
   cart_empty_message: "The cart is empty. Please proceed to order."
   cart_summary: "Cart Summary"
   cart_total: "Total"
@@ -26,6 +28,10 @@ language-pack-en:
   cart_pay_later: "Pay Later"
   edit_item_detail_editCart: "Edit Cart"
   
+  loading_create_order: "Creating Order..."
+  loading_retrieve_order: "Retrieving Order..."
+  
+  dialog_retrieve_order_failed_title: "Order Failed to Retrieve!"
   dialog_cart_add_success_title: "Item Added to Cart Successfully!"
   dialog_cart_edit_success_title: "Item Editted Successfully!"
   dialog_reset_cart_title: "Are you sure you want to clear your cart by returning to main page?"

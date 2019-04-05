@@ -16,6 +16,8 @@ language-pack-cn:
   tier_selection_selection: "选项"
   tier_selection_itemRemaining: "剩余选择"
   tier_selection_done: "完成"
+  order_list_empty_message: "订单列表是空的。 请开始下单。"
+  order_list_order_time: "订单时间"
   cart_empty_message: "购物车是空的。 请开始下单。"
   cart_summary: "购物车汇总"
   cart_total: "总计"
@@ -26,6 +28,10 @@ language-pack-cn:
   cart_pay_later: "以后支付"
   edit_item_detail_editCart: "修改购物车"
   
+  loading_create_order: "创建订单中..."
+  loading_retrieve_order: "检索订单中..."
+  
+  dialog_retrieve_order_failed_title: "订单无法检索!"
   dialog_cart_add_success_title: "商品已成功添加到购物车！"
   dialog_cart_edit_success_title: "商品已成功被修改！"
   dialog_reset_cart_title: "您确定要返回主页而清除购物车吗？"

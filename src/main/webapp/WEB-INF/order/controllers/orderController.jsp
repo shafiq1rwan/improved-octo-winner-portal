@@ -22,6 +22,7 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 	$scope.cartTotalPrice;
 	$scope.taxList = [];
 	$scope.taxDisplayList = [];
+	$scope.checkList;
 	/*Dialog Config*/
 	$scope.isAllowKeyboardDismissal = false;
 	$scope.dialogData = {};
@@ -49,6 +50,7 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 	
 	/*SOP Switch*/
 	$scope.backToLanding = function() {
+		$scope.hideFromView("checkList");
 		$scope.hideFromView("itemCategory");
 		$scope.hideFromView("itemList");
 		$scope.hideFromView("categorySelection");
@@ -59,7 +61,9 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 		$scope.hideFromView("editTierSelection");
 	}
 	$scope.switchToView = function(viewName, param1) {
-		if (viewName == "itemCategory") {
+		if (viewName == "checkList") {
+			$("div#check-list-overlay").fadeIn(300);
+		} else if (viewName == "itemCategory") {
 			$("div#item-category-overlay").fadeIn(300);
 		} else if (viewName == "itemList") {
 			$scope.selectedCategory = param1;
@@ -84,7 +88,9 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 		}
 	}
 	$scope.hideFromView = function(viewName) {
-		if (viewName == "itemCategory") {
+		if (viewName == "checkList") {
+			$("div#check-list-overlay").fadeOut(300);
+		} else if (viewName == "itemCategory") {
 			if ($scope.cart.length > 0) {
 				var dialogOption = {};
 				dialogOption.title = $scope.currentLanguageData.dialog_reset_cart_title;
@@ -739,7 +745,7 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 		}, 100);
 	}
 	$scope.sendCartData = function() {
-		$scope.showSpinnerLoading("Creating Order...");
+		$scope.showSpinnerLoading($scope.currentLanguageData.loading_create_order);
 		$http({
 			method: 'POST',
 			headers: {
@@ -773,8 +779,9 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 		dialogOption.button1 = {
 				name: $scope.currentLanguageData.dialog_button_ok,
 				fn: function() {
-					$("div#item-category-overlay").fadeOut(300);
 					$("div#modal-dialog").modal("hide");
+					$scope.cart = [];
+					$scope.backToLanding();
 				}
 		}
 		$scope.displayDialog(dialogOption);
@@ -787,6 +794,49 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 				name: $scope.currentLanguageData.dialog_button_ok,
 				fn: function() {
 					$("div#item-category-overlay").fadeOut(300);
+					$("div#modal-dialog").modal("hide");
+				}
+		}
+		$scope.displayDialog(dialogOption);
+	}
+	$scope.getCheckData = function() {
+		$scope.showSpinnerLoading($scope.currentLanguageData.loading_retrieve_order);
+		$http({
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			data: {
+				token: $routeParams.token
+			},
+			url: '${pageContext.request.contextPath}/order/getCheckData'
+		}).then(function (response) {
+			$scope.hideSpinnerLoading();
+			if (response != null && response.data != null && response.data.resultCode != null) {
+				if (response.data.resultCode == "00") {
+					$scope.checkList = response.data.checkList;
+					$scope.getCheckDataSuccess();
+				} else {
+					$scope.getCheckDataFailed();
+				}
+			} else {
+				$scope.getCheckDataFailed();
+			}
+		}, function (error) {
+			$scope.hideSpinnerLoading();
+			$scope.sendCartFailed();
+	    });
+	}
+	$scope.getCheckDataSuccess = function() {
+		$scope.switchToView("checkList");
+	}
+	$scope.getCheckDataFailed = function() {
+		var dialogOption = {};
+		dialogOption.title = $scope.currentLanguageData.dialog_retrieve_order_failed_title;
+		dialogOption.message = "";
+		dialogOption.button1 = {
+				name: $scope.currentLanguageData.dialog_button_ok,
+				fn: function() {
 					$("div#modal-dialog").modal("hide");
 				}
 		}
