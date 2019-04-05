@@ -637,15 +637,15 @@ public class DeviceConfigRestController {
 					+ "check_status, created_date, updated_date) VALUES "
 					+ "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 			
-			insertionSqlStatement2 = "INSERT INTO [check_tax_charge](store_id, check_id, check_number, tax_charge_id, total_charge_amount) VALUES "
-					+ "(?, ?, ?, ?, ?)";
+			insertionSqlStatement2 = "INSERT INTO [check_tax_charge](store_id, check_id, check_number, tax_charge_id, total_charge_amount,total_charge_amount_rounding_adjustment,grand_total_charge_amount) VALUES "
+					+ "(?, ?, ?, ?, ?, ?, ?)";
 			
 			updateSqlStatement = "UPDATE [check] SET check_number = ?, staff_id = ?, order_type = ?, table_number = ?, total_item_quantity = ?, "
 					+ "total_amount = ?, total_amount_with_tax = ?, total_amount_with_tax_rounding_adjustment = ?, "
 					+ "grand_total_amount = ?, deposit_amount = ?, tender_amount = ?, overdue_amount = ?, "
 					+ "check_status = ?, created_date = ?, updated_date = ? WHERE check_id = ? and store_id = ?";
 			
-			updateSqlStatement2 = "UPDATE [check_tax_charge] SET check_number = ?, tax_charge_id = ?, total_charge_amount = ? WHERE check_id = ? and store_id = ?";
+			updateSqlStatement2 = "UPDATE [check_tax_charge] SET check_number = ?, tax_charge_id = ?, total_charge_amount = ?, total_charge_amount_rounding_adjustment = ?, grand_total_charge_amount = ? WHERE check_id = ? and store_id = ?";
 
 			searchExistingCheckDetailSqlStatement = "SELECT check_id FROM [check] WHERE check_id = ? and store_id = ?";
 			
@@ -702,8 +702,10 @@ public class DeviceConfigRestController {
 								stmt.setLong(1, taxCharge.getLong("check_number"));				
 								stmt.setLong(2, taxCharge.getLong("tax_charge_id"));
 								stmt.setBigDecimal(3, new BigDecimal(taxCharge.getString("total_charge_amount")));
-								stmt.setLong(4, taxCharge.getLong("check_id"));	
-								stmt.setLong(5, storeId);
+								stmt.setBigDecimal(4, new BigDecimal(taxCharge.getString("total_charge_amount_rounding_adjustment")));
+								stmt.setBigDecimal(5, new BigDecimal(taxCharge.getString("grand_total_charge_amount")));
+								stmt.setLong(6, taxCharge.getLong("check_id"));	
+								stmt.setLong(7, storeId);
 								
 								stmt.executeUpdate();
 								stmt.close();
@@ -714,6 +716,8 @@ public class DeviceConfigRestController {
 								stmt.setLong(3, taxCharge.getLong("check_number"));				
 								stmt.setLong(4, taxCharge.getLong("tax_charge_id"));
 								stmt.setBigDecimal(5, new BigDecimal(taxCharge.getString("total_charge_amount")));
+								stmt.setBigDecimal(6, new BigDecimal(taxCharge.getString("total_charge_amount_rounding_adjustment")));
+								stmt.setBigDecimal(7, new BigDecimal(taxCharge.getString("grand_total_charge_amount")));
 								
 								stmt.executeUpdate();
 								stmt.close();
@@ -758,6 +762,8 @@ public class DeviceConfigRestController {
 							stmt.setLong(3, taxCharge.getLong("check_number"));				
 							stmt.setLong(4, taxCharge.getLong("tax_charge_id"));
 							stmt.setBigDecimal(5, new BigDecimal(taxCharge.getString("total_charge_amount")));
+							stmt.setBigDecimal(6, new BigDecimal(taxCharge.getString("total_charge_amount_rounding_adjustment")));
+							stmt.setBigDecimal(7, new BigDecimal(taxCharge.getString("grand_total_charge_amount")));
 							
 							stmt.executeUpdate();
 							stmt.close();

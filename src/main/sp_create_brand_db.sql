@@ -371,7 +371,9 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 				check_id BIGINT NOT NULL,
 				check_number BIGINT NOT NULL,
 				tax_charge_id BIGINT NULL,
-				total_charge_amount DECIMAL(25, 4) NOT NULL
+				total_charge_amount DECIMAL(25, 4) NOT NULL,
+				total_charge_amount_rounding_adjustment decimal(25, 4) NOT NULL,
+				grand_total_charge_amount decimal(25, 4) NOT NULL
 			);
 
 			CREATE TABLE check_detail 
