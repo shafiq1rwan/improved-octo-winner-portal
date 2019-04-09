@@ -11,7 +11,7 @@
 		<div class="d-flex flex-row justify-content-center">
 			<img class="h-25" src="${pageContext.request.contextPath}/assets/images/order/icon/scan_qr_icon.svg" />
 		</div>
-		<p class="text-center xl-resp-font ml-2 mr-2 mb-0"><b>Scan a QR to begin your BYOD Experience</b></p>
+		<p class="text-center xl-resp-font ml-2 mr-2 mb-0"><b>Invalid QR detected. Please scan a QR to begin your BYOD Experience</b></p>
 	</div>
 </body>
 </html>

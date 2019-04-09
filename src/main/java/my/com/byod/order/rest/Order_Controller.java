@@ -38,7 +38,7 @@ public class Order_Controller {
 			model.addObject("applicationData", orderConfiguration.applicationData());
 			model.setViewName("/order/home");
 		} else {
-			model.setViewName("/order/pleaseScanQR");
+			model.setViewName("/order/invalidQR");
 		}
 		
 		return model;
