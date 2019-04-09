@@ -7,7 +7,9 @@ function removeFromArray(array, element) {
 	}
 }
 
-byodApp.controller('OrderController', function($scope, $http, $routeParams, $timeout) {
+byodApp.controller('OrderController', function($scope, $http, $location, $timeout) {
+	var absURL = $location.absUrl();
+	var token = absURL.substring(absURL.indexOf("order/") + "order/".length, absURL.length - 3);
 	/*Config Data*/
 	$scope.paymentType;
 	$scope.localeData;
@@ -651,7 +653,7 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 				'Content-Type': 'application/json'
 			},
 			params: {
-				token: $routeParams.token,
+				token: token,
 			},
 			url: '${pageContext.request.contextPath}/order/getStoreData'
 		}).then(function (response) {
@@ -753,7 +755,7 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 			},
 			data: {
 				cartData: $scope.cart,
-				token: $routeParams.token
+				token: token
 			},
 			url: '${pageContext.request.contextPath}/order/sendOrder'
 		}).then(function (response) {
@@ -807,7 +809,7 @@ byodApp.controller('OrderController', function($scope, $http, $routeParams, $tim
 				'Content-Type': 'application/json'
 			},
 			data: {
-				token: $routeParams.token
+				token: token
 			},
 			url: '${pageContext.request.contextPath}/order/getCheckData'
 		}).then(function (response) {

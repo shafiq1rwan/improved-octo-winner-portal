@@ -94,13 +94,11 @@ var byodApp = angular.module('byodApp', ['ngRoute']);
 byodApp.config(function($routeProvider) {
 	$routeProvider
 	.when('', {
-		templateUrl : '${pageContext.request.contextPath}/order/views/pleaseScanQR'
+		templateUrl : '${pageContext.request.contextPath}/order/views/singleOrderPage',
+    	controller : "OrderController"
 	})
 	.when('/', {
-    	templateUrl : '${pageContext.request.contextPath}/order/views/pleaseScanQR'
-	})
-	.when('/tk/:token', {
-    	templateUrl : '${pageContext.request.contextPath}/order/views/singleOrderPage',
+		templateUrl : '${pageContext.request.contextPath}/order/views/singleOrderPage',
     	controller : "OrderController"
 	})
 	.otherwise({
