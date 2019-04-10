@@ -26,6 +26,6 @@ public class WebMvcConfig implements WebMvcConfigurer{
 		 
 		 registry
 		 	.addResourceHandler(menuPath + "**","/byod/" + menuPath +"**")
-		 	.addResourceLocations("file:/// + accessDrive + :" + menuPath);
+		 	.addResourceLocations("file:///"+ accessDrive + ":" + menuPath);
 	 }
 }
