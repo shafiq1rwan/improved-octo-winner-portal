@@ -9,6 +9,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 //@EnableWebMvc
 public class WebMvcConfig implements WebMvcConfigurer{
 	
+	@Value("${access-drive}")
+	private String accessDrive;
+	
 	@Value("${upload-path}")
 	private String uploadPath;
 	
@@ -19,10 +22,10 @@ public class WebMvcConfig implements WebMvcConfigurer{
 	 public void addResourceHandlers(ResourceHandlerRegistry registry) {
 		 registry
 		 	.addResourceHandler(uploadPath + "**","/byod/" + uploadPath +"**")
-		 	.addResourceLocations("file:///C:" + uploadPath);
+		 	.addResourceLocations("file:///" + accessDrive + ":" + uploadPath);
 		 
 		 registry
 		 	.addResourceHandler(menuPath + "**","/byod/" + menuPath +"**")
-		 	.addResourceLocations("file:///C:" + menuPath);
+		 	.addResourceLocations("file:/// + accessDrive + :" + menuPath);
 	 }
 }

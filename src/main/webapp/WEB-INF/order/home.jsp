@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
 <title page-title>${applicationData.getAppName()}</title>
 
@@ -82,7 +82,7 @@ button.btn-main:focus, button.btn-main:active {
 </style>
 
 </head>
-<body ng-app="byodApp" class="main-bg" oncontextmenu="return false;" style="display: none;">
+<body ng-app="byodApp" oncontextmenu="return false;" style="display: none;">
 	<div class="view-body w-100 h-100" ng-view></div>
 </body>
 
@@ -94,15 +94,15 @@ var byodApp = angular.module('byodApp', ['ngRoute']);
 byodApp.config(function($routeProvider) {
 	$routeProvider
 	.when('', {
-		templateUrl : '${pageContext.request.contextPath}/order/views/singleOrderPage',
+		templateUrl : '${pageContext.request.contextPath}/order/views/singleOrderPage/${brandId}',
     	controller : "OrderController"
 	})
 	.when('/', {
-		templateUrl : '${pageContext.request.contextPath}/order/views/singleOrderPage',
+		templateUrl : '${pageContext.request.contextPath}/order/views/singleOrderPage/${brandId}',
     	controller : "OrderController"
 	})
 	.otherwise({
-		templateUrl : '${pageContext.request.contextPath}/order/views/error'
+		templateUrl : '${pageContext.request.contextPath}/order/views/error/${brandId}'
 	});
 });
 </script>
