@@ -36,6 +36,7 @@ public class Order_Controller {
 			brandId = tokenSplitArry[0];
 			
 			model.addObject("applicationData", orderConfiguration.applicationData());
+			model.addObject("brandId", brandId);
 			model.setViewName("/order/home");
 		} else {
 			model.setViewName("/order/invalidQR");
@@ -44,16 +45,16 @@ public class Order_Controller {
 		return model;
 	}
 	
-	@RequestMapping(value = { "/views/error" }, method = { RequestMethod.GET })
-	public ModelAndView errorPage() {
+	@RequestMapping(value = { "/views/error/{brandId}" }, method = { RequestMethod.GET })
+	public ModelAndView errorPage(@PathVariable("brandId") String brandId) {
 		ModelAndView model = new ModelAndView();
 		model.addObject("applicationData", orderConfiguration.applicationData());
 		model.setViewName("order/views/error");
 		return model;
 	}
 	
-	@RequestMapping(value = { "/views/singleOrderPage" }, method = { RequestMethod.GET })
-	public ModelAndView categoryPage() {
+	@RequestMapping(value = { "/views/singleOrderPage/{brandId}" }, method = { RequestMethod.GET })
+	public ModelAndView categoryPage(@PathVariable("brandId") String brandId) {
 		ModelAndView model = new ModelAndView();
 		model.addObject("applicationData", orderConfiguration.applicationData());
 		model.setViewName("order/views/singleOrderPage");
