@@ -78,7 +78,7 @@ INSERT INTO users_brands(brand_id,user_id,permission) VALUES(1,2,'0'),(2,3,'0'),
 INSERT INTO users_brands(brand_id,user_id,permission) VALUES(1,6,'0'),(2,6,'0');
 
 -- Patch: Permission lookup
-INSERT INTO permission_lookup(perm_name) VALUES ('store'),('group-category'),('menu-item'),('user-config'),('setting');
+INSERT INTO permission_lookup(perm_name) VALUES ('store'),('group-category'),('menu-item'),('user-config'),('report'),('setting');
 
 --drop table authorities;
 --drop table users;

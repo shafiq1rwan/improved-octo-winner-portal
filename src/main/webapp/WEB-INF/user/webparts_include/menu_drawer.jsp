@@ -47,6 +47,12 @@
                          </ul>
                  </li>
               <%} %> 
+              
+              <%if (accessRight.getJSONObject("accessRights").getBoolean("report")) {%>
+                <li class="submenu">
+                      <a href="${pageContext.request.contextPath}/user/#!Router_report"><i class="fa fa-file"></i><span> Report </span> </a>
+                </li>	
+              <%} %>   
                  
               <%if (accessRight.getJSONObject("accessRights").getBoolean("setting")) {%>   
                  <li class="submenu">

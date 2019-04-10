@@ -62,11 +62,18 @@ if it's not present, don't show loader */
 	<!-- END CSS for this page -->
 
 	<link href="${pageContext.request.contextPath}/assets/plugins/jQuery.filer-1.3.0/css/jquery.filer.css" rel="stylesheet" />
-	<link href="${pageContext.request.contextPath}/assets/plugins/jQuery.filer-1.3.0/css/themes/jquery.filer-dragdropbox-theme.css" rel="stylesheet" />		
+	<link href="${pageContext.request.contextPath}/assets/plugins/jQuery.filer-1.3.0/css/themes/jquery.filer-dragdropbox-theme.css" rel="stylesheet" />	
+	
+	<link rel="stylesheet" href="${pageContext.request.contextPath}/assets/plugins/angular-material-1.1.12/angular-material.min.css">	
 	
 	<!-- ANGULAR JS IMPORT - Version 1.5 above -->
 	<script src="${pageContext.request.contextPath}/assets/plugins/angular-1.7.4/js/angular.min.js"></script>
+	<script src="${pageContext.request.contextPath}/assets/plugins/angular-1.7.4/js/angular-animate.min.js"></script>
 	<script src="${pageContext.request.contextPath}/assets/plugins/angular-1.7.4/js/angular-route.min.js"></script>
+	<script src="${pageContext.request.contextPath}/assets/plugins/angular-1.7.4/js/angular-aria.min.js"></script>
+
+	<!-- Angular Material Library -->
+ 	<script src="${pageContext.request.contextPath}/assets/plugins/angular-material-1.1.12/angular-material.min.js"></script>
 	
 	<script src="${pageContext.request.contextPath}/assets/plugins/jquery-3.3.1/js/jquery-3.3.1.min.js"></script>
 	<%-- <script src="${pageContext.request.contextPath}/assets2/js/jquery.min.js"></script> --%>
@@ -103,7 +110,7 @@ if it's not present, don't show loader */
 </body>
 
 <script>
-	var app = angular.module("myApp", ["ngRoute"]);
+	var app = angular.module("myApp", ["ngMaterial","ngRoute"]);
 
 	app.config(function($routeProvider) {
 		$routeProvider
@@ -236,6 +243,15 @@ if it's not present, don't show loader */
 		       	checkSession:checkSession
 		    }
 		})
+		.when('/Router_report',{
+			templateUrl : function(params){
+				return '${pageContext.request.contextPath}/user/views/report'
+			},
+			controller : "ctl_report",
+			resolve : {
+		       	checkSession:checkSession
+		    }
+		})
 		.when('/Router_setting',{
 			templateUrl : function(params){
 				return '${pageContext.request.contextPath}/user/views/setting'
@@ -332,6 +348,7 @@ if it's not present, don't show loader */
 <jsp:include page="/WEB-INF/user/controller/ctl_combo.jsp" />
 <jsp:include page="/WEB-INF/user/controller/ctl_assign_modifier.jsp" />
 <jsp:include page="/WEB-INF/user/controller/ctl_dashboard.jsp" />
+<jsp:include page="/WEB-INF/user/controller/ctl_report.jsp" />
 <jsp:include page="/WEB-INF/user/controller/ctl_setting.jsp" />
 <!-- *****************************ANGULAR JS CONTROLLER***************************** -->
 </html>

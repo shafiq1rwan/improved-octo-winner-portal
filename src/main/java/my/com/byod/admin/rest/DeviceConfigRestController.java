@@ -664,9 +664,15 @@ public class DeviceConfigRestController {
 					stmt =  connection.prepareStatement(updateSqlStatement);
 					
 					stmt.setLong(1, obj.getLong("check_number"));
-					stmt.setLong(2, obj.getLong("staff_id"));
+					
+					if(obj.isNull("staff_id")) stmt.setNull(2,  java.sql.Types.BIGINT);
+					else stmt.setLong(2, obj.getLong("staff_id"));
+
 					stmt.setLong(3, obj.getLong("order_type"));
-					stmt.setInt(4, obj.getInt("table_number"));
+
+					if(obj.isNull("table_number")) stmt.setNull(4,  java.sql.Types.INTEGER);
+					else stmt.setInt(4, obj.getInt("table_number"));
+
 					stmt.setInt(5, obj.getInt("total_item_quantity"));
 					stmt.setBigDecimal(6, BigDecimal.valueOf(obj.getDouble("total_amount")));
 					stmt.setBigDecimal(7, BigDecimal.valueOf(obj.getDouble("total_amount_with_tax")));
@@ -731,10 +737,16 @@ public class DeviceConfigRestController {
 					
 					stmt.setLong(1, storeId);
 					stmt.setLong(2, obj.getLong("check_id"));	
-					stmt.setLong(3, obj.getLong("check_number"));				
-					stmt.setLong(4, obj.getLong("staff_id"));
+					stmt.setLong(3, obj.getLong("check_number"));
+					
+					if(obj.isNull("staff_id")) stmt.setNull(4,  java.sql.Types.BIGINT);
+					else stmt.setLong(4, obj.getLong("staff_id"));
+					
 					stmt.setLong(5, obj.getLong("order_type"));
-					stmt.setInt(6, obj.getInt("table_number"));
+					
+					if(obj.isNull("table_number")) stmt.setNull(6,  java.sql.Types.INTEGER);
+					else stmt.setInt(6, obj.getInt("table_number"));
+					
 					stmt.setInt(7, obj.getInt("total_item_quantity"));		
 					stmt.setBigDecimal(8, BigDecimal.valueOf(obj.getDouble("total_amount")));
 					stmt.setBigDecimal(9, BigDecimal.valueOf(obj.getDouble("total_amount_with_tax")));

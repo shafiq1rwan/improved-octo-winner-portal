@@ -255,6 +255,14 @@ public class UserLoginRestController {
 		return model;
 	}
 	
+	//Report
+	@RequestMapping(value = {"/views/report"}, method = RequestMethod.GET)
+	public ModelAndView viewReport() {
+		ModelAndView model = new ModelAndView();
+		model.setViewName("/user/views/report");
+		return model;
+	}
+	
 	// Setting
 	@RequestMapping(value = { "/views/setting" }, method = RequestMethod.GET)
 	public ModelAndView viewSetting() {
