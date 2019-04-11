@@ -113,7 +113,7 @@ public class StoreRestController {
 				connection.close();
 				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 			}
-			int rowAffected = storeService.editStore(store.getId(), store, brandId);
+			int rowAffected = storeService.editStore(store.getId(), store, brandId, existingStore.getLogoPath());
 			if (rowAffected == 0) {
 				connection.close();
 				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -142,60 +142,18 @@ public class StoreRestController {
 		}
 	}
 	
-	@GetMapping(value = "/getStoreType", produces = "application/json")
-	public ResponseEntity<?> getStoreType(HttpServletRequest request, HttpServletResponse response){
-		JSONArray jsonArr = new JSONArray();
+	@GetMapping(value = "/getAllStoreLookup", produces = "application/json")
+	public ResponseEntity<?> getAllStoreLookup(HttpServletRequest request, HttpServletResponse response){
+		JSONObject jsonResult = new JSONObject();
 		Connection connection = null;
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-		
 		try {
 			connection = dbConnectionUtil.retrieveConnection(request);
-			stmt = connection.prepareStatement("SELECT * FROM store_type_lookup");
-			rs = (ResultSet) stmt.executeQuery();
 			
-			while(rs.next()) {
-				JSONObject jsonObj = new JSONObject();
-				jsonObj.put("id", rs.getLong("id"));				
-				jsonObj.put("store_type_name", rs.getString("store_type_name"));							
-				jsonArr.put(jsonObj);
-			}
+			jsonResult.put("storeType", getStoreType(connection));
+			jsonResult.put("paymentDelayType", getPaymentDelayType(connection));
+			jsonResult.put("storeTaxType", getStoreTaxType(connection));
 			
-			return ResponseEntity.ok(jsonArr.toString());
-		} catch(Exception ex) {
-			ex.printStackTrace();
-			return ResponseEntity.badRequest().body(ex.getMessage());
-		} finally {
-			if (connection != null) {
-				try {
-					connection.close();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}
-	}
-	
-	@GetMapping(value = "/getPaymentDelayType", produces = "application/json")
-	public ResponseEntity<?> getPaymentDelayType(HttpServletRequest request, HttpServletResponse response){
-		JSONArray jsonArr = new JSONArray();
-		Connection connection = null;
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-		
-		try {
-			connection = dbConnectionUtil.retrieveConnection(request);
-			stmt = connection.prepareStatement("SELECT * FROM payment_delay_lookup ORDER BY id");
-			rs = (ResultSet) stmt.executeQuery();
-			
-			while(rs.next()) {
-				JSONObject jsonObj = new JSONObject();
-				jsonObj.put("id", rs.getLong("id"));				
-				jsonObj.put("payment_delay_name", rs.getString("payment_delay_name"));							
-				jsonArr.put(jsonObj);
-			}
-			
-			return ResponseEntity.ok(jsonArr.toString());
+			return ResponseEntity.ok(jsonResult.toString());
 		} catch(Exception ex) {
 			ex.printStackTrace();
 			return ResponseEntity.badRequest().body(ex.getMessage());
@@ -1276,5 +1234,89 @@ public class StoreRestController {
 			}
 		}
 		return flag;
+	}
+	
+	public JSONArray getStoreType(Connection connection) throws Exception{
+		JSONArray jsonArr = new JSONArray();
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		
+		try {
+			stmt = connection.prepareStatement("SELECT * FROM store_type_lookup");
+			rs = (ResultSet) stmt.executeQuery();
+			
+			while(rs.next()) {
+				JSONObject jsonObj = new JSONObject();
+				jsonObj.put("id", rs.getLong("id"));				
+				jsonObj.put("store_type_name", rs.getString("store_type_name"));							
+				jsonArr.put(jsonObj);
+			}
+		} catch(Exception ex) {
+			throw ex;
+		} finally {
+			if (stmt != null) {
+				stmt.close();
+			}
+			if (rs != null) {
+				rs.close();
+			}
+		}
+		return jsonArr;
+	}
+	
+	public JSONArray getPaymentDelayType(Connection connection) throws Exception{
+		JSONArray jsonArr = new JSONArray();
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		
+		try {
+			stmt = connection.prepareStatement("SELECT * FROM payment_delay_lookup ORDER BY id");
+			rs = (ResultSet) stmt.executeQuery();
+			
+			while(rs.next()) {
+				JSONObject jsonObj = new JSONObject();
+				jsonObj.put("id", rs.getLong("id"));				
+				jsonObj.put("payment_delay_name", rs.getString("payment_delay_name"));							
+				jsonArr.put(jsonObj);
+			}
+		} catch(Exception ex) {
+			throw ex;
+		} finally {
+			if (stmt != null) {
+				stmt.close();
+			}
+			if (rs != null) {
+				rs.close();
+			}
+		}
+		return jsonArr;
+	}
+	
+	public JSONArray getStoreTaxType(Connection connection) throws Exception{
+		JSONArray jsonArr = new JSONArray();
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		
+		try {
+			stmt = connection.prepareStatement("SELECT * FROM store_tax_type_lookup");
+			rs = (ResultSet) stmt.executeQuery();
+			
+			while(rs.next()) {
+				JSONObject jsonObj = new JSONObject();
+				jsonObj.put("id", rs.getLong("store_tax_type_id"));				
+				jsonObj.put("store_tax_type_name", rs.getString("store_tax_type_name"));							
+				jsonArr.put(jsonObj);
+			}
+		} catch(Exception ex) {
+			throw ex;
+		} finally {
+			if (stmt != null) {
+				stmt.close();
+			}
+			if (rs != null) {
+				rs.close();
+			}
+		}
+		return jsonArr;
 	}
 }

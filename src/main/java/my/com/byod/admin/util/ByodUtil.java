@@ -256,6 +256,7 @@ public class ByodUtil {
 			
 		}catch(Exception ex) {
 			ex.printStackTrace();
+			throw ex;
 		} finally {
 			if (rs != null) {
 				rs.close();
@@ -265,5 +266,29 @@ public class ByodUtil {
 			}
 		}
 		return value;
+	}
+	
+	public boolean updateGeneralConfig(Connection connection, String parameter, String value) throws Exception {
+		PreparedStatement stmt = null;
+		boolean flag = false;
+		try {
+			stmt = connection.prepareStatement("UPDATE general_configuration SET value = ? WHERE parameter = ?");
+			stmt.setString(1, value);
+			stmt.setString(2, parameter);
+			int rowAffected = stmt.executeUpdate();
+			
+			if(rowAffected != 0) {
+				flag = true;		
+			}
+			
+		}catch(Exception ex) {
+			ex.printStackTrace();
+			throw ex;
+		} finally {
+			if (stmt != null) {
+				stmt.close();
+			}
+		}
+		return flag;
 	}
 }

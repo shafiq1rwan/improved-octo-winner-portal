@@ -159,6 +159,14 @@
 									</select>
 								</div>																	
 							</div>
+							<div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">	
+								<div class="form-group">
+									<label class="login-label">Tax Type</label>
+									<select class="form-control" ng-model="store.storeTaxType" ng-options="x.store_tax_type_name for x in storeTaxType track by x.id" required>
+										<option value="" disabled>Please choose a tax type</option>
+									</select>
+								</div>	
+							</div>					
 						</div>					
 						<div class="row">
 							 <div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">

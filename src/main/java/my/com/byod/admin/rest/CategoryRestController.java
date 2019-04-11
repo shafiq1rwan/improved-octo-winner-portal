@@ -280,11 +280,20 @@ public class CategoryRestController {
 				connection = dbConnectionUtil.retrieveConnection(request);
 				String brandId = byodUtil.getGeneralConfig(connection, "BRAND_ID");
 				String description = jsonCategoryData.isNull("category_description") ? null
-						: jsonCategoryData.getString("category_description");
-				String imagePath = jsonCategoryData.isNull("category_image_path") ? null
-						: byodUtil.saveImageFile(brandId,"imgC",jsonCategoryData.getString("category_image_path"), null);
+						: jsonCategoryData.getString("category_description");	
 				
-				String sqlStatement = "";
+				// getting existing category image
+				String existingImage = null;
+				String sqlStatement = "SELECT category_image_path FROM category WHERE id = ?;";
+				stmt = connection.prepareStatement(sqlStatement);
+				stmt.setLong(1, jsonCategoryData.getLong("id"));
+				ResultSet rs = stmt.executeQuery();
+				if(rs.next()) {
+					existingImage = rs.getString("category_image_path");
+				}
+				
+				String imagePath = jsonCategoryData.isNull("category_image_path") ? null
+						: byodUtil.saveImageFile(brandId,"imgC",jsonCategoryData.getString("category_image_path"), existingImage);
 				
 				if(imagePath == null)
 					sqlStatement = "UPDATE category SET category_name = ?, category_description = ?, is_active = ? WHERE id = ?;";

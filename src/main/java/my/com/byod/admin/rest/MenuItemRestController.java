@@ -376,8 +376,19 @@ public class MenuItemRestController {
 				}
 				connection = dbConnectionUtil.retrieveConnection(request);
 				String brandId = byodUtil.getGeneralConfig(connection, "BRAND_ID");
+				
+				// getting existing category image
+				String existingImage = null;
+				String sqlStatement = "SELECT menu_item_image_path FROM menu_item WHERE id = ?;";
+				stmt = connection.prepareStatement(sqlStatement);
+				stmt.setLong(1, jsonMenuItemData.getLong("id"));
+				ResultSet rs = stmt.executeQuery();
+				if(rs.next()) {
+					existingImage = rs.getString("menu_item_image_path");
+				}
+				
 				String imagePath = jsonMenuItemData.isNull("menu_item_image_path") ? null
-						: byodUtil.saveImageFile(brandId,"imgMI", jsonMenuItemData.getString("menu_item_image_path"), null); 
+						: byodUtil.saveImageFile(brandId,"imgMI", jsonMenuItemData.getString("menu_item_image_path"), existingImage); 
 				String description = jsonMenuItemData.isNull("menu_item_description") ? null
 						: jsonMenuItemData.getString("menu_item_description");
 				String altName = jsonMenuItemData.isNull("menu_item_alt_name") ? null 
@@ -392,7 +403,6 @@ public class MenuItemRestController {
 					}
 				}
 
-				String sqlStatement = ""; 
 				if(imagePath == null) {
 					sqlStatement = "UPDATE menu_item SET backend_id = ?, menu_item_name = ?, menu_item_alt_name = ?, menu_item_barcode = ?, menu_item_description =?, menu_item_base_price = ?, menu_item_type = ?, is_taxable = ? , is_discountable = ? WHERE id = ?;";
 				} else {

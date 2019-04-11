@@ -275,24 +275,28 @@
 		}
 		
 		$scope.publishMenu = function(id){
-			
+			$('#loading_modal').modal('show');
 			$http({
 				method : 'GET',
 				headers : {'Content-Type' : 'application/json'},
 				url : '${pageContext.request.contextPath}/menu/group_category/publish_menu?group_category_id='+id	
 			})
 			.then(function(response) {
+				$('#loading_modal').modal('hide');
 				console.log(response.data);
 				swal("Successfully published menu", {
 					icon: "success",
 				});
 			}, function(response){
+				$('#loading_modal').modal('hide');
+				$('.modal-backdrop').remove();
 				swal({
 					  title: "Failed to publish menu",
 					  text: response.data,
 					  icon: "warning",
-					  dangerMode: true,
+					  dangerMode: true
 					});
+				
 			});
 		}
 			

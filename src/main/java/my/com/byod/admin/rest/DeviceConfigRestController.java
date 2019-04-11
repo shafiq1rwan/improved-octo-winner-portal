@@ -58,6 +58,9 @@ public class DeviceConfigRestController {
 	private String byodUrl;
 	
 	@Autowired
+	private SettingRestController settingRestController;
+	
+	@Autowired
 	private ByodUtil byodUtil;
 	
 	@Autowired
@@ -348,6 +351,7 @@ public class DeviceConfigRestController {
 				}
 				else if(deviceInfo.getLong("deviceType")==3) {
 					// kiosk
+					result.put("setting", settingRestController.getBrandSetting(brandId, connection));
 				}
 				
 				result.put("storeInfo", storeInfo);				

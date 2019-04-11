@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-<title page-title>${applicationData.getAppName()}</title>
+<title page-title>${applicationData.getString('appName')}</title>
 
 <!-- JS File -->
 <script src="${pageContext.request.contextPath}/assets/plugins/jquery-3.3.1/js/jquery-3.3.1.min.js"></script>
@@ -21,26 +21,26 @@
 <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/order/main.css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/plugins/fontawesome-pro-5.6.1/css/all.css">
 
-<link rel="shortcut icon" type="image/png" href="${pageContext.request.contextPath}${applicationData.getShortcutLogoPath()}" />
+<link rel="shortcut icon" type="image/png" href="${pageContext.request.contextPath}${applicationData.getString('shortcutLogoPath')}" />
 
 <style>
 .main-bg {
-	background-image: url(${pageContext.request.contextPath}${applicationData.getMainBackgroundPath()}) !important;
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center;
+	background-image: url(${pageContext.request.contextPath}${applicationData.getString('mainBackgroundPath')}) !important;
+    background-size: cover !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
 }
 .main-color {
-	background: ${applicationData.getMainColor()} !important;
+	background: ${applicationData.getString('mainColor')} !important;
 }
 .sub-color {
-	background: ${applicationData.getSubColor()} !important;
+	background: ${applicationData.getString('subColor')} !important;
 }
 .main-text-color {
-	color: ${applicationData.getMainTextColor()} !important;
+	color: ${applicationData.getString('mainTextColor')} !important;
 }
 .sub-text-color {
-	color: ${applicationData.getMainTextColor()} !important;
+	color: ${applicationData.getString('mainTextColor')} !important;
 }
 .plus-color {
 	color: #28A13C;
@@ -49,28 +49,28 @@
 	color: #B32719;
 }
 button.btn-locale {
-	color: ${applicationData.getLocaleButtonColor()} !important;
-	border-color: ${applicationData.getLocaleButtonColor()};
+	color: ${applicationData.getString('localeButtonColor')} !important;
+	border-color: ${applicationData.getString('localeButtonColor')};
 	background: none !important;
 }
 button.btn-main {
-	color: ${applicationData.getMainButtonTextColor()} !important;
-	border-color: ${applicationData.getMainButtonBackgroundColor()};
-	background: ${applicationData.getMainButtonBackgroundColor()};
+	color: ${applicationData.getString('mainButtonTextColor')} !important;
+	border-color: ${applicationData.getString('mainButtonBackgroundColor')};
+	background: ${applicationData.getString('mainButtonBackgroundColor')};
 }
 button.btn-main:hover {
-	box-shadow: 0 0 5px ${applicationData.getMainButtonBackgroundHoverColor()} !important;
-	border-color: ${applicationData.getMainButtonBackgroundHoverColor()} !important;
-	background: ${applicationData.getMainButtonBackgroundHoverColor()} !important;
+	box-shadow: 0 0 5px ${applicationData.getString('mainButtonBackgroundHoverColor')} !important;
+	border-color: ${applicationData.getString('mainButtonBackgroundHoverColor')} !important;
+	background: ${applicationData.getString('mainButtonBackgroundHoverColor')} !important;
 }
 button.btn-main:focus, button.btn-main:active {
-	box-shadow: 0 0 10px ${applicationData.getMainButtonBackgroundFocusColor()} !important;
-	border-color: ${applicationData.getMainButtonBackgroundFocusColor()} !important;
-	background: ${applicationData.getMainButtonBackgroundFocusColor()} !important;
+	box-shadow: 0 0 10px ${applicationData.getString('mainButtonBackgroundFocusColor')} !important;
+	border-color: ${applicationData.getString('mainButtonBackgroundFocusColor')} !important;
+	background: ${applicationData.getString('mainButtonBackgroundFocusColor')} !important;
 }
 .dropdown-selector {
 	position: relative;
-	border: 1px solid ${applicationData.getMainTextColor()};
+	border: 1px solid ${applicationData.getString('mainTextColor')};
 	border-radius: 5px;
     vertical-align: middle;
 }

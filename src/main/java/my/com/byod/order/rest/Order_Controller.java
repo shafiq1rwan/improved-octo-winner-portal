@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
+import my.com.byod.admin.rest.SettingRestController;
 import my.com.byod.order.configuration.OrderConfiguration;
 import my.com.byod.order.util.AESEncryption;
 
@@ -16,6 +17,9 @@ public class Order_Controller {
 	
 	@Autowired
 	private OrderConfiguration orderConfiguration;
+	
+	@Autowired
+	private SettingRestController settingRestController;
 	
 	@RequestMapping(value = { "" }, method = { RequestMethod.GET })
 	public ModelAndView OrderDefaultPage() {
@@ -34,8 +38,7 @@ public class Order_Controller {
 		if (decryptedTokenString != null) {
 			String[] tokenSplitArry = decryptedTokenString.split("\\|;");
 			brandId = tokenSplitArry[0];
-			
-			model.addObject("applicationData", orderConfiguration.applicationData());
+			model.addObject("applicationData", settingRestController.getBrandSetting(Long.valueOf(brandId)));
 			model.addObject("brandId", brandId);
 			model.setViewName("/order/home");
 		} else {
@@ -48,7 +51,7 @@ public class Order_Controller {
 	@RequestMapping(value = { "/views/error/{brandId}" }, method = { RequestMethod.GET })
 	public ModelAndView errorPage(@PathVariable("brandId") String brandId) {
 		ModelAndView model = new ModelAndView();
-		model.addObject("applicationData", orderConfiguration.applicationData());
+		model.addObject("applicationData", settingRestController.getBrandSetting(Long.valueOf(brandId)));
 		model.setViewName("order/views/error");
 		return model;
 	}
@@ -56,7 +59,7 @@ public class Order_Controller {
 	@RequestMapping(value = { "/views/singleOrderPage/{brandId}" }, method = { RequestMethod.GET })
 	public ModelAndView categoryPage(@PathVariable("brandId") String brandId) {
 		ModelAndView model = new ModelAndView();
-		model.addObject("applicationData", orderConfiguration.applicationData());
+		model.addObject("applicationData", settingRestController.getBrandSetting(Long.valueOf(brandId)));
 		model.setViewName("order/views/singleOrderPage");
 		return model;
 	}

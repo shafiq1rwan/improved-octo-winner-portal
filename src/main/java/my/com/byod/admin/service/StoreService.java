@@ -14,7 +14,7 @@ public interface StoreService {
 
 	public int createStore(Store store, String brandId);
 
-	public int editStore(Long id, Store store, String brandId);
+	public int editStore(Long id, Store store, String brandId, String existingLogoPath);
 	
 	public int editStoreGroupCategoryId(Long groupCategoryId, Long id);
 	

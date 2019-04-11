@@ -10,6 +10,15 @@
 -- the definition of the procedure.
 -- ================================================
 USE tenant
+GO
+--PRINT 'Checking for the existence of this procedure'
+IF (SELECT OBJECT_ID('create_brand_db','P')) IS NOT NULL --means, the procedure already exists
+	BEGIN
+		--PRINT 'Procedure already exists. So, dropping it'
+		DROP PROC create_brand_db
+	END
+GO
+
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -169,6 +178,7 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 				ecpos BIT DEFAULT 0,
 				byod_payment_delay_id BIGINT DEFAULT 0,
 				kiosk_payment_delay_id BIGINT DEFAULT 0,
+				store_tax_type_id BIGINT DEFAULT 0,
 				created_date DATETIME NOT NULL
 			);
 
@@ -229,7 +239,13 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 			CREATE TABLE charge_type_lookup
 			(
 				charge_type_number INT UNIQUE NOT NULL, 
-				charge_type_name NVARCHAR(50) NOT NULL UNIQUE
+				charge_type_name NVARCHAR(50) NOT NULL
+			);
+
+			CREATE TABLE store_tax_type_lookup
+			(
+				store_tax_type_number INT UNIQUE NOT NULL, 
+				store_tax_type_name NVARCHAR(50) NOT NULL UNIQUE
 			);
 
 			CREATE TABLE group_category_tax_charge
@@ -510,6 +526,7 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 			INSERT INTO payment_delay_lookup VALUES (''Pay Now/Later''), (''Pay Now''), (''Pay Later'')
 
 			INSERT INTO charge_type_lookup VALUES (1, ''Total Tax''),(2, ''Overall Tax'');
+			INSERT INTO store_tax_type_lookup VALUES (1,''Exclusive Tax''), (2, ''Inclusive Tax'');
 
 			INSERT INTO device_type_lookup (id, name, prefix, backend_sequence, modified_date) VALUES (1, ''ECPOS'', ''EC'', 0, GETDATE())
 			INSERT INTO device_type_lookup (id, name, prefix, backend_sequence, modified_date) VALUES (2, ''BYOD'', ''BD'', 0, GETDATE())
@@ -546,6 +563,22 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 			INSERT INTO backend_sequence([id], [backend_sequence_code], [backend_sequence_name], [backend_sequence], [modified_date]) VALUES(7, ''MQF'',''Menu Query File'', 0,GETDATE());
 			INSERT INTO backend_sequence([id], [backend_sequence_code], [backend_sequence_name], [backend_sequence], [modified_date]) VALUES(8, ''TIF'',''Temporary Image File'', 0,GETDATE());
 			INSERT INTO backend_sequence([id], [backend_sequence_code], [backend_sequence_name], [backend_sequence], [modified_date]) VALUES(9, ''MIF'',''Menu Image File'', 0,GETDATE());
+			INSERT INTO backend_sequence([id], [backend_sequence_code], [backend_sequence_name], [backend_sequence], [modified_date]) VALUES(10, ''ST'',''Setting Logo Image'', 0,GETDATE());
+
+			INSERT general_configuration ([description], [parameter], [value]) VALUES (''BYOD Setting - Application Name'', ''appName'', ''BYOD'')
+			INSERT general_configuration ([description], [parameter], [value]) VALUES (''BYOD Setting - Main Logo Image'', ''mainLogoPath'', '''')
+			INSERT general_configuration ([description], [parameter], [value]) VALUES (''BYOD Setting - Shortcut Logo Image'', ''shortcutLogoPath'', '''')
+			INSERT general_configuration ([description], [parameter], [value]) VALUES (''BYOD Setting - Main Background Image'', ''mainBackgroundPath'', '''')
+			INSERT general_configuration ([description], [parameter], [value]) VALUES (''BYOD Setting - Landing Logo Image'', ''landingLogoPath'', '''')
+			INSERT general_configuration ([description], [parameter], [value]) VALUES (''BYOD Setting - Main Color'', ''mainColor'', ''#03d332'')
+			INSERT general_configuration ([description], [parameter], [value]) VALUES (''BYOD Setting - Sub Color'', ''subColor'', ''#000000'')
+			INSERT general_configuration ([description], [parameter], [value]) VALUES (''BYOD Setting - Main Text Color'', ''mainTextColor'', ''#008040'')
+			INSERT general_configuration ([description], [parameter], [value]) VALUES (''BYOD Setting - Sub Text Color'', ''subTextColor'', ''#FFFFFF'')
+			INSERT general_configuration ([description], [parameter], [value]) VALUES (''BYOD Setting - Locale Button Color'', ''localeButtonColor'', ''#00ffff'')
+			INSERT general_configuration ([description], [parameter], [value]) VALUES (''BYOD Setting - Main Button Text Color'', ''mainButtonTextColor'', ''#FFFFFF'')
+			INSERT general_configuration ([description], [parameter], [value]) VALUES (''BYOD Setting - Main Button Background Color'', ''mainButtonBackgroundColor'', ''#C41230'')
+			INSERT general_configuration ([description], [parameter], [value]) VALUES (''BYOD Setting - Main Button Background Hover Color'', ''mainButtonBackgroundHoverColor'', ''#C41230'')
+			INSERT general_configuration ([description], [parameter], [value]) VALUES (''BYOD Setting - Main Button Background Focus Color'', ''mainButtonBackgroundFocusColor'', ''#C41230'')
 
 			END
 			'

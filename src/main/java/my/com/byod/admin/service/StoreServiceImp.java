@@ -2,7 +2,6 @@ package my.com.byod.admin.service;
 
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,10 +73,13 @@ public class StoreServiceImp implements StoreService {
 	}
 
 	@Override
-	public int editStore(Long id, Store store, String brandId) {
+	public int editStore(Long id, Store store, String brandId, String existingLogoPath) {
 		try {
 			if(store.getLogoPath()!=null) {
-				String image = byodUtil.saveImageFile(brandId, "imgS", store.getLogoPath(), null);
+				if(existingLogoPath.equals("")) {
+					existingLogoPath = null;
+				}
+				String image = byodUtil.saveImageFile(brandId, "imgS", store.getLogoPath(), existingLogoPath);
 				return storeRepo.editStore(id, store, image);
 			}
 			else {

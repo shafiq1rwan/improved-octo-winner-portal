@@ -63,6 +63,9 @@ public class Store {
 	@JsonProperty("byod_payment_delay_id")
 	private Long byodPaymentDelayId;
 	
+	@JsonProperty("store_tax_type_id")
+	private Long storeTaxTypeId;
+	
 	public Store() {
 	}
 
@@ -216,6 +219,14 @@ public class Store {
 
 	public void setByodPaymentDelayId(Long byodPaymentDelayId) {
 		this.byodPaymentDelayId = byodPaymentDelayId;
+	}
+	
+	public Long getStoreTaxTypeId() {
+		return storeTaxTypeId;
+	}
+
+	public void setStoreTaxTypeId(Long storeTaxTypeId) {
+		this.storeTaxTypeId = storeTaxTypeId;
 	}
 
 }

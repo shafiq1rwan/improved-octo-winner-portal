@@ -19,8 +19,8 @@
 				</div>
 			</div>
 			<img class="align-self-center"
-				src="${pageContext.request.contextPath}${applicationData.getMainLogoPath()}"
-				alt="${applicationData.getAppName()}" height="60%">
+				src="${pageContext.request.contextPath}${applicationData.getString('mainLogoPath')}"
+				alt="${applicationData.getString('appName')}" height="60%">
 			<div class="align-self-center mr-1">
 				<button type="button" ng-click="getCheckData()" class="empty-btn badge-btn">
 					<i class="fal fa-list-alt xl-resp-font main-text-color"></i>
@@ -32,7 +32,7 @@
 				class="d-flex flex-column justify-content-center">
 				<img class="align-self-center"
 					style="max-height: 30%; max-width: 30%;"
-					src="${pageContext.request.contextPath}${applicationData.getLandingLogoPath()}">
+					src="${pageContext.request.contextPath}${applicationData.getString('landingLogoPath')}">
 				<div
 					class="align-self-center d-flex flex-row justify-content-center">
 					<span class="align-self-center xs-resp-font"><i class="fas fa-store-alt"></i>&nbsp;{{currentLanguageData.landing_storeName}}</span>
