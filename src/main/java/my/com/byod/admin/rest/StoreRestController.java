@@ -1303,7 +1303,7 @@ public class StoreRestController {
 			
 			while(rs.next()) {
 				JSONObject jsonObj = new JSONObject();
-				jsonObj.put("id", rs.getLong("store_tax_type_id"));				
+				jsonObj.put("id", rs.getLong("store_tax_type_number"));				
 				jsonObj.put("store_tax_type_name", rs.getString("store_tax_type_name"));							
 				jsonArr.put(jsonObj);
 			}

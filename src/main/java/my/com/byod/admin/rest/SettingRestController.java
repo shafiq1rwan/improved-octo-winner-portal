@@ -85,14 +85,14 @@ public class SettingRestController {
 				if(!existing.equals("")) {
 					existing = existing.substring(existing.lastIndexOf('/')+1);
 				}*/
-				byodUtil.updateGeneralConfig(connection, "mainLogoPath", byodUrl + displayFilePath + brandId + "/" + byodUtil.saveImageFile(brandId,"ST", jsonObj.getString("mainLogoPath"), null));
+				byodUtil.updateGeneralConfig(connection, "mainLogoPath", displayFilePath + brandId + "/" + byodUtil.saveImageFile(brandId,"ST", jsonObj.getString("mainLogoPath"), null));
 			}
 			if(jsonObj.has("shortcutLogoPath"))
-				byodUtil.updateGeneralConfig(connection, "shortcutLogoPath", byodUrl + displayFilePath + brandId + "/" + byodUtil.saveImageFile(brandId,"ST", jsonObj.getString("shortcutLogoPath"), null));
+				byodUtil.updateGeneralConfig(connection, "shortcutLogoPath", displayFilePath + brandId + "/" + byodUtil.saveImageFile(brandId,"ST", jsonObj.getString("shortcutLogoPath"), null));
 			if(jsonObj.has("mainBackgroundPath"))
-				byodUtil.updateGeneralConfig(connection, "mainBackgroundPath", byodUrl + displayFilePath + brandId + "/" + byodUtil.saveImageFile(brandId,"ST", jsonObj.getString("mainBackgroundPath"), null));
+				byodUtil.updateGeneralConfig(connection, "mainBackgroundPath", displayFilePath + brandId + "/" + byodUtil.saveImageFile(brandId,"ST", jsonObj.getString("mainBackgroundPath"), null));
 			if(jsonObj.has("landingLogoPath"))
-				byodUtil.updateGeneralConfig(connection, "landingLogoPath", byodUrl + displayFilePath + brandId + "/" + byodUtil.saveImageFile(brandId,"ST", jsonObj.getString("landingLogoPath"), null));
+				byodUtil.updateGeneralConfig(connection, "landingLogoPath", displayFilePath + brandId + "/" + byodUtil.saveImageFile(brandId,"ST", jsonObj.getString("landingLogoPath"), null));
 			byodUtil.updateGeneralConfig(connection, "appName", jsonObj.getString("appName"));
 			byodUtil.updateGeneralConfig(connection, "mainColor", jsonObj.getString("mainColor"));
 			byodUtil.updateGeneralConfig(connection, "subColor", jsonObj.getString("subColor"));

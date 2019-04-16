@@ -49,7 +49,7 @@
 									<div class="row">
 										<div class="col-4 col-sm-4 col-md-4 col-lg-4 col-xl-4">
 										 	<div class="form-group">
-										 		<img style="max-width:100%;max-height:100%;" ng-show="byod.mainLogo!=null" ng-src="{{byod.mainLogo}}" />	
+										 		<img style="max-width:100%;max-height:100%;" ng-show="byod.mainLogo!=null" ng-src="${pageContext.request.contextPath}{{byod.mainLogo}}" />	
 										 	</div>									
 											<div class="form-group">																							
 												<label class="login-label">Main Logo</label> 
@@ -58,7 +58,7 @@
 										</div>
 										<div class="col-4 col-sm-4 col-md-4 col-lg-4 col-xl-4">
 										 	<div class="form-group">
-										 		<img style="max-width:100%;max-height:100%;" ng-show="byod.shortcutLogo!=null" ng-src="{{byod.shortcutLogo}}" />	
+										 		<img style="max-width:100%;max-height:100%;" ng-show="byod.shortcutLogo!=null" ng-src="${pageContext.request.contextPath}{{byod.shortcutLogo}}" />	
 										 	</div>									
 											<div class="form-group">																							
 												<label class="login-label">Shortcut Logo</label> 
@@ -69,7 +69,7 @@
 									<div class="row">
 										<div class="col-4 col-sm-4 col-md-4 col-lg-4 col-xl-4">
 										 	<div class="form-group">
-										 		<img style="max-width:100%;max-height:100%;" ng-show="byod.mainBackground!=null" ng-src="{{byod.mainBackground}}" />	
+										 		<img style="max-width:100%;max-height:100%;" ng-show="byod.mainBackground!=null" ng-src="${pageContext.request.contextPath}{{byod.mainBackground}}" />	
 										 	</div>									
 											<div class="form-group">																							
 												<label class="login-label">Main Background Image</label> 
@@ -78,7 +78,7 @@
 										</div>
 										<div class="col-4 col-sm-4 col-md-4 col-lg-4 col-xl-4">
 										 	<div class="form-group">
-										 		<img style="max-width:100%;max-height:100%;" ng-show="byod.landingLogo!=null" ng-src="{{byod.landingLogo}}" />	
+										 		<img style="max-width:100%;max-height:100%;" ng-show="byod.landingLogo!=null" ng-src="${pageContext.request.contextPath}{{byod.landingLogo}}" />	
 										 	</div>									
 											<div class="form-group">																							
 												<label class="login-label">Landing Logo Image</label> 
