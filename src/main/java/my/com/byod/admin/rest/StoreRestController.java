@@ -349,52 +349,55 @@ public class StoreRestController {
 	}
 	
 	@PostMapping(value = {"/ecpos/createStaff"}, produces = "application/json")
-	public ResponseEntity<JSONObject> createStaff(@RequestBody String formfield, HttpServletRequest request, HttpServletResponse response) {
+	public ResponseEntity<?> createStaff(@RequestBody String formfield, HttpServletRequest request, HttpServletResponse response) {
 		//JSONArray jsonArray = new JSONArray();
 		JSONObject jsonObj = null;
 		Connection connection = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
-		int count = 1;
 		
 		try {
 			jsonObj  =  new JSONObject(formfield);
 			
 			if(!jsonObj.has("store_id")) {
-				jsonObj.put("error", "Unable to find store detail");
-				return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.NOT_FOUND);
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Unable to find store detail.");
 			}
 			if(jsonObj.getString("name")==null || jsonObj.getString("name").trim().equals("")) {
-				jsonObj.put("error", "Staff name cannot be empty");
-				return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.BAD_REQUEST);
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Staff name cannot be empty.");
 			}
 			if(jsonObj.getString("email")==null || jsonObj.getString("email").trim().equals("")) {
-				jsonObj.put("error", "Staff email cannot be empty");
-				return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.BAD_REQUEST);
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Staff email cannot be empty.");
 			}
 			if(jsonObj.getString("mobilePhone")==null || jsonObj.getString("mobilePhone").trim().equals("")) {
-				jsonObj.put("error", "Phone number cannot be empty");
-				return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.BAD_REQUEST);
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Phone number cannot be empty.");
 			}
 			if(jsonObj.getString("username")==null || jsonObj.getString("username").trim().equals("")) {
-				jsonObj.put("error", "Username cannot be empty");
-				return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.BAD_REQUEST);
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Username cannot be empty.");
 			}
 			if(jsonObj.getString("password")==null || jsonObj.getString("password").trim().equals("")) {
-				jsonObj.put("error", "Password cannot be empty");
-				return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.BAD_REQUEST);
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Password cannot be empty.");
 			}
 			if(!jsonObj.has("role_id") || jsonObj.getLong("role_id")==0) {
-				jsonObj.put("error", "Role cannot be empty");
-				return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.BAD_REQUEST);
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Role cannot be empty.");
 			}
 			
-			System.out.println(jsonObj.toString());
-			String encPassword = AESEncryption.encrypt(jsonObj.getString("password"));
-			
+			String encPassword = AESEncryption.encrypt(jsonObj.getString("password"));		
 			connection = dbConnectionUtil.retrieveConnection(request);
-			stmt = connection.prepareStatement("INSERT INTO staff (store_id, staff_name, staff_username, staff_password, staff_role, staff_contact_hp_number,"
-			 		+ "staff_contact_email, is_active, created_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, GETDATE()); SELECT SCOPE_IDENTITY();");
+			
+			// check for existing staff
+			String sqlStatement = "SELECT id FROM staff WHERE staff_username = ? AND store_id = ?";
+			stmt = connection.prepareStatement(sqlStatement);
+			stmt.setString(1, jsonObj.getString("username"));
+			stmt.setLong(2, jsonObj.getLong("store_id"));
+			rs = stmt.executeQuery();
+			if(rs.next()) {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Username has already existed for this store.");
+			}
+			
+			int count = 1;
+			sqlStatement = "INSERT INTO staff (store_id, staff_name, staff_username, staff_password, staff_role, staff_contact_hp_number,"
+			 		+ "staff_contact_email, is_active, created_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, GETDATE()); SELECT SCOPE_IDENTITY();";
+			stmt = connection.prepareStatement(sqlStatement);
 			stmt.setLong(count++, jsonObj.getLong("store_id"));
 			stmt.setString(count++, jsonObj.getString("name"));
 			stmt.setString(count++, jsonObj.getString("username"));
@@ -404,7 +407,7 @@ public class StoreRestController {
 			stmt.setString(count++, jsonObj.getString("email"));
 			stmt.setLong(count++, 1);
 			
-			rs = (ResultSet) stmt.executeQuery();
+			rs = stmt.executeQuery();
 			 
 			if(rs.next()) {
 				jsonObj.put("staff_id", rs.getInt(1));
@@ -1303,7 +1306,7 @@ public class StoreRestController {
 			
 			while(rs.next()) {
 				JSONObject jsonObj = new JSONObject();
-				jsonObj.put("id", rs.getLong("store_tax_type_number"));				
+				jsonObj.put("id", rs.getLong("store_tax_type_id"));				
 				jsonObj.put("store_tax_type_name", rs.getString("store_tax_type_name"));							
 				jsonArr.put(jsonObj);
 			}

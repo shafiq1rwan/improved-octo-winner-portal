@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <style>
-.form-section {
-   padding-left:15px;
-   border-left:2px solid #FF851B;
+.ng-hide.ng-hide-animate{
+     display: none !important;
 }
 </style>
 <body class="adminbody">
@@ -225,7 +224,13 @@
 									  </label>
 									</div>
 								</div>
-							</div>							
+							</div>
+							<div ng-show="store.ecpos" class="col-8 col-sm-8 col-md-8 col-lg-8 col-xl-8">			
+								<div class="form-group">
+									<label class="login-label">ECPOS URL</label>
+									<input class="form-control" name="ecposUrl" placeholder="IP Address" ng-model="store.ecposUrl" type="text" required> 
+								</div>																	
+							</div>					
 						</div>
 					</div>
 					<hr>

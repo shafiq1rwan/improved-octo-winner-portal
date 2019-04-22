@@ -36,7 +36,8 @@
 															$scope.store.storeType == null || $scope.store.storeType =='' ||
 																$scope.store.kioskPaymentDelayType == null || $scope.store.kioskPaymentDelayType =='' ||
 																	$scope.store.byodPaymentDelayType == null || $scope.store.byodPaymentDelayType =='' ||
-																		$scope.store.storeTaxType == null || $scope.store.storeTaxType == ''){
+																		$scope.store.storeTaxType == null || $scope.store.storeTaxType == '' ||
+																			$scope.store.ecpos && $scope.store.ecposUrl == null || $scope.store.ecpos && $scope.store.ecposUrl ==''){
 			}
 			else if($scope.action=='create' && $scope.store.imagePath == null || $scope.action=='create' && $scope.store.imagePath==''){
 				swal({
@@ -112,7 +113,8 @@
 					store_type_id : $scope.store.storeType.id,
 					kiosk_payment_delay_id : $scope.store.kioskPaymentDelayType.id,
 					byod_payment_delay_id : $scope.store.byodPaymentDelayType.id,
-					store_tax_type_id : $scope.store.storeTaxType.id
+					store_tax_type_id : $scope.store.storeTaxType.id,
+					ecpos_url : $scope.store.ecpos ? $scope.store.ecposUrl: undefined
 				}
 				
 			console.log(postdata);
@@ -278,6 +280,7 @@
 						$scope.store.kioskPaymentDelayType.id = response.data.kiosk_payment_delay_id;
 						$scope.store.byodPaymentDelayType.id = response.data.byod_payment_delay_id;
 						$scope.store.storeTaxType.id = response.data.store_tax_type_id;
+						$scope.store.ecposUrl = response.data.ecpos_url;
 						 $('#operatingStartTime').datetimepicker({
 							    defaultDate: moment($scope.store.operatingStartTime, "HH:mm:ss"),
 							    format: 'LT'

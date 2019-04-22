@@ -111,7 +111,7 @@
 		    <form id="staffListForm" method="POST" accept-charset="UTF-8" role="form" class="form-signin">
 		      <div class="modal-header">
 		        <h5>Staff List</h5>	
-		        <button type="button" class="close" data-dismiss="modal" ng-click="resetModal()" aria-label="Close">
+		        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
 		          <span aria-hidden="true">&times;</span>
 		        </button>
 		      </div>
@@ -149,7 +149,7 @@
 		      <div class="modal-header">
 		        <h5 ng-show="action=='create'">Create Staff</h5>
 		        <h5 ng-show="action=='update'">Edit Staff</h5>		
-		        <button type="button" class="close" data-dismiss="modal" ng-click="resetModal()" aria-label="Close">
+		        <button type="button" class="close" ng-click="resetModal()" aria-label="Close">
 		          <span aria-hidden="true">&times;</span>
 		        </button>
 		      </div>

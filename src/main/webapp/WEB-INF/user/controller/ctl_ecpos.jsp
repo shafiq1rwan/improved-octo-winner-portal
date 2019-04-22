@@ -92,10 +92,9 @@
 				data : postdata
 			})
 			.then(function(response) {
-
 				if (response.status == "403") {
 					alert("Session TIME OUT");
-					$(location).attr('href','${pageContext.request.contextPath}/admin');			
+					$(location).attr('href','${pageContext.request.contextPath}/user');			
 				} else if(response.status == "200") {
 					// ok
 					if($scope.action=='create'){
@@ -113,13 +112,22 @@
 					$('#staffListModal').modal('toggle');
 					$scope.refreshTable();
 				}
+			}, function(response){
+				console.log(response);
+				swal({
+				  title: "Error",
+				  text: response.data,
+				  icon: "warning",
+				  dangerMode: true,
+				});
 			});
 		}
 		
 		$scope.resetModal = function(){
 			$scope.action = {};
-			$scope.staff = {	
-};
+			$scope.staff = {};
+			$('#staffModal').modal('toggle');
+			$('#staffListModal').modal('toggle');
 		}
 		
 		$scope.refreshTable = function(){
@@ -181,7 +189,8 @@
 						$scope.staff.username = response.data.username;
 						$scope.staff.password = response.data.password;
 						$scope.staff.isActive = response.data.isActive;
-
+						
+						$('#staffListModal').modal('toggle');
 						$('#staffModal').modal('toggle');
 					}
 				});
