@@ -245,7 +245,7 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 
 			CREATE TABLE store_tax_type_lookup
 			(
-				store_tax_type_number INT UNIQUE NOT NULL, 
+				store_tax_type_id INT UNIQUE NOT NULL, 
 				store_tax_type_name NVARCHAR(50) NOT NULL UNIQUE
 			);
 
