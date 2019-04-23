@@ -18,10 +18,10 @@
 				if(response.status == "200") {
 					console.log(response.data);
 					$scope.byod.appName = response.data.appName;
-					$scope.byod.mainLogo = response.data.mainLogoPath;
-					$scope.byod.shortcutLogo = response.data.shortcutLogoPath;
-					$scope.byod.mainBackground = response.data.mainBackgroundPath;
-					$scope.byod.landingLogo = response.data.landingLogoPath;
+					$scope.byod.mainLogo = '${pageContext.request.contextPath}' + response.data.mainLogoPath;
+					$scope.byod.shortcutLogo = '${pageContext.request.contextPath}' + response.data.shortcutLogoPath;
+					$scope.byod.mainBackground = '${pageContext.request.contextPath}' + response.data.mainBackgroundPath;
+					$scope.byod.landingLogo = '${pageContext.request.contextPath}' + response.data.landingLogoPath;
 					$scope.byod.mainColor = response.data.mainColor;
 					$scope.byod.subColor = response.data.subColor;
 					$scope.byod.mainTextColor = response.data.mainTextColor;
