@@ -422,7 +422,6 @@ public class DeviceConfigRestController {
 				connection.setAutoCommit(false);
 				
 				JSONObject jsonData = new JSONObject(data);
-				System.out.println(jsonData.toString());
 				
 				JSONArray checks = null;
 				JSONArray checkDetails = null;
@@ -711,9 +710,9 @@ public class DeviceConfigRestController {
 								
 								stmt.setLong(1, taxCharge.getLong("check_number"));				
 								stmt.setLong(2, taxCharge.getLong("tax_charge_id"));
-								stmt.setBigDecimal(3, new BigDecimal(taxCharge.getString("total_charge_amount")));
-								stmt.setBigDecimal(4, new BigDecimal(taxCharge.getString("total_charge_amount_rounding_adjustment")));
-								stmt.setBigDecimal(5, new BigDecimal(taxCharge.getString("grand_total_charge_amount")));
+								stmt.setDouble(3, taxCharge.getDouble("total_charge_amount"));
+								stmt.setDouble(4, taxCharge.getDouble("total_charge_amount_rounding_adjustment"));
+								stmt.setDouble(5, taxCharge.getDouble("grand_total_charge_amount"));
 								stmt.setLong(6, taxCharge.getLong("check_id"));	
 								stmt.setLong(7, storeId);
 								
@@ -725,9 +724,9 @@ public class DeviceConfigRestController {
 								stmt.setLong(2, taxCharge.getLong("check_id"));	
 								stmt.setLong(3, taxCharge.getLong("check_number"));				
 								stmt.setLong(4, taxCharge.getLong("tax_charge_id"));
-								stmt.setBigDecimal(5, new BigDecimal(taxCharge.getString("total_charge_amount")));
-								stmt.setBigDecimal(6, new BigDecimal(taxCharge.getString("total_charge_amount_rounding_adjustment")));
-								stmt.setBigDecimal(7, new BigDecimal(taxCharge.getString("grand_total_charge_amount")));
+								stmt.setDouble(5, taxCharge.getDouble("total_charge_amount"));
+								stmt.setDouble(6, taxCharge.getDouble("total_charge_amount_rounding_adjustment"));
+								stmt.setDouble(7, taxCharge.getDouble("grand_total_charge_amount"));
 								
 								stmt.executeUpdate();
 								stmt.close();
@@ -777,9 +776,9 @@ public class DeviceConfigRestController {
 							stmt.setLong(2, taxCharge.getLong("check_id"));	
 							stmt.setLong(3, taxCharge.getLong("check_number"));				
 							stmt.setLong(4, taxCharge.getLong("tax_charge_id"));
-							stmt.setBigDecimal(5, new BigDecimal(taxCharge.getString("total_charge_amount")));
-							stmt.setBigDecimal(6, new BigDecimal(taxCharge.getString("total_charge_amount_rounding_adjustment")));
-							stmt.setBigDecimal(7, new BigDecimal(taxCharge.getString("grand_total_charge_amount")));
+							stmt.setDouble(5, taxCharge.getDouble("total_charge_amount"));
+							stmt.setDouble(6, taxCharge.getDouble("total_charge_amount_rounding_adjustment"));
+							stmt.setDouble(7, taxCharge.getDouble("grand_total_charge_amount"));
 							
 							stmt.executeUpdate();
 							stmt.close();
