@@ -246,12 +246,14 @@ public class BrandManagementRestController {
 			String name = jsonData.getString("name");
 			Long id = jsonData.getLong("id");
 			int rowAffected = 0;
+			
+			System.out.println(data);
 
 			if (checkDuplicateDbName(name, id).isEmpty()) {
 				rowAffected = jdbcTemplate.update(
 						"UPDATE brands SET name = ?,brand_db_domain = ?,brand_db_name = ?,brand_db_user = ?,brand_db_password = ?,brand_db_port = ? WHERE id = ?",
 						new Object[] { name, jsonData.getString("db_domain"), jsonData.getString("db_name"),
-								jsonData.getString("db_username"), jsonData.getString("db_password"),
+								jsonData.getString("db_user"), jsonData.getString("db_password"),
 								jsonData.getInt("db_port"), id });
 			} else {
 				return ResponseEntity.status(HttpStatus.CONFLICT).contentType(MediaType.TEXT_PLAIN)
@@ -277,7 +279,7 @@ public class BrandManagementRestController {
 	}
 
 	private String checkDuplicateDbName(String name, Long id) {
-		String SELECT_NAME_QUERY = "SELECT DISTINCT name FROM brands WHERE LOWER(name) LIKE LOWER(?) AND != ?";
+		String SELECT_NAME_QUERY = "SELECT DISTINCT name FROM brands WHERE LOWER(name) LIKE LOWER(?) AND id != ?";
 		String resultString = "";
 
 		if (id != null) {

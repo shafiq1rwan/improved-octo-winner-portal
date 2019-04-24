@@ -11,10 +11,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
 @Controller
-@RequestMapping("/byod")
 public class ByodController {
 
-	@GetMapping(value = "/byod-panel")
+	@GetMapping(value = {"","/","/byod-panel"})
 	public ModelAndView adminPanel(HttpServletRequest request, HttpServletResponse response) {
 		request.getSession().removeAttribute("brand_id");
 		request.getSession().removeAttribute("access_rights");

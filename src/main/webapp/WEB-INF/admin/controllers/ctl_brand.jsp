@@ -107,7 +107,7 @@
 						console.log("Success");
 						$(location)
 						.attr('href',
-								'${pageContext.request.contextPath}/user');
+								'${pageContext.request.contextPath}/user/#!Router_store');
 					},
 					function(response) {
 						alert(response.data);

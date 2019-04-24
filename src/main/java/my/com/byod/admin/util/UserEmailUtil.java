@@ -23,9 +23,9 @@ public class UserEmailUtil {
 
 			helper.setTo(email);
 			helper.setSubject("BYOD Login Password");
-			helper.setText("Dear " + username
-					+ ", \r\nThank you for registering with our BYOD solution. Here is you password for login :" + randomPass
-					+ "\r\nPlease click on the link to login : <a href='http://localhost:8081/user/signin'>Byod</a>", true);
+			helper.setText("Dear " + username + ","
+					+ "<br><br>Thank you for registering with our BYOD solution. Here is you password for login :" + randomPass
+					+ "<br>Please click on the link to login : <a href='http://localhost:8081/user/signin'>Byod</a>", true);
 
 			emailSender.send(message);
 		} catch (MessagingException e) {
