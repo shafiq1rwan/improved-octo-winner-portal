@@ -89,6 +89,9 @@ public class SettingRestController {
 						existing = null;
 					}
 				}
+				else {
+					existing = null;
+				}
 				byodUtil.updateGeneralConfig(connection, "mainLogoPath", displayFilePath + brandId + "/" + byodUtil.saveImageFile(brandId,"ST", jsonObj.getString("mainLogoPath"), existing));
 			}
 			if(jsonObj.has("shortcutLogoPath")) {
@@ -100,6 +103,9 @@ public class SettingRestController {
 						existing = null;
 					}
 				}
+				else {
+					existing = null;
+				}
 				byodUtil.updateGeneralConfig(connection, "shortcutLogoPath", displayFilePath + brandId + "/" + byodUtil.saveImageFile(brandId,"ST", jsonObj.getString("shortcutLogoPath"), existing));
 			}
 			if(jsonObj.has("mainBackgroundPath")) {
@@ -110,6 +116,8 @@ public class SettingRestController {
 					if(locationHeader.substring(locationHeader.lastIndexOf('/')+1).equals("default")) {
 						existing = null;
 					}
+				}else {
+					existing = null;
 				}
 				byodUtil.updateGeneralConfig(connection, "mainBackgroundPath", displayFilePath + brandId + "/" + byodUtil.saveImageFile(brandId,"ST", jsonObj.getString("mainBackgroundPath"), existing));
 			}
@@ -121,6 +129,8 @@ public class SettingRestController {
 					if(locationHeader.substring(locationHeader.lastIndexOf('/')+1).equals("default")) {
 						existing = null;
 					}
+				}else {
+					existing = null;
 				}
 				byodUtil.updateGeneralConfig(connection, "landingLogoPath", displayFilePath + brandId + "/" + byodUtil.saveImageFile(brandId,"ST", jsonObj.getString("landingLogoPath"), existing));
 			}
