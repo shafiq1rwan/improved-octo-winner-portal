@@ -415,6 +415,7 @@ public class StoreRestController {
 			
 		}catch(Exception ex) {
 			ex.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Server error. Please contact support.");
 		} finally {
 			if (connection != null) {
 				try {

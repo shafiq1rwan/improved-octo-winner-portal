@@ -81,18 +81,49 @@ public class SettingRestController {
 			connection = dbConnectionUtil.retrieveConnection(request);
 			String brandId = String.valueOf(dbConnectionUtil.getBrandId(request));
 			if(jsonObj.has("mainLogoPath")) {
-				/*String existing = byodUtil.getGeneralConfig(connection, "mainLogoPath");
+				String existing = byodUtil.getGeneralConfig(connection, "mainLogoPath");
 				if(!existing.equals("")) {
+					String locationHeader = existing.substring(0, existing.lastIndexOf('/'));
 					existing = existing.substring(existing.lastIndexOf('/')+1);
-				}*/
-				byodUtil.updateGeneralConfig(connection, "mainLogoPath", displayFilePath + brandId + "/" + byodUtil.saveImageFile(brandId,"ST", jsonObj.getString("mainLogoPath"), null));
+					if(locationHeader.substring(locationHeader.lastIndexOf('/')+1).equals("default")) {
+						existing = null;
+					}
+				}
+				byodUtil.updateGeneralConfig(connection, "mainLogoPath", displayFilePath + brandId + "/" + byodUtil.saveImageFile(brandId,"ST", jsonObj.getString("mainLogoPath"), existing));
 			}
-			if(jsonObj.has("shortcutLogoPath"))
-				byodUtil.updateGeneralConfig(connection, "shortcutLogoPath", displayFilePath + brandId + "/" + byodUtil.saveImageFile(brandId,"ST", jsonObj.getString("shortcutLogoPath"), null));
-			if(jsonObj.has("mainBackgroundPath"))
-				byodUtil.updateGeneralConfig(connection, "mainBackgroundPath", displayFilePath + brandId + "/" + byodUtil.saveImageFile(brandId,"ST", jsonObj.getString("mainBackgroundPath"), null));
-			if(jsonObj.has("landingLogoPath"))
-				byodUtil.updateGeneralConfig(connection, "landingLogoPath", displayFilePath + brandId + "/" + byodUtil.saveImageFile(brandId,"ST", jsonObj.getString("landingLogoPath"), null));
+			if(jsonObj.has("shortcutLogoPath")) {
+				String existing = byodUtil.getGeneralConfig(connection, "shortcutLogoPath");
+				if(!existing.equals("")) {
+					String locationHeader = existing.substring(0, existing.lastIndexOf('/'));
+					existing = existing.substring(existing.lastIndexOf('/')+1);
+					if(locationHeader.substring(locationHeader.lastIndexOf('/')+1).equals("default")) {
+						existing = null;
+					}
+				}
+				byodUtil.updateGeneralConfig(connection, "shortcutLogoPath", displayFilePath + brandId + "/" + byodUtil.saveImageFile(brandId,"ST", jsonObj.getString("shortcutLogoPath"), existing));
+			}
+			if(jsonObj.has("mainBackgroundPath")) {
+				String existing = byodUtil.getGeneralConfig(connection, "mainBackgroundPath");
+				if(!existing.equals("")) {
+					String locationHeader = existing.substring(0, existing.lastIndexOf('/'));
+					existing = existing.substring(existing.lastIndexOf('/')+1);
+					if(locationHeader.substring(locationHeader.lastIndexOf('/')+1).equals("default")) {
+						existing = null;
+					}
+				}
+				byodUtil.updateGeneralConfig(connection, "mainBackgroundPath", displayFilePath + brandId + "/" + byodUtil.saveImageFile(brandId,"ST", jsonObj.getString("mainBackgroundPath"), existing));
+			}
+			if(jsonObj.has("landingLogoPath")) {
+				String existing = byodUtil.getGeneralConfig(connection, "landingLogoPath");
+				if(!existing.equals("")) {
+					String locationHeader = existing.substring(0, existing.lastIndexOf('/'));
+					existing = existing.substring(existing.lastIndexOf('/')+1);
+					if(locationHeader.substring(locationHeader.lastIndexOf('/')+1).equals("default")) {
+						existing = null;
+					}
+				}
+				byodUtil.updateGeneralConfig(connection, "landingLogoPath", displayFilePath + brandId + "/" + byodUtil.saveImageFile(brandId,"ST", jsonObj.getString("landingLogoPath"), existing));
+			}
 			byodUtil.updateGeneralConfig(connection, "appName", jsonObj.getString("appName"));
 			byodUtil.updateGeneralConfig(connection, "mainColor", jsonObj.getString("mainColor"));
 			byodUtil.updateGeneralConfig(connection, "subColor", jsonObj.getString("subColor"));
