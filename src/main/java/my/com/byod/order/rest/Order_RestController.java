@@ -316,64 +316,77 @@ public class Order_RestController {
 			String decryptedTokenString = AESEncryption.decrypt(token);
 			String[] tokenSplitArry = decryptedTokenString.split("\\|;");
 			String brandId = tokenSplitArry[0];
+			String storeId = tokenSplitArry[1];
 			String tableId = tokenSplitArry[2];
 			String checkNo = tokenSplitArry[3];
 
 			connection = dbConnectionUtil.getConnection(Long.parseLong(brandId));
-			JSONObject verifyResult = verifyOrder(cartData, connection);
-			JSONArray sendOrderList = verifyResult.getJSONArray("sendOrderList");
-			boolean isCheckSuccess = verifyResult.getBoolean("isCheckSuccess");
-			resultCode = verifyResult.getString("resultMessage");
-			resultMessage = verifyResult.getString("resultMessage");
+			
+			String sqlStatement = "SELECT ecpos_url FROM store WHERE id = ?";
+			PreparedStatement ps1 = connection.prepareStatement(sqlStatement);
+			ps1.setInt(1, Integer.parseInt(storeId));
+			ResultSet rs1 = ps1.executeQuery();
+			if (rs1.next()) {
+				String headerURL = rs1.getString("ecpos_url");
+				
+				JSONObject verifyResult = verifyOrder(cartData, connection);
+				JSONArray sendOrderList = verifyResult.getJSONArray("sendOrderList");
+				boolean isCheckSuccess = verifyResult.getBoolean("isCheckSuccess");
+				resultCode = verifyResult.getString("resultMessage");
+				resultMessage = verifyResult.getString("resultMessage");
 
-			JSONObject sendData = new JSONObject();
-			sendData.put("order", sendOrderList);
-			// 1-Table, 2-Take Away
-			sendData.put("orderType", 1);
-			sendData.put("deviceType", "byod");
-			sendData.put("checkNumber", checkNo);
-			sendData.put("tableNumber", tableId);
-			sendData.put("hashData", ByodUtil.genSecureHash("SHA-256",
-					"SendOrder".concat(sendOrderList.toString().concat(checkNo).concat(tableId))));
-			System.out.println(sendData);
+				JSONObject sendData = new JSONObject();
+				sendData.put("order", sendOrderList);
+				// 1-Table, 2-Take Away
+				sendData.put("orderType", 1);
+				sendData.put("deviceType", "byod");
+				sendData.put("checkNumber", checkNo);
+				sendData.put("tableNumber", tableId);
+				sendData.put("hashData", ByodUtil.genSecureHash("SHA-256",
+						"SendOrder".concat(sendOrderList.toString().concat(checkNo).concat(tableId))));
+				System.out.println(sendData);
 
-			if (isCheckSuccess) {
-				String url = "http://localhost:8081/device/order/submit";
-				URL object = new URL(url);
-				HttpURLConnection con = (HttpURLConnection) object.openConnection();
-				con.setDoOutput(true);
-				con.setDoInput(true);
-				con.setRequestProperty("Content-Type", "application/json");
-				con.setRequestProperty("Accept", "application/json");
-				con.setRequestMethod("POST");
+				if (isCheckSuccess) {
+					String url = headerURL + "/device/order/submit";
+					URL object = new URL(url);
+					HttpURLConnection con = (HttpURLConnection) object.openConnection();
+					con.setDoOutput(true);
+					con.setDoInput(true);
+					con.setRequestProperty("Content-Type", "application/json");
+					con.setRequestProperty("Accept", "application/json");
+					con.setRequestMethod("POST");
 
-				OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
-				wr.write(sendData.toString());
-				wr.flush();
+					OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
+					wr.write(sendData.toString());
+					wr.flush();
 
-				StringBuilder sb = new StringBuilder();
-				int httpResult = con.getResponseCode();
-				if (httpResult == HttpURLConnection.HTTP_OK) {
-					BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), "utf-8"));
-					String line = null;
-					while ((line = br.readLine()) != null) {
-						sb.append(line + "\n");
-					}
-					br.close();
+					StringBuilder sb = new StringBuilder();
+					int httpResult = con.getResponseCode();
+					if (httpResult == HttpURLConnection.HTTP_OK) {
+						BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), "utf-8"));
+						String line = null;
+						while ((line = br.readLine()) != null) {
+							sb.append(line + "\n");
+						}
+						br.close();
 
-					JSONObject returnObject = new JSONObject(sb.toString());
-					System.out.println(returnObject);
-					if (returnObject.has("resultCode") && returnObject.getString("resultCode").equals("00")) {
-						resultCode = "00";
-						resultMessage = "Success";
+						JSONObject returnObject = new JSONObject(sb.toString());
+						System.out.println(returnObject);
+						if (returnObject.has("resultCode") && returnObject.getString("resultCode").equals("00")) {
+							resultCode = "00";
+							resultMessage = "Success";
+						} else {
+							resultCode = "E06";
+							resultMessage = "Verification Failed.";
+						}
 					} else {
-						resultCode = "E06";
-						resultMessage = "Verification Failed.";
+						resultCode = "E07";
+						resultMessage = "POS Invalid Response";
 					}
-				} else {
-					resultCode = "E07";
-					resultMessage = "POS Invalid Response";
 				}
+			} else {
+				resultCode = "E08";
+				resultMessage = "Invalid Configuration";
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
