@@ -30,16 +30,12 @@
 									$scope.store.country == null || $scope.store.country=='' || 
 										$scope.store.operatingStartTime == null || $scope.store.operatingStartTime=='' || 
 											$scope.store.operatingEndTime == null || $scope.store.operatingEndTime=='' ||
-												$scope.store.contactPerson == null || $scope.store.contactPerson=='' ||
-													$scope.store.mobileNumber == null || $scope.store.mobileNumber=='' ||
-														$scope.store.email == null || $scope.store.email=='' ||
-															$scope.store.storeType == null || $scope.store.storeType =='' ||
-																$scope.store.kioskPaymentDelayType == null || $scope.store.kioskPaymentDelayType =='' ||
-																	$scope.store.byodPaymentDelayType == null || $scope.store.byodPaymentDelayType =='' ||
-																		$scope.store.storeTaxType == null || $scope.store.storeTaxType == '' ||
-																			$scope.store.ecpos && $scope.store.ecposUrl == null || $scope.store.ecpos && $scope.store.ecposUrl ==''){
+												$scope.store.storeType == null || $scope.store.storeType =='' ||
+													$scope.store.storeTaxType == null || $scope.store.storeTaxType == '' ){
+				$('#collapseOne').collapse('show');
 			}
 			else if($scope.action=='create' && $scope.store.imagePath == null || $scope.action=='create' && $scope.store.imagePath==''){
+				$('#collapseOne').collapse('show');
 				swal({
 					  title: "Error",
 					  text: "Please upload an image",
@@ -47,6 +43,18 @@
 					  dangerMode: true,
 					});
 				focus($('#storeImage'));
+			}
+			else if($scope.store.contactPerson == null || $scope.store.contactPerson=='' ||
+						$scope.store.mobileNumber == null || $scope.store.mobileNumber=='' ||
+							$scope.store.email == null || $scope.store.email==''){
+				$('#collapseTwo').collapse('show');
+			}
+			else if($scope.store.ecpos && $scope.store.ecposUrl == null || $scope.store.ecpos && $scope.store.ecposUrl ==''){
+				$('#collapseThree').collapse('show');
+			}
+			else if($scope.store.kioskPaymentDelayType == null || $scope.store.kioskPaymentDelayType =='' ||
+						$scope.store.byodPaymentDelayType == null || $scope.store.byodPaymentDelayType ==''){
+				$('#collapseFour').collapse('show');
 			}
 			else{
 				if(publish==1){
@@ -171,7 +179,12 @@
 			$('#operatingStartTime').datetimepicker('destroy');
 			
 			$('#operatingEndTime').datetimepicker('clear');
-			$('#operatingEndTime').datetimepicker('destroy') ;
+			$('#operatingEndTime').datetimepicker('destroy');
+			
+			$('#collapseOne').collapse('hide');
+			$('#collapseTwo').collapse('hide');
+			$('#collapseThree').collapse('hide');
+			$('#collapseFour').collapse('hide');
 		}	
 		
 		var previewDefault;
