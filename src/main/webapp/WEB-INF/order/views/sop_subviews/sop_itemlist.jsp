@@ -5,7 +5,7 @@
 			<div class="align-self-center">
 				<button type="button" ng-click="hideFromView('itemList')"
 					class="empty-btn">
-					<i class="fas fa-chevron-left main-text-color xl-resp-font"></i>
+					<i class="fas fa-chevron-left sub-text-color xl-resp-font"></i>
 				</button>
 			</div>
 			<span
@@ -15,7 +15,7 @@
 			<div class="align-self-center mr-1">
 				<button type="button" ng-click="switchToView('itemCart')"
 					class="empty-btn badge-btn">
-					<i class="fal fa-shopping-cart main-text-color xl-resp-font"></i> <span
+					<i class="fal fa-shopping-cart sub-text-color xl-resp-font"></i> <span
 						class="badge badge-pill badge-danger xxs-resp-font ng-binding">{{cart.length}}</span>
 				</button>
 			</div>

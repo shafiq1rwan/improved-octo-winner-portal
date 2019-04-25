@@ -40,7 +40,7 @@
 	color: ${applicationData.getString('mainTextColor')} !important;
 }
 .sub-text-color {
-	color: ${applicationData.getString('mainTextColor')} !important;
+	color: ${applicationData.getString('subTextColor')} !important;
 }
 .plus-color {
 	color: #28A13C;

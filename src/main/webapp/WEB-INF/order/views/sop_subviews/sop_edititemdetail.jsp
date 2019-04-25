@@ -4,7 +4,7 @@
 			<div class="align-self-center">
 				<button type="button" ng-click="hideFromView('editItemDetail')"
 					class="empty-btn">
-					<i class="fas fa-chevron-left main-text-color xl-resp-font"></i>
+					<i class="fas fa-chevron-left sub-text-color xl-resp-font"></i>
 				</button>
 			</div>
 		</div>

@@ -5,11 +5,11 @@
 			<div class="align-self-center">
 				<button type="button" ng-click="hideFromView('checkList')"
 					class="empty-btn">
-					<i class="fas fa-chevron-left main-text-color xl-resp-font"></i>
+					<i class="fas fa-chevron-left sub-text-color xl-resp-font"></i>
 				</button>
 			</div>
 			<div
-				class="text-truncate align-self-center main-text-color md-resp-font">
+				class="text-truncate align-self-center sub-text-color md-resp-font">
 				<b>Order List</b>
 			</div>
 			<div>
@@ -96,7 +96,7 @@
 							</div>
 						</div>
 					</div>
-					<div class="col-12 pl-1 pr-1 mb-2">
+					<div class="col-12 pl-1 pr-1 mb-2 text-center">
 						<span>--End Of Order--</span>
 					</div>
 					<!--<div class="col-12 cart-item pl-1 pr-1 mb-2">

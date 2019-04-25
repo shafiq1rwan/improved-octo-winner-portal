@@ -5,11 +5,11 @@
 			<div class="align-self-center">
 				<button type="button" ng-click="hideFromView('itemCart')"
 					class="empty-btn">
-					<i class="fas fa-chevron-left main-text-color xl-resp-font"></i>
+					<i class="fas fa-chevron-left sub-text-color xl-resp-font"></i>
 				</button>
 			</div>
 			<div
-				class="text-truncate align-self-center main-text-color md-resp-font">
+				class="text-truncate align-self-center sub-text-color md-resp-font">
 				<b>{{currentLanguageData.cart_summary}}</b>
 			</div>
 			<div>

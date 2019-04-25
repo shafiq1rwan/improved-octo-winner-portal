@@ -5,17 +5,17 @@
 			<div class="align-self-center">
 				<button type="button" ng-click="hideFromView('itemCategory')"
 					class="empty-btn">
-					<i class="fas fa-chevron-left main-text-color xl-resp-font"></i>
+					<i class="fas fa-chevron-left sub-text-color xl-resp-font"></i>
 				</button>
 			</div>
 			<div
-				class="text-truncate align-self-center main-text-color md-resp-font">
+				class="text-truncate align-self-center sub-text-color md-resp-font">
 				<b>{{storeName}}</b>
 			</div>
 			<div class="align-self-center mr-2">
 				<button type="button" ng-click="switchToView('itemCart')"
 					class="empty-btn badge-btn">
-					<i class="fal fa-shopping-cart main-text-color xl-resp-font"></i> <span
+					<i class="fal fa-shopping-cart sub-text-color xl-resp-font"></i> <span
 						class="badge badge-pill badge-danger xxs-resp-font">{{cart.length}}</span>
 				</button>
 			</div>

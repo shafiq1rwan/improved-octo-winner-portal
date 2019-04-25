@@ -321,14 +321,14 @@ public class Order_RestController {
 			String checkNo = tokenSplitArry[3];
 
 			connection = dbConnectionUtil.getConnection(Long.parseLong(brandId));
-			
+
 			String sqlStatement = "SELECT ecpos_url FROM store WHERE id = ?";
 			PreparedStatement ps1 = connection.prepareStatement(sqlStatement);
 			ps1.setInt(1, Integer.parseInt(storeId));
 			ResultSet rs1 = ps1.executeQuery();
 			if (rs1.next()) {
 				String headerURL = rs1.getString("ecpos_url");
-				
+
 				JSONObject verifyResult = verifyOrder(cartData, connection);
 				JSONArray sendOrderList = verifyResult.getJSONArray("sendOrderList");
 				boolean isCheckSuccess = verifyResult.getBoolean("isCheckSuccess");
@@ -427,6 +427,7 @@ public class Order_RestController {
 			String[] tokenSplitArry = decryptedTokenString.split("\\|;");
 
 			String brandId = tokenSplitArry[0];
+			String storeId = tokenSplitArry[1];
 			String checkNo = tokenSplitArry[3];
 
 			storeLog += "Decrypted Data: " + System.lineSeparator();
@@ -435,128 +436,151 @@ public class Order_RestController {
 
 			connection = dbConnectionUtil.getConnection(Long.parseLong(brandId));
 
-			String url = "http://localhost:8081/device/order/info";
-			URL object = new URL(url);
-			HttpURLConnection con = (HttpURLConnection) object.openConnection();
-			con.setDoOutput(true);
-			con.setDoInput(true);
-			con.setRequestProperty("Content-Type", "application/json");
-			con.setRequestProperty("Accept", "application/json");
-			con.setRequestMethod("POST");
+			String sqlStatement = "SELECT ecpos_url FROM store WHERE id = ?";
+			PreparedStatement ps1 = connection.prepareStatement(sqlStatement);
+			ps1.setInt(1, Integer.parseInt(storeId));
+			ResultSet rs1 = ps1.executeQuery();
 
-			JSONObject sendData = new JSONObject();
-			sendData.put("checkNumber", checkNo);
-			sendData.put("hashData", ByodUtil.genSecureHash("SHA-256", "OrderInfo".concat(checkNo)));
-			System.out.println(sendData);
+			if (rs1.next()) {
+				String headerURL = rs1.getString("ecpos_url");
+				
+				String url = headerURL + "/device/order/info";
+				URL object = new URL(url);
+				HttpURLConnection con = (HttpURLConnection) object.openConnection();
+				con.setDoOutput(true);
+				con.setDoInput(true);
+				con.setRequestProperty("Content-Type", "application/json");
+				con.setRequestProperty("Accept", "application/json");
+				con.setRequestMethod("POST");
 
-			OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
-			wr.write(sendData.toString());
-			wr.flush();
+				JSONObject sendData = new JSONObject();
+				sendData.put("checkNumber", checkNo);
+				sendData.put("hashData", ByodUtil.genSecureHash("SHA-256", "OrderInfo".concat(checkNo)));
+				System.out.println(sendData);
 
-			StringBuilder sb = new StringBuilder();
-			int httpResult = con.getResponseCode();
-			if (httpResult == HttpURLConnection.HTTP_OK) {
-				BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), "utf-8"));
-				String line = null;
-				while ((line = br.readLine()) != null) {
-					sb.append(line + "\n");
-				}
-				br.close();
+				OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
+				wr.write(sendData.toString());
+				wr.flush();
 
-				JSONObject returnObject = new JSONObject(sb.toString());
-				System.out.println(returnObject);
-				if (returnObject.has("resultCode") && returnObject.getString("resultCode").equals("00")) {
-					JSONArray checkList = new JSONArray();
-					JSONArray itemList = returnObject.getJSONArray("items");
-					for (int x = 0; x < itemList.length(); x++) {
-						double totalPrice = 0.0;
-						JSONObject checkItem = new JSONObject();
-						JSONObject itemData = itemList.getJSONObject(x);
-						System.out.println("Item: " + itemData);
+				StringBuilder sb = new StringBuilder();
+				int httpResult = con.getResponseCode();
+				if (httpResult == HttpURLConnection.HTTP_OK) {
+					BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), "utf-8"));
+					String line = null;
+					while ((line = br.readLine()) != null) {
+						sb.append(line + "\n");
+					}
+					br.close();
 
-						JSONObject menuData = getMenuDataByBackendID(connection, itemData.getString("id"));
-						checkItem.put("name", menuData.getString("name"));
-						checkItem.put("price", String.format("%.2f", menuData.getDouble("price") * Integer.parseInt(itemData.getString("quantity"))));
-						totalPrice += menuData.getDouble("price") * Integer.parseInt(itemData.getString("quantity"));
-						checkItem.put("type", menuData.getInt("type"));
-						checkItem.put("is_taxable", menuData.getInt("is_taxable"));
-						checkItem.put("quantity", Integer.parseInt(itemData.getString("quantity")));
-						checkItem.put("datetime", itemData.getString("orderDate"));
-						if (menuData.getInt("type") == 1) {
-							JSONArray checkComboList = new JSONArray();
-							JSONArray comboList = itemData.getJSONArray("items");
-							for (int y = 0; y < comboList.length(); y++) {
-								JSONObject checkComboItem = new JSONObject();
-								JSONObject comboItemData = comboList.getJSONObject(y);
-								System.out.println("Combo: " + comboItemData);
-								
-								JSONObject comboData = getMenuDataByBackendID(connection, comboItemData.getString("id"));
-								checkComboItem.put("name", comboData.getString("name"));
-								checkComboItem.put("price", String.format("%.2f", comboData.getDouble("price") * Integer.parseInt(comboItemData.getString("quantity"))));
-								totalPrice += comboData.getDouble("price") * Integer.parseInt(comboItemData.getString("quantity"));
-								checkComboItem.put("type", comboData.getInt("type"));
-								checkComboItem.put("is_taxable", comboData.getInt("is_taxable"));
-								checkComboItem.put("quantity", Integer.parseInt(comboItemData.getString("quantity")));
-								
+					JSONObject returnObject = new JSONObject(sb.toString());
+					System.out.println(returnObject);
+					if (returnObject.has("resultCode") && returnObject.getString("resultCode").equals("00")) {
+						JSONArray checkList = new JSONArray();
+						JSONArray itemList = returnObject.getJSONArray("items");
+						for (int x = 0; x < itemList.length(); x++) {
+							double totalPrice = 0.0;
+							JSONObject checkItem = new JSONObject();
+							JSONObject itemData = itemList.getJSONObject(x);
+							System.out.println("Item: " + itemData);
+
+							JSONObject menuData = getMenuDataByBackendID(connection, itemData.getString("id"));
+							checkItem.put("name", menuData.getString("name"));
+							checkItem.put("price", String.format("%.2f",
+									menuData.getDouble("price") * Integer.parseInt(itemData.getString("quantity"))));
+							totalPrice += menuData.getDouble("price") * Integer.parseInt(itemData.getString("quantity"));
+							checkItem.put("type", menuData.getInt("type"));
+							checkItem.put("is_taxable", menuData.getInt("is_taxable"));
+							checkItem.put("quantity", Integer.parseInt(itemData.getString("quantity")));
+							checkItem.put("datetime", itemData.getString("orderDate"));
+							if (menuData.getInt("type") == 1) {
+								JSONArray checkComboList = new JSONArray();
+								JSONArray comboList = itemData.getJSONArray("items");
+								for (int y = 0; y < comboList.length(); y++) {
+									JSONObject checkComboItem = new JSONObject();
+									JSONObject comboItemData = comboList.getJSONObject(y);
+									System.out.println("Combo: " + comboItemData);
+
+									JSONObject comboData = getMenuDataByBackendID(connection,
+											comboItemData.getString("id"));
+									checkComboItem.put("name", comboData.getString("name"));
+									checkComboItem.put("price", String.format("%.2f", comboData.getDouble("price")
+											* Integer.parseInt(comboItemData.getString("quantity"))));
+									totalPrice += comboData.getDouble("price")
+											* Integer.parseInt(comboItemData.getString("quantity"));
+									checkComboItem.put("type", comboData.getInt("type"));
+									checkComboItem.put("is_taxable", comboData.getInt("is_taxable"));
+									checkComboItem.put("quantity", Integer.parseInt(comboItemData.getString("quantity")));
+
+									JSONArray checkModifierList = new JSONArray();
+									JSONArray modifierList = comboItemData.getJSONArray("items");
+									if (modifierList.length() != 0) {
+										for (int z = 0; z < modifierList.length(); z++) {
+											JSONObject checkModifierItem = new JSONObject();
+											JSONObject modifierItemData = modifierList.getJSONObject(z);
+											System.out.println("Mod: " + modifierItemData);
+
+											JSONObject modifierData = getMenuDataByBackendID(connection,
+													modifierItemData.getString("id"));
+											checkModifierItem.put("name", modifierData.getString("name"));
+											checkModifierItem.put("price",
+													String.format("%.2f", modifierData.getDouble("price")
+															* Integer.parseInt(modifierItemData.getString("quantity"))));
+											totalPrice += modifierData.getDouble("price")
+													* Integer.parseInt(modifierItemData.getString("quantity"));
+											checkModifierItem.put("type", modifierData.getInt("type"));
+											checkModifierItem.put("is_taxable", modifierData.getInt("is_taxable"));
+											checkModifierItem.put("quantity",
+													Integer.parseInt(modifierItemData.getString("quantity")));
+											checkModifierList.put(checkModifierItem);
+										}
+									}
+									checkComboItem.put("items", checkModifierList);
+									checkComboList.put(checkComboItem);
+								}
+								checkItem.put("items", checkComboList);
+								checkItem.put("total_price", String.format("%.2f", totalPrice));
+							} else {
 								JSONArray checkModifierList = new JSONArray();
-								JSONArray modifierList = comboItemData.getJSONArray("items");
+								JSONArray modifierList = itemData.getJSONArray("items");
 								if (modifierList.length() != 0) {
-									for (int z = 0; z < modifierList.length(); z++) {
+									for (int y = 0; y < modifierList.length(); y++) {
 										JSONObject checkModifierItem = new JSONObject();
-										JSONObject modifierItemData = modifierList.getJSONObject(z);
+										JSONObject modifierItemData = modifierList.getJSONObject(y);
 										System.out.println("Mod: " + modifierItemData);
-										
-										JSONObject modifierData = getMenuDataByBackendID(connection, modifierItemData.getString("id"));
+
+										JSONObject modifierData = getMenuDataByBackendID(connection,
+												modifierItemData.getString("id"));
 										checkModifierItem.put("name", modifierData.getString("name"));
-										checkModifierItem.put("price", String.format("%.2f", modifierData.getDouble("price") * Integer.parseInt(modifierItemData.getString("quantity"))));
-										totalPrice += modifierData.getDouble("price") * Integer.parseInt(modifierItemData.getString("quantity"));
+										checkModifierItem.put("price", String.format("%.2f", modifierData.getDouble("price")
+												* Integer.parseInt(modifierItemData.getString("quantity"))));
+										totalPrice += modifierData.getDouble("price")
+												* Integer.parseInt(modifierItemData.getString("quantity"));
 										checkModifierItem.put("type", modifierData.getInt("type"));
 										checkModifierItem.put("is_taxable", modifierData.getInt("is_taxable"));
-										checkModifierItem.put("quantity", Integer.parseInt(modifierItemData.getString("quantity")));
+										checkModifierItem.put("quantity",
+												Integer.parseInt(modifierItemData.getString("quantity")));
 										checkModifierList.put(checkModifierItem);
 									}
 								}
-								checkComboItem.put("items", checkModifierList);
-								checkComboList.put(checkComboItem);
+								checkItem.put("items", checkModifierList);
+								checkItem.put("total_price", String.format("%.2f", totalPrice));
 							}
-							checkItem.put("items", checkComboList);
-							checkItem.put("total_price", String.format("%.2f", totalPrice));
-						} else {
-							JSONArray checkModifierList = new JSONArray();
-							JSONArray modifierList = itemData.getJSONArray("items");
-							if (modifierList.length() != 0) {
-								for (int y = 0; y < modifierList.length(); y++) {
-									JSONObject checkModifierItem = new JSONObject();
-									JSONObject modifierItemData = modifierList.getJSONObject(y);
-									System.out.println("Mod: " + modifierItemData);
-									
-									JSONObject modifierData = getMenuDataByBackendID(connection, modifierItemData.getString("id"));
-									checkModifierItem.put("name", modifierData.getString("name"));
-									checkModifierItem.put("price", String.format("%.2f", modifierData.getDouble("price") * Integer.parseInt(modifierItemData.getString("quantity"))));
-									totalPrice += modifierData.getDouble("price") * Integer.parseInt(modifierItemData.getString("quantity"));
-									checkModifierItem.put("type", modifierData.getInt("type"));
-									checkModifierItem.put("is_taxable", modifierData.getInt("is_taxable"));
-									checkModifierItem.put("quantity", Integer.parseInt(modifierItemData.getString("quantity")));
-									checkModifierList.put(checkModifierItem);
-								}
-							}
-							checkItem.put("items", checkModifierList);
-							checkItem.put("total_price", String.format("%.2f", totalPrice));
-						}
-						
-						checkList.put(checkItem);
-					}
-					result.put("checkList", checkList);
 
-					resultCode = "00";
-					resultMessage = "Success";
+							checkList.put(checkItem);
+						}
+						result.put("checkList", checkList);
+
+						resultCode = "00";
+						resultMessage = "Success";
+					} else {
+						resultCode = "E02";
+						resultMessage = "Get Check Data Failed.";
+					}
 				} else {
-					resultCode = "E02";
-					resultMessage = "Get Check Data Failed.";
+					resultCode = "E03";
+					resultMessage = "POS Invalid Response";
 				}
 			} else {
-				resultCode = "E03";
-				resultMessage = "POS Invalid Response";
 			}
 		} catch (Exception e) {
 			storeLog += "Error occurred. Refer error log." + System.lineSeparator();
