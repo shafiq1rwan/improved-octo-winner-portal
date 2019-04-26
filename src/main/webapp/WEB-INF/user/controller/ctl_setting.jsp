@@ -18,26 +18,10 @@
 				if(response.status == "200") {
 					console.log(response.data);
 					$scope.byod.appName = response.data.appName;
-					if(response.data.mainLogoPath.includes('default'))
-						$scope.byod.mainLogo = response.data.mainLogoPath;
-					else
-						$scope.byod.mainLogo = '${pageContext.request.contextPath}' + response.data.mainLogoPath;
-						
-					if(response.data.shortcutLogoPath.includes('default'))
-						$scope.byod.shortcutLogo = response.data.shortcutLogoPath;
-					else
-						$scope.byod.shortcutLogo = '${pageContext.request.contextPath}' + response.data.shortcutLogoPath;
-					
-					if(response.data.mainBackgroundPath.includes('default'))
-						$scope.byod.mainBackground = response.data.mainBackgroundPath;
-					else
-						$scope.byod.mainBackground = '${pageContext.request.contextPath}' + response.data.mainBackgroundPath;
-						
-					if(response.data.landingLogoPath.includes('default'))
-						$scope.byod.landingLogo = response.data.landingLogoPath;
-					else
-						$scope.byod.landingLogo = '${pageContext.request.contextPath}' + response.data.landingLogoPath;
-						
+					$scope.byod.mainLogo = '${pageContext.request.contextPath}' + response.data.mainLogoPath;					
+					$scope.byod.shortcutLogo = '${pageContext.request.contextPath}' + response.data.shortcutLogoPath;				
+					$scope.byod.mainBackground = '${pageContext.request.contextPath}' + response.data.mainBackgroundPath;					
+					$scope.byod.landingLogo = '${pageContext.request.contextPath}' + response.data.landingLogoPath;						
 					$scope.byod.mainColor = response.data.mainColor;
 					$scope.byod.subColor = response.data.subColor;
 					$scope.byod.mainTextColor = response.data.mainTextColor;
