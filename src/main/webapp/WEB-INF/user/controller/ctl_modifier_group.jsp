@@ -325,6 +325,7 @@
 						$scope.itemList = response.data;
 						for(var i=0;i<$scope.itemList.length;i++){
 							$scope.itemList[i].isAssigned = false;
+							$scope.itemList[i].menu_item_image_path = "${pageContext.request.contextPath}" + response.data.menu_item_image_path;
 						}
 						
 						isEdit($scope.itemList);

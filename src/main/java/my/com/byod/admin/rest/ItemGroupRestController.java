@@ -8,7 +8,6 @@ import java.sql.Statement;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.sql.DataSource;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -26,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import my.com.byod.admin.util.ByodUtil;
 import my.com.byod.admin.util.DbConnectionUtil;
 
 @RestController
@@ -40,6 +40,9 @@ public class ItemGroupRestController {
 	
 	@Autowired
 	private DbConnectionUtil dbConnectionUtil;
+	
+	@Autowired
+	private ByodUtil byodUtil;
 	
 	@RequestMapping(value = "/get_all_item_group", method = RequestMethod.GET)
 	public ResponseEntity<?> getAllItemGroup(HttpServletRequest request, HttpServletResponse response) {
@@ -286,6 +289,7 @@ public class ItemGroupRestController {
 
 		try {		
 			connection = dbConnectionUtil.retrieveConnection(request);
+			String brandId = byodUtil.getGeneralConfig(connection, "BRAND_ID");
 			stmt = connection.prepareStatement("SELECT * FROM menu_item a " + 
 					"INNER JOIN menu_item_type_lookup b ON a.menu_item_type = b.menu_item_type_number " + 
 					"INNER JOIN menu_item_group_sequence c ON a.id = c.menu_item_id " + 
@@ -298,7 +302,7 @@ public class ItemGroupRestController {
 				jsonMenuItemObj.put("id", rs.getLong("id"));
 				jsonMenuItemObj.put("backend_id", rs.getString("backend_id"));
 				jsonMenuItemObj.put("menu_item_name", rs.getString("menu_item_name"));
-				jsonMenuItemObj.put("menu_item_image_path", displayFilePath + rs.getString("menu_item_image_path"));
+				jsonMenuItemObj.put("menu_item_image_path", displayFilePath + brandId + "/" + rs.getString("menu_item_image_path"));
 				jsonMenuItemObj.put("menu_item_base_price", rs.getBigDecimal("menu_item_base_price"));
 				jsonMenuItemObj.put("menu_item_type_name", rs.getString("menu_item_type_name"));			
 				jsonMenuItemArray.put(jsonMenuItemObj);

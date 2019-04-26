@@ -45,6 +45,9 @@ public class ModifierGroupRestController {
 	
 	@Autowired
 	private DbConnectionUtil dbConnectionUtil;
+	
+	@Autowired
+	private ByodUtil byodUtil;
 
 	@GetMapping(value = "/get_all_modifier_group", produces = "application/json")
 	public ResponseEntity<?> getAllModifierGroup(HttpServletRequest request, HttpServletResponse response) {
@@ -340,6 +343,7 @@ public class ModifierGroupRestController {
 
 		try {
 			connection = dbConnectionUtil.retrieveConnection(request);
+			String brandId = byodUtil.getGeneralConfig(connection, "BRAND_ID");
 			stmt = connection.prepareStatement("SELECT * FROM menu_item a "
 					+ "INNER JOIN menu_item_type_lookup b ON a.menu_item_type = b.menu_item_type_number "
 					+ "INNER JOIN modifier_item_sequence c ON a.id = c.menu_item_id "
@@ -352,7 +356,7 @@ public class ModifierGroupRestController {
 				jsonMenuItemObj.put("id", rs.getLong("id"));
 				jsonMenuItemObj.put("backend_id", rs.getString("backend_id"));
 				jsonMenuItemObj.put("menu_item_name", rs.getString("menu_item_name"));
-				jsonMenuItemObj.put("menu_item_image_path", displayFilePath + rs.getString("menu_item_image_path"));
+				jsonMenuItemObj.put("menu_item_image_path", displayFilePath + brandId + "/" + rs.getString("menu_item_image_path"));
 				jsonMenuItemObj.put("menu_item_base_price", rs.getBigDecimal("menu_item_base_price"));
 				jsonMenuItemObj.put("menu_item_type_name", rs.getString("menu_item_type_name"));
 				jsonMenuItemArray.put(jsonMenuItemObj);
