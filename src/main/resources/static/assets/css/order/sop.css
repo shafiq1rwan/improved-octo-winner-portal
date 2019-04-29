@@ -72,7 +72,7 @@ div.card-container .card {
 	height: 100%;
 }
 div.card-container .card-body {
-	padding: 0rem 0.6rem 0.6rem 0.6rem;
+	padding: 0.3rem;
 }
 div.card-container .card-title {
 	margin: 0;

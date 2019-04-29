@@ -34,13 +34,13 @@
 							</div>
 						</div>
 						<div class="row ml-0 mr-0" ng-if="(checkItem.type == 0 && checkItem.items.length == 0) || checkItem.type == 1">
-							<div class="col-7 pl-0 pr-0 xs-resp-font text-truncate">
+							<div class="col-7 pl-0 pr-0 xs-resp-font">
 								<b>{{checkItem.name}}</b>
 							</div>
-							<div class="col-2 pl-0 pr-0 xs-resp-font text-center">
+							<div class="col-2 pl-0 pr-0 xs-resp-font text-center flex-column d-flex justify-content-center">
 								<b>x{{checkItem.quantity}}</b>
 							</div>
-							<div class="col-3 pl-0 pr-0 xs-resp-font text-right">
+							<div class="col-3 pl-0 pr-0 xs-resp-font text-right flex-column d-flex justify-content-center">
 								<b>{{priceTag}}{{checkItem.price}}</b>
 							</div>
 						</div>

@@ -32,7 +32,7 @@
 							<div
 								class="sub-card-body text-center align-self-center d-flex flex-column">
 								<p
-									class="w-100 text-truncate card-title align-self-center xs-resp-font">
+									class="w-100 card-title align-self-center xs-resp-font">
 									<b>{{data.name}}</b>
 								</p>
 							</div>

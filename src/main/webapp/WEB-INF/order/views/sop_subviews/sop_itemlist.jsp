@@ -33,13 +33,14 @@
 								<b>{{priceTag}}{{data.price}}</b>
 							</div>
 							<div class="card-body d-flex flex-row">
-								<div class="sub-card-body text-center d-flex flex-column">
+								<div class="sub-card-body text-center d-flex flex-column justify-content-center">
 									<span
-										class="w-100 text-limiter two-liner card-title align-self-center xs-resp-font">
+										class="w-100 card-title align-self-center xs-resp-font">
 										<b>{{data.name}}</b>
-									</span> <span
-										class="w-100 text-limiter three-liner card-title align-self-center resp-font">{{data.description}}
 									</span>
+									<!--<span
+										class="w-100 card-title align-self-center resp-font">{{data.description}}
+									</span>-->
 								</div>
 							</div>
 						</div>

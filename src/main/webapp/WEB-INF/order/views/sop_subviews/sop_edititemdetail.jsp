@@ -19,10 +19,10 @@
 								alt="{{selectedItem.name}}">
 						</div>
 						<div class="w-100 align-self-center text-center">
-							<span class="text-limiter lg-resp-font"><b>{{selectedItem.name}}</b></span>
+							<span class="lg-resp-font"><b>{{selectedItem.name}}</b></span>
 						</div>
 						<div class="w-100 align-self-center text-center">
-							<span class="text-limiter three-liner xs-resp-font">{{selectedItem.description}}</span>
+							<span class="xs-resp-font">{{selectedItem.description}}</span>
 						</div>
 						<hr class="ml-1 mr-1">
 						<div class="flex-fill pb-2">
@@ -30,7 +30,7 @@
 								<div
 									class="col-8 col-sm-8 col-md-8 col-lg-9 col-xl-9 d-flex flex-row pr-0">
 									<div
-										class="w-100 align-self-center text-limiter two-liner sm-resp-font">
+										class="w-100 align-self-center sm-resp-font">
 										<b ng-show="selectedItem.type == 1">{{currentLanguageData.item_detail_comboPrice}}</b>
 										<b ng-show="selectedItem.type == 0">{{currentLanguageData.item_detail_alacartePrice}}</b>
 									</div>
@@ -48,7 +48,7 @@
 								<div class="row ml-0 mr-0">
 									<div
 										class="col-8 col-sm-8 col-md-8 col-lg-9 col-xl-9 d-flex flex-column pr-0">
-										<div class="text-limiter two-liner sm-resp-font">
+										<div class="sm-resp-font">
 											<b>{{currentLanguageData.item_detail_quantity}}</b>
 										</div>
 									</div>
@@ -96,11 +96,11 @@
 								<div class="row ml-0 mr-0">
 									<div
 										class="col-8 col-sm-8 col-md-8 col-lg-9 col-xl-9 d-flex flex-column pr-0">
-										<div class="text-limiter two-liner sm-resp-font"
+										<div class="sm-resp-font"
 											ng-class="{'tier-completed': comboTier.isTierCompleted}">
 											<b>{{comboTier.name}}</b>
 										</div>
-										<div class="text-limiter two-liner resp-font">
+										<div class="resp-font">
 											<span>{{comboTier.itemString}}</span>
 										</div>
 									</div>
@@ -134,7 +134,7 @@
 				<div
 					class="col-8 col-sm-8 col-md-8 col-lg-9 col-xl-9 d-flex flex-row pr-0">
 					<div
-						class="w-100 align-self-center text-limiter two-liner sm-resp-font">
+						class="w-100 align-self-center sm-resp-font">
 						<b>{{currentLanguageData.item_detail_totalPrice}}</b>
 					</div>
 				</div>
