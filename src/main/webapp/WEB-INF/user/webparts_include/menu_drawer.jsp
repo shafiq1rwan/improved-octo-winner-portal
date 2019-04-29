@@ -18,9 +18,9 @@
 		<div id="sidebar-menu">
        
 		<ul>
-				<li class="submenu">
+				<%-- <li class="submenu">
 					<a href="${pageContext.request.contextPath}/user/#!Router_dashboard"><i class="far fa-home"></i><span> Dashboard </span> </a>
-                </li>     
+                </li>  --%>    
                     
             <%if (accessRight.getJSONObject("accessRights").getBoolean("store")) {%>    
                 <li class="submenu">
