@@ -535,7 +535,7 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 
 			INSERT INTO check_status_lookup values (1, ''New''), (2, ''Pending''), (3, ''Closed''), (4, ''Cancelled'');
 
-			INSERT INTO order_type_lookup values (1, ''table''), (2, ''take away'');
+			INSERT INTO order_type_lookup values (1, ''table''), (2, ''take away''), (3, ''deposit'');
 
 			insert into transaction_type_lookup values (1, ''Sale''), (2, ''Void''), (3, ''Refund''), (4, ''Reversal'');
 
