@@ -816,9 +816,9 @@ public class DeviceConfigRestController {
 											+ "qr_content, created_date, response_code, response_message, updated_date, wifi_ip, wifi_port, approval_code, "  
 											+ "bank_mid, bank_tid, transaction_date, transaction_time, original_invoice_number, invoice_number, merchant_info, card_issuer_name, masked_card_number, card_expiry_date, " 
 											+ "batch_number, rrn, card_issuer_id, cardholder_name, aid, app_label, tc, terminal_verification_result, " 
-											+ "original_trace_number, trace_number, qr_issuer_type, mpay_mid, mpay_tid, qr_ref_id, qr_user_id, qr_amount_myr, qr_amount_rmb) VALUES "
+											+ "original_trace_number, trace_number, qr_issuer_type, mpay_mid, mpay_tid, qr_ref_id, qr_user_id, qr_amount_myr, qr_amount_rmb, received_amount, change_amount) VALUES "
 											+ "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? , ?, ? , ?, ? , ?, ? , ?, ?, ?," 
-											+ " ?, ? , ?, ?, ? , ?, ? , ?, ? , ?, ? , ? , ?, ?, ? ,? ,?, ?)";
+											+ " ?, ? , ?, ?, ? , ?, ? , ?, ? , ?, ? , ? , ?, ?, ? ,? ,?, ?, ?, ?)";
 			
 			updateSqlStatement = "UPDATE [transaction] SET staff_id = ?, check_id = ?, check_number = ?, transaction_type = ?, payment_method = ?, payment_type = ?, "
 					+ "terminal_serial_number = ?, transaction_currency = ?, transaction_amount = ?, transaction_tips = ?, "
@@ -828,7 +828,7 @@ public class DeviceConfigRestController {
 					+ "invoice_number = ?, merchant_info = ?, card_issuer_name = ?, masked_card_number = ?, card_expiry_date = ?, "
 					+ "batch_number = ?, rrn = ?, card_issuer_id = ?, cardholder_name = ?, aid = ?, app_label = ?, tc = ?, terminal_verification_result =?, "
 					+ "original_trace_number = ?, trace_number = ?, qr_issuer_type = ?, mpay_mid = ?, mpay_tid = ?, "
-					+ "qr_ref_id = ?, qr_user_id = ?, qr_amount_myr = ?, qr_amount_rmb = ? WHERE transaction_id = ? and store_id = ?";
+					+ "qr_ref_id = ?, qr_user_id = ?, qr_amount_myr = ?, qr_amount_rmb = ?, received_amount = ?, change_amount = ? WHERE transaction_id = ? and store_id = ?";
 			
 			searchExistingCheckDetailSqlStatement = "SELECT transaction_id FROM [transaction] WHERE transaction_id = ? and store_id = ?";
 			
@@ -968,9 +968,15 @@ public class DeviceConfigRestController {
 						
 					if(obj.isNull("qr_amount_rmb")) stmt.setNull(47, java.sql.Types.NVARCHAR);
 					else stmt.setString(47, obj.getString("qr_amount_rmb"));
+					
+					if(obj.isNull("received_amount")) stmt.setNull(48, java.sql.Types.NVARCHAR);
+					else stmt.setString(48, obj.getString("received_amount"));
+						
+					if(obj.isNull("change_amount")) stmt.setNull(49, java.sql.Types.NVARCHAR);
+					else stmt.setString(49, obj.getString("change_amount"));
 
-					stmt.setLong(48, obj.getLong("transaction_id"));	
-					stmt.setLong(49, storeId);
+					stmt.setLong(50, obj.getLong("transaction_id"));	
+					stmt.setLong(51, storeId);
 					
 					stmt.executeUpdate();
 					stmt.close();
@@ -1104,6 +1110,12 @@ public class DeviceConfigRestController {
 						
 					if(obj.isNull("qr_amount_rmb")) stmt.setNull(49, java.sql.Types.NVARCHAR);
 					else stmt.setString(49, obj.getString("qr_amount_rmb"));
+					
+					if(obj.isNull("received_amount")) stmt.setNull(50, java.sql.Types.NVARCHAR);
+					else stmt.setString(50, obj.getString("received_amount"));
+						
+					if(obj.isNull("change_amount")) stmt.setNull(51, java.sql.Types.NVARCHAR);
+					else stmt.setString(51, obj.getString("change_amount"));
 					
 					stmt.executeUpdate();
 					stmt.close();
