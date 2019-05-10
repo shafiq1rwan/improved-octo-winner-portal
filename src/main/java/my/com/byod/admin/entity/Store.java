@@ -26,9 +26,6 @@ public class Store {
 	
 	@JsonProperty("store_currency")
 	private String currency;
-	
-	@JsonProperty("store_table_count")
-	private int tableCount;
 
 	@JsonProperty("is_publish")
 	private boolean isPublish;
@@ -126,14 +123,6 @@ public class Store {
 
 	public void setCurrency(String currency) {
 		this.currency = currency;
-	}
-
-	public int getTableCount() {
-		return tableCount;
-	}
-
-	public void setTableCount(int tableCount) {
-		this.tableCount = tableCount;
 	}
 
 	public boolean isPublish() {

@@ -167,7 +167,6 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 				store_latitude DECIMAL(15,8),
 				store_country NVARCHAR(100),
 				store_currency NVARCHAR(50),
-				store_table_count INT DEFAULT 0,
 				store_start_operating_time time NOT NULL,
 				store_end_operating_time time NOT NULL,
 				store_contact_person VARCHAR(150) NOT NULL,
@@ -522,6 +521,16 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 				transaction_time nvarchar(255) NULL,
 				batch_total nvarchar(255) NULL,
 				nii nvarchar(255) NULL
+			);
+
+			CREATE TABLE table_setting 
+			(
+				id BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,
+				store_id BIGINT DEFAULT 0,
+				table_name NVARCHAR(150) NOT NULL,
+				status_lookup_id BIGINT,
+				created_date DATETIME NOT NULL,
+				last_update_date DATETIME
 			);
 
 			INSERT INTO role_lookup VALUES (''Admin''),(''Store Manager'');

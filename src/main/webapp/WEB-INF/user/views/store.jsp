@@ -107,12 +107,12 @@
 									<input class="form-control" name="storeAddress" placeholder="Address" ng-model="store.address" type="text" required> 
 								</div>
 							</div>
-							<div class="col-4 col-sm-4 col-md-4 col-lg-4 col-xl-4">
+							<!-- <div class="col-4 col-sm-4 col-md-4 col-lg-4 col-xl-4">
 								<div class="form-group">
 									<label class="login-label">Table Count</label>
 									<input class="form-control" name="storeTableCount" placeholder="50" ng-model="store.tableCount" type="number" required> 
 								</div>
-							</div>
+							</div> -->
 						</div>
 						<div class="row">
 							<div class="col-4 col-sm-4 col-md-4 col-lg-4 col-xl-4">

@@ -29,10 +29,15 @@
                     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">						
 						<div class="card mb-3">
 							<div class="card-header d-flex flex-row justify-content-between">
-								<h3>ECPOS Info</h3>								
-								<button type="button" class="btn btn-social pull-right btn-primary bg-aqua" data-toggle="modal" data-target="#staffListModal" ng-click="modalType('create')">
-									<span class="btn-label"><i class="fa fa-edit"></i></span> Manage Staff
-								</button>									
+								<h3>ECPOS Info</h3>
+								<div class="btn-group">								
+									<button type="button" class="btn btn-social pull-right btn-primary bg-aqua ml-3" data-toggle="modal" data-target="#staffListModal">
+										<span class="btn-label"><i class="fa fa-edit"></i></span> Manage Staff
+									</button>
+									<button type="button" class="btn btn-social pull-right btn-success bg-aqua ml-3" data-toggle="modal" data-target="#tableListModal">
+										<span class="btn-label"><i class="fa fa-edit"></i></span> Manage Table
+									</button>
+								</div>									
 							</div>						
 							<div class="card-body">													
 								<div class="row">
@@ -204,6 +209,74 @@
 		      <div class="modal-footer">
 		      	<button class="btn btn-primary" ng-show="action=='create'" type="submit" ng-click="submitStaff()"> Submit</button>
 		      	<button class="btn btn-primary" ng-show="action=='update'" type="submit" ng-click="submitStaff()"> Update</button>
+		      </div>
+		       </form>		      
+		    </div>
+		</div>
+	</div>
+	
+	<!-- Table List Modal -->
+	<div class="modal fade" id="tableListModal" role="dialog" aria-labelledby="tableListModal" aria-hidden="true">
+		<div class="modal-dialog modal-lg">
+		    <div class="modal-content">
+		    <form id="tableListForm" method="POST" accept-charset="UTF-8" role="form" class="form-signin">
+		      <div class="modal-header">
+		        <h5>Table List</h5>	
+		        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+		          <span aria-hidden="true">&times;</span>
+		        </button>
+		      </div>
+		      <div class="modal-body">
+		      		<div class="table-responsive">
+									<table id="tableList_dtable" class="table table-bordered table-hover display" style="width:100%">
+										<thead>
+											<tr>
+												<th>ID</th>
+												<th>Table Name</th>
+											</tr>
+										</thead>										
+										<tbody>									
+										</tbody>
+									</table>
+								</div>			       									  				 									
+		      </div>
+		      <div class="modal-footer">
+		      	<button type="button" class="btn btn-social pull-right btn-primary bg-aqua" data-toggle="modal" data-target="#tableModal" ng-click="tableModalType('create')">
+					<span class="btn-label"><i class="fa fa-plus"></i></span> Add Table
+				</button>
+		      </div>
+		       </form>		      
+		    </div>
+		</div>
+	</div>
+	
+	<!-- Create Table Modal -->
+	<div class="modal fade" id="tableModal" tabindex="-1" role="dialog" aria-labelledby="tableModal" aria-hidden="true">
+		<div class="modal-dialog modal-lg">
+		    <div class="modal-content">
+		    <form id="staffForm" method="POST" accept-charset="UTF-8" role="form" class="form-signin">
+		      <div class="modal-header">
+		        <h5 ng-show="actionTable == 'create'">Create Table</h5>
+		        <h5 ng-show="actionTable == 'update'">Edit Table</h5>		
+		        <button type="button" class="close" ng-click="resetTableModal()" aria-label="Close">
+		          <span aria-hidden="true">&times;</span>
+		        </button>
+		      </div>
+		      <div class="modal-body">
+		      	<div class="form-section">
+					<div class="row">
+						<div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
+							<div class="form-group">
+								<label class="login-label">Name</label>
+								<input class="form-control" name="tableName" placeholder="Name" ng-model="table.name" type="text" required> 
+							</div>
+						</div>
+					</div>	
+				</div>				       									  				 									
+		      </div>
+		      <div class="modal-footer">
+		      	<button class="btn btn-primary" ng-show="actionTable == 'create'" type="submit" ng-click="submitTable()"> Submit</button>
+		      	<button class="btn btn-primary" ng-show="actionTable == 'update'" type="submit" ng-click="submitTable()"> Update</button>
 		      </div>
 		       </form>		      
 		    </div>

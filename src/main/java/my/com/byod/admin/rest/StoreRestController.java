@@ -429,8 +429,7 @@ public class StoreRestController {
 	}
 	
 	@PostMapping(value = {"/ecpos/updateStaff"}, produces = "application/json")
-	public ResponseEntity<JSONObject> updateStaff(@RequestBody String formfield, HttpServletRequest request, HttpServletResponse response) {
-		//JSONArray jsonArray = new JSONArray();
+	public ResponseEntity<?> updateStaff(@RequestBody String formfield, HttpServletRequest request, HttpServletResponse response) {
 		JSONObject jsonObj = null;
 		Connection connection = null;
 		PreparedStatement stmt = null;
@@ -498,6 +497,203 @@ public class StoreRestController {
 			
 		}catch(Exception ex) {
 			ex.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Server error. Please contact support.");
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.OK);
+	}
+	
+	@GetMapping(value = {"/ecpos/getAllTables"}, produces = "application/json")
+	public String getAllTables(@RequestParam("store_id") Long store_id, HttpServletRequest request, HttpServletResponse response) {
+		JSONArray jsonArray = new JSONArray();
+		JSONObject jsonObj = null;
+		JSONObject jsonObjResult = null;
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		
+		try {
+			connection = dbConnectionUtil.retrieveConnection(request);
+			// get all active tables
+			stmt = connection.prepareStatement("SELECT * FROM table_setting "
+			 		+ "WHERE store_id = ? AND status_lookup_id = 2 ");
+			stmt.setLong(1, store_id);
+			rs = (ResultSet) stmt.executeQuery();
+			 
+			while(rs.next()) {
+				jsonObj = new JSONObject();
+				jsonObj.put("id", rs.getLong("id"));
+				jsonObj.put("tableName", rs.getString("table_name"));
+				jsonObj.put("createdDate", rs.getString("created_date"));
+				jsonArray.put(jsonObj);
+			}
+			jsonObjResult = new JSONObject();
+			jsonObjResult.put("data", jsonArray);
+			/*jsonObjResult.put("tableCount", jsonArray.length());*/
+			
+		}catch(Exception ex) {
+			ex.printStackTrace();
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return jsonObjResult.toString();
+	}
+	
+	@GetMapping(value = {"/ecpos/tableById"}, produces = "application/json")
+	public String getTableById(@RequestParam("store_id") Long store_id, @RequestParam("id") Long id, HttpServletRequest request, HttpServletResponse response) {
+		//JSONArray jsonArray = new JSONArray();
+		JSONObject jsonObj = null;
+		//JSONObject jsonObjResult = null;
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		
+		try {
+			connection = dbConnectionUtil.retrieveConnection(request);
+			 stmt = connection.prepareStatement("SELECT * FROM table_setting WHERE store_id = ? AND id = ? ");
+			 stmt.setLong(1, store_id);
+			 stmt.setLong(2, id);
+			 rs = (ResultSet) stmt.executeQuery();
+			 
+			if(rs.next()) {
+				jsonObj = new JSONObject();
+				jsonObj.put("id", rs.getLong("id"));
+				jsonObj.put("tableName", rs.getString("table_name"));
+				jsonObj.put("createdDate", rs.getString("created_date"));
+			}			
+			
+		}catch(Exception ex) {
+			ex.printStackTrace();
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return jsonObj.toString();
+	}
+	
+	@PostMapping(value = {"/ecpos/createTable"}, produces = "application/json")
+	public ResponseEntity<?> createTable(@RequestBody String formfield, HttpServletRequest request, HttpServletResponse response) {
+		JSONObject jsonObj = null;
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		
+		try {
+			jsonObj  =  new JSONObject(formfield);		
+			if(!jsonObj.has("store_id")) {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Unable to find store detail.");
+			}
+			if(jsonObj.getString("tableName")==null || jsonObj.getString("tableName").trim().equals("")) {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Table name cannot be empty.");
+			}
+				
+			connection = dbConnectionUtil.retrieveConnection(request);		
+			// check for existing table name
+			String sqlStatement = "SELECT id FROM table_setting WHERE table_name = ? AND store_id = ?";
+			stmt = connection.prepareStatement(sqlStatement);
+			stmt.setString(1, jsonObj.getString("tableName"));
+			stmt.setLong(2, jsonObj.getLong("store_id"));
+			rs = stmt.executeQuery();
+			if(rs.next()) {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Duplicate table name for this store.");
+			}
+			
+			int count = 1;
+			sqlStatement = "INSERT INTO table_setting (store_id, table_name, status_lookup_id, created_date) VALUES (?, ?, ?, GETDATE()); SELECT SCOPE_IDENTITY();";
+			stmt = connection.prepareStatement(sqlStatement);
+			stmt.setLong(count++, jsonObj.getLong("store_id"));
+			stmt.setString(count++, jsonObj.getString("tableName"));
+			stmt.setLong(count++, 2);	
+			rs = stmt.executeQuery();
+			 
+			if(rs.next()) {
+				jsonObj.put("id", rs.getInt(1));
+			}
+			
+		}catch(Exception ex) {
+			ex.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Server error. Please contact support.");
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.OK);
+	}
+	
+	@PostMapping(value = {"/ecpos/updateTable"}, produces = "application/json")
+	public ResponseEntity<?> updateTable(@RequestBody String formfield, HttpServletRequest request, HttpServletResponse response) {
+		//JSONArray jsonArray = new JSONArray();
+		JSONObject jsonObj = null;
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		int count = 1;
+		
+		try {
+			jsonObj  =  new JSONObject(formfield);
+			
+			if(!jsonObj.has("store_id")) {
+				jsonObj.put("error", "Unable to find store detail");
+				return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.NOT_FOUND);
+			}
+			if(!jsonObj.has("id")) {
+				jsonObj.put("error", "Unable to find table detail");
+				return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.NOT_FOUND);
+			}
+			if(jsonObj.getString("tableName")==null || jsonObj.getString("tableName").trim().equals("")) {
+				jsonObj.put("error", "Table name cannot be empty");
+				return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.BAD_REQUEST);
+			}
+			
+			connection = dbConnectionUtil.retrieveConnection(request);	
+			// check for existing table name
+			String sqlStatement = "SELECT id FROM table_setting WHERE table_name = ? AND store_id = ? AND id != ?";
+			stmt = connection.prepareStatement(sqlStatement);
+			stmt.setString(1, jsonObj.getString("tableName"));
+			stmt.setLong(2, jsonObj.getLong("store_id"));
+			stmt.setLong(3, jsonObj.getLong("id"));
+			rs = stmt.executeQuery();
+			if(rs.next()) {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Duplicate table name for this store.");
+			}
+			
+			stmt = connection.prepareStatement("UPDATE table_setting SET table_name = ?, last_update_date = GETDATE() WHERE store_id = ? AND id = ?; SELECT SCOPE_IDENTITY();");	
+			stmt.setString(count++, jsonObj.getString("tableName"));
+			stmt.setLong(count++, jsonObj.getLong("store_id"));
+			stmt.setLong(count++, jsonObj.getLong("id"));
+			
+			rs = (ResultSet) stmt.executeQuery();
+			 
+			if(rs.next()) {
+				jsonObj.put("id", rs.getInt(1));
+			}
+			
+		}catch(Exception ex) {
+			ex.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Server error. Please contact support.");
 		} finally {
 			if (connection != null) {
 				try {
@@ -535,6 +731,7 @@ public class StoreRestController {
 					
 		}catch(Exception ex) {
 			ex.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Server error. Please contact support.");
 		} finally {
 			if (connection != null) {
 				try {
@@ -617,6 +814,7 @@ public class StoreRestController {
 			
 		}catch(Exception ex) {
 			ex.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Server error. Please contact support.");
 		} finally {
 			if (connection != null) {
 				try {
@@ -662,6 +860,7 @@ public class StoreRestController {
 			
 		}catch(Exception ex) {
 			ex.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Server error. Please contact support.");
 		} finally {
 			if (connection != null) {
 				try {
@@ -740,6 +939,7 @@ public class StoreRestController {
 			}*/	
 		}catch(Exception ex) {
 			ex.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Server error. Please contact support.");
 		} finally {
 			if (connection != null) {
 				try {
@@ -778,6 +978,7 @@ public class StoreRestController {
 			
 		}catch(Exception ex) {
 			ex.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Server error. Please contact support.");
 		} finally {
 			if (connection != null) {
 				try {
@@ -816,6 +1017,7 @@ public class StoreRestController {
 			
 		}catch(Exception ex) {
 			ex.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Server error. Please contact support.");
 		} finally {
 			if (connection != null) {
 				try {
@@ -893,6 +1095,7 @@ public class StoreRestController {
 			}	*/		
 		}catch(Exception ex) {
 			ex.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Server error. Please contact support.");
 		} finally {
 			if (connection != null) {
 				try {
@@ -932,6 +1135,7 @@ public class StoreRestController {
 			
 		}catch(Exception ex) {
 			ex.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Server error. Please contact support.");
 		} finally {
 			if (connection != null) {
 				try {
@@ -970,6 +1174,7 @@ public class StoreRestController {
 			
 		}catch(Exception ex) {
 			ex.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Server error. Please contact support.");
 		} finally {
 			if (connection != null) {
 				try {
@@ -1000,7 +1205,7 @@ public class StoreRestController {
 			
 		}catch(Exception ex) {
 			ex.printStackTrace();
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Server error. Please try again later.");
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Server error. Please contact support.");
 		} finally {
 			if (connection != null) {
 				try {

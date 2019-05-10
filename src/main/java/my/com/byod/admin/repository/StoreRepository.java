@@ -47,7 +47,6 @@ public class StoreRepository {
 		location.setCountry(rs.getString("store_country"));
 		store.setLocation(location);
 		store.setCurrency(rs.getString("store_currency"));
-		store.setTableCount(rs.getInt("store_table_count"));
 		store.setPublish(rs.getBoolean("is_publish"));
 		store.setCreatedDate(rs.getDate("created_date"));
 		store.setOperatingStartTime(rs.getTime("store_start_operating_time"));
@@ -100,11 +99,11 @@ public class StoreRepository {
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(dbConnectionUtil.setupDataSource(request));
 		return jdbcTemplate.update(
 				"INSERT INTO store(backend_id,store_name,store_logo_path,store_address,store_longitude,store_latitude,store_country,store_currency, "
-				+ "store_table_count, is_publish, store_start_operating_time, store_end_operating_time, ecpos, store_contact_person, store_contact_hp_number, store_contact_email, store_type_id, kiosk_payment_delay_id, byod_payment_delay_id, store_tax_type_id, ecpos_url, created_date) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,GETDATE());",
+				+ "is_publish, store_start_operating_time, store_end_operating_time, ecpos, store_contact_person, store_contact_hp_number, store_contact_email, store_type_id, kiosk_payment_delay_id, byod_payment_delay_id, store_tax_type_id, ecpos_url, created_date) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,GETDATE());",
 				new Object[] { store.getBackendId(), store.getName(), store.getLogoPath(),
 						store.getLocation().getAddress(), store.getLocation().getLongitude(),
 						store.getLocation().getLatitude(), store.getLocation().getCountry(), store.getCurrency(),
-						store.getTableCount(), store.isPublish(), store.getOperatingStartTime(), store.getOperatingEndTime(), store.getEcpos(), store.getContactPerson(), store.getMobileNumber(), store.getEmail(), store.getStoreTypeId(), store.getKioskPaymentDelayId(), store.getByodPaymentDelayId(), store.getStoreTaxTypeId(), store.getEcposUrl()});
+						store.isPublish(), store.getOperatingStartTime(), store.getOperatingEndTime(), store.getEcpos(), store.getContactPerson(), store.getMobileNumber(), store.getEmail(), store.getStoreTypeId(), store.getKioskPaymentDelayId(), store.getByodPaymentDelayId(), store.getStoreTaxTypeId(), store.getEcposUrl()});
 		
 		/*jdbcTemplate.update( new PreparedStatementCreator() {
 	        public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
@@ -133,20 +132,20 @@ public class StoreRepository {
 	public int editStore(Long id, Store store, String image) {
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(dbConnectionUtil.setupDataSource(request));
 		return jdbcTemplate.update(
-				"UPDATE store SET store_name = ?,store_logo_path = ?,store_address = ?,store_longitude = ?,store_latitude = ?,store_country = ?,store_currency = ?, store_table_count = ?, is_publish = ?, store_start_operating_time = ?, store_end_operating_time = ?, last_update_date = GETDATE(), ecpos = ?, store_contact_person = ?, store_contact_hp_number = ?, store_contact_email = ?, store_type_id = ?, kiosk_payment_delay_id = ?, byod_payment_delay_id = ?, store_tax_type_id = ?, ecpos_url = ? WHERE id = ?",
+				"UPDATE store SET store_name = ?,store_logo_path = ?,store_address = ?,store_longitude = ?,store_latitude = ?,store_country = ?,store_currency = ?, is_publish = ?, store_start_operating_time = ?, store_end_operating_time = ?, last_update_date = GETDATE(), ecpos = ?, store_contact_person = ?, store_contact_hp_number = ?, store_contact_email = ?, store_type_id = ?, kiosk_payment_delay_id = ?, byod_payment_delay_id = ?, store_tax_type_id = ?, ecpos_url = ? WHERE id = ?",
 				new Object[] { store.getName(), image, store.getLocation().getAddress(),
 						store.getLocation().getLongitude(), store.getLocation().getLatitude(),
-						store.getLocation().getCountry(), store.getCurrency(), store.getTableCount(),
+						store.getLocation().getCountry(), store.getCurrency(),
 						store.isPublish(), store.getOperatingStartTime(), store.getOperatingEndTime(), store.getEcpos(), store.getContactPerson(), store.getMobileNumber(), store.getEmail(), store.getStoreTypeId(), store.getKioskPaymentDelayId(), store.getByodPaymentDelayId(), store.getStoreTaxTypeId(), store.getEcposUrl(), id });
 	}
 	
 	public int editStore(Long id, Store store) {
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(dbConnectionUtil.setupDataSource(request));
 		return jdbcTemplate.update(
-				"UPDATE store SET store_name = ?,store_address = ?,store_longitude = ?,store_latitude = ?,store_country = ?,store_currency = ?, store_table_count = ?, is_publish = ?, store_start_operating_time = ?, store_end_operating_time = ?, last_update_date = GETDATE(), ecpos = ?, store_contact_person = ?, store_contact_hp_number = ?, store_contact_email = ?, store_type_id = ?, kiosk_payment_delay_id = ?, byod_payment_delay_id = ?, store_tax_type_id = ?, ecpos_url = ? WHERE id = ?",
+				"UPDATE store SET store_name = ?,store_address = ?,store_longitude = ?,store_latitude = ?,store_country = ?,store_currency = ?, is_publish = ?, store_start_operating_time = ?, store_end_operating_time = ?, last_update_date = GETDATE(), ecpos = ?, store_contact_person = ?, store_contact_hp_number = ?, store_contact_email = ?, store_type_id = ?, kiosk_payment_delay_id = ?, byod_payment_delay_id = ?, store_tax_type_id = ?, ecpos_url = ? WHERE id = ?",
 				new Object[] { store.getName(), store.getLocation().getAddress(),
 						store.getLocation().getLongitude(), store.getLocation().getLatitude(),
-						store.getLocation().getCountry(), store.getCurrency(), store.getTableCount(),
+						store.getLocation().getCountry(), store.getCurrency(),
 						store.isPublish(), store.getOperatingStartTime(), store.getOperatingEndTime(), store.getEcpos(), store.getContactPerson(), store.getMobileNumber(), store.getEmail(), store.getStoreTypeId(), store.getKioskPaymentDelayId(), store.getByodPaymentDelayId(), store.getStoreTaxTypeId(), store.getEcposUrl(), id });
 	}
 

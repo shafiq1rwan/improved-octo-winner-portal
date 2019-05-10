@@ -124,13 +124,16 @@ public class DeviceConfigRestController {
 					// ecpos retrieve extra info
 					if(type==1) {
 						JSONArray ecposStaffInfo = getEcposStaffInfo(connection, deviceInfo.getLong("refId"));
+						JSONArray ecposTableSetting = getEcposTableSetting(connection, deviceInfo.getLong("refId"));
 						JSONArray ecposStaffRole = getEcposStaffRole(connection);					
+						
 						if(ecposStaffInfo.length()==0) {
 							resultCode = "E07";
 							resultMessage = "Please create at least one staff login before activation.";
 							throw new IllegalArgumentException("There is no staff login info.");
 						}		
 						result.put("staffInfo", ecposStaffInfo);
+						result.put("tableSetting", ecposTableSetting);
 						result.put("staffRole", ecposStaffRole);
 					}
 					
@@ -345,8 +348,10 @@ public class DeviceConfigRestController {
 				if(deviceInfo.getLong("deviceType")==1) {
 					// ecpos
 					JSONArray ecposStaffInfo = getEcposStaffInfo(connection, storeId);
+					JSONArray ecposTableSetting = getEcposTableSetting(connection, storeId);
 					JSONArray ecposStaffRole = getEcposStaffRole(connection);
 					result.put("staffInfo", ecposStaffInfo);
+					result.put("tableSetting", ecposTableSetting);
 					result.put("staffRole", ecposStaffRole);
 				}
 				else if(deviceInfo.getLong("deviceType")==3) {
@@ -1361,7 +1366,7 @@ public class DeviceConfigRestController {
 		try {
 			//connection = dataSource.getConnection();
 			sqlStatement = "SELECT id, backend_id, store_name, store_logo_path, store_address, store_longitude, store_latitude, store_country, store_currency, " + 
-					"store_table_count, store_start_operating_time, store_end_operating_time, last_update_date, is_publish, created_date, store_contact_person, store_contact_hp_number, store_contact_email, store_type_id, kiosk_payment_delay_id, byod_payment_delay_id FROM store WHERE id = ? ";
+					"store_start_operating_time, store_end_operating_time, last_update_date, is_publish, created_date, store_contact_person, store_contact_hp_number, store_contact_email, store_type_id, kiosk_payment_delay_id, byod_payment_delay_id FROM store WHERE id = ? ";
 			ps1 = connection.prepareStatement(sqlStatement);
 			ps1.setLong(1, storeId);
 			rs1 = ps1.executeQuery();	
@@ -1377,7 +1382,6 @@ public class DeviceConfigRestController {
 				result.put("latitude", rs1.getString("store_latitude"));
 				result.put("country", rs1.getString("store_country"));
 				result.put("currency", rs1.getString("store_currency"));
-				result.put("tableCount", rs1.getString("store_table_count"));
 				result.put("startOperatingTime", rs1.getString("store_start_operating_time"));
 				result.put("endOperatingTime", rs1.getString("store_end_operating_time"));
 				result.put("lastUpdateDate", rs1.getString("last_update_date"));
@@ -1462,6 +1466,41 @@ public class DeviceConfigRestController {
 				JSONObject jsonObject = new JSONObject();
 				jsonObject.put("id", rs1.getLong("id"));
 				jsonObject.put("roleName", rs1.getString("role_name"));
+				result.put(jsonObject);
+			}
+			
+		} catch (Exception ex) {
+			throw ex;
+		} finally {
+			if (rs1 != null) {
+				rs1.close();
+			}
+			if (ps1 != null) {
+				ps1.close();
+			}
+		}
+		return result;
+	}
+	
+	private JSONArray getEcposTableSetting(Connection connection, Long storeId) throws Exception {
+		String sqlStatement = null;
+		PreparedStatement ps1 = null;
+		ResultSet rs1 = null;
+		JSONArray result = new JSONArray();
+		try {
+			sqlStatement = "SELECT id, table_name, status_lookup_id, created_date, last_update_date FROM table_setting "
+					+ "WHERE store_id = ? ";
+			ps1 = connection.prepareStatement(sqlStatement);
+			ps1.setLong(1, storeId);
+			rs1 = ps1.executeQuery();	
+			
+			while (rs1.next()) {
+				JSONObject jsonObject = new JSONObject();
+				jsonObject.put("id", rs1.getLong("id"));
+				jsonObject.put("tableName", rs1.getString("table_name"));
+				jsonObject.put("statusLookupId", rs1.getLong("status_lookup_id"));
+				jsonObject.put("createdDate", rs1.getString("created_date"));
+				jsonObject.put("lastUpdateDate", rs1.getString("last_update_date")==null?"":rs1.getString("last_update_date"));
 				result.put(jsonObject);
 			}
 			

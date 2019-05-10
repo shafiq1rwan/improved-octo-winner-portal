@@ -25,13 +25,12 @@
 			if($scope.store.name == null || $scope.store.name=='' ||
 				$scope.store.currency == null || $scope.store.currency=='' ||
 					$scope.store.address == null || $scope.store.address=='' ||
-						$scope.store.tableCount == null || $scope.store.tableCount=='' ||
-							$scope.store.longitude == null || $scope.store.latitude == null || 
-									$scope.store.country == null || $scope.store.country=='' || 
-										$scope.store.operatingStartTime == null || $scope.store.operatingStartTime=='' || 
-											$scope.store.operatingEndTime == null || $scope.store.operatingEndTime=='' ||
-												$scope.store.storeType == null || $scope.store.storeType =='' ||
-													$scope.store.storeTaxType == null || $scope.store.storeTaxType == '' ){
+						$scope.store.longitude == null || $scope.store.latitude == null || 
+								$scope.store.country == null || $scope.store.country=='' || 
+									$scope.store.operatingStartTime == null || $scope.store.operatingStartTime=='' || 
+										$scope.store.operatingEndTime == null || $scope.store.operatingEndTime=='' ||
+											$scope.store.storeType == null || $scope.store.storeType =='' ||
+												$scope.store.storeTaxType == null || $scope.store.storeTaxType == '' ){
 				$('#collapseOne').collapse('show');
 			}
 			else if($scope.action=='create' && $scope.store.imagePath == null || $scope.action=='create' && $scope.store.imagePath==''){
@@ -109,7 +108,6 @@
 						store_latitude : parseFloat($scope.store.latitude).toFixed(6)
 					},
 					store_currency : $scope.store.currency,
-					store_table_count: $scope.store.tableCount, 
 					is_publish: $scope.store.isPublish==null?false:$scope.store.isPublish,
 					store_logo_path: $scope.uploadImage?$scope.store.imagePath: null,
 					store_start_operating_time: $scope.store.operatingStartTime,
@@ -281,7 +279,6 @@
 						$scope.store.longitude = response.data.location.store_longitude;
 						$scope.store.latitude = response.data.location.store_latitude;
 						$scope.store.currency = response.data.store_currency;
-						$scope.store.tableCount = response.data.store_table_count;
 						$scope.store.isPublish = response.data.is_publish;
 						$scope.store.operatingStartTime = response.data.store_start_operating_time;
 						$scope.store.operatingEndTime = response.data.store_end_operating_time;

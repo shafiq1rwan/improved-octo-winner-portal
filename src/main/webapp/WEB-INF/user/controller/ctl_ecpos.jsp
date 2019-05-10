@@ -3,11 +3,14 @@
 	app.controller('ctl_ecpos', function($scope, $http, $compile, $routeParams) {
 		
 		$scope.action = '';
+		$scope.actionTable = '';
 		$scope.store = {id : $routeParams.id};
-		$scope.staff = {}
+		$scope.staff = {};
+		$scope.table = {};
 		$scope.roleList = [];
 		$scope.ecpos = {}
 		$scope.showActivation = false;
+		//$scope.tableCount = 0;
 		
 		$scope.modalType = function(action){
 			$scope.action = action;
@@ -124,7 +127,7 @@
 		}
 		
 		$scope.resetModal = function(){
-			$scope.action = {};
+			$scope.action = '';
 			$scope.staff = {};
 			$('#staffModal').modal('toggle');
 			$('#staffListModal').modal('toggle');
@@ -373,10 +376,145 @@
 			});
 		}
 		
+		// table modal setting
+		$scope.resetTableModal = function(){
+			$scope.actionTable = '';
+			$scope.table = {};
+			$('#tableModal').modal('toggle');
+			$('#tableListModal').modal('toggle');
+		}
+		
+		$scope.tableModalType = function(action){
+			$scope.actionTable = action;
+			// close table list modal
+			$('#tableListModal').modal('toggle');
+		}
+		
+		// validation
+		$scope.submitTable = function(){
+			if($scope.table.name == null || $scope.table.name==''){
+			}
+			else{
+				if($scope.actionTable=='create'){
+					swal({
+						  title: "Are you sure?",
+						  text: "Please confirm to add a table",
+						  icon: "warning",
+						  buttons: true,
+						  dangerMode: true,
+						})
+						.then((willCreate) => {
+						  if (willCreate) {
+							  $scope.postRequestTable();
+						}
+					});
+				}
+				else if($scope.actionTable=='update'){
+					 $scope.postRequestTable();
+				}				
+			}
+		}
+
+		$scope.postRequestTable = function(){
+			var postdata = {
+					id : $scope.actionTable=='create'?undefined:$scope.table.id,
+					store_id: $scope.store.id,
+					tableName : $scope.table.name
+				}
+				
+				console.log(postdata);
+				
+			$http({
+				method : 'POST',
+				headers : {'Content-Type' : 'application/json'},
+				url : $scope.actionTable=='create'?'${pageContext.request.contextPath}/menu/store/ecpos/createTable':'${pageContext.request.contextPath}/menu/store/ecpos/updateTable',
+				data : postdata
+			})
+			.then(function(response) {
+				if (response.status == "403") {
+					alert("Session TIME OUT");
+					$(location).attr('href','${pageContext.request.contextPath}/user');			
+				} else if(response.status == "200") {
+					// ok
+					if($scope.actionTable=='create'){
+						swal("The table has been created", {
+							icon: "success",
+						});
+					}
+					else if($scope.actionTable=='update'){
+						swal("The table has been updated", {
+							icon: "success",
+						});
+					}
+					$scope.resetTableModal();
+					$('#tableModal').modal('toggle');
+					$('#tableListModal').modal('toggle');
+					$scope.refreshTable2();
+				}
+			}, function(response){
+				console.log(response);
+				swal({
+				  title: "Error",
+				  text: response.data,
+				  icon: "warning",
+				  dangerMode: true,
+				});
+			});
+		}
+		
+		$scope.refreshTable2 = function(){
+			var table = $('#tableList_dtable').DataTable({
+				"ajax" : {
+					"url" : "${pageContext.request.contextPath}/menu/store/ecpos/getAllTables?store_id="+$scope.store.id,
+					"dataSrc": function ( json ) {
+						/* $scope.$apply(function() {
+							$scope.tableCount = JSON.stringify(json.tableCount);
+						}); */
+						return json.data;
+		            },
+					"statusCode" : {
+						403 : function() {
+							alert("Session TIME OUT");
+							$(location).attr('href', '${pageContext.request.contextPath}/user');
+						}
+					}
+				},
+				destroy : true,
+				"order" : [ [ 0, "asc" ] ] ,
+				"columns" : [ 
+					{"data" : "id", "width": "5%"}, 
+					{"data" : "tableName"}
+				]			
+			});
+			
+			$('#tableList_dtable tbody').off('click', 'tr');
+			$('#tableList_dtable tbody').on('click', 'tr', function(evt) {				
+				$scope.actionTable = 'update';
+				$scope.table = {}
+				$scope.table.id = table.row(this).data().id;
+				$http({
+					method : 'GET',
+					headers : {'Content-Type' : 'application/json'},
+					url : '${pageContext.request.contextPath}/menu/store/ecpos/tableById?store_id='+$scope.store.id + '&id=' + $scope.table.id		
+				})
+				.then(function(response) {
+					if (response.status == "404") {
+						alert("Unable to find table detail");
+					} else{
+						$scope.table.name = response.data.tableName;
+						
+						$('#tableListModal').modal('toggle');
+						$('#tableModal').modal('toggle');
+					}
+				});
+			});
+		}
+		
 		$scope.getDeviceInfo();
 		
 		$(document).ready(function() {
 			$scope.refreshTable();
+			$scope.refreshTable2();
 		});
 	});
 	
