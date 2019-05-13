@@ -18,6 +18,7 @@ language-pack-en:
   tier_selection_done: "Done"
   order_list_empty_message: "The order list is empty. Please proceed to order."
   order_list_order_time: "Order Time"
+  order_list_expired: "The order has been cancelled/closed. Please scan new QR."
   cart_empty_message: "The cart is empty. Please proceed to order."
   cart_summary: "Cart Summary"
   cart_total: "Total"

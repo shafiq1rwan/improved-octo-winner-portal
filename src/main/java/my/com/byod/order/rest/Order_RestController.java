@@ -568,7 +568,13 @@ public class Order_RestController {
 
 							checkList.put(checkItem);
 						}
-						result.put("checkList", checkList);
+						
+						if (returnObject.getString("status").equalsIgnoreCase("closed") || returnObject.getString("status").equalsIgnoreCase("cancelled")) {
+							result.put("isOpen", false);
+						} else {
+							result.put("checkList", checkList);
+							result.put("isCheckOpen", true);
+						}
 
 						resultCode = "00";
 						resultMessage = "Success";

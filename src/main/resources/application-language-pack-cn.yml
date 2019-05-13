@@ -18,6 +18,7 @@ language-pack-cn:
   tier_selection_done: "完成"
   order_list_empty_message: "订单列表是空的。 请开始下单。"
   order_list_order_time: "订单时间"
+  order_list_expired: "订单已被取消/关闭。 请扫描新的QR。"
   cart_empty_message: "购物车是空的。 请开始下单。"
   cart_summary: "购物车汇总"
   cart_total: "总计"

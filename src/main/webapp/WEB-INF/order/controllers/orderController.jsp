@@ -25,6 +25,7 @@ byodApp.controller('OrderController', function($scope, $http, $location, $timeou
 	$scope.taxList = [];
 	$scope.taxDisplayList = [];
 	$scope.checkList;
+	$scope.isCheckOpen;
 	/*Dialog Config*/
 	$scope.isAllowKeyboardDismissal = false;
 	$scope.dialogData = {};
@@ -817,6 +818,7 @@ byodApp.controller('OrderController', function($scope, $http, $location, $timeou
 			if (response != null && response.data != null && response.data.resultCode != null) {
 				if (response.data.resultCode == "00") {
 					$scope.checkList = response.data.checkList;
+					$scope.isCheckOpen = response.data.isCheckOpen;
 					$scope.getCheckDataSuccess();
 				} else {
 					$scope.getCheckDataFailed();

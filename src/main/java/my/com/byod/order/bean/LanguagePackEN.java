@@ -25,6 +25,7 @@ public class LanguagePackEN {
 	
 	public String order_list_empty_message;
 	public String order_list_order_time;
+	public String order_list_expired;
 	
 	public String cart_empty_message;
 	public String cart_summary;
@@ -152,6 +153,12 @@ public class LanguagePackEN {
 	}
 	public void setOrder_list_order_time(String order_list_order_time) {
 		this.order_list_order_time = order_list_order_time;
+	}
+	public String getOrder_list_expired() {
+		return order_list_expired;
+	}
+	public void setOrder_list_expired(String order_list_expired) {
+		this.order_list_expired = order_list_expired;
 	}
 	public String getCart_empty_message() {
 		return cart_empty_message;

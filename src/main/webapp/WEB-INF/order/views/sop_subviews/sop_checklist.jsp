@@ -19,12 +19,19 @@
 		<div class="body-content d-flex flex-column pt-2">
 			<div
 				class="flex-fill pl-1 pr-1 d-flex flex-column justify-content-center"
-				ng-show="checkList.length <= 0">
+				ng-show="!isCheckOpen">
+				<div class="w-100 align-self-center text-center">
+					<span class="md-resp-font"><b>{{currentLanguageData.order_list_expired}}</b></span>
+				</div>
+			</div>
+			<div
+				class="flex-fill pl-1 pr-1 d-flex flex-column justify-content-center"
+				ng-show="isCheckOpen && checkList.length <= 0">
 				<div class="w-100 align-self-center text-center">
 					<span class="md-resp-font"><b>{{currentLanguageData.order_list_empty_message}}</b></span>
 				</div>
 			</div>
-			<div class="flex-fill scrollable-y" ng-show="checkList.length > 0">
+			<div class="flex-fill scrollable-y" ng-show="isCheckOpen && checkList.length > 0">
 				<div class="row ml-0 mr-0 pl-1 pr-1">
 					<div class="col-12 cart-item pl-1 pr-1 mb-2"
 						ng-repeat="checkItem in checkList">
