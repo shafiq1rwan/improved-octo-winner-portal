@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Base64;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -28,6 +29,7 @@ import my.com.byod.admin.entity.Store;
 import my.com.byod.admin.service.StoreService;
 import my.com.byod.admin.util.ByodUtil;
 import my.com.byod.admin.util.DbConnectionUtil;
+import my.com.byod.admin.util.QRGenerate;
 import my.com.byod.admin.util.UserEmailUtil;
 import my.com.byod.order.util.AESEncryption;
 
@@ -871,6 +873,45 @@ public class StoreRestController {
 			}
 		}
 		return new ResponseEntity<>(HttpStatus.OK);
+	}
+	
+	@PostMapping(value = {"/ecpos/generateStaffQR"}, produces = "application/json")
+	public ResponseEntity<?> generateStaffQR(@RequestBody String formfield, HttpServletRequest request, HttpServletResponse response) {
+		JSONObject jsonObj = new JSONObject();
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		
+		try {
+			JSONObject requestObj = new JSONObject(formfield);
+			if(!requestObj.has("staff_id")) {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Staff ID required.");
+			}
+				
+			connection = dbConnectionUtil.retrieveConnection(request);
+			String sqlStatement = "SELECT store_id, staff_username, staff_password FROM staff WHERE id = ?";
+			stmt = connection.prepareStatement(sqlStatement);
+			stmt.setLong(1, requestObj.getLong("staff_id"));
+			rs = stmt.executeQuery();
+			if(!rs.next()) {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("No such staff.");
+			} else {
+				String qrImg = Base64.getEncoder().encodeToString(QRGenerate.generateQRImage(AESEncryption.encrypt(rs.getLong("store_id") + String.valueOf((char)28) + rs.getString("staff_username") + String.valueOf((char)28) + rs.getString("staff_password")), 300, 300));
+				jsonObj.put("qrImg", qrImg);
+			}
+		}catch(Exception ex) {
+			ex.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Server error. Please contact support.");
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return new ResponseEntity<String>(jsonObj.toString(), HttpStatus.OK);
 	}
 	
 	/*End ECPOS API*/

@@ -129,6 +129,7 @@
 												<th>Name</th>
 												<th>Username</th>
 												<th>Status</th>
+												<th>Action</th>
 											</tr>
 										</thead>										
 										<tbody>									
@@ -142,6 +143,23 @@
 				</button>
 		      </div>
 		       </form>		      
+		    </div>
+		</div>
+	</div>
+	
+	<!-- Staff QR Modal -->
+	<div class="modal fade" id="staffQRModal" tabindex="-1" role="dialog" aria-labelledby="staffQRModal" aria-hidden="true">
+		<div class="modal-dialog">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <h5>Staff QR</h5>
+		        <button type="button" class="close" ng-click="closeQRModel()" aria-label="Close">
+		          <span aria-hidden="true">&times;</span>
+		        </button>
+		      </div>
+		      <div class="modal-body text-center">
+		        <img class="img-fluid" alt="Responsive image" data-ng-src="data:image/png;base64,{{qrImgData}}">				  				 									
+		      </div>      
 		    </div>
 		</div>
 	</div>

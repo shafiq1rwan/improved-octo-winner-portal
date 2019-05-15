@@ -11,6 +11,7 @@
 		$scope.ecpos = {}
 		$scope.showActivation = false;
 		//$scope.tableCount = 0;
+		$scope.qrImgData = "";
 		
 		$scope.modalType = function(action){
 			$scope.action = action;
@@ -164,13 +165,59 @@
 						 		status = 'Inactive';
 						 	}
 						    return status;	  						
+					 }},
+					 {"data" : "username",
+						 "render": function ( data, type, full, meta ) {
+							 return '<button class="btn btn-primary" ng-click="generateStaffQR('+full.id+')">Show QR</button>';
 					 }}
-				]
-				
+				],
+				"createdRow": function ( row, data, index ) {
+					$compile(row)($scope);  //add this to compile the DOM
+				}
 			});
 			
+			$scope.generateStaffQR = function(staffId) {
+				$http({
+					method : 'POST',
+					headers : {'Content-Type' : 'application/json'},
+					url : '${pageContext.request.contextPath}/menu/store/ecpos/generateStaffQR',
+					data : {
+						staff_id: staffId
+					}
+				})
+				.then(function(response) {
+					if (response.status == "403") {
+						alert("Session TIME OUT");
+						$(location).attr('href','${pageContext.request.contextPath}/user');			
+					} else if(response.status == "200") {
+						$scope.qrImgData = response.data.qrImg;
+						
+						$('#staffListModal').modal('hide');
+						$('#staffQRModal').modal({
+						    backdrop: 'static'
+						})
+						$('#staffQRModal').modal('show');
+					}
+				}, function(response){
+					console.log(response);
+					swal({
+					  title: "Error",
+					  text: response.data,
+					  icon: "warning",
+					  dangerMode: true,
+					});
+				});
+			}
+			$scope.closeQRModel = function() {
+				$('#staffQRModal').modal('hide');
+				$('#staffListModal').modal('show');
+			}
+			
 			$('#staffList_dtable tbody').off('click', 'tr');
-			$('#staffList_dtable tbody').on('click', 'tr', function(evt) {				
+			$('#staffList_dtable tbody').on('click', 'tr', function(evt) {
+				if($(evt.target).is('.btn')) {
+					return;
+				}
 				$scope.action = 'update';
 				$scope.staff = {
 						role:{}
