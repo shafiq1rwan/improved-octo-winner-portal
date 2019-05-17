@@ -98,18 +98,18 @@ public class BrandManagementRestController {
 	public ResponseEntity<?> changeConnectionDbSource(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody String data) {
 		Connection conn = null;
+		JSONObject jsonAccessRights = null;
 
 		try {
 			Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 			String username = auth.getName();
-			System.out.println("Hello My " + username);
 			
 			JSONObject jsonData = new JSONObject(data);
 			conn = dbConnectionUtil.getConnection(jsonData.getLong("id"));
 
 			if (conn != null) {
 				dbConnectionUtil.setBrandId(jsonData.getLong("id"), request);
-				accessRightsUtil.setupAccessRightByUsername(username, jsonData.getLong("id"),request);
+				jsonAccessRights = accessRightsUtil.setupAccessRightByUsername(username, jsonData.getLong("id"),request);
 			} else {
 				return ResponseEntity.badRequest().contentType(MediaType.TEXT_PLAIN)
 						.body("Error occured while connecting to database");
@@ -127,7 +127,7 @@ public class BrandManagementRestController {
 				}
 			}
 		}
-		return ResponseEntity.ok(null);
+		return ResponseEntity.ok(jsonAccessRights.toString());
 	}
 
 	@GetMapping(value = "")

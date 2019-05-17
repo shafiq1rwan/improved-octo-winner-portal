@@ -21,7 +21,8 @@ public class AccessRightsUtil {
 	@Autowired
 	private DataSource dataSource;
 
-	public void setupAccessRightByUsername(String username, Long brandId, HttpServletRequest request) {
+	public JSONObject setupAccessRightByUsername(String username, Long brandId, HttpServletRequest request) {
+		JSONObject jsonResult = null;
 		Connection connection = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
@@ -32,7 +33,9 @@ public class AccessRightsUtil {
 
 			if (role.equals("ROLE_SUPER_ADMIN")) {
 				HttpSession session = request.getSession();
-				session.setAttribute("access_rights", convertAccessRightsToJSON(null, role));
+				jsonResult = convertAccessRightsToJSON(null, role);
+				jsonResult.put("role", role);
+				session.setAttribute("access_rights", jsonResult);
 
 			} else {
 				connection = dataSource.getConnection();
@@ -44,7 +47,8 @@ public class AccessRightsUtil {
 
 				if (rs.next()) {
 					HttpSession session = request.getSession();
-					session.setAttribute("access_rights", convertAccessRightsToJSON(rs.getString("permission"), role));
+					jsonResult = convertAccessRightsToJSON(rs.getString("permission"), role);
+					session.setAttribute("access_rights", jsonResult);
 				}
 			}
 		} catch (Exception ex) {
@@ -58,6 +62,8 @@ public class AccessRightsUtil {
 				}
 			}
 		}
+		
+		return jsonResult;
 	}
 
 	private JSONObject convertAccessRightsToJSON(String permission, String role) {

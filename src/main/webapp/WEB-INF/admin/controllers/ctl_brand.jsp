@@ -103,15 +103,43 @@
 					data : postData
 				})
 				.then(
-					function(response) {			
-						console.log("Success");
-						$(location)
-						.attr('href',
-								'${pageContext.request.contextPath}/user/#!Router_store');
+					function(response) {
+						if(response.data.role){
+	   						$(location)
+							.attr('href',
+									'${pageContext.request.contextPath}/user/#!Router_store'); 
+						} else {
+		 				 	$(location)
+							.attr('href',
+									'${pageContext.request.contextPath}/user/'+decideDefaultRoute(response.data)); 
+						}
 					},
 					function(response) {
 						alert(response.data);
 				});
+		}
+		
+		function decideDefaultRoute(accessRightJson){
+			var accessRights = accessRightJson.accessRights;
+			
+			for (var key in accessRights) {
+			    if (accessRights.hasOwnProperty(key)) {
+			        //console.log(key + " -> " + accessRights[key]);
+			        if(accessRights[key]){
+			        	if(key === "group-category")
+			        		return "#!Router_group_category";
+			        	else if(key === "report")
+			        		return "#!Router_report";
+			        	else if(key === "store")
+			        		return "#!Router_store";
+			        	else if(key === "menu-item")
+			        		return 	"#!Router_menu_item";
+			        	else if(key === "setting")
+			        		return  "#!Router_setting";
+			        }
+			    }
+			}
+			return "";
 		}
 		
 		$scope.promptEditBrandModal = function(id){

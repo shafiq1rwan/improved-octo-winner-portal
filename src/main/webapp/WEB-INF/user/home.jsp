@@ -293,7 +293,10 @@ if it's not present, don't show loader */
 						var deferred = $q.defer();
 					    if (resultData == "authorized") {
 					        deferred.resolve();
-					    } else {
+					    }  else if(resultData == "session_expired"){
+					    	deferred.reject();
+					        window.location.href = "${pageContext.request.contextPath}/byod-panel";
+					    }  else {
 					        deferred.reject();
 					        window.location.href = "${pageContext.request.contextPath}/user/views/unauthorized";
 					    }

@@ -44,13 +44,23 @@ public class UserLoginRestController {
 	
 	// SEND HOME
 	@RequestMapping(value = {""}, method = RequestMethod.GET)
-	public ModelAndView home(/*Authentication authentication*/) {		
+	public ModelAndView home(/*Authentication authentication*/HttpServletRequest request) {		
 		/*User user = (User) authentication.getPrincipal();
 		com.managepay.byod.model.User dbUser = adminService.getAdminDetail(user.getUsername());*/
 		
+		HttpSession session = request.getSession();
 		ModelAndView model = new ModelAndView();
 		/*model.addObject("role", dbUser.getRoles());*/
-		model.setViewName("/user/home");
+
+		if(session != null) {
+			JSONObject accessRight = (JSONObject) session.getAttribute("access_rights");
+			if(accessRight!=null)
+				model.setViewName("/user/home");
+			else 
+				model.setViewName("/admin/home");
+		} else {
+			model.setViewName("/admin/home");
+		}
 		return model;
 	}
 	
@@ -78,15 +88,23 @@ public class UserLoginRestController {
 	@RequestMapping(value = {"/checkaccessrights/{access}"}, method = RequestMethod.GET)
 	public ResponseEntity<String> check_access_rights(HttpServletRequest request, @PathVariable("access") String access) throws JSONException{
 		HttpSession session = request.getSession();
-		JSONObject accessRight = (JSONObject) session.getAttribute("access_rights");
-		String authorized = null;
+		String result = null;
 		
-		if(accessRight!=null) {
-			if(accessRight.getJSONObject("accessRights").getBoolean(access)) {
-				authorized = "authorized";
+		if(session != null) {
+			JSONObject accessRight = (JSONObject) session.getAttribute("access_rights");
+/*			System.out.println("AccessRights :" + accessRight.toString());
+			System.out.println("Access :" + access);
+			System.out.println("Access Result:" + accessRight.getJSONObject("accessRights").getBoolean(access));*/
+
+			if(accessRight!=null) {
+				if(accessRight.getJSONObject("accessRights").getBoolean(access)) {
+					result = "authorized";
+				}
 			}
+		} else {
+			result = "session_expired";
 		}
-		return ResponseEntity.status(HttpStatus.OK).body(authorized);
+		return ResponseEntity.status(HttpStatus.OK).body(result);
 	}
 	
 	@RequestMapping(value = { "/views/unauthorized" }, method = RequestMethod.GET)

@@ -22,7 +22,7 @@
 
                                <!-- item-->
                                <a href="${pageContext.request.contextPath}/byod-panel" class="dropdown-item notify-item">
-                                   <i class="fa fa-power-off"></i> <span>Back to Admin</span>
+                                   <i class="fa fa-power-off"></i> <span>Back to Brands</span>
                                </a>
 							
                            </div>
