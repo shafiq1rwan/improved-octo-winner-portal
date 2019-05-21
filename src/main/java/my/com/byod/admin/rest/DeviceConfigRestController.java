@@ -1366,7 +1366,7 @@ public class DeviceConfigRestController {
 		try {
 			//connection = dataSource.getConnection();
 			sqlStatement = "SELECT id, backend_id, store_name, store_logo_path, store_address, store_longitude, store_latitude, store_country, store_currency, " + 
-					"store_start_operating_time, store_end_operating_time, last_update_date, is_publish, created_date, store_contact_person, store_contact_hp_number, store_contact_email, store_type_id, kiosk_payment_delay_id, byod_payment_delay_id FROM store WHERE id = ? ";
+					"store_start_operating_time, store_end_operating_time, last_update_date, is_publish, created_date, store_contact_person, store_contact_hp_number, store_contact_email, store_type_id, kiosk_payment_delay_id, byod_payment_delay_id, ecpos_takeaway_detail_flag, login_type_id, login_switch_flag FROM store WHERE id = ? ";
 			ps1 = connection.prepareStatement(sqlStatement);
 			ps1.setLong(1, storeId);
 			rs1 = ps1.executeQuery();	
@@ -1393,6 +1393,10 @@ public class DeviceConfigRestController {
 				result.put("storeTypeId", rs1.getLong("store_type_id"));
 				result.put("kioskPaymentDelayId", rs1.getLong("kiosk_payment_delay_id"));
 				result.put("byodPaymentDelayId", rs1.getLong("byod_payment_delay_id"));
+				result.put("ecposTakeawayDetailFlag", rs1.getBoolean("ecpos_takeaway_detail_flag"));
+				result.put("loginTypeId", rs1.getLong("login_type_id"));
+				result.put("loginSwitchFlag", rs1.getBoolean("login_switch_flag"));
+				
 			}
 			
 		} catch (Exception ex) {
