@@ -246,16 +246,16 @@ overflow-y: auto;
 		<!-- END Modal -->
 		
 		<!-- Loading Modal [START] -->
-		<div class="modal fade" data-backdrop="static" id="loading_modal" role="dialog">
-			<div class="modal-dialog h-100 d-flex flex-column justify-content-center my-0 modal-sm">
-			<div class="modal-content">
-				<div class="modal-body">
-					<div class="text-center">
-						<img style="width:75%" src="${pageContext.request.contextPath}/assets/images/byodadmin/gif/loading.gif"><br>
-							<span>Loading...</span>
+		<div class="modal" id="loading_modal" tabindex="-1" role="dialog">
+			<div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+				<div class="modal-content">
+					<div class="modal-body">
+						<div class="text-center">
+							<img style="width:75%" src="${pageContext.request.contextPath}/assets/images/byodadmin/gif/loading.gif"><br>
+								<span>Loading...</span>
+						</div>
 					</div>
 				</div>
-			</div>
 			</div>
 		</div>
 		<!-- Loading Modal [END] -->

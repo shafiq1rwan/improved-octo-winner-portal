@@ -4,7 +4,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Calendar;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -17,7 +19,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,8 +26,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import my.com.byod.admin.entity.Location;
 import my.com.byod.admin.entity.Store;
-import my.com.byod.admin.service.StoreService;
 import my.com.byod.admin.util.ByodUtil;
 import my.com.byod.admin.util.DbConnectionUtil;
 import my.com.byod.admin.util.QRGenerate;
@@ -39,9 +40,6 @@ public class StoreRestController {
 	
 	@Value("${get-upload-path}")
 	private String displayFilePath;
-	
-	@Autowired
-	private StoreService storeService;
 	
 /*	@Autowired
 	private DataSource dataSource;*/
@@ -57,70 +55,256 @@ public class StoreRestController {
 	
 	// Store
 	@GetMapping("")
-	public ResponseEntity<List<Store>> findAllStore(HttpServletRequest request, HttpServletResponse response) {
-		List<Store> stores = storeService.findAllStore();
+	public ResponseEntity<?> findAllStore(HttpServletRequest request, HttpServletResponse response) {
+		List<Store> stores = new ArrayList<Store>();
+		Connection connection = null;;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
 		try {
-			Connection connection = dbConnectionUtil.retrieveConnection(request);
+			connection = dbConnectionUtil.retrieveConnection(request);
 			String brandId = byodUtil.getGeneralConfig(connection, "BRAND_ID");
-			connection.close();
-			for(Store store: stores) {
-				store.setLogoPath(displayFilePath + brandId + "/" + store.getLogoPath());
+			String sqlStatement = "SELECT * FROM store ";
+			stmt = connection.prepareStatement(sqlStatement);
+			rs = stmt.executeQuery();
+			while(rs.next()) {
+				Store store = new Store();
+				store.setId(rs.getLong("id"));
+				store.setGroupCategoryId(rs.getLong("group_category_id"));
+				store.setBackendId(rs.getString("backend_id"));
+				store.setName(rs.getString("store_name"));
+				store.setLogoPath(displayFilePath + brandId + "/" + rs.getString("store_logo_path"));
+				Location location = new Location();
+				location.setAddress(rs.getString("store_address"));
+				location.setLongitude(rs.getDouble("store_longitude"));
+				location.setLatitude(rs.getDouble("store_latitude"));
+				location.setCountry(rs.getString("store_country"));
+				store.setLocation(location);
+				store.setCurrency(rs.getString("store_currency"));
+				store.setPublish(rs.getBoolean("is_publish"));
+				store.setCreatedDate(rs.getDate("created_date"));
+				store.setOperatingStartTime(rs.getTime("store_start_operating_time"));
+				store.setOperatingEndTime(rs.getTime("store_end_operating_time"));
+				store.setEcpos(rs.getBoolean("ecpos"));
+				store.setEcposUrl(rs.getString("ecpos_url"));
+				store.setEcposTakeawayDetailFlag(rs.getBoolean("ecpos_takeaway_detail_flag"));
+				store.setLoginTypeId(rs.getLong("login_type_id"));
+				store.setLoginSwitchFlag(rs.getBoolean("login_switch_flag"));
+				store.setContactPerson(rs.getString("store_contact_person"));
+				store.setMobileNumber(rs.getString("store_contact_hp_number"));
+				store.setEmail(rs.getString("store_contact_email"));
+				store.setStoreTypeId(rs.getLong("store_type_id"));
+				store.setKioskPaymentDelayId(rs.getLong("kiosk_payment_delay_id"));
+				store.setByodPaymentDelayId(rs.getLong("byod_payment_delay_id"));
+				store.setStoreTaxTypeId(rs.getLong("store_tax_type_id"));
+				stores.add(store);
 			}
 		} catch (Exception ex) {
 			ex.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Server error. Please contact support."); 
+		} finally {
+			if(connection != null) {
+				try {
+					connection.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 		}
 		return new ResponseEntity<List<Store>>(stores, HttpStatus.OK);
 	}
 
 	@GetMapping("/storeById")
-	public ResponseEntity<Store> findStoreById(@RequestParam("id") Long id, HttpServletRequest request, HttpServletResponse response) {
-		Store existingStore = storeService.findStoreById(id);
+	public ResponseEntity<?> findStoreById(@RequestParam("id") Long id, HttpServletRequest request, HttpServletResponse response) {
+		Store store = null;
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
 		try {
-			Connection connection = dbConnectionUtil.retrieveConnection(request);
+			connection = dbConnectionUtil.retrieveConnection(request);
 			String brandId = byodUtil.getGeneralConfig(connection, "BRAND_ID");
-			connection.close();
-			if (existingStore.getId() == 0)
-				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-			existingStore.setLogoPath(displayFilePath + brandId + "/" + existingStore.getLogoPath());
+			String sqlStatement = "SELECT * FROM store WHERE id = ? ";
+			stmt = connection.prepareStatement(sqlStatement);
+			stmt.setLong(1, id);
+			rs = stmt.executeQuery();
+			if(rs.next()) {
+				store = new Store();
+				store.setId(rs.getLong("id"));
+				store.setGroupCategoryId(rs.getLong("group_category_id"));
+				store.setBackendId(rs.getString("backend_id"));
+				store.setName(rs.getString("store_name"));
+				store.setLogoPath(displayFilePath + brandId + "/" + rs.getString("store_logo_path"));
+				Location location = new Location();
+				location.setAddress(rs.getString("store_address"));
+				location.setLongitude(rs.getDouble("store_longitude"));
+				location.setLatitude(rs.getDouble("store_latitude"));
+				location.setCountry(rs.getString("store_country"));
+				store.setLocation(location);
+				store.setCurrency(rs.getString("store_currency"));
+				store.setPublish(rs.getBoolean("is_publish"));
+				store.setCreatedDate(rs.getDate("created_date"));
+				store.setOperatingStartTime(rs.getTime("store_start_operating_time"));
+				store.setOperatingEndTime(rs.getTime("store_end_operating_time"));
+				store.setEcpos(rs.getBoolean("ecpos"));
+				store.setEcposUrl(rs.getString("ecpos_url"));
+				store.setEcposTakeawayDetailFlag(rs.getBoolean("ecpos_takeaway_detail_flag"));
+				store.setLoginTypeId(rs.getLong("login_type_id"));
+				store.setLoginSwitchFlag(rs.getBoolean("login_switch_flag"));
+				store.setContactPerson(rs.getString("store_contact_person"));
+				store.setMobileNumber(rs.getString("store_contact_hp_number"));
+				store.setEmail(rs.getString("store_contact_email"));
+				store.setStoreTypeId(rs.getLong("store_type_id"));
+				store.setKioskPaymentDelayId(rs.getLong("kiosk_payment_delay_id"));
+				store.setByodPaymentDelayId(rs.getLong("byod_payment_delay_id"));
+				store.setStoreTaxTypeId(rs.getLong("store_tax_type_id"));
+			}
 		} catch (Exception ex) {
 			ex.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Server error. Please contact support."); 
+		} finally {
+			if(connection!=null) {
+				try {
+					connection.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 		}
-		return new ResponseEntity<Store>(existingStore, HttpStatus.OK);
+			}
+		}
+		return new ResponseEntity<Store>(store, HttpStatus.OK);
 	}
 
 	@PostMapping("/create")
 	public ResponseEntity<?> createStore(@RequestBody Store store, HttpServletRequest request, HttpServletResponse response) {
+		Connection connection = null;
+		PreparedStatement stmt = null;
 		try {
-			Connection connection = dbConnectionUtil.retrieveConnection(request);
+			connection = dbConnectionUtil.retrieveConnection(request);
 			String brandId = byodUtil.getGeneralConfig(connection, "BRAND_ID");
-			connection.close();
-			int rowAffected = storeService.createStore(store, brandId);
-			if (rowAffected == 0)
-				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-			return new ResponseEntity<>(HttpStatus.OK);
+			
+			// check for store name duplication
+			if(checkStoreExistByName(connection, store.getName())) {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Duplicate store name. Please enter a different name.");
+			}	
+			String backendId = byodUtil.createUniqueBackendId("S");
+			// check for backend id duplication
+			if(checkStoreExistByBackendId(connection, backendId)) {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Duplicate Backend ID. Please try again.");
+			}
+			
+			Calendar startTime = Calendar.getInstance();
+			startTime.setTime(store.getOperatingStartTime());
+			startTime.set(Calendar.SECOND, 0);
+			startTime.set(Calendar.MILLISECOND, 0);
+			Calendar endTime = Calendar.getInstance();
+			endTime.setTime(store.getOperatingEndTime());
+			endTime.set(Calendar.SECOND, 0);
+			endTime.set(Calendar.MILLISECOND, 0);
+			
+			String sqlStatement = "INSERT INTO store(backend_id,store_name,store_logo_path,store_address,store_longitude,store_latitude,store_country,store_currency, " + 
+					"is_publish, store_start_operating_time, store_end_operating_time, ecpos, store_contact_person, store_contact_hp_number, store_contact_email, store_type_id, kiosk_payment_delay_id, byod_payment_delay_id, store_tax_type_id, ecpos_url, ecpos_takeaway_detail_flag, login_type_id, login_switch_flag, created_date) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,GETDATE());";
+			int count = 1;
+			stmt = connection.prepareStatement(sqlStatement);
+			stmt.setString(count++, backendId);
+			stmt.setString(count++, store.getName());
+			stmt.setString(count++, byodUtil.saveImageFile(brandId,"imgS", store.getLogoPath(), null));
+			stmt.setString(count++, store.getLocation().getAddress());
+			stmt.setDouble(count++, store.getLocation().getLongitude());
+			stmt.setDouble(count++, store.getLocation().getLatitude());
+			stmt.setString(count++, store.getLocation().getCountry());
+			stmt.setString(count++, store.getCurrency());
+			stmt.setBoolean(count++, store.isPublish());
+			stmt.setTimestamp(count++, new java.sql.Timestamp(startTime.getTimeInMillis()));
+			stmt.setTimestamp(count++, new java.sql.Timestamp(endTime.getTimeInMillis()));
+			stmt.setBoolean(count++, store.getEcpos());
+			stmt.setString(count++, store.getContactPerson());
+			stmt.setString(count++, store.getMobileNumber());
+			stmt.setString(count++, store.getEmail());
+			stmt.setLong(count++, store.getStoreTypeId());
+			stmt.setLong(count++, store.getKioskPaymentDelayId());
+			stmt.setLong(count++, store.getByodPaymentDelayId());
+			stmt.setLong(count++, store.getStoreTaxTypeId());
+			stmt.setString(count++, store.getEcposUrl());
+			stmt.setBoolean(count++, store.getEcposTakeawayDetailFlag());
+			stmt.setLong(count++, store.getLoginTypeId());
+			stmt.setBoolean(count++, store.getLoginSwitchFlag());
+			stmt.executeUpdate();
+
 		} catch (Exception ex) {
-			return new ResponseEntity<String>(ex.getMessage(), HttpStatus.CONFLICT);
+			ex.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Server error. Please contact support.");
+		} finally {
+			if(connection != null) {
+				try {
+			connection.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 		}
+			return new ResponseEntity<>(HttpStatus.OK);
 	}
 
 	@PostMapping("/edit")
 	public ResponseEntity<?> editStore(@RequestBody Store store, HttpServletRequest request, HttpServletResponse response) {
 		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		
 		try {
-			System.out.println("my email:" + store.getEmail());
 			connection = dbConnectionUtil.retrieveConnection(request);
 			String brandId = byodUtil.getGeneralConfig(connection, "BRAND_ID");
-			Store existingStore = storeService.findStoreById(store.getId());
-			if (existingStore.getId() == 0) {
-				connection.close();
-				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-			}
-			int rowAffected = storeService.editStore(store.getId(), store, brandId, existingStore.getLogoPath());
-			if (rowAffected == 0) {
-				connection.close();
-				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-			}
-			else {
+			String sqlStatement = "SELECT * FROM store WHERE id = ? ";
+			stmt = connection.prepareStatement(sqlStatement);
+			stmt.setLong(1, store.getId());
+			rs = stmt.executeQuery();
+			if(rs.next()) {
+				Calendar startTime = Calendar.getInstance();
+				startTime.setTime(store.getOperatingStartTime());
+				startTime.set(Calendar.SECOND, 0);
+				startTime.set(Calendar.MILLISECOND, 0);
+				Calendar endTime = Calendar.getInstance();
+				endTime.setTime(store.getOperatingEndTime());
+				endTime.set(Calendar.SECOND, 0);
+				endTime.set(Calendar.MILLISECOND, 0);
+				
+				System.out.println("test1:" + store.getEcposTakeawayDetailFlag());
+				System.out.println("test2:" + store.getLoginTypeId());
+				System.out.println("test3:" + store.getLoginSwitchFlag());
+				
+				if(store.getLogoPath()!=null) 
+					sqlStatement = "UPDATE store SET store_name = ?,store_logo_path = ?,store_address = ?,store_longitude = ?,store_latitude = ?,store_country = ?,store_currency = ?, is_publish = ?, store_start_operating_time = ?, store_end_operating_time = ?, last_update_date = GETDATE(), ecpos = ?, store_contact_person = ?, store_contact_hp_number = ?, store_contact_email = ?, store_type_id = ?, kiosk_payment_delay_id = ?, byod_payment_delay_id = ?, store_tax_type_id = ?, ecpos_url = ?, ecpos_takeaway_detail_flag = ?, login_type_id = ?, login_switch_flag = ? WHERE id = ?;";			
+				else 
+					sqlStatement = "UPDATE store SET store_name = ?,store_address = ?,store_longitude = ?,store_latitude = ?,store_country = ?,store_currency = ?, is_publish = ?, store_start_operating_time = ?, store_end_operating_time = ?, last_update_date = GETDATE(), ecpos = ?, store_contact_person = ?, store_contact_hp_number = ?, store_contact_email = ?, store_type_id = ?, kiosk_payment_delay_id = ?, byod_payment_delay_id = ?, store_tax_type_id = ?, ecpos_url = ?, ecpos_takeaway_detail_flag = ?, login_type_id = ?, login_switch_flag = ? WHERE id = ?";
+				int count = 1;
+				stmt = connection.prepareStatement(sqlStatement);
+				stmt.setString(count++, store.getName());
+				if(store.getLogoPath()!=null)
+					stmt.setString(count++, byodUtil.saveImageFile(brandId, "imgS", store.getLogoPath(), rs.getString("store_logo_path")));
+				stmt.setString(count++, store.getLocation().getAddress());
+				stmt.setDouble(count++, store.getLocation().getLongitude());
+				stmt.setDouble(count++, store.getLocation().getLatitude());
+				stmt.setString(count++, store.getLocation().getCountry());
+				stmt.setString(count++, store.getCurrency());
+				stmt.setBoolean(count++, store.isPublish());
+				stmt.setTimestamp(count++, new java.sql.Timestamp(startTime.getTimeInMillis()));
+				stmt.setTimestamp(count++, new java.sql.Timestamp(endTime.getTimeInMillis()));
+				stmt.setBoolean(count++, store.getEcpos());
+				stmt.setString(count++, store.getContactPerson());
+				stmt.setString(count++, store.getMobileNumber());
+				stmt.setString(count++, store.getEmail());
+				stmt.setLong(count++, store.getStoreTypeId());
+				stmt.setLong(count++, store.getKioskPaymentDelayId());
+				stmt.setLong(count++, store.getByodPaymentDelayId());
+				stmt.setLong(count++, store.getStoreTaxTypeId());
+				stmt.setString(count++, store.getEcposUrl());
+				stmt.setBoolean(count++, store.getEcposTakeawayDetailFlag());
+				stmt.setLong(count++, store.getLoginTypeId());
+				stmt.setBoolean(count++, store.getLoginSwitchFlag());
+				stmt.setLong(count++, store.getId());
+				stmt.executeUpdate();
+				
 				// terminate ecpos for ecpos status 0 at store	
 				JSONArray jsonArray = getDeviceInfoByStoreId(connection, 1, store.getId());
 				if(jsonArray.length()!=0) {
@@ -131,17 +315,23 @@ public class StoreRestController {
 					}
 				}
 			}
-			connection.close();
-			return new ResponseEntity<>(HttpStatus.OK);
+			else {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Store info not found.");
+			}
 		} catch (Exception ex) {
+			ex.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Server error. Please contact support.");
+		} finally {
+			if(connection != null) {
 			try {
 				connection.close();
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			return new ResponseEntity<String>(ex.getMessage(), HttpStatus.CONFLICT);
 		}
+	}
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 	
 	@GetMapping(value = "/getAllStoreLookup", produces = "application/json")
@@ -154,6 +344,7 @@ public class StoreRestController {
 			jsonResult.put("storeType", getStoreType(connection));
 			jsonResult.put("paymentDelayType", getPaymentDelayType(connection));
 			jsonResult.put("storeTaxType", getStoreTaxType(connection));
+			jsonResult.put("storeLoginType", getStoreLoginType(connection));
 			
 			return ResponseEntity.ok(jsonResult.toString());
 		} catch(Exception ex) {
@@ -168,22 +359,6 @@ public class StoreRestController {
 				}
 			}
 		}
-	}
-	
-	@PostMapping("/edit/groupCategory")
-	public ResponseEntity<Void> editStoreGroupCategoryId(@RequestParam("storeId") Long storeId,
-			@RequestParam("groupCategoryId") Long groupCategoryId, HttpServletRequest request, HttpServletResponse response) {
-		storeService.editStoreGroupCategoryId(groupCategoryId, storeId);
-		return new ResponseEntity<>(HttpStatus.OK);
-	}
-
-	@DeleteMapping("/delete")
-	public ResponseEntity<Void> removeStore(@RequestParam("id") Long id, HttpServletRequest request, HttpServletResponse response) {
-		int rowAffected = storeService.removeStore(id);
-		if (rowAffected == 0)
-			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-
-		return new ResponseEntity<>(HttpStatus.OK);
 	}
 	
 	/*Start ECPOS API*/
@@ -1233,17 +1408,25 @@ public class StoreRestController {
 	@PostMapping(value = {"/resendAct"}, produces = "application/json")
 	public ResponseEntity<?> resendActivationInfo(@RequestParam("store_id") Long store_id, @RequestParam("activation_id") String activationId, HttpServletRequest request, HttpServletResponse response) {
 		Connection connection = null;
-		
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
 		try {
 			connection = dbConnectionUtil.retrieveConnection(request);
-			Store store = storeService.findStoreById(store_id);
-			// send email
 			String brandId = byodUtil.getGeneralConfig(connection, "BRAND_ID");
-			String email = store.getEmail();
+			String sqlStatement = "SELECT store_contact_email, store_contact_person FROM store WHERE id = ? ";
+			stmt = connection.prepareStatement(sqlStatement);
+			stmt.setLong(1, store_id);
+			rs = stmt.executeQuery();
+			if(rs.next()) {
+				String email = rs.getString("store_contact_email");
+				String contactPerson = rs.getString("store_contact_person");
 			JSONObject activationInfo = getDeviceInfoByActivationId(connection, activationId);
-			if(!userEmailUtil.sendActivationInfo(store.getContactPerson(), activationInfo, brandId, email))
+				// send email
+				if(!userEmailUtil.sendActivationInfo(contactPerson, activationInfo, brandId, email))
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Failed to resend activation email.");
-			
+			}
+			else
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Failed to get store info.");			
 		}catch(Exception ex) {
 			ex.printStackTrace();
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Server error. Please contact support.");
@@ -1257,6 +1440,56 @@ public class StoreRestController {
 			}
 		}
 		return new ResponseEntity<>(HttpStatus.OK);
+	}
+	
+	public boolean checkStoreExistByName(Connection connection, String store_name) throws Exception {	
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		boolean flag = false;
+		
+		try {
+			stmt = connection.prepareStatement("SELECT * FROM store WHERE store_name = ? ");	
+			stmt.setString(1, store_name);
+			rs = stmt.executeQuery();			 
+			if(rs.next()) {
+				flag = true;
+			}
+		}catch(Exception ex) {
+			throw ex;
+		} finally {
+			if (rs != null) {
+				rs.close();
+			}
+			if (stmt != null) {
+				stmt.close();
+			}
+		}
+		return flag;
+	}
+	
+	public boolean checkStoreExistByBackendId(Connection connection, String backend_id) throws Exception {	
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		boolean flag = false;
+		
+		try {
+			stmt = connection.prepareStatement("SELECT * FROM store WHERE backend_id = ? ");	
+			stmt.setString(1, backend_id);
+			rs = stmt.executeQuery();			 
+			if(rs.next()) {
+				flag = true;
+			}
+		}catch(Exception ex) {
+			throw ex;
+		} finally {
+			if (rs != null) {
+				rs.close();
+			}
+			if (stmt != null) {
+				stmt.close();
+			}
+		}
+		return flag;
 	}
 	
 	public boolean getEcposStatus(Connection connection, long store_id) throws Exception {	
@@ -1555,6 +1788,34 @@ public class StoreRestController {
 				JSONObject jsonObj = new JSONObject();
 				jsonObj.put("id", rs.getLong("store_tax_type_id"));				
 				jsonObj.put("store_tax_type_name", rs.getString("store_tax_type_name"));							
+				jsonArr.put(jsonObj);
+			}
+		} catch(Exception ex) {
+			throw ex;
+		} finally {
+			if (stmt != null) {
+				stmt.close();
+			}
+			if (rs != null) {
+				rs.close();
+			}
+		}
+		return jsonArr;
+	}
+	
+	public JSONArray getStoreLoginType(Connection connection) throws Exception{
+		JSONArray jsonArr = new JSONArray();
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		
+		try {
+			stmt = connection.prepareStatement("SELECT * FROM login_type_lookup ");
+			rs = (ResultSet) stmt.executeQuery();
+			
+			while(rs.next()) {
+				JSONObject jsonObj = new JSONObject();
+				jsonObj.put("id", rs.getLong("id"));				
+				jsonObj.put("login_type_name", rs.getString("login_type_name"));							
 				jsonArr.put(jsonObj);
 			}
 		} catch(Exception ex) {

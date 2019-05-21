@@ -4,13 +4,14 @@
 		
 		$scope.action = '';
 		$scope.store = {
-				ecpos:true
+				ecpos:true,
+				ecposTakeawayDetailFlag:false,
+				storeLoginSwitchFlag:false
 		};
 		$scope.uploadImage = false;
 		
 		$scope.modalType = function(action){
 			$scope.action = action;	
-			
 			$('#operatingStartTime').datetimepicker({
                 format: 'LT'
             });
@@ -30,7 +31,7 @@
 									$scope.store.operatingStartTime == null || $scope.store.operatingStartTime=='' || 
 										$scope.store.operatingEndTime == null || $scope.store.operatingEndTime=='' ||
 											$scope.store.storeType == null || $scope.store.storeType =='' ||
-												$scope.store.storeTaxType == null || $scope.store.storeTaxType == '' ){
+												$scope.store.storeTaxType == null || $scope.store.storeTaxType == ''){
 				$('#collapseOne').collapse('show');
 			}
 			else if($scope.action=='create' && $scope.store.imagePath == null || $scope.action=='create' && $scope.store.imagePath==''){
@@ -48,7 +49,8 @@
 							$scope.store.email == null || $scope.store.email==''){
 				$('#collapseTwo').collapse('show');
 			}
-			else if($scope.store.ecpos && $scope.store.ecposUrl == null || $scope.store.ecpos && $scope.store.ecposUrl ==''){
+			else if($scope.store.ecpos && $scope.store.ecposUrl == null || $scope.store.ecpos && $scope.store.ecposUrl =='' ||
+						$scope.store.ecpos && $scope.store.storeLoginType == null || $scope.store.ecpos && $scope.store.storeLoginType == ''){
 				$('#collapseThree').collapse('show');
 			}
 			else if($scope.store.kioskPaymentDelayType == null || $scope.store.kioskPaymentDelayType =='' ||
@@ -120,7 +122,10 @@
 					kiosk_payment_delay_id : $scope.store.kioskPaymentDelayType.id,
 					byod_payment_delay_id : $scope.store.byodPaymentDelayType.id,
 					store_tax_type_id : $scope.store.storeTaxType.id,
-					ecpos_url : $scope.store.ecpos ? $scope.store.ecposUrl: undefined
+					ecpos_url : $scope.store.ecpos ? $scope.store.ecposUrl: undefined,
+					ecpos_takeaway_detail_flag : $scope.store.ecpos ? $scope.store.ecposTakeawayDetailFlag: undefined,
+					login_type_id : $scope.store.ecpos ? $scope.store.storeLoginType.id: 0,
+					login_switch_flag : $scope.store.ecpos ? $scope.store.storeLoginSwitchFlag: undefined 
 				}
 				
 			console.log(postdata);
@@ -152,6 +157,13 @@
 					$('#storeModal').modal('toggle');
 					$scope.refreshTable();
 				}
+			}, function(response){
+				swal({
+					  title: "Error",
+					  text:  response.data,
+					  icon: "warning",
+					  dangerMode: true,
+				});
 			});
 		}
 		
@@ -165,7 +177,9 @@
 		$scope.resetModal = function(){
 			$scope.action = '';
 			$scope.store = {
-					ecpos:true
+					ecpos: true,
+					ecposTakeawayDetailFlag: false,
+					storeLoginSwitchFlag: false
 			};
 			// reset image
 			/* $('#previewImage').attr('src', "");
@@ -202,6 +216,7 @@
 					$scope.storeType = response.data.storeType;
 					$scope.paymentDelayType = response.data.paymentDelayType;
 					$scope.storeTaxType = response.data.storeTaxType;
+					$scope.storeLoginType = response.data.storeLoginType;
 				}
 			});
 			
@@ -225,12 +240,6 @@
 					{"data" : "id", "width": "5%"}, 
 					{"data" : "backend_id", "width": "15%"},
 					{"data" : "store_name"},
-					/* {"data" : "store_logo_path",
-						 "render": function ( data, type, full, meta ) {
-							 	var image = full.store_logo_path;
-							    return '<img class="border border-warning rounded" style="min-width:100%;width:90px;height:90px;" src="${pageContext.request.contextPath}'+image+'" />'
-						 }
-					}, */
 					{"data" : "location.store_country"},
 					{"data" : "is_publish", "width": "13%"},
 					{"data": "id", "width": "25%",
@@ -291,6 +300,13 @@
 						$scope.store.byodPaymentDelayType.id = response.data.byod_payment_delay_id;
 						$scope.store.storeTaxType.id = response.data.store_tax_type_id;
 						$scope.store.ecposUrl = response.data.ecpos_url;
+						$scope.store.ecposTakeawayDetailFlag = response.data.ecpos_takeaway_detail_flag;
+						if(response.data.login_type_id!=0){
+							// initialize storeLoginType
+							$scope.store.storeLoginType = {};
+							$scope.store.storeLoginType.id = response.data.login_type_id;
+						}
+						$scope.store.storeLoginSwitchFlag = response.data.login_switch_flag;
 						 $('#operatingStartTime').datetimepicker({
 							    defaultDate: moment($scope.store.operatingStartTime, "HH:mm:ss"),
 							    format: 'LT'
@@ -299,8 +315,16 @@
 							    defaultDate: moment($scope.store.operatingEndTime, "HH:mm:ss"),
 							    format: 'LT'
 							  });
-						 $('#storeModal').modal({backdrop: 'static', keyboard: false});	
+						 $('#storeModal').modal({backdrop: 'static', keyboard: false});
+						 console.log($scope.store);
 					}
+				}, function(response){
+					swal({
+						  title: "Error",
+						  text:  response.data,
+						  icon: "warning",
+						  dangerMode: true,
+					});	
 				});
 			});
 		}

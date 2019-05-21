@@ -257,16 +257,16 @@
 				})
 				.then((willCreate) => {
 				  if (willCreate) {
-					  //$('#loading_modal').modal('toggle');
+					  $scope.isLoadingEnded = false;
+					  $('#loading_modal').modal({backdrop: 'static', keyboard: false});
 					  $http({
 							method : 'GET',
 							headers : {'Content-Type' : 'application/json'},
 							url : '${pageContext.request.contextPath}/menu/store/ecpos/activate?store_id='+$scope.store.id 	
 						})
 						.then(function successCallback(response) {
-							if(response.status==200){
-								//$('#loading_modal').modal('toggle');
-								
+							$scope.hideLoading();
+							if(response.status==200){			
 								swal("Activation ID is generated", {
 									icon: "success",
 								});
@@ -274,7 +274,7 @@
 								$scope.getDeviceInfo();
 							}
 						 }, function errorCallback(response) {
-							//$('#loading_modal').modal('toggle');
+						 	$scope.hideLoading();
 					    	swal({
 								  title: "Error",
 								  text:  response.data,
@@ -333,7 +333,8 @@
 				})
 				.then((willCreate) => {
 				  if (willCreate) {
-					  $('#loading_modal').modal('toggle');
+					  $scope.isLoadingEnded = false;
+					  $('#loading_modal').modal({backdrop: 'static', keyboard: false});
 					  $http({
 							method : 'POST',
 							headers : {'Content-Type' : 'application/json'},
@@ -341,7 +342,7 @@
 						})
 						.then(function successCallback(response) {
 							console.log(response);
-							$('#loading_modal').modal('toggle');
+							$scope.hideLoading();
 							if(response.status==200){
 								//console.log(response);
 								swal("Successfully resend ECPOS activation email.", {
@@ -350,7 +351,7 @@
 							}
 						 }, function errorCallback(response) {
 							 console.log(response);
-							 $('#loading_modal').modal('toggle');
+							 $scope.hideLoading();
 							 swal({
 								  title: "Error",
 								  text: response.data,
@@ -361,6 +362,16 @@
 				}					 
 			});
 		}
+		
+		$scope.hideLoading = function() {
+			$scope.isLoadingEnded = true;
+			$('#loading_modal').modal('hide');
+		}
+		$('#loading_modal').on('shown.bs.modal', function (event) {
+			if ($scope.isLoadingEnded) {
+				$('#loading_modal').modal('hide');
+			}
+		});
 		
 		$scope.reactivateDevice = function(){		
 			swal({

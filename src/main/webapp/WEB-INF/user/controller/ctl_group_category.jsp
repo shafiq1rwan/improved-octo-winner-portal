@@ -1,7 +1,6 @@
 <html>
 <script>
 	app.controller('ctl_group_category', function($scope, $http, $compile) {
-	
 		$scope.group_category = {};
 		$scope.stores = [];
 		$scope.action = '';
@@ -275,30 +274,38 @@
 		}
 		
 		$scope.publishMenu = function(id){
-			$('#loading_modal').modal('show');
+			$scope.isLoadingEnded = false;
+			$('#loading_modal').modal({backdrop: 'static', keyboard: false});		
 			$http({
 				method : 'GET',
 				headers : {'Content-Type' : 'application/json'},
 				url : '${pageContext.request.contextPath}/menu/group_category/publish_menu?group_category_id='+id	
 			})
 			.then(function(response) {
-				$('#loading_modal').modal('hide');
-				console.log(response.data);
+				$scope.hideLoading();
 				swal("Successfully published menu", {
 					icon: "success",
 				});
-			}, function(response){
-				$('#loading_modal').modal('hide');
-				$('.modal-backdrop').remove();
+			}, function(response){		
+				$scope.hideLoading();
 				swal({
 					  title: "Failed to publish menu",
 					  text: response.data,
 					  icon: "warning",
 					  dangerMode: true
 					});
-				
 			});
 		}
+		
+		$scope.hideLoading = function() {
+			$scope.isLoadingEnded = true;
+			$('#loading_modal').modal('hide');
+		}
+		$('#loading_modal').on('shown.bs.modal', function (event) {
+			if ($scope.isLoadingEnded) {
+				$('#loading_modal').modal('hide');
+			}
+		});
 			
 		// tax setting
 		$scope.refreshTaxList = function(){
@@ -340,8 +347,8 @@
 					]		
 			});
 			
-			$('#taxList_dtable tbody').off('click', 'tr td:nth-child(-n+3)');
-			$('#taxList_dtable tbody').on('click', 'tr td:nth-child(-n+3)', function() {
+			$('#taxList_dtable tbody').off('click', 'tr td:nth-child(-n+4)');
+			$('#taxList_dtable tbody').on('click', 'tr td:nth-child(-n+4)', function() {
 				$scope.tax = {
 						type:{}
 				};
@@ -402,7 +409,7 @@
 						tax_charge_name : $scope.tax.name,
 						rate : $scope.tax.rate,
 						charge_type : $scope.tax.type.id,
-						is_active : $scope.tax.is_active,
+						is_active : $scope.tax.is_active==null? false: $scope.tax.is_active,
 						group_category_id : $scope.group_category.id
 					}
 					

@@ -176,6 +176,9 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 				is_publish BIT DEFAULT 0,
 				ecpos BIT DEFAULT 0,
 				ecpos_url NVARCHAR(150),
+				ecpos_takeaway_detail_flag BIT,
+				login_type_id BIGINT,
+				login_switch_flag BIT,
 				byod_payment_delay_id BIGINT DEFAULT 0,
 				kiosk_payment_delay_id BIGINT DEFAULT 0,
 				store_tax_type_id BIGINT DEFAULT 0,
@@ -201,6 +204,12 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 			(
 				id BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,
 				role_name NVARCHAR(50) NOT NULL UNIQUE
+			);
+
+			CREATE TABLE login_type_lookup
+			(
+				id BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,
+				login_type_name NVARCHAR(50) NOT NULL UNIQUE
 			);
 
 			CREATE TABLE store_type_lookup
@@ -536,6 +545,7 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 			INSERT INTO role_lookup VALUES (''Admin''),(''Store Manager'');
 			INSERT INTO store_type_lookup VALUES (''Retail''),(''F&B'');
 			INSERT INTO payment_delay_lookup VALUES (''Pay Now/Later''), (''Pay Now''), (''Pay Later'')
+			INSERT INTO login_type_lookup VALUES (''Username & Password''), (''Scan QR'')
 
 			INSERT INTO charge_type_lookup VALUES (1, ''Total Tax''),(2, ''Overall Tax'');
 			INSERT INTO store_tax_type_lookup VALUES (1,''Exclusive Tax''), (2, ''Inclusive Tax'');

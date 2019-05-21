@@ -45,6 +45,15 @@ public class Store {
 	@JsonProperty("ecpos_url")
 	private String ecpos_url;
 	
+	@JsonProperty("ecpos_takeaway_detail_flag")
+	private boolean ecpos_takeaway_detail_flag;
+	
+	@JsonProperty("login_type_id")
+	private Long login_type_id;
+	
+	@JsonProperty("login_switch_flag")
+	private boolean login_switch_flag;
+	
 	@JsonProperty("store_contact_person")
 	private String contactPerson;
 	
@@ -171,6 +180,30 @@ public class Store {
 
 	public void setEcposUrl(String ecpos_url) {
 		this.ecpos_url = ecpos_url;
+	}
+	
+	public boolean getEcposTakeawayDetailFlag() {
+		return ecpos_takeaway_detail_flag;
+	}
+	
+	public void setEcposTakeawayDetailFlag(boolean ecpos_takeaway_detail_flag) {
+		this.ecpos_takeaway_detail_flag = ecpos_takeaway_detail_flag;
+	}
+	
+	public Long getLoginTypeId() {
+		return login_type_id;
+	}
+	
+	public void setLoginTypeId(Long login_type_id) {
+		this.login_type_id = login_type_id;
+	}
+	
+	public boolean getLoginSwitchFlag() {
+		return login_switch_flag;
+	}
+	
+	public void setLoginSwitchFlag(boolean login_switch_flag) {
+		this.login_switch_flag = login_switch_flag;
 	}
 	
 	public String getContactPerson() {

@@ -256,6 +256,42 @@
 								<div class="form-group">
 									<label class="login-label">ECPOS URL</label>
 									<input class="form-control" name="ecposUrl" placeholder="IP Address" ng-model="store.ecposUrl" type="text" required> 
+								</div>
+								<div class="form-group">
+									<label class="login-label">Login Type</label>
+									<select class="form-control" ng-model="store.storeLoginType" ng-options="x.login_type_name for x in storeLoginType track by x.id" required>
+										<option value="" disabled>Please choose a login type</option>
+									</select>
+								</div>
+								<div class="form-group">
+									<label class="login-label">Login Switch Setting</label>
+									<div>
+										<div class="form-check-inline">
+										  <label class="form-check-label">
+										    <input type="radio" ng-model="store.storeLoginSwitchFlag" class="form-check-input" ng-value=false checked>No Switch
+										  </label>
+										</div>
+										<div class="form-check-inline">
+										  <label class="form-check-label">
+										    <input type="radio" ng-model="store.storeLoginSwitchFlag" class="form-check-input" ng-value=true checked>Switchable
+										  </label>
+										</div>
+									</div>
+								</div>	
+								<div class="form-group">
+									<label class="login-label">Take Away Order</label>
+									<div>
+										<div class="form-check-inline">
+										  <label class="form-check-label">
+										    <input type="radio" ng-model="store.ecposTakeawayDetailFlag" class="form-check-input" ng-value=false checked>No Detail
+										  </label>
+										</div>
+										<div class="form-check-inline">
+										  <label class="form-check-label">
+										    <input type="radio" ng-model="store.ecposTakeawayDetailFlag" class="form-check-input" ng-value=true checked>Input Detail
+										  </label>
+										</div>
+									</div>
 								</div>																	
 							</div>					
 						</div>
