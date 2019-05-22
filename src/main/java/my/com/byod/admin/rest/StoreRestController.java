@@ -1,5 +1,11 @@
 package my.com.byod.admin.rest;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -1089,6 +1095,95 @@ public class StoreRestController {
 		return new ResponseEntity<String>(jsonObj.toString(), HttpStatus.OK);
 	}
 	
+	@PostMapping(value = {"/ecpos/syncTrans"}, produces = "application/json")
+	public ResponseEntity<?> syncTrans(@RequestParam("store_id") Long store_id, @RequestParam("activation_id") String activationId, HttpServletRequest request, HttpServletResponse response) {
+		JSONObject jsonObj = null;
+		JSONArray jsonArray = null;
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		
+		try {
+			connection = dbConnectionUtil.retrieveConnection(request);
+			if(!getEcposStatus(connection, store_id))
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("ECPOS is disabled.");
+			
+			jsonArray = getDeviceInfoByStoreId(connection, 1, store_id);
+			if(jsonArray.length()==0) {
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).contentType(MediaType.TEXT_PLAIN).body("Unable to find ECPOS info.");
+			}
+			else{
+				// ecpos only one record
+				jsonObj = jsonArray.getJSONObject(0);
+				if(jsonObj.getLong("status_lookup_id")!=2) {
+					return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("ECPOS is not active.");				
+				}
+			}
+				
+			String sqlStatement = "SELECT ecpos_url FROM store WHERE id = ?";
+			stmt = connection.prepareStatement(sqlStatement);
+			stmt.setLong(1, store_id);
+			rs = stmt.executeQuery();
+			if(!rs.next()) {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Invalid ECPOS URL.");
+			} else {
+				String brandId = byodUtil.getGeneralConfig(connection, "BRAND_ID");
+				String ecposUrl = rs.getString("ecpos_url");
+				String url = ecposUrl + "/syncTransaction";
+				
+				JSONObject sendData = new JSONObject();
+				sendData.put("storeId", String.valueOf(store_id));
+				sendData.put("brandId", brandId);
+				
+				URL object = new URL(url);
+				HttpURLConnection con = (HttpURLConnection) object.openConnection();
+				con.setDoOutput(true);
+				con.setDoInput(true);
+				con.setRequestProperty("Content-Type", "application/json");
+				con.setRequestProperty("Accept", "application/json");
+				con.setRequestMethod("POST");
+
+				OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
+				wr.write(sendData.toString());
+				wr.flush();
+
+				StringBuilder sb = new StringBuilder();
+				int httpResult = con.getResponseCode();
+				if (httpResult == HttpURLConnection.HTTP_OK) {
+					BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), "utf-8"));
+					String line = null;
+					while ((line = br.readLine()) != null) {
+						sb.append(line + "\n");
+					}
+					br.close();
+
+					JSONObject returnObject = new JSONObject(sb.toString());
+					System.out.println(returnObject);
+					if (!(returnObject.has("resultCode") && returnObject.has("resultMessage") && returnObject.getString("resultCode").equals("00"))) {
+						return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body(returnObject.getString("resultMessage"));
+					}
+				} else {
+					return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("ECPOS invalid response.");				
+				}
+			}
+		}catch (MalformedURLException ex) {
+			ex.printStackTrace();
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Invalid ECPOS URL.");
+		}catch(Exception ex) {
+			ex.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Server error. Please contact support.");
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return new ResponseEntity<String>(jsonObj.toString(), HttpStatus.OK);
+	}
+	
 	/*End ECPOS API*/
 	
 	/*Start BYOD API*/
@@ -1412,6 +1507,11 @@ public class StoreRestController {
 		ResultSet rs = null;
 		try {
 			connection = dbConnectionUtil.retrieveConnection(request);
+			JSONArray jsonArray = getDeviceInfoByStoreId(connection, 1, store_id);
+			if(jsonArray.length()==0) {
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).contentType(MediaType.TEXT_PLAIN).body("Unable to find ECPOS info.");
+			}
+			
 			String brandId = byodUtil.getGeneralConfig(connection, "BRAND_ID");
 			String sqlStatement = "SELECT store_contact_email, store_contact_person FROM store WHERE id = ? ";
 			stmt = connection.prepareStatement(sqlStatement);
@@ -1420,10 +1520,10 @@ public class StoreRestController {
 			if(rs.next()) {
 				String email = rs.getString("store_contact_email");
 				String contactPerson = rs.getString("store_contact_person");
-			JSONObject activationInfo = getDeviceInfoByActivationId(connection, activationId);
+				JSONObject activationInfo = getDeviceInfoByActivationId(connection, activationId);
 				// send email
 				if(!userEmailUtil.sendActivationInfo(contactPerson, activationInfo, brandId, email))
-				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Failed to resend activation email.");
+					return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Failed to resend activation email.");
 			}
 			else
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Failed to get store info.");			

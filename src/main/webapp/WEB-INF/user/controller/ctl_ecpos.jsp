@@ -363,6 +363,46 @@
 			});
 		}
 		
+		$scope.syncTransactions = function(){		
+			swal({
+				  title: "Are you sure?",
+				  text: "Do you want to synchronize ECPOS transactions to cloud?",
+				  icon: "warning",
+				  buttons: true,
+				  dangerMode: true,
+				})
+				.then((willCreate) => {
+				  if (willCreate) {
+					  $scope.isLoadingEnded = false;
+					  $('#loading_modal').modal({backdrop: 'static', keyboard: false});
+					  $http({
+							method : 'POST',
+							headers : {'Content-Type' : 'application/json'},
+							url : '${pageContext.request.contextPath}/menu/store/ecpos/syncTrans?store_id='+$scope.store.id+'&activation_id='+$scope.ecpos.activation_id
+						})
+						.then(function successCallback(response) {
+							console.log(response);
+							$scope.hideLoading();
+							if(response.status==200){
+								//console.log(response);
+								swal("Successfully synchronize ECPOS transactions to cloud.", {
+									icon: "success",
+								});
+							}
+						 }, function errorCallback(response) {
+							 console.log(response);
+							 $scope.hideLoading();
+							 swal({
+								  title: "Error",
+								  text: response.data,
+								  icon: "warning",
+								  dangerMode: true,
+							});		
+						});		 
+				}					 
+			});
+		}
+		
 		$scope.hideLoading = function() {
 			$scope.isLoadingEnded = true;
 			$('#loading_modal').modal('hide');

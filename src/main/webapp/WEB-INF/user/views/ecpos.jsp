@@ -93,7 +93,8 @@
 							</div>
 							<div class="card-footer">
 								<div class="btn-toolbar justify-content-end" role="toolbar" aria-label="Toolbar with button groups">
-									<button type="button" ng-show="showActivation" ng-click="generateActivation()" class="btn btn-success">Generate Activation ID</button>															
+									<button type="button" ng-show="showActivation" ng-click="generateActivation()" class="btn btn-success">Generate Activation ID</button>
+									<button type="button" ng-click="syncTransactions()" class="btn btn-outline-secondary">Synchronize Transactions</button>															
 			  						<button type="button" ng-click="resendActivationInfo()" class="btn btn-outline-secondary">Resend Activation ID</button>
 			  						<button type="button" ng-click="reactivateDevice()" class="btn btn-outline-secondary">Reactivate ECPOS</button>
 			  						<button type="button" ng-click="terminateDevice()" class="btn btn-outline-secondary">Terminate ECPOS</button>		  				
