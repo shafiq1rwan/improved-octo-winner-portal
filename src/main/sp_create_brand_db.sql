@@ -562,7 +562,7 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 
 			insert into payment_method_lookup values (1, ''Cash''), (2, ''Card''), (3, ''QR'');
 
-			insert into payment_type_lookup values (1, ''Full Payment''), (2, ''Partial Payment''), (3, ''Split Payment''), (4, ''Deposit Payment'');
+			insert into payment_type_lookup values (1, ''Full Payment''), (2, ''Partial Payment''), (3, ''Deposit Payment'');
 
 			insert into nii_type_lookup values (1, ''VISA/MASTER/JCB''), (2, ''AMEX''), (3, ''MCCS''), (4, ''UNIONPAY'');
 
