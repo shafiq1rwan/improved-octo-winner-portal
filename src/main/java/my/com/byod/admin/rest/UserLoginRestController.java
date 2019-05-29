@@ -184,6 +184,14 @@ public class UserLoginRestController {
 		ModelAndView model = new ModelAndView();
 		model.setViewName("/user/views/kiosk");
 		return model;
+	}
+	
+	// Store - Transaction
+	@RequestMapping(value = { "/views/store/{id}/transaction" }, method = RequestMethod.GET)
+	public ModelAndView viewTransaction(@PathVariable(value = "id") long id) {
+		ModelAndView model = new ModelAndView();
+		model.setViewName("/user/views/transaction");
+		return model;
 	}		
 	
 	// Group Category

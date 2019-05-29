@@ -246,7 +246,7 @@
 						 "render": function ( data, type, full, meta ) {
 							 	var id = full.id;
 							 	var ecpos = full.store_ecpos;
-							    return '<div class="d-flex justify-content-start"><a ng-href="${pageContext.request.contextPath}/user/#!Router_store_byod/'+id+'" class="btn btn-outline-info ml-1 mr-1 custom-fontsize"><i class="far fa-edit"></i> BYOD</a><a ng-href="${pageContext.request.contextPath}/user/#!Router_store_kiosk/'+id+'" class="btn btn-outline-info ml-1 mr-1 custom-fontsize"><i class="far fa-edit"></i> KIOSK</a><a ng-show='+ecpos+' ng-href="${pageContext.request.contextPath}/user/#!Router_store_ecpos/'+id+'" class="btn btn-outline-info ml-1 mr-1 custom-fontsize"><i class="far fa-edit"></i> ECPOS</a></div>'
+							    return '<div class="d-flex justify-content-start"><a ng-href="${pageContext.request.contextPath}/user/#!Router_store_transaction/'+id+'" class="btn btn-outline-success ml-1 mr-1 custom-fontsize"><i class="far fa-list-alt"></i> Transactions</a><a ng-href="${pageContext.request.contextPath}/user/#!Router_store_byod/'+id+'" class="btn btn-outline-info ml-1 mr-1 custom-fontsize">BYOD</a><a ng-href="${pageContext.request.contextPath}/user/#!Router_store_kiosk/'+id+'" class="btn btn-outline-info ml-1 mr-1 custom-fontsize">KIOSK</a><a ng-show='+ecpos+' ng-href="${pageContext.request.contextPath}/user/#!Router_store_ecpos/'+id+'" class="btn btn-outline-info ml-1 mr-1 custom-fontsize">ECPOS</a></div>'
 						 }
 					}
 				],			
@@ -277,6 +277,7 @@
 					url : '${pageContext.request.contextPath}/menu/store/storeById?id='+$scope.store.id		
 				})
 				.then(function(response) {
+					console.log(response);
 					if (response.status == "404") {
 						alert("Unable to find store detail");
 					} else if(response.status == "200") {

@@ -192,6 +192,16 @@ if it's not present, don't show loader */
 		       	checkSession:checkSession
 		       }
 	    })
+	    .when('/Router_store_transaction/:id', {                            
+	        templateUrl: function(params){
+	        	return '${pageContext.request.contextPath}/user/views/store/'+params.id+'/transaction'
+	        }
+	        ,
+	        controller: 'ctl_transaction',
+	        resolve : {
+		       	checkSession:checkSession
+		       }
+	    })
 		.when('/Router_group_category_category/:id', {
 			templateUrl : function(params) {
 				return '${pageContext.request.contextPath}/user/views/groupCategory/'+ params.id + '/category'
@@ -344,6 +354,7 @@ if it's not present, don't show loader */
 <jsp:include page="/WEB-INF/user/controller/ctl_ecpos.jsp" />
 <jsp:include page="/WEB-INF/user/controller/ctl_byod.jsp" />
 <jsp:include page="/WEB-INF/user/controller/ctl_kiosk.jsp" />
+<jsp:include page="/WEB-INF/user/controller/ctl_transaction.jsp" />
 <jsp:include page="/WEB-INF/user/controller/ctl_category.jsp" />
 <jsp:include page="/WEB-INF/user/controller/ctl_modifier_group.jsp" />
 <jsp:include page="/WEB-INF/user/controller/ctl_item_group.jsp" />
