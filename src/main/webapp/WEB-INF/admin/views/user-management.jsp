@@ -321,7 +321,7 @@
 			<div class="modal-content">
 				<div class="modal-body">
 					<div class="text-center">
-						<img style="width:75%" src="${pageContext.request.contextPath}/img/gif/loading.gif"><br>
+						<img style="height:25vh;" src="${pageContext.request.contextPath}/assets/images/byodadmin/gif/loading.gif"><br>
 							<span>Processing Data...</span>
 					</div>
 				</div>
@@ -329,6 +329,22 @@
 			</div>
 		</div>
 	<!-- Loading Modal [END] -->
+	
+	<!-- Alert Modal [START] -->
+	<div class="modal fade" id="alertModal" role="dialog" aria-labelledby="alertModal" aria-hidden="true" data-keyboard="false" data-backdrop="static">
+	  <div class="modal-dialog">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close" ng-click="paymentButtonFn()">
+	          <span aria-hidden="true">&times;</span>
+	        </button>
+	      </div>
+	      <div class="modal-body text-center" ng-bind-html="alertMessage">
+	      </div>
+	    </div>
+	  </div>
+	</div>
+	<!-- Alert Modal [END] -->
 
 	</div>
 </body>

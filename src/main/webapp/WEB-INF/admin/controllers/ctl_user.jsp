@@ -1,6 +1,6 @@
 <html>
 <script>
-	app.controller('ctl_user', function($scope, $http, $compile) {
+	app.controller('ctl_user', function($scope, $http, $compile, $sce) {
 		
 		$scope.users = [];
 		$scope.user = {};
@@ -14,6 +14,8 @@
 		
 		$scope.access_rights = [];
 		$scope.action = '';
+		
+		$scope.alertMessage = "";
 		
 		var table;
 		var brands_array = [];
@@ -229,6 +231,12 @@
 					|| $scope.user.authority == null || $scope.user.authority == ''){
 			}
 			else {
+				var userUrl = $scope.action == 'create'?'signup':'edit';
+				
+				if(userUrl == 'signup'){
+					$('#loading_modal').modal('show');
+				}
+
 				var	data = {
 						'id' : $scope.action == 'update'?$scope.user.id:0,
 						'name' : $scope.user.name,
@@ -244,13 +252,7 @@
 					
 				console.log("Submit User");
 				console.log(postData);
-				
-				var userUrl = $scope.action == 'create'?'signup':'edit';
-				
-				if(userUrl == 'signup'){
-					$('#loading_modal').modal('show');
-				}
-				
+
  				$http({
 					method : 'POST',
 					headers : {'Content-Type' : 'application/json'},
@@ -263,14 +265,24 @@
 							$('#loading_modal').modal('hide');
 						}
 						$scope.resetModal();
-						$('#userModal').modal('toggle');
+						$('#userModal').modal('hide');
 						getUserInfo();
 					},
 					function(response) {
-						if(userUrl == 'signup'){
-							$('#loading_modal').modal('hide');
+	 					if(userUrl == 'signup'){
+							setTimeout(function(){
+								  $('#loading_modal').modal('hide');
+							}, 1000);
+						} 
+
+						if(response.status == '409'){
+							$scope.alertMessage = $sce.trustAsHtml(response.data.responseMessage);
+							$('#alertModal').modal('show');
+						} else {
+							$scope.alertMessage = $sce.trustAsHtml(response.data);
+							$('#alertModal').modal('show');
 						}
-						alert(response.data.responseMessage);
+
 						//$scope.resetModal();
 						//$('#userModal').modal('toggle');
 				});
