@@ -48,18 +48,19 @@ public class UserLoginRestController {
 		/*User user = (User) authentication.getPrincipal();
 		com.managepay.byod.model.User dbUser = adminService.getAdminDetail(user.getUsername());*/
 		
-		HttpSession session = request.getSession();
+		HttpSession session = request.getSession(false);
 		ModelAndView model = new ModelAndView();
-		/*model.addObject("role", dbUser.getRoles());*/
+/*model.addObject("role", dbUser.getRoles());*/
 
 		if(session != null) {
 			JSONObject accessRight = (JSONObject) session.getAttribute("access_rights");
-			if(accessRight!=null)
+			if(accessRight!=null) {
 				model.setViewName("/user/home");
-			else 
-				model.setViewName("/admin/home");
+			}else  {
+				return new ModelAndView("redirect:/byod-panel");
+			}
 		} else {
-			model.setViewName("/admin/home");
+			return new ModelAndView("redirect:/byod-panel");
 		}
 		return model;
 	}
@@ -184,7 +185,7 @@ public class UserLoginRestController {
 		ModelAndView model = new ModelAndView();
 		model.setViewName("/user/views/kiosk");
 		return model;
-	}
+	}		
 	
 	// Store - Transaction
 	@RequestMapping(value = { "/views/store/{id}/transaction" }, method = RequestMethod.GET)

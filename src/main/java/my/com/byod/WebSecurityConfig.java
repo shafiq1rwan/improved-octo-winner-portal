@@ -76,6 +76,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		        		  }
 		        		  response.sendRedirect(request.getContextPath()+"/byod-panel");
 		        	  }
+		        	  else {
+		        		  System.out.println("Roleless Punk");
+		        	  }
 		          })
 		          .failureHandler((request, response, exception) -> {
 		  			String username = request.getParameter("username");
