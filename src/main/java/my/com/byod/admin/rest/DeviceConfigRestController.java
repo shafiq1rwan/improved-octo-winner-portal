@@ -642,8 +642,8 @@ public class DeviceConfigRestController {
 			insertionSqlStatement = "INSERT INTO [check](store_id, check_id, check_number, staff_id, order_type, table_number, "
 					+ "total_item_quantity, total_amount, total_amount_with_tax, total_amount_with_tax_rounding_adjustment, "
 					+ "grand_total_amount, deposit_amount, tender_amount, overdue_amount, "
-					+ "check_status, created_date, updated_date) VALUES "
-					+ "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+					+ "check_status, created_date, updated_date, customer_name) VALUES "
+					+ "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 			
 			insertionSqlStatement2 = "INSERT INTO [check_tax_charge](store_id, check_id, check_number, tax_charge_id, total_charge_amount,total_charge_amount_rounding_adjustment,grand_total_charge_amount) VALUES "
 					+ "(?, ?, ?, ?, ?, ?, ?)";
@@ -651,7 +651,7 @@ public class DeviceConfigRestController {
 			updateSqlStatement = "UPDATE [check] SET check_number = ?, staff_id = ?, order_type = ?, table_number = ?, total_item_quantity = ?, "
 					+ "total_amount = ?, total_amount_with_tax = ?, total_amount_with_tax_rounding_adjustment = ?, "
 					+ "grand_total_amount = ?, deposit_amount = ?, tender_amount = ?, overdue_amount = ?, "
-					+ "check_status = ?, created_date = ?, updated_date = ? WHERE check_id = ? and store_id = ?";
+					+ "check_status = ?, created_date = ?, updated_date = ?, customer_name = ? WHERE check_id = ? and store_id = ?";
 			
 			updateSqlStatement2 = "UPDATE [check_tax_charge] SET check_number = ?, tax_charge_id = ?, total_charge_amount = ?, total_charge_amount_rounding_adjustment = ?, grand_total_charge_amount = ? WHERE check_id = ? and store_id = ?";
 
@@ -694,9 +694,12 @@ public class DeviceConfigRestController {
 					
 					if(obj.isNull("updated_date")) stmt.setNull(15, java.sql.Types.TIMESTAMP);
 					else stmt.setTimestamp(15, new Timestamp(datetimeFormatter.parse(obj.getString("updated_date")).getTime()));
+					
+					if(obj.isNull("customer_name")) stmt.setNull(16, java.sql.Types.VARCHAR);
+					else stmt.setString(16, obj.getString("customer_name"));
 
-					stmt.setLong(16, obj.getLong("check_id"));
-					stmt.setLong(17, storeId);
+					stmt.setLong(17, obj.getLong("check_id"));
+					stmt.setLong(18, storeId);
 
 					stmt.executeUpdate();
 					stmt.close();
@@ -768,6 +771,9 @@ public class DeviceConfigRestController {
 					
 					if(obj.isNull("updated_date")) stmt.setNull(17, java.sql.Types.TIMESTAMP);
 					else stmt.setTimestamp(17,new Timestamp(datetimeFormatter.parse(obj.getString("updated_date")).getTime()));
+					
+					if(obj.isNull("customer_name")) stmt.setNull(18, java.sql.Types.VARCHAR);
+					else stmt.setString(18, obj.getString("customer_name"));
 					
 					stmt.executeUpdate();
 					stmt.close();
