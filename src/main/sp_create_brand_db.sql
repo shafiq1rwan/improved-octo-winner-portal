@@ -376,7 +376,7 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 				check_number BIGINT NOT NULL,
 				staff_id BIGINT NULL,
 				order_type BIGINT NOT NULL,
-				customer_name varchar(max) NULL,
+				customer_name varchar(250) NULL,
 				table_number INT NULL,
 				total_item_quantity INT NOT NULL,
 				total_amount DECIMAL(25, 4) NOT NULL,
