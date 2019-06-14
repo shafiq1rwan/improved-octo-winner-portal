@@ -641,16 +641,16 @@ public class DeviceConfigRestController {
 			
 			insertionSqlStatement = "INSERT INTO [check](store_id, check_id, check_number, staff_id, order_type, table_number, "
 					+ "total_item_quantity, total_amount, total_amount_with_tax, total_amount_with_tax_rounding_adjustment, "
-					+ "grand_total_amount, deposit_amount, tender_amount, overdue_amount, "
+					+ "grand_total_amount, tender_amount, overdue_amount, "
 					+ "check_status, created_date, updated_date, customer_name) VALUES "
-					+ "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+					+ "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 			
 			insertionSqlStatement2 = "INSERT INTO [check_tax_charge](store_id, check_id, check_number, tax_charge_id, total_charge_amount,total_charge_amount_rounding_adjustment,grand_total_charge_amount) VALUES "
 					+ "(?, ?, ?, ?, ?, ?, ?)";
 			
 			updateSqlStatement = "UPDATE [check] SET check_number = ?, staff_id = ?, order_type = ?, table_number = ?, total_item_quantity = ?, "
 					+ "total_amount = ?, total_amount_with_tax = ?, total_amount_with_tax_rounding_adjustment = ?, "
-					+ "grand_total_amount = ?, deposit_amount = ?, tender_amount = ?, overdue_amount = ?, "
+					+ "grand_total_amount = ?, tender_amount = ?, overdue_amount = ?, "
 					+ "check_status = ?, created_date = ?, updated_date = ?, customer_name = ? WHERE check_id = ? and store_id = ?";
 			
 			updateSqlStatement2 = "UPDATE [check_tax_charge] SET check_number = ?, tax_charge_id = ?, total_charge_amount = ?, total_charge_amount_rounding_adjustment = ?, grand_total_charge_amount = ? WHERE check_id = ? and store_id = ?";
@@ -686,20 +686,19 @@ public class DeviceConfigRestController {
 					stmt.setBigDecimal(7, BigDecimal.valueOf(obj.getDouble("total_amount_with_tax")));
 					stmt.setBigDecimal(8, BigDecimal.valueOf(obj.getDouble("total_amount_with_tax_rounding_adjustment")));			
 					stmt.setBigDecimal(9, BigDecimal.valueOf(obj.getDouble("grand_total_amount")));	
-					stmt.setBigDecimal(10, BigDecimal.valueOf(obj.getDouble("deposit_amount")));
-					stmt.setBigDecimal(11, BigDecimal.valueOf(obj.getDouble("tender_amount")));
-					stmt.setBigDecimal(12, BigDecimal.valueOf(obj.getDouble("overdue_amount")));	
-					stmt.setLong(13, obj.getLong("check_status"));
-					stmt.setTimestamp(14, new Timestamp(datetimeFormatter.parse(obj.getString("created_date")).getTime()));
+					stmt.setBigDecimal(10, BigDecimal.valueOf(obj.getDouble("tender_amount")));
+					stmt.setBigDecimal(11, BigDecimal.valueOf(obj.getDouble("overdue_amount")));	
+					stmt.setLong(12, obj.getLong("check_status"));
+					stmt.setTimestamp(13, new Timestamp(datetimeFormatter.parse(obj.getString("created_date")).getTime()));
 					
-					if(obj.isNull("updated_date")) stmt.setNull(15, java.sql.Types.TIMESTAMP);
-					else stmt.setTimestamp(15, new Timestamp(datetimeFormatter.parse(obj.getString("updated_date")).getTime()));
+					if(obj.isNull("updated_date")) stmt.setNull(14, java.sql.Types.TIMESTAMP);
+					else stmt.setTimestamp(14, new Timestamp(datetimeFormatter.parse(obj.getString("updated_date")).getTime()));
 					
-					if(obj.isNull("customer_name")) stmt.setNull(16, java.sql.Types.VARCHAR);
-					else stmt.setString(16, obj.getString("customer_name"));
+					if(obj.isNull("customer_name")) stmt.setNull(15, java.sql.Types.VARCHAR);
+					else stmt.setString(15, obj.getString("customer_name"));
 
-					stmt.setLong(17, obj.getLong("check_id"));
-					stmt.setLong(18, storeId);
+					stmt.setLong(16, obj.getLong("check_id"));
+					stmt.setLong(17, storeId);
 
 					stmt.executeUpdate();
 					stmt.close();
@@ -763,17 +762,16 @@ public class DeviceConfigRestController {
 					stmt.setBigDecimal(9, BigDecimal.valueOf(obj.getDouble("total_amount_with_tax")));
 					stmt.setBigDecimal(10, BigDecimal.valueOf(obj.getDouble("total_amount_with_tax_rounding_adjustment")));
 					stmt.setBigDecimal(11, BigDecimal.valueOf(obj.getDouble("grand_total_amount")));
-					stmt.setBigDecimal(12, BigDecimal.valueOf(obj.getDouble("deposit_amount")));
-					stmt.setBigDecimal(13, BigDecimal.valueOf(obj.getDouble("tender_amount")));
-					stmt.setBigDecimal(14, BigDecimal.valueOf(obj.getDouble("overdue_amount")));
-					stmt.setLong(15, obj.getLong("check_status"));		
-					stmt.setTimestamp(16, new Timestamp(datetimeFormatter.parse(obj.getString("created_date")).getTime()));
+					stmt.setBigDecimal(12, BigDecimal.valueOf(obj.getDouble("tender_amount")));
+					stmt.setBigDecimal(13, BigDecimal.valueOf(obj.getDouble("overdue_amount")));
+					stmt.setLong(14, obj.getLong("check_status"));		
+					stmt.setTimestamp(15, new Timestamp(datetimeFormatter.parse(obj.getString("created_date")).getTime()));
 					
-					if(obj.isNull("updated_date")) stmt.setNull(17, java.sql.Types.TIMESTAMP);
-					else stmt.setTimestamp(17,new Timestamp(datetimeFormatter.parse(obj.getString("updated_date")).getTime()));
+					if(obj.isNull("updated_date")) stmt.setNull(16, java.sql.Types.TIMESTAMP);
+					else stmt.setTimestamp(16, new Timestamp(datetimeFormatter.parse(obj.getString("updated_date")).getTime()));
 					
-					if(obj.isNull("customer_name")) stmt.setNull(18, java.sql.Types.VARCHAR);
-					else stmt.setString(18, obj.getString("customer_name"));
+					if(obj.isNull("customer_name")) stmt.setNull(17, java.sql.Types.VARCHAR);
+					else stmt.setString(17, obj.getString("customer_name"));
 					
 					stmt.executeUpdate();
 					stmt.close();

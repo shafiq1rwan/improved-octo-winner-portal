@@ -383,7 +383,6 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 				total_amount_with_tax DECIMAL(25, 4) NOT NULL,
 				total_amount_with_tax_rounding_adjustment DECIMAL(25, 4) NOT NULL,
 				grand_total_amount DECIMAL(25, 4) NOT NULL,
-				deposit_amount DECIMAL(25, 4) NOT NULL,
 				tender_amount DECIMAL(25, 4) NOT NULL,
 				overdue_amount DECIMAL(25, 4) NOT NULL,
 				check_status BIGINT NOT NULL,
@@ -563,7 +562,7 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 
 			insert into payment_method_lookup values (1, ''Cash''), (2, ''Card''), (3, ''QR'');
 
-			insert into payment_type_lookup values (1, ''Full Payment''), (2, ''Partial Payment''), (3, ''Deposit Payment'');
+			insert into payment_type_lookup values (1, ''Full Payment''), (2, ''Partial Payment'');
 
 			insert into nii_type_lookup values (1, ''VISA/MASTER/JCB''), (2, ''AMEX''), (3, ''MCCS''), (4, ''UNIONPAY'');
 
