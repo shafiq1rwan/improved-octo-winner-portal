@@ -48,7 +48,7 @@
 					<span class="align-self-center xs-resp-font"><i
 						class="fas fa-utensils"></i>&nbsp;{{currentLanguageData.landing_table}}</span>
 				</div>
-				<span class="align-self-center md-resp-font font-weight-bold">{{tableId}}</span>
+				<span class="align-self-center md-resp-font font-weight-bold">{{tableName}}</span>
 				<div class="align-self-center">
 					<button class="btn btn-primary btn-main md-resp-font" type="button"
 						ng-click="switchToView('itemCategory')">{{currentLanguageData.landing_orderNow}}</button>

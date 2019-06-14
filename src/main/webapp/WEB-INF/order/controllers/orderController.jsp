@@ -19,6 +19,7 @@ byodApp.controller('OrderController', function($scope, $http, $location, $timeou
 	$scope.priceTag;
 	$scope.storeName;
 	$scope.tableId;
+	$scope.tableName;
 	$scope.cart = [];
 	$scope.cartSubtotalPrice;
 	$scope.cartTotalPrice;
@@ -664,6 +665,7 @@ byodApp.controller('OrderController', function($scope, $http, $location, $timeou
 					$scope.menuList = response.data.menuList;
 					$scope.storeName = response.data.storeName;
 					$scope.tableId = response.data.tableId;
+					$scope.tableName = response.data.tableName;
 					$scope.priceTag = response.data.priceTag;
 					$scope.imagePath = response.data.imagePath;
 					$scope.taxList = response.data.taxList;

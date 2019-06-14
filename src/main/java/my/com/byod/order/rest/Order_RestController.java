@@ -117,12 +117,16 @@ public class Order_RestController {
 			String storeId = tokenSplitArry[1];
 			String tableId = tokenSplitArry[2];
 			String checkNo = tokenSplitArry[3];
+			String timeStamp = tokenSplitArry[4];
+			String tableName = tokenSplitArry[5];
 
 			storeLog += "Decrypted Data: " + System.lineSeparator();
 			storeLog += "Brand ID: " + brandId + System.lineSeparator();
 			storeLog += "Store ID: " + storeId + System.lineSeparator();
 			storeLog += "Table ID: " + tableId + System.lineSeparator();
 			storeLog += "Check No: " + checkNo + System.lineSeparator();
+			storeLog += "Time Stamp: " + timeStamp + System.lineSeparator();
+			storeLog += "Table Name: " + tableName + System.lineSeparator();
 
 			connection = dbConnectionUtil.getConnection(Long.parseLong(brandId));
 			sqlStatement = "SELECT a.group_category_id, a.store_name, a.store_currency, a.byod_payment_delay_id, b.publish_version_id, c.menu_file_path FROM store a "
@@ -161,6 +165,7 @@ public class Order_RestController {
 						}
 
 						result.put("tableId", tableId);
+						result.put("tableName", tableName);
 						result.put("storeName", rs1.getString("store_name"));
 						result.put("priceTag", rs1.getString("store_currency"));
 						result.put("paymentType", rs1.getInt("byod_payment_delay_id"));
