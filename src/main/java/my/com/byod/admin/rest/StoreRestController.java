@@ -388,7 +388,8 @@ public class StoreRestController {
 				jsonObj.put("brand_id", byodUtil.getGeneralConfig(connection, "BRAND_ID"));		
 				jsonObj.put("id", rs.getLong("id"));		
 				jsonObj.put("backend_id", rs.getString("backend_id"));
-				jsonObj.put("store_name", rs.getString("store_name"));				
+				jsonObj.put("store_name", rs.getString("store_name"));
+				jsonObj.put("ecpos", getDeviceInfoByStoreId(connection, 1, store_id));
 			}
 			
 		}catch(Exception ex) {
@@ -889,29 +890,30 @@ public class StoreRestController {
 		return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.OK);
 	}
 	
-	@GetMapping(value = {"/ecpos/activate"}, produces = "application/json")
-	public ResponseEntity<?> activateECPOS(@RequestParam("store_id") Long store_id, HttpServletRequest request, HttpServletResponse response) {
+	@PostMapping(value = {"/ecpos/activate"}, produces = "application/json")
+	public ResponseEntity<?> activateECPOS(@RequestBody String formfield, HttpServletRequest request, HttpServletResponse response) {
 		JSONObject jsonObj = null;
 		Connection connection = null;
 		
 		try {
 			connection = dbConnectionUtil.retrieveConnection(request);
-			if(checkDeviceInfoExist(connection, 1, store_id))
+			/*if(checkDeviceInfoExist(connection, 1, store_id))
 				return ResponseEntity.status(HttpStatus.CONFLICT).contentType(MediaType.TEXT_PLAIN).body("ECPOS has already been activated.");
-			
-			String activationId = createDeviceInfo(connection, 1, store_id);
-			if(activationId==null || activationId.equals(""))
-				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Failed to generate ECPOS activation info.");
-			/*else {
-				Store store = storeService.findStoreById(store_id);
-				// send email
-				String brandId = byodUtil.getGeneralConfig(connection, "BRAND_ID");
-				String email = store.getEmail();
-				JSONObject activationInfo = getDeviceInfoByActivationId(connection, activationId);
-				if(!userEmailUtil.sendActivationInfo(store.getContactPerson(), activationInfo, brandId, email))
-					return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Activation success but failed to send activation email.");
-			}*/
-					
+			*/
+			JSONObject requestObj = new JSONObject(formfield);
+			if(requestObj.has("store_id") && requestObj.has("ecpos_name") && requestObj.has("ecpos_url")) {
+				Long store_id = requestObj.getLong("store_id");
+				jsonObj = new JSONObject();
+				jsonObj.put("name", requestObj.getString("ecpos_name"));
+				jsonObj.put("url", requestObj.getString("ecpos_url"));
+
+				String activationId = createDeviceInfo(connection, 1, store_id, jsonObj);
+				if(activationId==null || activationId.equals(""))
+					return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Failed to generate ECPOS activation info.");
+			}
+			else {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Invalid ECPOS activation request.");
+			}
 		}catch(Exception ex) {
 			ex.printStackTrace();
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Server error. Please contact support.");
@@ -924,10 +926,134 @@ public class StoreRestController {
 				}
 			}
 		}
-		return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.OK);	
+		return new ResponseEntity<String>(jsonObj.toString(), HttpStatus.OK);	
 	}
 	
-	@GetMapping(value = {"/ecpos/getInfo"}, produces = "application/json")
+	@PostMapping(value = {"/ecpos/convertToMaster"}, produces = "application/json")
+	public ResponseEntity<?> convertToMaster(@RequestParam("store_id") Long store_id, @RequestParam("activation_id") String activation_id, HttpServletRequest request, HttpServletResponse response) {
+		JSONObject jsonObj = null;
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		Long role_type_id = (long) 1;
+		
+		try {
+			connection = dbConnectionUtil.retrieveConnection(request);
+			connection.setAutoCommit(false);
+			
+			if(!getEcposStatus(connection, store_id))
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("ECPOS is disabled.");
+			
+			jsonObj = getDeviceInfoByActivationId(connection, activation_id);
+			if(jsonObj==null) {
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).contentType(MediaType.TEXT_PLAIN).body("Unable to find ECPOS info.");
+			}
+			else {
+				String sqlStatement = "SELECT id, activation_id FROM device_info WHERE ref_id = ? AND device_type_lookup_id = ?";
+				stmt = connection.prepareStatement(sqlStatement);
+				stmt.setLong(1, store_id);
+				// 1 - ECPOS
+				// 2 - BYOD
+				// 3 - KIOSK
+				stmt.setLong(2, 1);
+				rs = stmt.executeQuery();
+				while(rs.next()) {
+					Long device_info_id = rs.getLong("id");
+					String check_activation_id = rs.getString("activation_id"); 
+					sqlStatement = "UPDATE device_info_detail SET device_role_lookup_id = ? WHERE device_info_id = ?";
+					stmt = connection.prepareStatement(sqlStatement);
+					// 1 - Master
+					// 2 - Client
+					if(check_activation_id.equals(activation_id))
+						role_type_id = (long) 1;
+					else
+						role_type_id = (long) 2;
+					stmt.setLong(1, role_type_id);
+					stmt.setLong(2, device_info_id);
+					stmt.executeUpdate();
+				}	
+			}
+			connection.commit();
+			connection.setAutoCommit(true);
+		}catch(Exception ex) {
+			ex.printStackTrace();
+			try {
+				// roll back during exception
+				connection.rollback();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Server error. Please contact support.");
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return new ResponseEntity<String>(jsonObj.toString(), HttpStatus.OK);	
+	}
+	
+	@PostMapping(value = {"/ecpos/edit"}, produces = "application/json")
+	public ResponseEntity<?> editEcpos(@RequestBody String formfield, HttpServletRequest request, HttpServletResponse response) {
+		JSONObject jsonObj = null;
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		
+		try {
+			connection = dbConnectionUtil.retrieveConnection(request);
+			
+			JSONObject requestObj = new JSONObject(formfield);
+			if(requestObj.has("store_id") && requestObj.has("activation_id") && requestObj.has("ecpos_name") && requestObj.has("ecpos_url")) {		
+				Long store_id = requestObj.getLong("store_id");
+				String name = requestObj.getString("ecpos_name");
+				String url = requestObj.getString("ecpos_url");
+				String activation_id = requestObj.getString("activation_id");
+				
+				if(!getEcposStatus(connection, store_id))
+					return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("ECPOS is disabled.");
+				
+				jsonObj = getDeviceInfoByActivationId(connection, activation_id);
+				if(jsonObj==null) {
+					return ResponseEntity.status(HttpStatus.NOT_FOUND).contentType(MediaType.TEXT_PLAIN).body("Unable to find ECPOS info.");
+				}
+				else {
+					String sqlStatement = "UPDATE device_info_detail SET device_name = ?, device_url = ? WHERE device_info_id = ?; ";
+					stmt = connection.prepareStatement(sqlStatement);
+					stmt.setString(1, name);
+					stmt.setString(2, url);
+					stmt.setLong(3, jsonObj.getLong("id"));
+					stmt.executeUpdate();
+				}
+			}else {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Invalid ECPOS update request.");
+			}
+		}catch(Exception ex) {
+			ex.printStackTrace();
+			try {
+				// roll back during exception
+				connection.rollback();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Server error. Please contact support.");
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return new ResponseEntity<String>(jsonObj.toString(), HttpStatus.OK);	
+	}
+	
+	/*@GetMapping(value = {"/ecpos/getInfo"}, produces = "application/json")
 	public ResponseEntity<?> getEcposInfo(@RequestParam("store_id") Long store_id, HttpServletRequest request, HttpServletResponse response) {
 		JSONArray jsonArray = new JSONArray();
 		JSONObject jsonObj = null;
@@ -962,11 +1088,10 @@ public class StoreRestController {
 			}
 		}
 		return new ResponseEntity<String>(jsonObj.toString(), HttpStatus.OK);
-	}
+	}*/
 	
 	@GetMapping(value = {"/ecpos/terminate"}, produces = "application/json")
-	public ResponseEntity<?> terminateEcpos(@RequestParam("store_id") Long store_id, HttpServletRequest request, HttpServletResponse response) {
-		JSONArray jsonArray = new JSONArray();
+	public ResponseEntity<?> terminateEcpos(@RequestParam("store_id") Long store_id, @RequestParam("activation_id") String activation_id, HttpServletRequest request, HttpServletResponse response) {
 		JSONObject jsonObj = null;
 		//JSONObject jsonObjResult = null;
 		Connection connection = null;
@@ -978,13 +1103,9 @@ public class StoreRestController {
 			if(!getEcposStatus(connection, store_id))
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("ECPOS is disabled.");
 			
-			jsonArray = getDeviceInfoByStoreId(connection, 1, store_id);
-			if(jsonArray.length()==0) {
+			jsonObj = getDeviceInfoByActivationId(connection, activation_id);
+			if(jsonObj == null) {
 				return ResponseEntity.status(HttpStatus.NOT_FOUND).contentType(MediaType.TEXT_PLAIN).body("Unable to find ECPOS info.");
-			}
-			else {
-				// ecpos only 1 record
-				jsonObj = jsonArray.getJSONObject(0);
 			}
 
 			Long statusLookupId = jsonObj.getLong("status_lookup_id");
@@ -1011,8 +1132,7 @@ public class StoreRestController {
 	}
 	
 	@GetMapping(value = {"/ecpos/reactivate"}, produces = "application/json")
-	public ResponseEntity<?> reactivateEcpos(@RequestParam("store_id") Long store_id, HttpServletRequest request, HttpServletResponse response) {
-		JSONArray jsonArray = new JSONArray();
+	public ResponseEntity<?> reactivateEcpos(@RequestParam("store_id") Long store_id, @RequestParam("activation_id") String activation_id, HttpServletRequest request, HttpServletResponse response) {
 		JSONObject jsonObj = null;
 		//JSONObject jsonObjResult = null;
 		Connection connection = null;
@@ -1024,13 +1144,9 @@ public class StoreRestController {
 			if(!getEcposStatus(connection, store_id))
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("ECPOS is disabled.");
 			
-			jsonArray = getDeviceInfoByStoreId(connection, 1, store_id);
-			if(jsonArray.length()==0) {
+			jsonObj = getDeviceInfoByActivationId(connection, activation_id);
+			if(jsonObj == null) {
 				return ResponseEntity.status(HttpStatus.NOT_FOUND).contentType(MediaType.TEXT_PLAIN).body("Unable to find ECPOS info.");
-			}
-			else {
-				// ecpos only 1 record
-				jsonObj = jsonArray.getJSONObject(0);
 			}
 	
 			Long statusLookupId = jsonObj.getLong("status_lookup_id");
@@ -1098,7 +1214,6 @@ public class StoreRestController {
 	@PostMapping(value = {"/ecpos/syncTrans"}, produces = "application/json")
 	public ResponseEntity<?> syncTrans(@RequestParam("store_id") Long store_id, @RequestParam("activation_id") String activationId, HttpServletRequest request, HttpServletResponse response) {
 		JSONObject jsonObj = null;
-		JSONArray jsonArray = null;
 		Connection connection = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
@@ -1108,33 +1223,27 @@ public class StoreRestController {
 			if(!getEcposStatus(connection, store_id))
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("ECPOS is disabled.");
 			
-			jsonArray = getDeviceInfoByStoreId(connection, 1, store_id);
-			if(jsonArray.length()==0) {
+			jsonObj = getDeviceInfoByActivationId(connection, activationId);
+			if(jsonObj == null) {
 				return ResponseEntity.status(HttpStatus.NOT_FOUND).contentType(MediaType.TEXT_PLAIN).body("Unable to find ECPOS info.");
 			}
 			else{
-				// ecpos only one record
-				jsonObj = jsonArray.getJSONObject(0);
 				if(jsonObj.getLong("status_lookup_id")!=2) {
 					return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("ECPOS is not active.");				
 				}
 			}
-				
-			String sqlStatement = "SELECT ecpos_url FROM store WHERE id = ?";
-			stmt = connection.prepareStatement(sqlStatement);
-			stmt.setLong(1, store_id);
-			rs = stmt.executeQuery();
-			if(!rs.next()) {
+			
+			if(!(jsonObj.has("device_url") && !jsonObj.getString("device_url").equals(""))) {
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Invalid ECPOS URL.");
 			} else {
 				String brandId = byodUtil.getGeneralConfig(connection, "BRAND_ID");
-				String ecposUrl = rs.getString("ecpos_url");
+				String ecposUrl = jsonObj.getString("device_url");
 				String url = ecposUrl + "/syncTransaction";
 				
 				JSONObject sendData = new JSONObject();
 				sendData.put("storeId", String.valueOf(store_id));
 				sendData.put("brandId", brandId);
-				
+
 				URL object = new URL(url);
 				HttpURLConnection con = (HttpURLConnection) object.openConnection();
 				con.setDoOutput(true);
@@ -1236,7 +1345,7 @@ public class StoreRestController {
 		
 		try {
 			connection = dbConnectionUtil.retrieveConnection(request);
-			String activationId = createDeviceInfo(connection, 2, store_id);
+			String activationId = createDeviceInfo(connection, 2, store_id, null);
 			if(activationId==null || activationId.equals(""))
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Failed to generate BYOD activation info.");
 			/*else {
@@ -1392,7 +1501,7 @@ public class StoreRestController {
 		
 		try {
 			connection = dbConnectionUtil.retrieveConnection(request);
-			String activationId = createDeviceInfo(connection, 3, store_id);
+			String activationId = createDeviceInfo(connection, 3, store_id, null);
 			if(activationId==null || activationId.equals(""))
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Failed to generate KIOSK activation info.");
 			/*else {
@@ -1507,8 +1616,8 @@ public class StoreRestController {
 		ResultSet rs = null;
 		try {
 			connection = dbConnectionUtil.retrieveConnection(request);
-			JSONArray jsonArray = getDeviceInfoByStoreId(connection, 1, store_id);
-			if(jsonArray.length()==0) {
+			JSONObject activationInfo = getDeviceInfoByActivationId(connection, activationId);
+			if(activationInfo==null) {
 				return ResponseEntity.status(HttpStatus.NOT_FOUND).contentType(MediaType.TEXT_PLAIN).body("Unable to find ECPOS info.");
 			}
 			
@@ -1520,7 +1629,6 @@ public class StoreRestController {
 			if(rs.next()) {
 				String email = rs.getString("store_contact_email");
 				String contactPerson = rs.getString("store_contact_person");
-				JSONObject activationInfo = getDeviceInfoByActivationId(connection, activationId);
 				// send email
 				if(!userEmailUtil.sendActivationInfo(contactPerson, activationInfo, brandId, email))
 					return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Failed to resend activation email.");
@@ -1675,7 +1783,7 @@ public class StoreRestController {
 		return exist;
 	}
 	
-	private String createDeviceInfo(Connection connection, long deviceTypeId, long referenceId) throws Exception {	
+	private String createDeviceInfo(Connection connection, long deviceTypeId, long referenceId, JSONObject deviceInfoDetail) throws Exception {	
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		int count = 1;
@@ -1694,6 +1802,13 @@ public class StoreRestController {
 			rs = stmt.executeQuery();		
 			if(rs.next()) {
 				result = activationId;
+				
+				if(deviceInfoDetail!=null) {
+					// insert device info detail
+					// ecpos usage
+					Long device_info_id = rs.getLong(1);
+					createDeviceInfoDetail(connection, device_info_id, referenceId, deviceInfoDetail);
+				}
 			}
 			
 		}catch(Exception ex) {
@@ -1709,6 +1824,78 @@ public class StoreRestController {
 		return result;
 	}
 	
+	private boolean createDeviceInfoDetail(Connection connection, long id, long ref_id, JSONObject deviceInfoDetail) throws Exception {	
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		int count = 1;
+		boolean flag = false;
+		Long deviceRoleType = (long) 1;
+		
+		try {
+			if(checkMasterRoleExist(connection, ref_id)) {
+				// 1 - master
+				// 2 - client
+				deviceRoleType = (long) 2;
+			}
+			String name = deviceInfoDetail.getString("name");
+			String url = deviceInfoDetail.getString("url");
+			
+			stmt = connection.prepareStatement("INSERT INTO device_info_detail (device_info_id, device_name, device_url, device_role_lookup_id) "
+					+ "VALUES (?, ? ,? ,?); SELECT SCOPE_IDENTITY();");	
+			stmt.setLong(count++, id);
+			stmt.setString(count++, name);
+			stmt.setString(count++, url);
+			stmt.setLong(count++, deviceRoleType);
+			rs = stmt.executeQuery();		
+			if(rs.next()) {
+				flag = true;
+			}
+			
+		}catch(Exception ex) {
+			throw ex;
+		} finally {
+			if (rs != null) {
+				rs.close();
+			}
+			if (stmt != null) {
+				stmt.close();
+			}
+		}
+		return flag;
+	}
+	
+	private boolean checkMasterRoleExist(Connection connection, Long ref_id) throws Exception {
+		// check device role master exist
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		int count = 1;
+		boolean flag = false;
+		
+		try {
+			stmt = connection.prepareStatement("SELECT * FROM device_info a "
+					+ "INNER JOIN device_info_detail b ON a.id = b.device_info_id "
+					+ "WHERE a.ref_id = ? AND b.device_role_lookup_id = ? ");	
+			stmt.setLong(count++, ref_id);
+			// 1 - master
+			// 2 - client
+			stmt.setLong(count++, 1);
+			rs = stmt.executeQuery();		
+			if(rs.next()) {
+				flag = true;
+			}
+		}catch(Exception ex) {
+			throw ex;
+		} finally {
+			if (rs != null) {
+				rs.close();
+			}
+			if (stmt != null) {
+				stmt.close();
+			}
+		}
+		return flag;
+	}
+	
 	private JSONArray getDeviceInfoByStoreId(Connection connection, long deviceTypeId, long referenceId) throws Exception {	
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
@@ -1717,8 +1904,10 @@ public class StoreRestController {
 		int count = 1;
 		
 		try {
-			stmt = connection.prepareStatement("SELECT a.*, b.name AS status FROM device_info a "
-					+ "INNER JOIN status_lookup b ON a.status_lookup_id = b.id WHERE a.device_type_lookup_id = ? AND a.ref_id = ? ORDER BY a.created_date DESC");	
+			stmt = connection.prepareStatement("SELECT a.*, b.name AS status, c.device_name, c.device_url, c.device_role_lookup_id FROM device_info a "
+					+ "INNER JOIN status_lookup b ON a.status_lookup_id = b.id "
+					+ "LEFT JOIN device_info_detail c ON a.id = c.device_info_id "
+					+ "WHERE a.device_type_lookup_id = ? AND a.ref_id = ? ORDER BY a.created_date DESC ");	
 			stmt.setLong(count++, deviceTypeId);
 			stmt.setLong(count++, referenceId);
 			rs = stmt.executeQuery();	
@@ -1731,6 +1920,9 @@ public class StoreRestController {
 				jsonObj.put("created_date", rs.getString("created_date"));
 				jsonObj.put("status_lookup_id", rs.getLong("status_lookup_id"));
 				jsonObj.put("status", rs.getString("status"));
+				jsonObj.put("device_name", rs.getString("device_name"));
+				jsonObj.put("device_url", rs.getString("device_url"));
+				jsonObj.put("device_role_lookup_id", rs.getLong("device_role_lookup_id"));
 				jsonArray.put(jsonObj);
 			}
 			
@@ -1755,9 +1947,10 @@ public class StoreRestController {
 		int count = 1;
 		
 		try {
-			stmt = connection.prepareStatement("SELECT a.*, b.name AS status, c.name AS device FROM device_info a "
+			stmt = connection.prepareStatement("SELECT a.*, b.name AS status, c.name AS device, d.device_name, d.device_url, d.device_role_lookup_id FROM device_info a "
 					+ "INNER JOIN status_lookup b ON a.status_lookup_id = b.id "
 					+ "INNER JOIN device_type_lookup c ON a.device_type_lookup_id = c.id "
+					+ "LEFT JOIN device_info_detail d ON a.id = d.device_info_id "
 					+ "WHERE a.activation_id = ?");			
 			stmt.setString(count++, activationId);
 			rs = stmt.executeQuery();	
@@ -1771,6 +1964,9 @@ public class StoreRestController {
 				jsonObj.put("status_lookup_id", rs.getLong("status_lookup_id"));
 				jsonObj.put("status", rs.getString("status"));
 				jsonObj.put("device", rs.getString("device"));
+				jsonObj.put("device_name", rs.getString("device_name"));
+				jsonObj.put("device_url", rs.getString("device_url"));
+				jsonObj.put("device_role_lookup_id", rs.getLong("device_role_lookup_id"));
 			}
 			
 		}catch(Exception ex) {

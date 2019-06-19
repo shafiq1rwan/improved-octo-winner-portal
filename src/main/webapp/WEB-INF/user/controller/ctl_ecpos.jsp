@@ -4,12 +4,12 @@
 		
 		$scope.action = '';
 		$scope.actionTable = '';
+		$scope.actionEcpos = '';
 		$scope.store = {id : $routeParams.id};
 		$scope.staff = {};
 		$scope.table = {};
 		$scope.roleList = [];
 		$scope.ecpos = {}
-		$scope.showActivation = false;
 		//$scope.tableCount = 0;
 		$scope.qrImgData = "";
 		
@@ -19,18 +19,21 @@
 			$('#staffListModal').modal('toggle');
 		}
 		
-		// get store info
-		$http({
-			method : 'GET',
-			headers : {'Content-Type' : 'application/json'},
-			url : '${pageContext.request.contextPath}/menu/store/ecposByStoreId?store_id='+$scope.store.id	
-		})
-		.then(function(response) {
-			$scope.store.brand_id = response.data.brand_id;
-			$scope.store.name = response.data.store_name;
-			$scope.store.backend_id = response.data.backend_id;
-			console.log($scope.store);		
-		});		
+		$scope.getDeviceInfo = function(){
+			$http({
+				method : 'GET',
+				headers : {'Content-Type' : 'application/json'},
+				url : '${pageContext.request.contextPath}/menu/store/ecposByStoreId?store_id='+$scope.store.id	
+			})
+			.then(function(response) {
+				$scope.store.brand_id = response.data.brand_id;
+				$scope.store.name = response.data.store_name;
+				$scope.store.backend_id = response.data.backend_id;
+				$scope.store.ecpos = response.data.ecpos;
+				$scope.store.ecpos_count = $scope.store.ecpos.length;
+				console.log($scope.store);		
+			});
+		}
 		
 		// get role list
 		$http({
@@ -42,6 +45,162 @@
 			$scope.roleList = response.data;
 			console.log($scope.roleList);
 		});
+		
+		$scope.ecposModalType = function(action, index){
+			$scope.actionEcpos = action;
+			$('#ecposModal').modal('toggle');
+			
+			if(action=='update'){
+				$scope.ecpos.name = $scope.store.ecpos[index].device_name;
+				$scope.ecpos.url  = $scope.store.ecpos[index].device_url;
+				$scope.ecpos.activation_id = $scope.store.ecpos[index].activation_id;
+			}
+		}
+		
+		$scope.resetEcposModal = function(){
+			$scope.actionEcpos = '';
+			$scope.ecpos = {};
+			$('#ecposModal').modal('toggle');
+		}
+		
+		$scope.submitEditEcpos = function(){
+			swal({
+				  title: "Are you sure?",
+				  text: "Do you want perform update on ECPOS?",
+				  icon: "warning",
+				  buttons: true,
+				  dangerMode: true,
+				})
+				.then((willCreate) => {
+				  if (willCreate) {
+					  $scope.isLoadingEnded = false;
+					  $('#loading_modal').modal({backdrop: 'static', keyboard: false});
+					  var postdata = {
+					  	store_id : $scope.store.id,
+					  	ecpos_name : $scope.ecpos.name,
+					  	ecpos_url : $scope.ecpos.url,
+					  	activation_id : $scope.ecpos.activation_id
+					  };
+					  console.log(postdata);
+					  $http({
+							method : 'POST',
+							headers : {'Content-Type' : 'application/json'},
+							url : '${pageContext.request.contextPath}/menu/store/ecpos/edit',
+							data : postdata
+						})
+						.then(function successCallback(response) {
+							$scope.hideLoading();
+							$scope.resetEcposModal();
+							if(response.status==200){
+								swal("ECPOS is updated", {
+									icon: "success",
+								});
+								
+								$scope.getDeviceInfo();
+							}
+						 }, function errorCallback(response) {
+							$scope.hideLoading();
+					    	swal({
+								  title: "Error",
+								  text: response.data,
+								  icon: "warning",
+								  dangerMode: true,
+							});
+						}); 
+				}					 
+			});
+		}
+		
+		$scope.convertToMaster = function(activationId){
+			swal({
+				  title: "Are you sure?",
+				  text: "Do you want to change the selected ECPOS to Master?",
+				  icon: "warning",
+				  buttons: true,
+				  dangerMode: true,
+				})
+				.then((willCreate) => {
+				  if (willCreate) {
+					  $scope.isLoadingEnded = false;
+					  $('#loading_modal').modal({backdrop: 'static', keyboard: false});
+					  $http({
+							method : 'POST',
+							headers : {'Content-Type' : 'application/json'},
+							url : '${pageContext.request.contextPath}/menu/store/ecpos/convertToMaster?store_id='+$scope.store.id+'&activation_id='+activationId 	
+						})
+						.then(function successCallback(response) {
+							$scope.hideLoading();
+							if(response.status==200){
+								swal("Successfully changed new Master ECPOS.", {
+									icon: "success",
+								});
+								
+								$scope.getDeviceInfo();
+							}
+						 }, function errorCallback(response) {
+							$scope.hideLoading();
+					    	swal({
+								  title: "Error",
+								  text: response.data,
+								  icon: "warning",
+								  dangerMode: true,
+							});
+						}); 
+				}					 
+			});
+		}
+		
+		$scope.addDevice = function(){
+			if($scope.ecpos.name == null || $scope.ecpos.name=='' ||
+					$scope.ecpos.url == null || $scope.staff.url==''){
+			}
+			else{
+				swal({
+					  title: "Are you sure?",
+					  text: "Do you want to generate Activation ID for new ECPOS?",
+					  icon: "warning",
+					  buttons: true,
+					  dangerMode: true,
+					})
+					.then((willCreate) => {
+					  if (willCreate) {
+						  $scope.isLoadingEnded = false;
+						  $('#loading_modal').modal({backdrop: 'static', keyboard: false});
+						  var postdata = {
+						  	store_id : $scope.store.id,
+						  	ecpos_name : $scope.ecpos.name,
+						  	ecpos_url : $scope.ecpos.url
+						  };
+						  console.log(postdata);
+						  $http({
+								method : 'POST',
+								headers : {'Content-Type' : 'application/json'},
+								url : '${pageContext.request.contextPath}/menu/store/ecpos/activate',
+								data : postdata
+							})
+							.then(function successCallback(response) {
+								$scope.hideLoading();
+								$scope.resetEcposModal();
+								if(response.status==200){
+									swal("Activation ID is generated", {
+										icon: "success",
+									});
+									
+									$scope.getDeviceInfo();
+								}
+							 }, function errorCallback(response) {
+								$scope.hideLoading();
+						    	swal({
+									  title: "Error",
+									  text: response.data,
+									  icon: "warning",
+									  dangerMode: true,
+								});
+							}); 
+					}					 
+				});
+			}
+		}
 		
 		// validation
 		$scope.submitStaff = function(){
@@ -247,46 +406,7 @@
 			});
 		}
 		
-		$scope.generateActivation = function(){
-			swal({
-				  title: "Are you sure?",
-				  text: "Do you want to generate Activation ID?",
-				  icon: "warning",
-				  buttons: true,
-				  dangerMode: true,
-				})
-				.then((willCreate) => {
-				  if (willCreate) {
-					  $scope.isLoadingEnded = false;
-					  $('#loading_modal').modal({backdrop: 'static', keyboard: false});
-					  $http({
-							method : 'GET',
-							headers : {'Content-Type' : 'application/json'},
-							url : '${pageContext.request.contextPath}/menu/store/ecpos/activate?store_id='+$scope.store.id 	
-						})
-						.then(function successCallback(response) {
-							$scope.hideLoading();
-							if(response.status==200){			
-								swal("Activation ID is generated", {
-									icon: "success",
-								});
-								
-								$scope.getDeviceInfo();
-							}
-						 }, function errorCallback(response) {
-						 	$scope.hideLoading();
-					    	swal({
-								  title: "Error",
-								  text:  response.data,
-								  icon: "warning",
-								  dangerMode: true,
-							});						    
-						});
-				}					 
-			});
-		}
-		
-		$scope.terminateDevice = function(){
+		$scope.terminateDevice = function(activationId){
 			swal({
 				  title: "Are you sure?",
 				  text: "Do you want to terminate ECPOS?",
@@ -299,7 +419,7 @@
 					  $http({
 							method : 'GET',
 							headers : {'Content-Type' : 'application/json'},
-							url : '${pageContext.request.contextPath}/menu/store/ecpos/terminate?store_id='+$scope.store.id 	
+							url : '${pageContext.request.contextPath}/menu/store/ecpos/terminate?store_id=' + $scope.store.id+'&activation_id='+activationId 	
 						})
 						.then(function successCallback(response) {
 							console.log(response);
@@ -323,7 +443,7 @@
 			});
 		}
 		
-		$scope.resendActivationInfo = function(){		
+		$scope.resendActivationInfo = function(activationId){		
 			swal({
 				  title: "Are you sure?",
 				  text: "Do you want to resend ECPOS activation email?",
@@ -338,7 +458,7 @@
 					  $http({
 							method : 'POST',
 							headers : {'Content-Type' : 'application/json'},
-							url : '${pageContext.request.contextPath}/menu/store/resendAct?store_id='+$scope.store.id+'&activation_id='+$scope.ecpos.activation_id
+							url : '${pageContext.request.contextPath}/menu/store/resendAct?store_id='+$scope.store.id+'&activation_id='+activationId
 						})
 						.then(function successCallback(response) {
 							console.log(response);
@@ -363,7 +483,7 @@
 			});
 		}
 		
-		$scope.syncTransactions = function(){		
+		$scope.syncTransactions = function(activationId){		
 			swal({
 				  title: "Are you sure?",
 				  text: "Do you want to synchronize ECPOS transactions to cloud?",
@@ -378,7 +498,7 @@
 					  $http({
 							method : 'POST',
 							headers : {'Content-Type' : 'application/json'},
-							url : '${pageContext.request.contextPath}/menu/store/ecpos/syncTrans?store_id='+$scope.store.id+'&activation_id='+$scope.ecpos.activation_id
+							url : '${pageContext.request.contextPath}/menu/store/ecpos/syncTrans?store_id='+$scope.store.id+'&activation_id='+activationId
 						})
 						.then(function successCallback(response) {
 							console.log(response);
@@ -413,7 +533,7 @@
 			}
 		});
 		
-		$scope.reactivateDevice = function(){		
+		$scope.reactivateDevice = function(activationId){		
 			swal({
 				  title: "Are you sure?",
 				  text: "Do you want to reactivate ECPOS?",
@@ -426,7 +546,7 @@
 					  $http({
 							method : 'GET',
 							headers : {'Content-Type' : 'application/json'},
-							url : '${pageContext.request.contextPath}/menu/store/ecpos/reactivate?store_id='+$scope.store.id 	
+							url : '${pageContext.request.contextPath}/menu/store/ecpos/reactivate?store_id='+$scope.store.id+'&activation_id='+activationId 	
 						})
 						.then(function successCallback(response) {
 							console.log(response);
@@ -447,30 +567,6 @@
 							});		
 						});		 
 				}					 
-			});
-		}
-		
-		$scope.getDeviceInfo = function(){
-			$http({
-				method : 'GET',
-				headers : {'Content-Type' : 'application/json'},
-				url : '${pageContext.request.contextPath}/menu/store/ecpos/getInfo?store_id='+$scope.store.id 	
-			})
-			.then(function successCallback(response) {
-				if(response.status==200){
-					console.log(response.data);
-					$scope.showActivation = false;
-					$scope.ecpos.activation_id = response.data.activation_id;
-					$scope.ecpos.activation_key = response.data.activation_key;
-					$scope.ecpos.created_date = response.data.created_date;
-					$scope.ecpos.status = response.data.status;
-					$scope.ecpos.mac_address = response.data.mac_address;
-					console.log($scope.ecpos);
-				}
-			 }, function errorCallback(response) {	
-			    if(response.status==400){
-			    	$scope.showActivation = true;
-			    }
 			});
 		}
 		

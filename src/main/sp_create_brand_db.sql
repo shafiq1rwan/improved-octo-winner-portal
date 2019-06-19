@@ -175,7 +175,6 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 				last_update_date datetime,
 				is_publish BIT DEFAULT 0,
 				ecpos BIT DEFAULT 0,
-				ecpos_url NVARCHAR(150),
 				ecpos_takeaway_detail_flag BIT,
 				login_type_id BIGINT,
 				login_switch_flag BIT,
@@ -205,6 +204,19 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 				id BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,
 				role_name NVARCHAR(50) NOT NULL UNIQUE
 			);
+
+			CREATE TABLE device_info_detail(
+				id BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,
+				device_info_id BIGINT NOT NULL,
+				device_name VARCHAR(50),
+				device_url VARCHAR(50),
+				device_role_lookup_id INT
+			)
+
+			CREATE TABLE device_role_lookup(
+				device_role_id INT UNIQUE NOT NULL, 
+				device_role_name NVARCHAR(50) NOT NULL UNIQUE
+			)
 
 			CREATE TABLE login_type_lookup
 			(
@@ -549,6 +561,9 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 
 			INSERT INTO charge_type_lookup VALUES (1, ''Total Tax''),(2, ''Overall Tax'');
 			INSERT INTO store_tax_type_lookup VALUES (1,''Exclusive Tax''), (2, ''Inclusive Tax'');
+
+			INSERT INTO device_role_lookup (device_role_id, device_role_name) VALUES (1, ''Master'');
+			INSERT INTO device_role_lookup (device_role_id, device_role_name) VALUES (2, ''Client'');
 
 			INSERT INTO device_type_lookup (id, name, prefix, backend_sequence, modified_date) VALUES (1, ''ECPOS'', ''EC'', 0, GETDATE())
 			INSERT INTO device_type_lookup (id, name, prefix, backend_sequence, modified_date) VALUES (2, ''BYOD'', ''BD'', 0, GETDATE())

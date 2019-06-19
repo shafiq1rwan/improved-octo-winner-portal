@@ -30,15 +30,18 @@
 						<div class="card mb-3">
 							<div class="card-header d-flex flex-row justify-content-between">
 								<h3>ECPOS Info</h3>
-								<div class="btn-group">								
-									<button type="button" class="btn btn-social pull-right btn-primary bg-aqua ml-3" data-toggle="modal" data-target="#staffListModal">
+								<div class="btn-group">					
+									<button type="button" class="btn pull-right btn-success ml-3" data-toggle="modal" data-target="#staffListModal">
 										<span class="btn-label"><i class="fa fa-edit"></i></span> Manage Staff
 									</button>
-									<button type="button" class="btn btn-social pull-right btn-success bg-aqua ml-3" data-toggle="modal" data-target="#tableListModal">
+									<button type="button" class="btn pull-right btn-info ml-3" data-toggle="modal" data-target="#tableListModal">
 										<span class="btn-label"><i class="fa fa-edit"></i></span> Manage Table
 									</button>
+									<button type="button" class="btn pull-right btn-primary ml-3" ng-click="ecposModalType('create')">
+										<span class="btn-label"><i class="fa fa-plus"></i></span> Add ECPOS
+									</button>			
 								</div>									
-							</div>						
+							</div>
 							<div class="card-body">													
 								<div class="row">
 									<div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
@@ -47,60 +50,88 @@
 											<h6><label>Store ID : {{store.id}}</label></h6>
 											<h6><label>Backend ID : {{store.backend_id}}</label></h6>
 											<h6><label>Store Name : {{store.name}}</label></h6>
+											<h6><label>Number of ECPOS : {{store.ecpos_count}}</label></h6>
 										</div>
 									</div>									
-								</div>								
-										
-								<hr>
+								</div>
+							</div>																										
+						</div><!-- end card-->
+						<div class="card mb-3 shadow" ng-repeat="item in store.ecpos">				
+							<div class="card-body">		
 								<div class="form-section" id="test">
+									<div class="btn btn-outline-success pull-right" ng-click="ecposModalType('update', $index)"><i class="fa fa-edit"></i> Edit</div>
+									<h5>ECPOS # {{store.ecpos.length - $index}} <b ng-show="item.device_role_lookup_id==1">(Master)</b></h5>
+									<br>
 									<div class="row">
 										<div class="col-3 col-sm-3 col-md-3 col-lg-3 col-xl-3">
 											<div class="form-group">
 												<label class="login-label">Activation ID</label>
-												<input class="form-control" ng-model="ecpos.activation_id" type="text" disabled>
+												<input class="form-control" ng-model="item.activation_id" type="text" disabled>
 											</div>
 										</div>
 										<div class="col-3 col-sm-3 col-md-3 col-lg-3 col-xl-3">
 											<div class="form-group">
 												<label class="login-label">Activation Key</label>
-												<input class="form-control" ng-model="ecpos.activation_key"  type="text" disabled>
+												<input class="form-control" ng-model="item.activation_key"  type="text" disabled>
 											</div>
 										</div>
 										<div class="col-3 col-sm-3 col-md-3 col-lg-3 col-xl-3">
 											<div class="form-group">
 												<label class="login-label">Date Created</label>
-												<input class="form-control" ng-model="ecpos.created_date" type="text" disabled>
+												<input class="form-control" ng-model="item.created_date" type="text" disabled>
 											</div>
 										</div>
 										<div class="col-3 col-sm-3 col-md-3 col-lg-3 col-xl-3">
 											<div class="form-group">
 												<label class="login-label">Status</label>
-												<input class="form-control" ng-model="ecpos.status" type="text" disabled>
+												<input class="form-control" ng-model="item.status" type="text" disabled>
 											</div>
-										</div>											
+										</div>										
 									</div>
 									
 									<div class="row">
 										<div class="col-3 col-sm-3 col-md-3 col-lg-3 col-xl-3">
 											<div class="form-group">
 												<label class="login-label">MAC Address</label>
-												<input class="form-control" ng-model="ecpos.mac_address"  type="text" disabled>
+												<input class="form-control" ng-model="item.mac_address" type="text" disabled>
 											</div>
-										</div>									
+										</div>
+										<div class="col-3 col-sm-3 col-md-3 col-lg-3 col-xl-3">
+											<div class="form-group">
+												<label class="login-label">Device Name</label>
+												<input class="form-control" ng-model="item.device_name" type="text" disabled>
+											</div>
+										</div>
+										<div class="col-3 col-sm-3 col-md-3 col-lg-3 col-xl-3">
+											<div class="form-group">
+												<label class="login-label">Device URL</label>
+												<input class="form-control" ng-model="item.device_url" type="text" disabled>
+											</div>
+										</div>																
 									</div>		
 										
 								</div>							
 							</div>
 							<div class="card-footer">
-								<div class="btn-toolbar justify-content-end" role="toolbar" aria-label="Toolbar with button groups">
-									<button type="button" ng-show="showActivation" ng-click="generateActivation()" class="btn btn-success">Generate Activation ID</button>
-									<button type="button" ng-click="syncTransactions()" class="btn btn-outline-secondary">Synchronize Transactions</button>															
-			  						<button type="button" ng-click="resendActivationInfo()" class="btn btn-outline-secondary">Resend Activation ID</button>
-			  						<button type="button" ng-click="reactivateDevice()" class="btn btn-outline-secondary">Reactivate ECPOS</button>
-			  						<button type="button" ng-click="terminateDevice()" class="btn btn-outline-secondary">Terminate ECPOS</button>		  				
+								<div class="d-flex justify-content-end" ng-show="item.device_role_lookup_id==1" role="toolbar" aria-label="Toolbar with button groups">
+									<div class="btn-toolbar">							
+				  						<button type="button" ng-click="syncTransactions(item.activation_id)" class="btn btn-outline-secondary">Synchronize Transactions</button>															
+				  						<button type="button" ng-click="resendActivationInfo(item.activation_id)" class="btn btn-outline-secondary">Resend Activation ID</button>
+				  						<button type="button" ng-click="reactivateDevice(item.activation_id)" class="btn btn-outline-secondary">Reactivate ECPOS</button>
+				  						<button type="button" ng-click="terminateDevice(item.activation_id)" class="btn btn-outline-secondary">Terminate ECPOS</button>
+			  						</div>				  				
+								</div>	
+								<div class="d-flex justify-content-between" ng-show="item.device_role_lookup_id==2" role="toolbar" aria-label="Toolbar with button groups">
+									<button type="button" ng-click="convertToMaster(item.activation_id)" class="btn btn-primary">Make Master</button>
+									<div class="btn-toolbar">							
+				  						<button type="button" ng-click="syncTransactions(item.activation_id)" class="btn btn-outline-secondary">Synchronize Transactions</button>															
+				  						<button type="button" ng-click="resendActivationInfo(item.activation_id)" class="btn btn-outline-secondary">Resend Activation ID</button>
+				  						<button type="button" ng-click="reactivateDevice(item.activation_id)" class="btn btn-outline-secondary">Reactivate ECPOS</button>
+				  						<button type="button" ng-click="terminateDevice(item.activation_id)" class="btn btn-outline-secondary">Terminate ECPOS</button>
+			  						</div>				  				
 								</div>	
 							</div>														
-						</div><!-- end card-->						
+						</div><!-- end card-->							
 					</div>														
 				</div><!-- end card-->					
             </div>	
@@ -109,6 +140,45 @@
 		<!-- END content -->	
     </div>
 	<!-- END content-page -->
+	
+	<!-- Create ECPOS Modal -->
+	<div class="modal fade" id="ecposModal" tabindex="-1" role="dialog" aria-labelledby="ecposModal" aria-hidden="true">
+		<div class="modal-dialog modal-lg">
+		    <div class="modal-content">
+		    <form method="POST" accept-charset="UTF-8" role="form" class="form-signin">
+		      <div class="modal-header">
+		        <h5 ng-show="actionEcpos == 'create'">Create ECPOS</h5>
+		        <h5 ng-show="actionEcpos == 'update'">Edit ECPOS</h5>		
+		        <button type="button" class="close" ng-click="resetEcposModal()" aria-label="Close">
+		          <span aria-hidden="true">&times;</span>
+		        </button>
+		      </div>
+		      <div class="modal-body">
+		      	<div class="form-section">
+					<div class="row">
+						<div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
+							<div class="form-group">
+								<label class="login-label">Name</label>
+								<input class="form-control" name="ecposName" ng-model="ecpos.name" type="text" required> 
+							</div>
+						</div>
+						<div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
+							<div class="form-group">
+								<label class="login-label">URL</label>
+								<input class="form-control" name="ecposUrl" ng-model="ecpos.url" type="text" required> 
+							</div>
+						</div>
+					</div>
+				</div>				       									  				 									
+		      </div>
+		      <div class="modal-footer">
+	      	  	<button class="btn btn-primary" ng-show="actionEcpos == 'create'" type="submit" ng-click="addDevice()"> Submit</button>
+	      	  	<button class="btn btn-primary" ng-show="actionEcpos == 'update'" type="submit" ng-click="submitEditEcpos()"> Update</button>
+		      </div>
+		       </form>		      
+		    </div>
+		</div>
+	</div>
 	
 	<!-- Staff List Modal -->
 	<div class="modal fade" id="staffListModal" role="dialog" aria-labelledby="staffListModal" aria-hidden="true">
@@ -273,7 +343,7 @@
 	<div class="modal fade" id="tableModal" tabindex="-1" role="dialog" aria-labelledby="tableModal" aria-hidden="true">
 		<div class="modal-dialog modal-lg">
 		    <div class="modal-content">
-		    <form id="staffForm" method="POST" accept-charset="UTF-8" role="form" class="form-signin">
+		    <form id="tableForm" method="POST" accept-charset="UTF-8" role="form" class="form-signin">
 		      <div class="modal-header">
 		        <h5 ng-show="actionTable == 'create'">Create Table</h5>
 		        <h5 ng-show="actionTable == 'update'">Edit Table</h5>		

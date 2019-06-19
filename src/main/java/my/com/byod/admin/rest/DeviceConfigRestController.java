@@ -127,6 +127,10 @@ public class DeviceConfigRestController {
 						JSONArray ecposTableSetting = getEcposTableSetting(connection, deviceInfo.getLong("refId"));
 						JSONArray ecposStaffRole = getEcposStaffRole(connection);					
 						
+						JSONObject ecposSetting = new JSONObject();
+						ecposSetting.put("deviceName", deviceInfo.getString("deviceName"));
+						ecposSetting.put("deviceId", deviceInfo.getLong("id"));
+											
 						if(ecposStaffInfo.length()==0) {
 							resultCode = "E07";
 							resultMessage = "Please create at least one staff login before activation.";
@@ -135,6 +139,7 @@ public class DeviceConfigRestController {
 						result.put("staffInfo", ecposStaffInfo);
 						result.put("tableSetting", ecposTableSetting);
 						result.put("staffRole", ecposStaffRole);
+						result.put("ecposSetting", ecposSetting);
 					}
 					
 					connection.commit();
@@ -350,9 +355,15 @@ public class DeviceConfigRestController {
 					JSONArray ecposStaffInfo = getEcposStaffInfo(connection, storeId);
 					JSONArray ecposTableSetting = getEcposTableSetting(connection, storeId);
 					JSONArray ecposStaffRole = getEcposStaffRole(connection);
+					
+					JSONObject ecposSetting = new JSONObject();
+					ecposSetting.put("deviceName", deviceInfo.getString("deviceName"));
+					ecposSetting.put("deviceId", deviceInfo.getLong("id"));
+					
 					result.put("staffInfo", ecposStaffInfo);
 					result.put("tableSetting", ecposTableSetting);
 					result.put("staffRole", ecposStaffRole);
+					result.put("ecposSetting", ecposSetting);
 				}
 				else if(deviceInfo.getLong("deviceType")==3) {
 					// kiosk
@@ -1300,8 +1311,10 @@ public class DeviceConfigRestController {
 		JSONObject result = null;
 		try {
 			//connection = dataSource.getConnection();
-			sqlStatement = "SELECT b.group_category_id AS 'groupCategoryId', * FROM device_info a "
+			// #important: use store group category id to check
+			sqlStatement = "SELECT a.*, b.is_publish, b.group_category_id AS 'groupCategoryId', c.device_name FROM device_info a "
 					+ "INNER JOIN store b ON b.id = a.ref_id "
+					+ "LEFT JOIN device_info_detail c ON c.device_info_id = a.id "
 					+ "WHERE a.activation_id = ? AND a.activation_key = ? AND a.device_type_lookup_id = ? ";
 			ps1 = connection.prepareStatement(sqlStatement);
 			ps1.setString(1, activationId);
@@ -1316,6 +1329,7 @@ public class DeviceConfigRestController {
 				result.put("statusLookupId", rs1.getLong("status_lookup_id"));
 				result.put("storeStatus", rs1.getLong("is_publish"));
 				result.put("groupCategoryId", rs1.getLong("groupCategoryId"));
+				result.put("deviceName", rs1.getString("device_name"));
 				//result.put("typeId", rs1.getLong("device_type_lookup_id"));
 			}
 			
@@ -1708,8 +1722,9 @@ public class DeviceConfigRestController {
 		JSONObject result = null;
 		try {
 			//connection = dataSource.getConnection();
-			sqlStatement = "SELECT a.status_lookup_id, a.device_type_lookup_id, a.mac_address, a.group_category_id, b.is_publish FROM device_info a "
+			sqlStatement = "SELECT a.id, a.status_lookup_id, a.device_type_lookup_id, a.mac_address, a.group_category_id, b.is_publish, c.device_name FROM device_info a "
 					+ "INNER JOIN store b ON b.id = a.ref_id AND a.group_category_id = b.group_category_id "
+					+ "LEFT JOIN device_info_detail c ON c.device_info_id = a.id "
 					+ "WHERE a.activation_id = ? AND a.ref_id = ?";
 			ps1 = connection.prepareStatement(sqlStatement);
 			ps1.setString(1, activationId);
@@ -1718,11 +1733,13 @@ public class DeviceConfigRestController {
 
 			if (rs1.next()) {
 				result = new JSONObject();
+				result.put("id", rs1.getLong("id"));
 				result.put("statusLookupId", rs1.getLong("status_lookup_id"));
 				result.put("deviceType", rs1.getLong("device_type_lookup_id"));
 				result.put("mac_address", rs1.getString("mac_address")==null?"":rs1.getString("mac_address"));
 				result.put("storeStatus", rs1.getLong("is_publish"));
 				result.put("groupCategoryId", rs1.getLong("group_category_id"));
+				result.put("deviceName", rs1.getString("device_name"));
 			}
 			
 		} catch (Exception ex) {
