@@ -78,7 +78,6 @@
 					  var postdata = {
 					  	store_id : $scope.store.id,
 					  	ecpos_name : $scope.ecpos.name,
-					  	ecpos_url : $scope.ecpos.url,
 					  	activation_id : $scope.ecpos.activation_id
 					  };
 					  console.log(postdata);
@@ -168,8 +167,7 @@
 						  $('#loading_modal').modal({backdrop: 'static', keyboard: false});
 						  var postdata = {
 						  	store_id : $scope.store.id,
-						  	ecpos_name : $scope.ecpos.name,
-						  	ecpos_url : $scope.ecpos.url
+						  	ecpos_name : $scope.ecpos.name
 						  };
 						  console.log(postdata);
 						  $http({

@@ -44,7 +44,6 @@ public class StoreRepository {
 		store.setOperatingStartTime(rs.getTime("store_start_operating_time"));
 		store.setOperatingEndTime(rs.getTime("store_end_operating_time"));
 		store.setEcpos(rs.getBoolean("ecpos"));
-		store.setEcposUrl(rs.getString("ecpos_url"));
 		store.setEcposTakeawayDetailFlag(rs.getBoolean("ecpos_takeaway_detail_flag"));
 		store.setLoginTypeId(rs.getLong("login_type_id"));
 		store.setLoginSwitchFlag(rs.getBoolean("login_switch_flag"));

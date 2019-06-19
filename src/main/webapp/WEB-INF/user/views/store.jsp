@@ -254,10 +254,6 @@
 							</div>
 							<div ng-show="store.ecpos" class="col-8 col-sm-8 col-md-8 col-lg-8 col-xl-8">			
 								<div class="form-group">
-									<label class="login-label">ECPOS URL</label>
-									<input class="form-control" name="ecposUrl" placeholder="IP Address" ng-model="store.ecposUrl" type="text" required> 
-								</div>
-								<div class="form-group">
 									<label class="login-label">Login Type</label>
 									<select class="form-control" ng-model="store.storeLoginType" ng-options="x.login_type_name for x in storeLoginType track by x.id" required>
 										<option value="" disabled>Please choose a login type</option>

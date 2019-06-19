@@ -91,7 +91,6 @@ public class StoreRestController {
 				store.setOperatingStartTime(rs.getTime("store_start_operating_time"));
 				store.setOperatingEndTime(rs.getTime("store_end_operating_time"));
 				store.setEcpos(rs.getBoolean("ecpos"));
-				store.setEcposUrl(rs.getString("ecpos_url"));
 				store.setEcposTakeawayDetailFlag(rs.getBoolean("ecpos_takeaway_detail_flag"));
 				store.setLoginTypeId(rs.getLong("login_type_id"));
 				store.setLoginSwitchFlag(rs.getBoolean("login_switch_flag"));
@@ -152,7 +151,6 @@ public class StoreRestController {
 				store.setOperatingStartTime(rs.getTime("store_start_operating_time"));
 				store.setOperatingEndTime(rs.getTime("store_end_operating_time"));
 				store.setEcpos(rs.getBoolean("ecpos"));
-				store.setEcposUrl(rs.getString("ecpos_url"));
 				store.setEcposTakeawayDetailFlag(rs.getBoolean("ecpos_takeaway_detail_flag"));
 				store.setLoginTypeId(rs.getLong("login_type_id"));
 				store.setLoginSwitchFlag(rs.getBoolean("login_switch_flag"));
@@ -208,7 +206,7 @@ public class StoreRestController {
 			endTime.set(Calendar.MILLISECOND, 0);
 			
 			String sqlStatement = "INSERT INTO store(backend_id,store_name,store_logo_path,store_address,store_longitude,store_latitude,store_country,store_currency, " + 
-					"is_publish, store_start_operating_time, store_end_operating_time, ecpos, store_contact_person, store_contact_hp_number, store_contact_email, store_type_id, kiosk_payment_delay_id, byod_payment_delay_id, store_tax_type_id, ecpos_url, ecpos_takeaway_detail_flag, login_type_id, login_switch_flag, created_date) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,GETDATE());";
+					"is_publish, store_start_operating_time, store_end_operating_time, ecpos, store_contact_person, store_contact_hp_number, store_contact_email, store_type_id, kiosk_payment_delay_id, byod_payment_delay_id, store_tax_type_id, ecpos_takeaway_detail_flag, login_type_id, login_switch_flag, created_date) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,GETDATE());";
 			int count = 1;
 			stmt = connection.prepareStatement(sqlStatement);
 			stmt.setString(count++, backendId);
@@ -230,7 +228,6 @@ public class StoreRestController {
 			stmt.setLong(count++, store.getKioskPaymentDelayId());
 			stmt.setLong(count++, store.getByodPaymentDelayId());
 			stmt.setLong(count++, store.getStoreTaxTypeId());
-			stmt.setString(count++, store.getEcposUrl());
 			stmt.setBoolean(count++, store.getEcposTakeawayDetailFlag());
 			stmt.setLong(count++, store.getLoginTypeId());
 			stmt.setBoolean(count++, store.getLoginSwitchFlag());
@@ -280,9 +277,9 @@ public class StoreRestController {
 				System.out.println("test3:" + store.getLoginSwitchFlag());
 				
 				if(store.getLogoPath()!=null) 
-					sqlStatement = "UPDATE store SET store_name = ?,store_logo_path = ?,store_address = ?,store_longitude = ?,store_latitude = ?,store_country = ?,store_currency = ?, is_publish = ?, store_start_operating_time = ?, store_end_operating_time = ?, last_update_date = GETDATE(), ecpos = ?, store_contact_person = ?, store_contact_hp_number = ?, store_contact_email = ?, store_type_id = ?, kiosk_payment_delay_id = ?, byod_payment_delay_id = ?, store_tax_type_id = ?, ecpos_url = ?, ecpos_takeaway_detail_flag = ?, login_type_id = ?, login_switch_flag = ? WHERE id = ?;";			
+					sqlStatement = "UPDATE store SET store_name = ?,store_logo_path = ?,store_address = ?,store_longitude = ?,store_latitude = ?,store_country = ?,store_currency = ?, is_publish = ?, store_start_operating_time = ?, store_end_operating_time = ?, last_update_date = GETDATE(), ecpos = ?, store_contact_person = ?, store_contact_hp_number = ?, store_contact_email = ?, store_type_id = ?, kiosk_payment_delay_id = ?, byod_payment_delay_id = ?, store_tax_type_id = ?, ecpos_takeaway_detail_flag = ?, login_type_id = ?, login_switch_flag = ? WHERE id = ?;";			
 				else 
-					sqlStatement = "UPDATE store SET store_name = ?,store_address = ?,store_longitude = ?,store_latitude = ?,store_country = ?,store_currency = ?, is_publish = ?, store_start_operating_time = ?, store_end_operating_time = ?, last_update_date = GETDATE(), ecpos = ?, store_contact_person = ?, store_contact_hp_number = ?, store_contact_email = ?, store_type_id = ?, kiosk_payment_delay_id = ?, byod_payment_delay_id = ?, store_tax_type_id = ?, ecpos_url = ?, ecpos_takeaway_detail_flag = ?, login_type_id = ?, login_switch_flag = ? WHERE id = ?";
+					sqlStatement = "UPDATE store SET store_name = ?,store_address = ?,store_longitude = ?,store_latitude = ?,store_country = ?,store_currency = ?, is_publish = ?, store_start_operating_time = ?, store_end_operating_time = ?, last_update_date = GETDATE(), ecpos = ?, store_contact_person = ?, store_contact_hp_number = ?, store_contact_email = ?, store_type_id = ?, kiosk_payment_delay_id = ?, byod_payment_delay_id = ?, store_tax_type_id = ?, ecpos_takeaway_detail_flag = ?, login_type_id = ?, login_switch_flag = ? WHERE id = ?";
 				int count = 1;
 				stmt = connection.prepareStatement(sqlStatement);
 				stmt.setString(count++, store.getName());
@@ -304,20 +301,18 @@ public class StoreRestController {
 				stmt.setLong(count++, store.getKioskPaymentDelayId());
 				stmt.setLong(count++, store.getByodPaymentDelayId());
 				stmt.setLong(count++, store.getStoreTaxTypeId());
-				stmt.setString(count++, store.getEcposUrl());
 				stmt.setBoolean(count++, store.getEcposTakeawayDetailFlag());
 				stmt.setLong(count++, store.getLoginTypeId());
 				stmt.setBoolean(count++, store.getLoginSwitchFlag());
 				stmt.setLong(count++, store.getId());
 				stmt.executeUpdate();
 				
-				// terminate ecpos for ecpos status 0 at store	
-				JSONArray jsonArray = getDeviceInfoByStoreId(connection, 1, store.getId());
-				if(jsonArray.length()!=0) {
-					// ecpos only one record
-					JSONObject jsonObj = jsonArray.getJSONObject(0);
-					if(!getEcposStatus(connection, store.getId())) {
-						updateDeviceStatus(connection, jsonObj.getLong("id") ,3);
+				// terminate ecpos for ecpos status 0 at store
+				if(!getEcposStatus(connection, store.getId())) {
+					JSONArray jsonArray = getDeviceInfoByStoreId(connection, 1, store.getId());
+					for(int a=0; a<jsonArray.length(); a++) {
+						JSONObject jsonObj = jsonArray.getJSONObject(a);
+						updateDeviceStatus(connection, jsonObj.getLong("id") ,3);					
 					}
 				}
 			}

@@ -42,9 +42,6 @@ public class Store {
 	@JsonProperty("store_ecpos")
 	private boolean ecpos;
 	
-	@JsonProperty("ecpos_url")
-	private String ecpos_url;
-	
 	@JsonProperty("ecpos_takeaway_detail_flag")
 	private boolean ecpos_takeaway_detail_flag;
 	
@@ -172,14 +169,6 @@ public class Store {
 
 	public void setEcpos(boolean ecpos) {
 		this.ecpos = ecpos;
-	}
-	
-	public String getEcposUrl() {
-		return ecpos_url;
-	}
-
-	public void setEcposUrl(String ecpos_url) {
-		this.ecpos_url = ecpos_url;
 	}
 	
 	public boolean getEcposTakeawayDetailFlag() {

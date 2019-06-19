@@ -49,8 +49,7 @@
 							$scope.store.email == null || $scope.store.email==''){
 				$('#collapseTwo').collapse('show');
 			}
-			else if($scope.store.ecpos && $scope.store.ecposUrl == null || $scope.store.ecpos && $scope.store.ecposUrl =='' ||
-						$scope.store.ecpos && $scope.store.storeLoginType == null || $scope.store.ecpos && $scope.store.storeLoginType == ''){
+			else if($scope.store.ecpos && $scope.store.storeLoginType == null || $scope.store.ecpos && $scope.store.storeLoginType == ''){
 				$('#collapseThree').collapse('show');
 			}
 			else if($scope.store.kioskPaymentDelayType == null || $scope.store.kioskPaymentDelayType =='' ||
@@ -122,7 +121,6 @@
 					kiosk_payment_delay_id : $scope.store.kioskPaymentDelayType.id,
 					byod_payment_delay_id : $scope.store.byodPaymentDelayType.id,
 					store_tax_type_id : $scope.store.storeTaxType.id,
-					ecpos_url : $scope.store.ecpos ? $scope.store.ecposUrl: undefined,
 					ecpos_takeaway_detail_flag : $scope.store.ecpos ? $scope.store.ecposTakeawayDetailFlag: undefined,
 					login_type_id : $scope.store.ecpos ? $scope.store.storeLoginType.id: 0,
 					login_switch_flag : $scope.store.ecpos ? $scope.store.storeLoginSwitchFlag: undefined 
@@ -300,7 +298,6 @@
 						$scope.store.kioskPaymentDelayType.id = response.data.kiosk_payment_delay_id;
 						$scope.store.byodPaymentDelayType.id = response.data.byod_payment_delay_id;
 						$scope.store.storeTaxType.id = response.data.store_tax_type_id;
-						$scope.store.ecposUrl = response.data.ecpos_url;
 						$scope.store.ecposTakeawayDetailFlag = response.data.ecpos_takeaway_detail_flag;
 						if(response.data.login_type_id!=0){
 							// initialize storeLoginType
