@@ -327,12 +327,21 @@ public class Order_RestController {
 
 			connection = dbConnectionUtil.getConnection(Long.parseLong(brandId));
 
-			String sqlStatement = "SELECT ecpos_url FROM store WHERE id = ?";
+			String sqlStatement = "SELECT device_url FROM device_info a " + 
+					"INNER JOIN device_info_detail b ON a.id = b.device_info_id " + 
+					"WHERE a.device_type_lookup_id = ? AND ref_id= ? AND b.device_role_lookup_id = ?; ";
 			PreparedStatement ps1 = connection.prepareStatement(sqlStatement);
-			ps1.setInt(1, Integer.parseInt(storeId));
+			// 1 - ECPOS
+			// 2 - BYOD
+			// 3 - KIOSK
+			ps1.setInt(1, 1);
+			ps1.setInt(2, Integer.parseInt(storeId));
+			// 1 - Master
+			// 2 - Client
+			ps1.setInt(3, 1);
 			ResultSet rs1 = ps1.executeQuery();
 			if (rs1.next()) {
-				String headerURL = rs1.getString("ecpos_url");
+				String headerURL = rs1.getString("device_url");
 
 				JSONObject verifyResult = verifyOrder(cartData, connection);
 				JSONArray sendOrderList = verifyResult.getJSONArray("sendOrderList");
@@ -441,13 +450,22 @@ public class Order_RestController {
 
 			connection = dbConnectionUtil.getConnection(Long.parseLong(brandId));
 
-			String sqlStatement = "SELECT ecpos_url FROM store WHERE id = ?";
+			String sqlStatement = "SELECT device_url FROM device_info a " + 
+					"INNER JOIN device_info_detail b ON a.id = b.device_info_id " + 
+					"WHERE a.device_type_lookup_id = ? AND ref_id = ? AND b.device_role_lookup_id = ?; ";
 			PreparedStatement ps1 = connection.prepareStatement(sqlStatement);
-			ps1.setInt(1, Integer.parseInt(storeId));
+			// 1 - ECPOS
+			// 2 - BYOD
+			// 3 - KIOSK
+			ps1.setInt(1, 1);
+			ps1.setInt(2, Integer.parseInt(storeId));
+			// 1 - Master
+			// 2 - Client
+			ps1.setInt(3, 1);
 			ResultSet rs1 = ps1.executeQuery();
 
 			if (rs1.next()) {
-				String headerURL = rs1.getString("ecpos_url");
+				String headerURL = rs1.getString("device_url");
 				
 				String url = headerURL + "/device/order/info";
 				URL object = new URL(url);
