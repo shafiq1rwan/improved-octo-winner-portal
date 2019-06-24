@@ -167,7 +167,8 @@
 						  $('#loading_modal').modal({backdrop: 'static', keyboard: false});
 						  var postdata = {
 						  	store_id : $scope.store.id,
-						  	ecpos_name : $scope.ecpos.name
+						  	ecpos_name : $scope.ecpos.name,
+						  	ecpos_url : $scope.ecpos.url
 						  };
 						  console.log(postdata);
 						  $http({
