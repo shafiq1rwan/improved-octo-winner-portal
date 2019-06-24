@@ -384,6 +384,7 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 			(
 				id BIGINT IDENTITY(1,1) NOT NULL,
 				store_id BIGINT NOT NULL,
+				device_id BIGINT NULL,
 				check_id BIGINT NOT NULL,
 				check_number BIGINT NOT NULL,
 				staff_id BIGINT NULL,
@@ -463,6 +464,7 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 				id BIGINT IDENTITY(1,1) NOT NULL,
 				store_id BIGINT NOT NULL,
 				transaction_id BIGINT NOT NULL,
+				device_id BIGINT NOT NULL,
 				staff_id BIGINT NOT NULL,
 				check_id BIGINT NOT NULL,
 				check_number BIGINT NOT NULL,
@@ -525,6 +527,7 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = @db_name)
 				id BIGINT IDENTITY(1,1) NOT NULL,
 				store_id BIGINT NOT NULL,
 				settlement_id BIGINT NOT NULL,
+				device_id BIGINT NOT NULL,
 				staff_id BIGINT NOT NULL,
 				nii_type BIGINT NOT NULL,
 				settlement_status BIGINT NOT NULL,

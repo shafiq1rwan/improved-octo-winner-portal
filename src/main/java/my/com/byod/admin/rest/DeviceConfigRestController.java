@@ -653,8 +653,8 @@ public class DeviceConfigRestController {
 			insertionSqlStatement = "INSERT INTO [check](store_id, check_id, check_number, staff_id, order_type, table_number, "
 					+ "total_item_quantity, total_amount, total_amount_with_tax, total_amount_with_tax_rounding_adjustment, "
 					+ "grand_total_amount, tender_amount, overdue_amount, "
-					+ "check_status, created_date, updated_date, customer_name) VALUES "
-					+ "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+					+ "check_status, created_date, updated_date, customer_name, device_id) VALUES "
+					+ "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 			
 			insertionSqlStatement2 = "INSERT INTO [check_tax_charge](store_id, check_id, check_number, tax_charge_id, total_charge_amount,total_charge_amount_rounding_adjustment,grand_total_charge_amount) VALUES "
 					+ "(?, ?, ?, ?, ?, ?, ?)";
@@ -662,7 +662,7 @@ public class DeviceConfigRestController {
 			updateSqlStatement = "UPDATE [check] SET check_number = ?, staff_id = ?, order_type = ?, table_number = ?, total_item_quantity = ?, "
 					+ "total_amount = ?, total_amount_with_tax = ?, total_amount_with_tax_rounding_adjustment = ?, "
 					+ "grand_total_amount = ?, tender_amount = ?, overdue_amount = ?, "
-					+ "check_status = ?, created_date = ?, updated_date = ?, customer_name = ? WHERE check_id = ? and store_id = ?";
+					+ "check_status = ?, created_date = ?, updated_date = ?, customer_name = ?, device_id = ? WHERE check_id = ? and store_id = ?";
 			
 			updateSqlStatement2 = "UPDATE [check_tax_charge] SET check_number = ?, tax_charge_id = ?, total_charge_amount = ?, total_charge_amount_rounding_adjustment = ?, grand_total_charge_amount = ? WHERE check_id = ? and store_id = ?";
 
@@ -684,12 +684,12 @@ public class DeviceConfigRestController {
 					
 					stmt.setLong(1, obj.getLong("check_number"));
 					
-					if(obj.isNull("staff_id")) stmt.setNull(2,  java.sql.Types.BIGINT);
+					if(obj.isNull("staff_id")) stmt.setNull(2, java.sql.Types.BIGINT);
 					else stmt.setLong(2, obj.getLong("staff_id"));
 
 					stmt.setLong(3, obj.getLong("order_type"));
 
-					if(obj.isNull("table_number")) stmt.setNull(4,  java.sql.Types.INTEGER);
+					if(obj.isNull("table_number")) stmt.setNull(4, java.sql.Types.INTEGER);
 					else stmt.setInt(4, obj.getInt("table_number"));
 
 					stmt.setInt(5, obj.getInt("total_item_quantity"));
@@ -707,9 +707,12 @@ public class DeviceConfigRestController {
 					
 					if(obj.isNull("customer_name")) stmt.setNull(15, java.sql.Types.VARCHAR);
 					else stmt.setString(15, obj.getString("customer_name"));
+					
+					if(obj.isNull("device_id")) stmt.setNull(16, java.sql.Types.BIGINT);
+					else stmt.setString(16, obj.getString("device_id"));
 
-					stmt.setLong(16, obj.getLong("check_id"));
-					stmt.setLong(17, storeId);
+					stmt.setLong(17, obj.getLong("check_id"));
+					stmt.setLong(18, storeId);
 
 					stmt.executeUpdate();
 					stmt.close();
@@ -784,6 +787,9 @@ public class DeviceConfigRestController {
 					if(obj.isNull("customer_name")) stmt.setNull(17, java.sql.Types.VARCHAR);
 					else stmt.setString(17, obj.getString("customer_name"));
 					
+					if(obj.isNull("device_id")) stmt.setNull(18, java.sql.Types.BIGINT);
+					else stmt.setString(18, obj.getString("device_id"));
+					
 					stmt.executeUpdate();
 					stmt.close();
 					
@@ -836,9 +842,9 @@ public class DeviceConfigRestController {
 											+ "qr_content, created_date, response_code, response_message, updated_date, wifi_ip, wifi_port, approval_code, "  
 											+ "bank_mid, bank_tid, transaction_date, transaction_time, original_invoice_number, invoice_number, merchant_info, card_issuer_name, masked_card_number, card_expiry_date, " 
 											+ "batch_number, rrn, card_issuer_id, cardholder_name, aid, app_label, tc, terminal_verification_result, " 
-											+ "original_trace_number, trace_number, qr_issuer_type, mpay_mid, mpay_tid, qr_ref_id, qr_user_id, qr_amount_myr, qr_amount_rmb, received_amount, change_amount) VALUES "
+											+ "original_trace_number, trace_number, qr_issuer_type, mpay_mid, mpay_tid, qr_ref_id, qr_user_id, qr_amount_myr, qr_amount_rmb, received_amount, change_amount, device_id) VALUES "
 											+ "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? , ?, ? , ?, ? , ?, ? , ?, ?, ?," 
-											+ " ?, ? , ?, ?, ? , ?, ? , ?, ? , ?, ? , ? , ?, ?, ? ,? ,?, ?, ?, ?)";
+											+ " ?, ? , ?, ?, ? , ?, ? , ?, ? , ?, ? , ? , ?, ?, ? ,? ,?, ?, ?, ?, ?)";
 			
 			updateSqlStatement = "UPDATE [transaction] SET staff_id = ?, check_id = ?, check_number = ?, transaction_type = ?, payment_method = ?, payment_type = ?, "
 					+ "terminal_serial_number = ?, transaction_currency = ?, transaction_amount = ?, transaction_tips = ?, "
@@ -848,7 +854,7 @@ public class DeviceConfigRestController {
 					+ "invoice_number = ?, merchant_info = ?, card_issuer_name = ?, masked_card_number = ?, card_expiry_date = ?, "
 					+ "batch_number = ?, rrn = ?, card_issuer_id = ?, cardholder_name = ?, aid = ?, app_label = ?, tc = ?, terminal_verification_result =?, "
 					+ "original_trace_number = ?, trace_number = ?, qr_issuer_type = ?, mpay_mid = ?, mpay_tid = ?, "
-					+ "qr_ref_id = ?, qr_user_id = ?, qr_amount_myr = ?, qr_amount_rmb = ?, received_amount = ?, change_amount = ? WHERE transaction_id = ? and store_id = ?";
+					+ "qr_ref_id = ?, qr_user_id = ?, qr_amount_myr = ?, qr_amount_rmb = ?, received_amount = ?, change_amount = ?, device_id = ? WHERE transaction_id = ? and store_id = ?";
 			
 			searchExistingCheckDetailSqlStatement = "SELECT transaction_id FROM [transaction] WHERE transaction_id = ? and store_id = ?";
 			
@@ -994,9 +1000,12 @@ public class DeviceConfigRestController {
 						
 					if(obj.isNull("change_amount")) stmt.setNull(49, java.sql.Types.NVARCHAR);
 					else stmt.setString(49, obj.getString("change_amount"));
+					
+					if(obj.isNull("device_id")) stmt.setNull(50, java.sql.Types.BIGINT);
+					else stmt.setString(50, obj.getString("device_id"));
 
-					stmt.setLong(50, obj.getLong("transaction_id"));	
-					stmt.setLong(51, storeId);
+					stmt.setLong(51, obj.getLong("transaction_id"));	
+					stmt.setLong(52, storeId);
 					
 					stmt.executeUpdate();
 					stmt.close();
@@ -1137,6 +1146,9 @@ public class DeviceConfigRestController {
 					if(obj.isNull("change_amount")) stmt.setNull(51, java.sql.Types.NVARCHAR);
 					else stmt.setString(51, obj.getString("change_amount"));
 					
+					if(obj.isNull("device_id")) stmt.setNull(52, java.sql.Types.BIGINT);
+					else stmt.setString(52, obj.getString("device_id"));
+					
 					stmt.executeUpdate();
 					stmt.close();
 				}
@@ -1166,14 +1178,14 @@ public class DeviceConfigRestController {
 		try {
 			SimpleDateFormat datetimeFormatter = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 			
-			insertionSqlStatement = "INSERT INTO [settlement](store_id, settlement_id, staff_id ,nii_type, settlement_status, created_date, response_code, response_message, updated_date, wifi_ip, wifi_port, merchant_info, bank_mid, bank_tid, batch_number, transaction_date, transaction_time, batch_total, nii) "
-					+ "VALUES (?, ?, ?, ? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,?)";
+			insertionSqlStatement = "INSERT INTO [settlement](store_id, settlement_id, staff_id ,nii_type, settlement_status, created_date, response_code, response_message, updated_date, wifi_ip, wifi_port, merchant_info, bank_mid, bank_tid, batch_number, transaction_date, transaction_time, batch_total, nii, device_id) "
+					+ "VALUES (?, ?, ?, ? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,?, ?)";
 			
 			updateSqlStatement = "UPDATE [settlement] SET staff_id = ?, nii_type = ?, "
 					+ "settlement_status = ?, created_date = ?, response_code = ?, response_message = ?, "
 					+ "updated_date = ?, wifi_ip = ?, wifi_port = ?, merchant_info = ?, "
 					+ "bank_mid = ? , bank_tid = ?, batch_number = ?, transaction_date = ?, transaction_time = ?, "
-					+ "batch_total = ?, nii = ? WHERE settlement_id = ? and store_id = ?";
+					+ "batch_total = ?, nii = ?, device_id = ? WHERE settlement_id = ? and store_id = ?";
 
 			searchExistingCheckDetailSqlStatement = "SELECT settlement_id FROM [settlement] WHERE settlement_id = ? and store_id = ?";
 
@@ -1231,10 +1243,13 @@ public class DeviceConfigRestController {
 					else stmt.setString(16, obj.getString("batch_total"));
 									
 					if(obj.isNull("nii")) stmt.setNull(17, java.sql.Types.NVARCHAR);
-					else stmt.setString(17, obj.getString("nii"));				
+					else stmt.setString(17, obj.getString("nii"));	
 					
-					stmt.setLong(18, obj.getLong("settlement_id"));
-					stmt.setLong(19, storeId);
+					if(obj.isNull("device_id")) stmt.setNull(18, java.sql.Types.BIGINT);
+					else stmt.setString(18, obj.getString("device_id"));
+					
+					stmt.setLong(19, obj.getLong("settlement_id"));
+					stmt.setLong(20, storeId);
 					
 					stmt.executeUpdate();
 					stmt.close();
@@ -1285,7 +1300,10 @@ public class DeviceConfigRestController {
 					else stmt.setString(18, obj.getString("batch_total"));
 									
 					if(obj.isNull("nii")) stmt.setNull(19, java.sql.Types.NVARCHAR);
-					else stmt.setString(19, obj.getString("nii"));				
+					else stmt.setString(19, obj.getString("nii"));	
+					
+					if(obj.isNull("device_id")) stmt.setNull(20, java.sql.Types.BIGINT);
+					else stmt.setString(20, obj.getString("device_id"));
 
 					stmt.executeUpdate();
 					stmt.close();
