@@ -78,7 +78,8 @@
 					  var postdata = {
 					  	store_id : $scope.store.id,
 					  	ecpos_name : $scope.ecpos.name,
-					  	activation_id : $scope.ecpos.activation_id
+					  	activation_id : $scope.ecpos.activation_id,
+					  	ecpos_url : $scope.ecpos.url
 					  };
 					  console.log(postdata);
 					  $http({
