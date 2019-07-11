@@ -301,7 +301,10 @@
 							}
 						}
 						
-						$scope.selectedItemList.splice($scope.selectedItemList.indexOf($scope.selectedItemList[a]),1);		
+						var filteredAry = $scope.selectedItemList.filter(function(e) { return e.id !== $scope.selectedItemList[a].id })
+						// deep copy
+						$scope.selectedItemList = angular.copy(filteredAry);
+						//$scope.selectedItemList.splice($scope.selectedItemList.indexOf($scope.selectedItemList[a]),1);		
 					}
 				}
 		}
