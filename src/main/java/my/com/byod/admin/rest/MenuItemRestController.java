@@ -315,8 +315,8 @@ public class MenuItemRestController {
 			if(rs.next()) {
 			// logging to file	
 			String [] parameters = {
-						String.valueOf(rs.getLong(1)),
-					jsonMenuItemData.getString("menu_item_backend_id"),
+					String.valueOf(rs.getLong(1)),
+					jsonMenuItemData.getString("menu_item_backend_id")==null?"null":"'"+jsonMenuItemData.getString("menu_item_backend_id")+"'",
 					jsonMenuItemData.getString("menu_item_name")==null?"null":"'"+jsonMenuItemData.getString("menu_item_name")+"'",
 					altName==null?"null":"'"+altName+"'",
 					barcode==null?"null":"'"+barcode+"'",
