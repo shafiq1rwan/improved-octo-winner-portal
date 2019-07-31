@@ -425,7 +425,7 @@ public class MenuItemRestController {
 					
 					// logging to file	
 					parameters = new String[] {
-							jsonMenuItemData.getString("menu_item_backend_id"),
+							jsonMenuItemData.getString("menu_item_backend_id")==null?"null":"'"+jsonMenuItemData.getString("menu_item_backend_id")+"'",
 							jsonMenuItemData.getString("menu_item_name")==null?"null":"'"+jsonMenuItemData.getString("menu_item_name")+"'",
 							altName == null?"null":"'"+altName+"'",	
 							barcode == null?"null":"'"+barcode+"'",
@@ -441,7 +441,7 @@ public class MenuItemRestController {
 					
 					// logging to file
 					parameters = new String[] {
-							jsonMenuItemData.getString("menu_item_backend_id"),
+							jsonMenuItemData.getString("menu_item_backend_id")==null?"null":"'"+jsonMenuItemData.getString("menu_item_backend_id")+"'",
 							jsonMenuItemData.getString("menu_item_name")==null?"null":"'"+jsonMenuItemData.getString("menu_item_name")+"'",
 							altName == null?"null":"'" + altName + "'",
 							barcode == null?"null":"'" + barcode + "'",		
