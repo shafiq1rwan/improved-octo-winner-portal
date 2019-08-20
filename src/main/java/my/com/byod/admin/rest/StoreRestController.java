@@ -1,11 +1,15 @@
 package my.com.byod.admin.rest;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -32,6 +36,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.itextpdf.text.Document;
+import com.itextpdf.text.Image;
+import com.itextpdf.text.PageSize;
+import com.itextpdf.text.Rectangle;
+import com.itextpdf.text.pdf.PdfWriter;
+
 import my.com.byod.admin.entity.Location;
 import my.com.byod.admin.entity.Store;
 import my.com.byod.admin.util.ByodUtil;
@@ -46,6 +56,9 @@ public class StoreRestController {
 	
 	@Value("${get-upload-path}")
 	private String displayFilePath;
+	
+	@Value("${pdf-path}")
+	private String pdfFilePath;
 	
 /*	@Autowired
 	private DataSource dataSource;*/
@@ -1173,6 +1186,8 @@ public class StoreRestController {
 		Connection connection = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
+		Document document = new Document(); //Set pdf size
+		Rectangle pagesize = new Rectangle(226, 792);
 		
 		try {
 			JSONObject requestObj = new JSONObject(formfield);
@@ -1190,6 +1205,18 @@ public class StoreRestController {
 			} else {
 				String qrImg = Base64.getEncoder().encodeToString(QRGenerate.generateQRImage(AESEncryption.encrypt(rs.getLong("store_id") + String.valueOf((char)28) + rs.getString("staff_username") + String.valueOf((char)28) + rs.getString("staff_password")), 300, 300));
 				jsonObj.put("qrImg", qrImg);
+				
+				//save pdf
+				document.setPageSize(pagesize);
+	            PdfWriter.getInstance(document, new FileOutputStream(new File(Paths.get(pdfFilePath, "staffQR.pdf").toString())));
+	            document.open();
+	            byte[] decoded = Base64.getDecoder().decode(qrImg);
+	            Image img = Image.getInstance(decoded);
+	            float scaler = ((document.getPageSize().getWidth() - document.leftMargin()
+	                    - document.rightMargin()) / img.getWidth()) * 100;
+	            img.scalePercent(scaler); //set the image
+	            document.add(img);
+	            document.close();
 			}
 		}catch(Exception ex) {
 			ex.printStackTrace();
@@ -1204,6 +1231,18 @@ public class StoreRestController {
 			}
 		}
 		return new ResponseEntity<String>(jsonObj.toString(), HttpStatus.OK);
+	}
+	
+	//Convert pdf into byte[]
+	@GetMapping(value = {"/ecpos/displayStaffQRPdf"}, produces = "application/json")
+	public byte[] displayStaffQRPdf(HttpServletRequest request, HttpServletResponse response) {
+		byte[] outputPdf = null;
+		try {
+			outputPdf = Files.readAllBytes(Paths.get(pdfFilePath, "staffQR.pdf"));
+		}catch(Exception ex) {
+			ex.printStackTrace();
+		}
+		return outputPdf;
 	}
 	
 	@PostMapping(value = {"/ecpos/syncTrans"}, produces = "application/json")

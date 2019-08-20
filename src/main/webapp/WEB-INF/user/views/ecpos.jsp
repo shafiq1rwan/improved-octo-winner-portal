@@ -230,7 +230,10 @@
 		      </div>
 		      <div class="modal-body text-center">
 		        <img class="img-fluid" alt="Responsive image" data-ng-src="data:image/png;base64,{{qrImgData}}">				  				 									
-		      </div>      
+		      </div> 	      
+		      <div>
+		      	<button class="pull-right btn" ng-click="displayQRPdf()"><i class="fa fa-qrcode"></i> Pdf</button>
+		      </div>     
 		    </div>
 		</div>
 	</div>

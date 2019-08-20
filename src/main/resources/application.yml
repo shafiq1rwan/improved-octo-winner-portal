@@ -35,6 +35,7 @@ get-upload-path: /byod-img/
 menu-path: byod-menu/
 get-menu-path: /byod-menu/
 log-path: logger
+pdf-path: pdf-folder/
 byod-cloud-url: http://localhost:8080
 
 ---

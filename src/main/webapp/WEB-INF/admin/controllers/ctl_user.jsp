@@ -66,6 +66,7 @@
 						}
 					}
 				} */
+				"pageLength": 4,
 				"destroy" : true,
 				"order" : [ [ 0, "asc" ] ] ,
 				"columns" : [ 

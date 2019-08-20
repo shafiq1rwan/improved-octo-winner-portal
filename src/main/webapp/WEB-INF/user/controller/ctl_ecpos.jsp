@@ -706,6 +706,17 @@
 		
 		$scope.getDeviceInfo();
 		
+		$scope.displayQRPdf = function(){		
+			$http.get("${pageContext.request.contextPath}/menu/store/ecpos/displayStaffQRPdf",{responseType: 'arraybuffer'})
+			.then(function(response) {	
+				if (response.status == 200) {
+				    var file = new Blob([response.data], {type: 'application/pdf'});
+				    var fileURL = URL.createObjectURL(file);
+				    window.open(fileURL);
+				}
+			});
+		}
+		
 		$(document).ready(function() {
 			$scope.refreshTable();
 			$scope.refreshTable2();
