@@ -263,7 +263,10 @@
 				.then(
 					function(response) {
 						if(userUrl == 'signup'){
-							$('#loading_modal').modal('hide');
+							//if modal shown hide
+							$('#loading_modal').on('shown.bs.modal', function () {
+								$('#loading_modal').modal('hide');
+							});
 						}
 						$scope.resetModal();
 						$('#userModal').modal('hide');

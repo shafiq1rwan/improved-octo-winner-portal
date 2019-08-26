@@ -94,8 +94,9 @@ public class UserManagementRestController {
 				throw new IllegalArgumentException(
 						constructJsonResponse("03", user.getMobileNumber() + " already being taken"));
 
-			String randomPass = byodUtil.createRandomString(10);
-			user.setPassword(randomPass);
+			//String randomPass = byodUtil.createRandomString(10);
+			//user.setPassword(randomPass);
+			user.setPassword(user.getUsername());
 			
 			Long userId = applicationUserService.createUser(user, jsonData.getString("role"));
 			if (userId == 0) {
@@ -110,10 +111,10 @@ public class UserManagementRestController {
 						return ResponseEntity.badRequest().contentType(MediaType.TEXT_PLAIN).body("Cannot assign user to brand");
 				}			
 				//send email
-				boolean sendStatus = userEmailUtil.sendUserRegisterPassword(user.getUsername(),randomPass,user.getEmail());
-				if(!sendStatus) {
-					return ResponseEntity.badRequest().contentType(MediaType.TEXT_PLAIN).body("Cannot send email to user");
-				}
+//				boolean sendStatus = userEmailUtil.sendUserRegisterPassword(user.getUsername(),randomPass,user.getEmail());
+//				if(!sendStatus) {
+//					return ResponseEntity.badRequest().contentType(MediaType.TEXT_PLAIN).body("Cannot send email to user");
+//				}
 			}
 		} catch (IllegalArgumentException ex) {
 			ex.printStackTrace();
@@ -217,7 +218,7 @@ public class UserManagementRestController {
 					sql = "SELECT DISTINCT u.id, u.name, u.email, u.mobileNumber, u.address, u.username, u.enabled, a.authority "
 							+ "FROM users u INNER JOIN authorities a ON u.id = a.user_id "
 							+ "INNER JOIN users_brands ub ON u.id = ub.user_id "
-							+ "WHERE a.authority NOT IN('ROLE_SUPER_ADMIN','ROLE_ADMIN') "
+							+ "WHERE a.authority NOT IN('ROLE_SUPER_ADMIN','ROLE_ADMIN','ROLE_SUPER_GROUP_ADMIN') "
 							+ "AND ub.brand_id IN(:ids)";
 					
 					Map<String, List<Long>> paramMap = Collections.singletonMap("ids", brandIds);
@@ -231,8 +232,9 @@ public class UserManagementRestController {
 						+ "ON b.id = ub.brand_id INNER JOIN users u "
 						+ "ON ub.user_id = u.id WHERE u.username = ?";
 				brands = jdbcTemplate.queryForList(brandSql, new Object[] {username});
-				
+								
 				filteredRoleList = roleList.stream().filter(r -> !r.equals(role) && !r.equals("ROLE_SUPER_GROUP_ADMIN")).collect(Collectors.toList());
+				System.out.println("Filter Me: " + filteredRoleList);
 			} 
 			else if(role.equals("ROLE_SUPER_GROUP_ADMIN")) {
 				List<Long> brandIds = jdbcTemplate.queryForList("SELECT b.id FROM brands b "
@@ -433,6 +435,9 @@ public class UserManagementRestController {
 	public ResponseEntity<?> assignAccessRights(HttpServletRequest request, HttpServletResponse response, @RequestBody String data){	
 		Connection connection = null;
 		PreparedStatement stmt = null;
+		PreparedStatement stmt2 = null;
+		ResultSet rs = null;
+		String userRole = "";
 
 		try {
 			JSONObject jsonObject = new JSONObject(data);
@@ -442,16 +447,38 @@ public class UserManagementRestController {
 	
 			connection = dataSource.getConnection();	
 			
+			//Get the user role
+			String queryUserRoleSql = "SELECT authority FROM authorities WHERE user_id = ?";
+			stmt = connection.prepareStatement(queryUserRoleSql);
+			stmt.setLong(1, userId);
+			rs = stmt.executeQuery();
+			
+			if(rs.next()) {
+				userRole = rs.getString("authority");
+			}
+			
 			String updateSql = "UPDATE users_brands SET permission = ? WHERE brand_id = ? AND user_id = ?";
 			String binaryString = "";
 				
 			if(permissionArray.length()==0) {
 				binaryString = String.format("%-8s", "0").replace(" ", "0");
 			} else {
-				String binaryTempString = "0"; //because store is always false
-				for(int i =0; i<permissionArray.length();i++) {	
-					JSONObject jsonPermissionObj = permissionArray.getJSONObject(i);
-					binaryTempString += jsonPermissionObj.getBoolean("exist")?"1":"0";
+				//String binaryTempString = "0"; //because store is always false
+				String binaryTempString = "";
+				
+				if(userRole.equals("ROLE_USER")) {
+					//user dont have store access
+					binaryTempString += "0";
+					for(int i =0; i<permissionArray.length();i++) {
+						JSONObject jsonPermissionObj = permissionArray.getJSONObject(i);
+						binaryTempString += jsonPermissionObj.getBoolean("exist")?"1":"0";
+					}
+					System.out.println(binaryTempString);
+				} else {
+					for(int i =0; i<permissionArray.length();i++) {	
+						JSONObject jsonPermissionObj = permissionArray.getJSONObject(i);
+						binaryTempString += jsonPermissionObj.getBoolean("exist")?"1":"0";
+					}
 				}
 				//Pad extra zeros to the right
 				binaryString = String.format("%-8s", binaryTempString).replace(" ", "0");
@@ -462,11 +489,11 @@ public class UserManagementRestController {
 			System.out.println("Binary Permission :" + binaryString);
 			System.out.println("Hex Permission :" + hexString);
 
-			stmt = connection.prepareStatement(updateSql);
-			stmt.setString(1, hexString);
-			stmt.setLong(2, brandId);
-			stmt.setLong(3, userId);
-			stmt.executeUpdate();
+			stmt2 = connection.prepareStatement(updateSql);
+			stmt2.setString(1, hexString);
+			stmt2.setLong(2, brandId);
+			stmt2.setLong(3, userId);
+			stmt2.executeUpdate();
 
 			return ResponseEntity.ok(null);
 		} catch(Exception ex) {
@@ -477,6 +504,9 @@ public class UserManagementRestController {
 			if(connection!=null) {
 				try {
 					connection.setAutoCommit(true);
+					rs.close();
+					stmt.close();
+					stmt2.close();
 					connection.close();
 				} catch (SQLException e) {
 					e.printStackTrace();
@@ -492,8 +522,10 @@ public class UserManagementRestController {
 		Connection connection = null;
 		PreparedStatement stmt = null;
 		PreparedStatement stmt2 = null;
+		PreparedStatement stmt3 = null;
 		ResultSet rs = null;
 		ResultSet rs2 = null;
+		ResultSet rs3 = null;
 			
 		try {
 			connection = dataSource.getConnection();
@@ -503,8 +535,22 @@ public class UserManagementRestController {
 			rs = stmt.executeQuery();
 			
 			if(!rs.next()) {
-				//new records
-				stmt2 = connection.prepareStatement("SELECT *, exist = CAST(0 AS BIT) FROM permission_lookup WHERE id != 1");
+				//new records		
+				//Get the user role
+				String queryUserRoleSql = "SELECT authority FROM authorities WHERE user_id = ?";
+				stmt3 = connection.prepareStatement(queryUserRoleSql);
+				stmt3.setLong(1, id);
+				rs3 = stmt3.executeQuery();
+								
+				String permissionLookupQuerySql = "SELECT *, exist = CAST(0 AS BIT) FROM permission_lookup";
+				
+				if(rs3.next()) { //if it is USER change the query to exclude Store permission
+					if(rs3.getString("authority").equals("ROLE_USER")) {
+						permissionLookupQuerySql = "SELECT *, exist = CAST(0 AS BIT) FROM permission_lookup WHERE id != 1";
+					}
+				} 
+				
+				stmt2 = connection.prepareStatement(permissionLookupQuerySql);
 				rs2 = stmt2.executeQuery();
 				
 				while(rs2.next()) {
@@ -539,15 +585,44 @@ public class UserManagementRestController {
 			    	System.out.println(permissionBooleans[j]);
 			    }
 			    
-			    for(int k=1; k<accessRights.size();k++) { //bypass the first store
-			    	int index = k+1;
-			    	JSONObject jsonObject = new JSONObject();
-			    	jsonObject.put("id", index);
-			    	jsonObject.put("name", accessRights.get(k));
-			    	jsonObject.put("exist", permissionBooleans[k]);
-			    	
-			    	jsonAccessRightsArray.put(jsonObject);
-			    }
+				//Get the user role
+				//String queryUserRoleSql = "SELECT * FROM authorities WHERE user_id = ?";
+				stmt3 = connection.prepareStatement("SELECT authority FROM authorities WHERE user_id = ?");
+				stmt3.setLong(1, id);
+				rs3 = stmt3.executeQuery();
+			    
+				boolean isUserRole = false;
+				
+				if(rs3.next()) {
+					System.out.println("Existing Role: " + rs3.getString("authority"));
+					if(rs3.getString("authority").equals("ROLE_USER")) {
+						isUserRole = true;
+					}	
+				}
+			    
+				if(isUserRole) {
+				    for(int k=1; k<accessRights.size();k++) { 
+				    	JSONObject jsonObject = new JSONObject();
+				    	int index = k+1;
+				    	jsonObject.put("id", index);
+				    	jsonObject.put("name", accessRights.get(k));
+				    	jsonObject.put("exist", permissionBooleans[k]);
+				    	
+				    	jsonAccessRightsArray.put(jsonObject);
+				    	System.out.println(jsonObject);
+				    }
+				} else {
+				    for(int k=0; k<accessRights.size();k++) { 
+				    	JSONObject jsonObject = new JSONObject();
+				    	jsonObject.put("id", k);
+				    	jsonObject.put("name", accessRights.get(k));
+				    	jsonObject.put("exist", permissionBooleans[k]);
+				    	
+				    	jsonAccessRightsArray.put(jsonObject);
+				    	System.out.println(jsonObject);
+				    }
+				}
+		
 			}
 			return ResponseEntity.ok(jsonAccessRightsArray.toString());
 		}
@@ -561,7 +636,13 @@ public class UserManagementRestController {
 		}
 		finally {
 			if(connection!=null) {
-				try {
+				try {	
+					stmt.close();
+					stmt2.close();
+					stmt3.close();
+					rs.close();
+					rs2.close();
+					rs3.close();
 					connection.close();
 				} catch (SQLException e) {
 					e.printStackTrace();
