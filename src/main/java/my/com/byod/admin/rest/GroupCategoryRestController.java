@@ -38,8 +38,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.microsoft.sqlserver.jdbc.SQLServerException;
-
 import my.com.byod.admin.util.ByodUtil;
 import my.com.byod.admin.util.DbConnectionUtil;
 
@@ -289,7 +287,7 @@ public class GroupCategoryRestController {
 					
 				}
 			}			
-		}catch(SQLServerException ex) {
+		}catch(SQLException ex) {
 			ex.printStackTrace();
 			response.setStatus(409);
 			try {

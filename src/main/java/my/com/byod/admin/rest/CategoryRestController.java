@@ -23,8 +23,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.microsoft.sqlserver.jdbc.SQLServerException;
-
 import my.com.byod.admin.util.ByodUtil;
 import my.com.byod.admin.util.DbConnectionUtil;
 
@@ -242,7 +240,7 @@ public class CategoryRestController {
 			} else {
 				return ResponseEntity.status(HttpStatus.NOT_FOUND).contentType(MediaType.TEXT_PLAIN).body("Category name not available");
 			}
-		} catch (SQLServerException ex) {
+		} catch (SQLException ex) {
 			ex.printStackTrace();
 			return ResponseEntity.status(HttpStatus.CONFLICT).contentType(MediaType.TEXT_PLAIN).body("Duplicate category name");
 		} catch (Exception ex) {
@@ -332,7 +330,7 @@ public class CategoryRestController {
 				return ResponseEntity.status(HttpStatus.NOT_FOUND).contentType(MediaType.TEXT_PLAIN).body("Category name not available");
 			}
 		}
-		catch (SQLServerException ex) {
+		catch (SQLException ex) {
 			ex.printStackTrace();
 			return ResponseEntity.status(HttpStatus.CONFLICT).contentType(MediaType.TEXT_PLAIN).body("Duplicate category name");
 		}

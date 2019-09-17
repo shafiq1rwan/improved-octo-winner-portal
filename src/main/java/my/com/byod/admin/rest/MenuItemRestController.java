@@ -28,7 +28,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.microsoft.sqlserver.jdbc.SQLServerException;
 
 import my.com.byod.admin.util.ByodUtil;
 import my.com.byod.admin.util.DbConnectionUtil;
@@ -331,7 +330,7 @@ public class MenuItemRestController {
 			else {
 				return ResponseEntity.badRequest().contentType(MediaType.TEXT_PLAIN).body("Cannot create menu item");
 			}
-		} catch (SQLServerException ex) {
+		} catch (SQLException ex) {
 			return ResponseEntity.status(HttpStatus.CONFLICT).contentType(MediaType.TEXT_PLAIN).body("Duplication Backend Id Found");
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -465,7 +464,7 @@ public class MenuItemRestController {
 				return ResponseEntity.status(HttpStatus.NOT_FOUND).contentType(MediaType.TEXT_PLAIN).body("Menu Item Not Found");
 			}
 		} 
-		catch (SQLServerException ex) {
+		catch (SQLException ex) {
 			ex.printStackTrace();
 			return ResponseEntity.status(HttpStatus.CONFLICT).contentType(MediaType.TEXT_PLAIN).body("Duplication Backend Id Found");
 		}

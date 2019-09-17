@@ -27,10 +27,10 @@ public class DbConnectionUtil {
     	Map<String, Object> brand = jdbcTemplate.queryForMap("SELECT * FROM brands WHERE id = ?", new Object[] {brandId});
 
     	if(!brand.isEmpty()) {
-            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+            Class.forName("com.mysql.cj.jdbc.Driver");
 
-            String dbURL = "jdbc:sqlserver://"+ (String)brand.get("brand_db_domain")+":"+ (Integer)brand.get("brand_db_port")+";databaseName="+ 
-    					(String)brand.get("brand_db_name");
+            String dbURL = "jdbc:mysql://"+ (String)brand.get("brand_db_domain")+":"+ (Integer)brand.get("brand_db_port")+"/"+ 
+    					(String)brand.get("brand_db_name")+"?useTimezone=true&serverTimezone=UTC";
             con = DriverManager.getConnection(dbURL, (String)brand.get("brand_db_user"), (String)brand.get("brand_db_password"));
     	}
     	return con;
@@ -65,11 +65,11 @@ public class DbConnectionUtil {
     	Map<String, Object> brand = jdbcTemplate.queryForMap("SELECT * FROM brands WHERE id = ?", new Object[] {getBrandId(request)});
     	
     	if(!brand.isEmpty()) {
-    		String dbURL = "jdbc:sqlserver://"+ (String)brand.get("brand_db_domain")+":"+ (Integer)brand.get("brand_db_port")+";databaseName="+ 
-   					(String)brand.get("brand_db_name");
+    		String dbURL = "jdbc:mysql://"+ (String)brand.get("brand_db_domain")+":"+ (Integer)brand.get("brand_db_port")+"/"+ 
+					(String)brand.get("brand_db_name")+"?useTimezone=true&serverTimezone=UTC";
     		
             ds = new DriverManagerDataSource();
-            ds.setDriverClassName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+            ds.setDriverClassName("com.mysql.cj.jdbc.Driver");
             ds.setUrl(dbURL);
             ds.setUsername((String)brand.get("brand_db_user"));
             ds.setPassword((String)brand.get("brand_db_password"));

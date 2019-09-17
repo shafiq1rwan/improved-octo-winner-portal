@@ -168,14 +168,14 @@ public class BrandManagementRestController {
 
 			if (checkDuplicateDbName(name).isEmpty()) {
 				SimpleJdbcCall jdbcCall = new SimpleJdbcCall(dataSource).withProcedureName("create_brand_db");
-				SqlParameterSource input = new MapSqlParameterSource().addValue("db_name",
+				SqlParameterSource input = new MapSqlParameterSource().addValue("p_db_name",
 						jsonData.getString("db_name"));
 				Map<String, Object> output = jdbcCall.execute(input);
 
 				System.out.println(output.values().toString());
 
 				if (!output.isEmpty()) {
-					int result = (int) output.get("db_creation_result");
+					int result = (int) output.get("p_db_creation_result");
 					if (result == 1) {
 						KeyHolder keyHolder = new GeneratedKeyHolder();
 						rowAffected = jdbcTemplate.update(
