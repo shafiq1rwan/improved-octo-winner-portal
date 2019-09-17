@@ -186,7 +186,7 @@ public class ModifierGroupRestController {
 					: jsonModifierGroupData.getBoolean("is_active");
 
 			connection = dbConnectionUtil.retrieveConnection(request);
-			String sqlStatement = "INSERT INTO modifier_group (modifier_group_name, is_active, created_date) VALUES (?, ?, GETDATE());";
+			String sqlStatement = "INSERT INTO modifier_group (modifier_group_name, is_active, created_date) VALUES (?, ?, NOW());";
 			stmt = connection
 					.prepareStatement(sqlStatement,  Statement.RETURN_GENERATED_KEYS);
 			stmt.setString(1, jsonModifierGroupData.getString("modifier_group_name"));
@@ -583,7 +583,8 @@ public class ModifierGroupRestController {
 
 			connection = dbConnectionUtil.retrieveConnection(request);
 			connection.setAutoCommit(false);
-			String sqlStatement = "SELECT TOP 1 menu_item_modifier_group_sequence FROM menu_item_modifier_group WHERE menu_item_id = ? ORDER BY menu_item_modifier_group_sequence DESC";
+			/*String sqlStatement = "SELECT TOP 1 menu_item_modifier_group_sequence FROM menu_item_modifier_group WHERE menu_item_id = ? ORDER BY menu_item_modifier_group_sequence DESC";*/
+			String sqlStatement = "SELECT menu_item_modifier_group_sequence FROM menu_item_modifier_group WHERE menu_item_id = ? ORDER BY menu_item_modifier_group_sequence DESC LIMIT 1";
 			stmt = connection.prepareStatement(sqlStatement);
 			stmt.setLong(1, menuItemId);
 			rs = stmt.executeQuery();

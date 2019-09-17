@@ -151,7 +151,7 @@ public class GroupCategoryRestController {
 				}
 				else {
 					connection = dbConnectionUtil.retrieveConnection(request);
-					stmt = connection.prepareStatement("INSERT INTO group_category (group_category_name, created_date) VALUES(?, GETDATE())", new String[] {"id"});
+					stmt = connection.prepareStatement("INSERT INTO group_category (group_category_name, created_date) VALUES(?, NOW())", new String[] {"id"});
 					stmt.setString(1, jsonGroupCategoryData.getString("group_category_name"));
 					stmt.executeUpdate();
 					
@@ -236,7 +236,7 @@ public class GroupCategoryRestController {
 							stmt.executeUpdate();				
 							
 							// update activated device with group category id
-							sqlStatement = "UPDATE device_info SET status_lookup_id = ?, mac_address = NULL, last_update_date = GETDATE(), group_category_id = 0 WHERE ref_id = ? AND group_category_id !=0";						
+							sqlStatement = "UPDATE device_info SET status_lookup_id = ?, mac_address = NULL, last_update_date = NOW(), group_category_id = 0 WHERE ref_id = ? AND group_category_id !=0";						
 							stmt = connection.prepareStatement(sqlStatement);
 							stmt.setLong(1, 3);
 							stmt.setLong(2, storeId);
@@ -1418,7 +1418,7 @@ public class GroupCategoryRestController {
 		Long publishVersionId = null;
 
 		try {		
-			sqlStatement = "INSERT INTO publish_version (group_category_id, version_count, menu_file_path, menu_query_file_path, menu_img_file_path, publish_date) VALUES (?, ?, ?, ?, ?, GETDATE()); SELECT SCOPE_IDENTITY();";
+			sqlStatement = "INSERT INTO publish_version (group_category_id, version_count, menu_file_path, menu_query_file_path, menu_img_file_path, publish_date) VALUES (?, ?, ?, ?, ?, NOW()); SELECT LAST_INSERT_ID();";
 			stmt = connection.prepareStatement(sqlStatement);
 			stmt.setLong(1, groupCategoryId);
 			stmt.setLong(2, versionCount);

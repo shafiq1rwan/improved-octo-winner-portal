@@ -297,7 +297,7 @@ public class MenuItemRestController {
 				}
 			}
 			
-			String sqlStatement = "INSERT INTO menu_item (backend_id, menu_item_name, menu_item_alt_name, menu_item_barcode, menu_item_description, menu_item_image_path, menu_item_base_price, menu_item_type,is_taxable, is_discountable, created_date) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, GETDATE());";
+			String sqlStatement = "INSERT INTO menu_item (backend_id, menu_item_name, menu_item_alt_name, menu_item_barcode, menu_item_description, menu_item_image_path, menu_item_base_price, menu_item_type,is_taxable, is_discountable, created_date) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW());";
 			stmt = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
 			stmt.setString(1, jsonMenuItemData.getString("menu_item_backend_id"));
 			stmt.setString(2, jsonMenuItemData.getString("menu_item_name"));

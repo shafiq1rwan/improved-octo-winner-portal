@@ -86,7 +86,7 @@ public class ComboRestController {
 		try {
 			JSONObject jsonComboDetailData = new JSONObject(data);
 			connection = dbConnectionUtil.retrieveConnection(request);
-			String sqlStatement = "INSERT INTO combo_detail (menu_item_id, combo_detail_name, combo_detail_quantity, combo_detail_sequence, created_date) VALUES (?, ?, ?, ?, GETDATE());";
+			String sqlStatement = "INSERT INTO combo_detail (menu_item_id, combo_detail_name, combo_detail_quantity, combo_detail_sequence, created_date) VALUES (?, ?, ?, ?, NOW());";
 			stmt = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
 			stmt.setLong(1, jsonComboDetailData.getLong("menu_item_id"));
 			stmt.setString(2, jsonComboDetailData.getString("combo_detail_name"));
@@ -133,7 +133,8 @@ public class ComboRestController {
 		ResultSet rs = null;
 
 		try {
-			stmt = connection.prepareStatement("SELECT TOP 1 combo_detail_sequence FROM combo_detail WHERE menu_item_id = ? ORDER BY combo_detail_sequence DESC");
+			/*stmt = connection.prepareStatement("SELECT TOP 1 combo_detail_sequence FROM combo_detail WHERE menu_item_id = ? ORDER BY combo_detail_sequence DESC");*/
+			stmt = connection.prepareStatement("SELECT combo_detail_sequence FROM combo_detail WHERE menu_item_id = ? ORDER BY combo_detail_sequence DESC LIMIT 1");
 			stmt.setLong(1, menu_item_id);
 			rs = (ResultSet)stmt.executeQuery();
 			
@@ -440,7 +441,7 @@ public class ComboRestController {
 			
 			
 			for (int i = 0; i < jsonComboItemDetailArray.length(); i++) {
-				String sqlStatement = "INSERT INTO combo_item_detail (combo_detail_id, menu_item_id, menu_item_group_id, combo_item_detail_sequence, created_date) VALUES (?, ?, ?, ?, GETDATE());";			
+				String sqlStatement = "INSERT INTO combo_item_detail (combo_detail_id, menu_item_id, menu_item_group_id, combo_item_detail_sequence, created_date) VALUES (?, ?, ?, ?, NOW());";			
 				stmt = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
 				JSONObject jsonComboItemDetailObj = jsonComboItemDetailArray.getJSONObject(i);
 				int index = 0;		
@@ -498,7 +499,8 @@ public class ComboRestController {
 		ResultSet rs = null;
 
 		try {
-			stmt = connection.prepareStatement("SELECT TOP 1 combo_item_detail_sequence FROM combo_item_detail WHERE combo_detail_id = ? ORDER BY combo_item_detail_sequence DESC");
+			/*stmt = connection.prepareStatement("SELECT TOP 1 combo_item_detail_sequence FROM combo_item_detail WHERE combo_detail_id = ? ORDER BY combo_item_detail_sequence DESC");*/
+			stmt = connection.prepareStatement("SELECT combo_item_detail_sequence FROM combo_item_detail WHERE combo_detail_id = ? ORDER BY combo_item_detail_sequence DESC LIMIT 1");
 			stmt.setLong(1, comboDetailId);
 			rs = (ResultSet)stmt.executeQuery();
 			

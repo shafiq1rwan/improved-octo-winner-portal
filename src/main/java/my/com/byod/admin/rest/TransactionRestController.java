@@ -69,9 +69,9 @@ public class TransactionRestController {
 					"t.transaction_amount,tss.name as transaction_status, " + 
 					"case when pm.id = 1 then t.created_date else case when t.transaction_date is not null and t.transaction_time is not null then " + 
 					"concat('20',SUBSTRING(t.transaction_date, 1, 2),'-',SUBSTRING(t.transaction_date, 3, 2),'-',SUBSTRING(t.transaction_date, 5, 2),' ',SUBSTRING(t.transaction_time, 1, 2),':',SUBSTRING(t.transaction_time, 3, 2),':',SUBSTRING(t.transaction_time, 5, 2)) else '' end end as transaction_date " + 
-					"from [transaction] t " + 
+					"from `transaction` t " + 
 					"inner join staff s on s.id = t.staff_id " + 
-					"inner join [check] c on c.check_id = t.check_id and c.check_number = t.check_number and c.store_id = t.store_id " + 
+					"inner join `check` c on c.check_id = t.check_id and c.check_number = t.check_number and c.store_id = t.store_id " + 
 					"inner join transaction_type_lookup tt on tt.id = t.transaction_type " + 
 					"inner join payment_method_lookup pm on pm.id = t.payment_method " + 
 					"inner join payment_type_lookup pt on pt.id = t.payment_type " + 

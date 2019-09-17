@@ -219,7 +219,7 @@ public class StoreRestController {
 			endTime.set(Calendar.MILLISECOND, 0);
 			
 			String sqlStatement = "INSERT INTO store(backend_id,store_name,store_logo_path,store_address,store_longitude,store_latitude,store_country,store_currency, " + 
-					"is_publish, store_start_operating_time, store_end_operating_time, ecpos, store_contact_person, store_contact_hp_number, store_contact_email, store_type_id, kiosk_payment_delay_id, byod_payment_delay_id, store_tax_type_id, ecpos_takeaway_detail_flag, login_type_id, login_switch_flag, created_date) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,GETDATE());";
+					"is_publish, store_start_operating_time, store_end_operating_time, ecpos, store_contact_person, store_contact_hp_number, store_contact_email, store_type_id, kiosk_payment_delay_id, byod_payment_delay_id, store_tax_type_id, ecpos_takeaway_detail_flag, login_type_id, login_switch_flag, created_date) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,NOW());";
 			int count = 1;
 			stmt = connection.prepareStatement(sqlStatement);
 			stmt.setString(count++, backendId);
@@ -290,9 +290,9 @@ public class StoreRestController {
 				System.out.println("test3:" + store.getLoginSwitchFlag());
 				
 				if(store.getLogoPath()!=null) 
-					sqlStatement = "UPDATE store SET store_name = ?,store_logo_path = ?,store_address = ?,store_longitude = ?,store_latitude = ?,store_country = ?,store_currency = ?, is_publish = ?, store_start_operating_time = ?, store_end_operating_time = ?, last_update_date = GETDATE(), ecpos = ?, store_contact_person = ?, store_contact_hp_number = ?, store_contact_email = ?, store_type_id = ?, kiosk_payment_delay_id = ?, byod_payment_delay_id = ?, store_tax_type_id = ?, ecpos_takeaway_detail_flag = ?, login_type_id = ?, login_switch_flag = ? WHERE id = ?;";			
+					sqlStatement = "UPDATE store SET store_name = ?,store_logo_path = ?,store_address = ?,store_longitude = ?,store_latitude = ?,store_country = ?,store_currency = ?, is_publish = ?, store_start_operating_time = ?, store_end_operating_time = ?, last_update_date = NOW(), ecpos = ?, store_contact_person = ?, store_contact_hp_number = ?, store_contact_email = ?, store_type_id = ?, kiosk_payment_delay_id = ?, byod_payment_delay_id = ?, store_tax_type_id = ?, ecpos_takeaway_detail_flag = ?, login_type_id = ?, login_switch_flag = ? WHERE id = ?;";			
 				else 
-					sqlStatement = "UPDATE store SET store_name = ?,store_address = ?,store_longitude = ?,store_latitude = ?,store_country = ?,store_currency = ?, is_publish = ?, store_start_operating_time = ?, store_end_operating_time = ?, last_update_date = GETDATE(), ecpos = ?, store_contact_person = ?, store_contact_hp_number = ?, store_contact_email = ?, store_type_id = ?, kiosk_payment_delay_id = ?, byod_payment_delay_id = ?, store_tax_type_id = ?, ecpos_takeaway_detail_flag = ?, login_type_id = ?, login_switch_flag = ? WHERE id = ?";
+					sqlStatement = "UPDATE store SET store_name = ?,store_address = ?,store_longitude = ?,store_latitude = ?,store_country = ?,store_currency = ?, is_publish = ?, store_start_operating_time = ?, store_end_operating_time = ?, last_update_date = NOW(), ecpos = ?, store_contact_person = ?, store_contact_hp_number = ?, store_contact_email = ?, store_type_id = ?, kiosk_payment_delay_id = ?, byod_payment_delay_id = ?, store_tax_type_id = ?, ecpos_takeaway_detail_flag = ?, login_type_id = ?, login_switch_flag = ? WHERE id = ?";
 				int count = 1;
 				stmt = connection.prepareStatement(sqlStatement);
 				stmt.setString(count++, store.getName());
@@ -588,7 +588,7 @@ public class StoreRestController {
 			
 			int count = 1;
 			sqlStatement = "INSERT INTO staff (store_id, staff_name, staff_username, staff_password, staff_role, staff_contact_hp_number,"
-			 		+ "staff_contact_email, is_active, created_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, GETDATE()); SELECT SCOPE_IDENTITY();";
+			 		+ "staff_contact_email, is_active, created_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW()); SELECT LAST_INSERT_ID();";
 			stmt = connection.prepareStatement(sqlStatement);
 			stmt.setLong(count++, jsonObj.getLong("store_id"));
 			stmt.setString(count++, jsonObj.getString("name"));
@@ -669,7 +669,7 @@ public class StoreRestController {
 			
 			connection = dbConnectionUtil.retrieveConnection(request);
 			stmt = connection.prepareStatement("UPDATE staff SET staff_name = ?, staff_username = ?, staff_password = ?, staff_role = ?, staff_contact_hp_number = ?,"
-			 		+ "staff_contact_email = ?, is_active = ?, last_update_date = GETDATE() WHERE store_id = ? AND id = ?; SELECT SCOPE_IDENTITY();");
+			 		+ "staff_contact_email = ?, is_active = ?, last_update_date = NOW() WHERE store_id = ? AND id = ?; SELECT LAST_INSERT_ID();");
 			
 			stmt.setString(count++, jsonObj.getString("name"));
 			stmt.setString(count++, jsonObj.getString("username"));
@@ -809,7 +809,7 @@ public class StoreRestController {
 			}
 			
 			int count = 1;
-			sqlStatement = "INSERT INTO table_setting (store_id, table_name, status_lookup_id, created_date) VALUES (?, ?, ?, GETDATE()); SELECT SCOPE_IDENTITY();";
+			sqlStatement = "INSERT INTO table_setting (store_id, table_name, status_lookup_id, created_date) VALUES (?, ?, ?, NOW()); SELECT LAST_INSERT_ID();";
 			stmt = connection.prepareStatement(sqlStatement);
 			stmt.setLong(count++, jsonObj.getLong("store_id"));
 			stmt.setString(count++, jsonObj.getString("tableName"));
@@ -872,7 +872,7 @@ public class StoreRestController {
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Duplicate table name for this store.");
 			}
 			
-			stmt = connection.prepareStatement("UPDATE table_setting SET table_name = ?, last_update_date = GETDATE() WHERE store_id = ? AND id = ?; SELECT SCOPE_IDENTITY();");	
+			stmt = connection.prepareStatement("UPDATE table_setting SET table_name = ?, last_update_date = NOW() WHERE store_id = ? AND id = ?; SELECT LAST_INSERT_ID();");	
 			stmt.setString(count++, jsonObj.getString("tableName"));
 			stmt.setLong(count++, jsonObj.getLong("store_id"));
 			stmt.setLong(count++, jsonObj.getLong("id"));
@@ -1827,7 +1827,7 @@ public class StoreRestController {
 			String prefix = getDevicePrefix(connection, deviceTypeId);				
 			String activationId = byodUtil.createUniqueActivationId(prefix);
 			stmt = connection.prepareStatement("INSERT INTO device_info (activation_id, activation_key, status_lookup_id, device_type_lookup_id, ref_id, created_date, group_category_id) "
-					+ "VALUES (?, ? ,? ,? ,? , GETDATE(), 0); SELECT SCOPE_IDENTITY();");	
+					+ "VALUES (?, ? ,? ,? ,? , NOW(), 0); SELECT LAST_INSERT_ID();");	
 			stmt.setString(count++, activationId);
 			stmt.setString(count++, byodUtil.createRandomDigit(16));
 			stmt.setInt(count++, 1);
@@ -1875,7 +1875,7 @@ public class StoreRestController {
 			String url = deviceInfoDetail.getString("url");
 			
 			stmt = connection.prepareStatement("INSERT INTO device_info_detail (device_info_id, device_name, device_url, device_role_lookup_id) "
-					+ "VALUES (?, ? ,? ,?); SELECT SCOPE_IDENTITY();");	
+					+ "VALUES (?, ? ,? ,?); SELECT LAST_INSERT_ID();");	
 			stmt.setLong(count++, id);
 			stmt.setString(count++, name);
 			stmt.setString(count++, url);
@@ -2026,10 +2026,10 @@ public class StoreRestController {
 			if(statusTypeId==3) {
 				// deactivate
 				// update group_category_id to 0
-				sqlStatement = "UPDATE device_info SET status_lookup_id = ?, mac_address = NULL, last_update_date = GETDATE(), group_category_id = 0 WHERE id = ?;";
+				sqlStatement = "UPDATE device_info SET status_lookup_id = ?, mac_address = NULL, last_update_date = NOW(), group_category_id = 0 WHERE id = ?;";
 			}
 			else {
-				sqlStatement = "UPDATE device_info SET status_lookup_id = ?, mac_address = NULL, last_update_date = GETDATE() WHERE id = ?;";
+				sqlStatement = "UPDATE device_info SET status_lookup_id = ?, mac_address = NULL, last_update_date = NOW() WHERE id = ?;";
 			}
 			stmt = connection.prepareStatement(sqlStatement);
 			stmt.setLong(count++, statusTypeId);

@@ -650,25 +650,25 @@ public class DeviceConfigRestController {
 		try {	
 			SimpleDateFormat datetimeFormatter = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 			
-			insertionSqlStatement = "INSERT INTO [check](store_id, check_id, check_number, staff_id, order_type, table_number, "
+			insertionSqlStatement = "INSERT INTO `check`(store_id, check_id, check_number, staff_id, order_type, table_number, "
 					+ "total_item_quantity, total_amount, total_amount_with_tax, total_amount_with_tax_rounding_adjustment, "
 					+ "grand_total_amount, tender_amount, overdue_amount, "
 					+ "check_status, created_date, updated_date, customer_name, device_id) VALUES "
 					+ "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 			
-			insertionSqlStatement2 = "INSERT INTO [check_tax_charge](store_id, check_id, check_number, tax_charge_id, total_charge_amount,total_charge_amount_rounding_adjustment,grand_total_charge_amount) VALUES "
+			insertionSqlStatement2 = "INSERT INTO `check_tax_charge`(store_id, check_id, check_number, tax_charge_id, total_charge_amount,total_charge_amount_rounding_adjustment,grand_total_charge_amount) VALUES "
 					+ "(?, ?, ?, ?, ?, ?, ?)";
 			
-			updateSqlStatement = "UPDATE [check] SET check_number = ?, staff_id = ?, order_type = ?, table_number = ?, total_item_quantity = ?, "
+			updateSqlStatement = "UPDATE `check` SET check_number = ?, staff_id = ?, order_type = ?, table_number = ?, total_item_quantity = ?, "
 					+ "total_amount = ?, total_amount_with_tax = ?, total_amount_with_tax_rounding_adjustment = ?, "
 					+ "grand_total_amount = ?, tender_amount = ?, overdue_amount = ?, "
 					+ "check_status = ?, created_date = ?, updated_date = ?, customer_name = ?, device_id = ? WHERE check_id = ? and store_id = ?";
 			
-			updateSqlStatement2 = "UPDATE [check_tax_charge] SET check_number = ?, tax_charge_id = ?, total_charge_amount = ?, total_charge_amount_rounding_adjustment = ?, grand_total_charge_amount = ? WHERE check_id = ? and store_id = ?";
+			updateSqlStatement2 = "UPDATE `check_tax_charge` SET check_number = ?, tax_charge_id = ?, total_charge_amount = ?, total_charge_amount_rounding_adjustment = ?, grand_total_charge_amount = ? WHERE check_id = ? and store_id = ?";
 
-			searchExistingCheckDetailSqlStatement = "SELECT check_id FROM [check] WHERE check_id = ? and store_id = ?";
+			searchExistingCheckDetailSqlStatement = "SELECT check_id FROM `check` WHERE check_id = ? and store_id = ?";
 			
-			searchExistingCheckDetailSqlStatement2 = "SELECT check_id FROM [check_tax_charge] WHERE check_id = ? and store_id = ?";
+			searchExistingCheckDetailSqlStatement2 = "SELECT check_id FROM `check_tax_charge` WHERE check_id = ? and store_id = ?";
 			
 			for(int a=0; a<checks.length(); a++) {
 				JSONObject obj = checks.getJSONObject(a);
@@ -837,7 +837,7 @@ public class DeviceConfigRestController {
 		try {	
 			SimpleDateFormat datetimeFormatter = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 			
-			insertionSqlStatement = "INSERT INTO [transaction](store_id, transaction_id, staff_id, check_id, check_number, transaction_type, payment_method, payment_type, terminal_serial_number, "  
+			insertionSqlStatement = "INSERT INTO `transaction`(store_id, transaction_id, staff_id, check_id, check_number, transaction_type, payment_method, payment_type, terminal_serial_number, "  
 											+ "transaction_currency, transaction_amount, transaction_tips, transaction_status, unique_trans_number, " 
 											+ "qr_content, created_date, response_code, response_message, updated_date, wifi_ip, wifi_port, approval_code, "  
 											+ "bank_mid, bank_tid, transaction_date, transaction_time, original_invoice_number, invoice_number, merchant_info, card_issuer_name, masked_card_number, card_expiry_date, " 
@@ -846,7 +846,7 @@ public class DeviceConfigRestController {
 											+ "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? , ?, ? , ?, ? , ?, ? , ?, ?, ?," 
 											+ " ?, ? , ?, ?, ? , ?, ? , ?, ? , ?, ? , ? , ?, ?, ? ,? ,?, ?, ?, ?, ?)";
 			
-			updateSqlStatement = "UPDATE [transaction] SET staff_id = ?, check_id = ?, check_number = ?, transaction_type = ?, payment_method = ?, payment_type = ?, "
+			updateSqlStatement = "UPDATE `transaction` SET staff_id = ?, check_id = ?, check_number = ?, transaction_type = ?, payment_method = ?, payment_type = ?, "
 					+ "terminal_serial_number = ?, transaction_currency = ?, transaction_amount = ?, transaction_tips = ?, "
 					+ "transaction_status = ?, unique_trans_number = ?, qr_content = ?, created_date = ?, "
 					+ "response_code = ? ,response_message = ?, updated_date = ?, wifi_ip = ?, wifi_port = ?, approval_code = ?, "
@@ -856,7 +856,7 @@ public class DeviceConfigRestController {
 					+ "original_trace_number = ?, trace_number = ?, qr_issuer_type = ?, mpay_mid = ?, mpay_tid = ?, "
 					+ "qr_ref_id = ?, qr_user_id = ?, qr_amount_myr = ?, qr_amount_rmb = ?, received_amount = ?, change_amount = ?, device_id = ? WHERE transaction_id = ? and store_id = ?";
 			
-			searchExistingCheckDetailSqlStatement = "SELECT transaction_id FROM [transaction] WHERE transaction_id = ? and store_id = ?";
+			searchExistingCheckDetailSqlStatement = "SELECT transaction_id FROM `transaction` WHERE transaction_id = ? and store_id = ?";
 			
 			for(int a=0; a<transactions.length(); a++) {
 				JSONObject obj = transactions.getJSONObject(a);
@@ -1178,16 +1178,16 @@ public class DeviceConfigRestController {
 		try {
 			SimpleDateFormat datetimeFormatter = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 			
-			insertionSqlStatement = "INSERT INTO [settlement](store_id, settlement_id, staff_id ,nii_type, settlement_status, created_date, response_code, response_message, updated_date, wifi_ip, wifi_port, merchant_info, bank_mid, bank_tid, batch_number, transaction_date, transaction_time, batch_total, nii, device_id) "
+			insertionSqlStatement = "INSERT INTO `settlement`(store_id, settlement_id, staff_id ,nii_type, settlement_status, created_date, response_code, response_message, updated_date, wifi_ip, wifi_port, merchant_info, bank_mid, bank_tid, batch_number, transaction_date, transaction_time, batch_total, nii, device_id) "
 					+ "VALUES (?, ?, ?, ? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,?, ?)";
 			
-			updateSqlStatement = "UPDATE [settlement] SET staff_id = ?, nii_type = ?, "
+			updateSqlStatement = "UPDATE `settlement` SET staff_id = ?, nii_type = ?, "
 					+ "settlement_status = ?, created_date = ?, response_code = ?, response_message = ?, "
 					+ "updated_date = ?, wifi_ip = ?, wifi_port = ?, merchant_info = ?, "
 					+ "bank_mid = ? , bank_tid = ?, batch_number = ?, transaction_date = ?, transaction_time = ?, "
 					+ "batch_total = ?, nii = ?, device_id = ? WHERE settlement_id = ? and store_id = ?";
 
-			searchExistingCheckDetailSqlStatement = "SELECT settlement_id FROM [settlement] WHERE settlement_id = ? and store_id = ?";
+			searchExistingCheckDetailSqlStatement = "SELECT settlement_id FROM `settlement` WHERE settlement_id = ? and store_id = ?";
 
 			for(int a=0; a<settlements.length(); a++) {
 				JSONObject obj = settlements.getJSONObject(a);
@@ -1372,7 +1372,7 @@ public class DeviceConfigRestController {
 		boolean flag = false;
 		try {
 			//connection = dataSource.getConnection();
-			sqlStatement = "UPDATE device_info SET mac_address = ? , last_update_date = GETDATE(), status_lookup_id = ?, group_category_id = ? WHERE id = ? ";
+			sqlStatement = "UPDATE device_info SET mac_address = ? , last_update_date = NOW(), status_lookup_id = ?, group_category_id = ? WHERE id = ? ";
 			ps1 = connection.prepareStatement(sqlStatement);
 			ps1.setString(1, macAddress);
 			ps1.setInt(2, 2);
@@ -1694,7 +1694,7 @@ public class DeviceConfigRestController {
 							        everything = everything.replace(matcher.group(0), "");
 							    }					    
 							    */
-							    // replace GETDATE() with NOW()
+							    // replace NOW() with NOW()
 							    everything = everything.replaceAll("GETDATE\\(\\)", "NOW()");				    							  					
  
 							    // new mysql file

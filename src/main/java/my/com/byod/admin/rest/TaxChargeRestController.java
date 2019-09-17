@@ -146,7 +146,7 @@ public class TaxChargeRestController {
 		try {
 			JSONObject jsonTaxChargeData = new JSONObject(data);
 			connection = dbConnectionUtil.retrieveConnection(request);
-			String sqlStatement = "INSERT INTO tax_charge(tax_charge_name, rate, charge_type, is_active, created_date) VALUES (?,?,?,?,GETDATE());";
+			String sqlStatement = "INSERT INTO tax_charge(tax_charge_name, rate, charge_type, is_active, created_date) VALUES (?,?,?,?,NOW());";
 			stmt = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
 			stmt.setString(1, jsonTaxChargeData.getString("tax_charge_name"));
 			stmt.setInt(2, jsonTaxChargeData.getInt("rate"));

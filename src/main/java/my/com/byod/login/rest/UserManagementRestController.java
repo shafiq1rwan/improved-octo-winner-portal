@@ -321,8 +321,8 @@ public class UserManagementRestController {
 					"WHERE ub.brand_id = b.id " + 
 					"AND " + 
 					"ub.user_id = ?) > 0 " + 
-					"THEN CAST (1 AS BIT) " + 
-					"ELSE CAST (0 AS BIT) END as exist " + 
+					"THEN CAST (1 AS TINYINT) " + 
+					"ELSE CAST (0 AS TINYINT) END as exist " + 
 					"FROM brands b", new Object[] {id});
 
 			if(!usersInBrand.isEmpty()) {
@@ -542,11 +542,11 @@ public class UserManagementRestController {
 				stmt3.setLong(1, id);
 				rs3 = stmt3.executeQuery();
 								
-				String permissionLookupQuerySql = "SELECT *, exist = CAST(0 AS BIT) FROM permission_lookup";
+				String permissionLookupQuerySql = "SELECT *, exist = CAST(0 AS TINYINT) FROM permission_lookup";
 				
 				if(rs3.next()) { //if it is USER change the query to exclude Store permission
 					if(rs3.getString("authority").equals("ROLE_USER")) {
-						permissionLookupQuerySql = "SELECT *, exist = CAST(0 AS BIT) FROM permission_lookup WHERE id != 1";
+						permissionLookupQuerySql = "SELECT *, exist = CAST(0 AS TINYINT) FROM permission_lookup WHERE id != 1";
 					}
 				} 
 				

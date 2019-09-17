@@ -215,7 +215,7 @@ public class CategoryRestController {
 						: jsonCategoryData.getString("category_description");
 				String imagePath = jsonCategoryData.isNull("category_image_path") ? null
 						: byodUtil.saveImageFile(brandId,"imgC",jsonCategoryData.getString("category_image_path"), null);
-				String sqlStatement = "INSERT into category(group_category_id, category_name, category_description, category_image_path, category_sequence, is_active, created_date) VALUES (?, ?, ?, ?, ?, ?, GETDATE());";
+				String sqlStatement = "INSERT into category(group_category_id, category_name, category_description, category_image_path, category_sequence, is_active, created_date) VALUES (?, ?, ?, ?, ?, ?, NOW());";
 				stmt = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
 				stmt.setLong(1, jsonCategoryData.getLong("group_category_id"));
 				stmt.setString(2, jsonCategoryData.getString("category_name"));
@@ -465,7 +465,8 @@ public class CategoryRestController {
 		ResultSet rs = null;
 
 		try {
-			stmt = connection.prepareStatement("SELECT TOP 1 category_sequence FROM category WHERE group_category_id = ? ORDER BY category_sequence DESC");
+			/*stmt = connection.prepareStatement("SELECT TOP 1 category_sequence FROM category WHERE group_category_id = ? ORDER BY category_sequence DESC");*/
+			stmt = connection.prepareStatement("SELECT category_sequence FROM category WHERE group_category_id = ? ORDER BY category_sequence DESC LIMIT 1");
 			stmt.setLong(1, groupCategoryId);
 			rs = stmt.executeQuery();
 			
