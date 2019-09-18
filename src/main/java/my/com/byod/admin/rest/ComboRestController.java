@@ -92,7 +92,8 @@ public class ComboRestController {
 			stmt.setString(2, jsonComboDetailData.getString("combo_detail_name"));
 			stmt.setInt(3, jsonComboDetailData.getInt("combo_detail_quantity"));
 			stmt.setInt(4, checkComboDetailSequence(jsonComboDetailData.getLong("menu_item_id"), connection)+ 1);
-			rs = stmt.executeQuery();
+			stmt.executeUpdate();
+			rs = stmt.getGeneratedKeys();
 			if(rs.next()) {
 				// logging to file	
 				String [] parameters = {
@@ -454,7 +455,8 @@ public class ComboRestController {
 					stmt.setLong(++index, jsonComboItemDetailObj.getLong("id"));
 				}
 				stmt.setInt(++index, getComboItemDetailSequence(jsonComboItemDetail.getLong("combo_detail_id"), connection)+(i+1));
-				rs = stmt.executeQuery();
+				stmt.executeUpdate();
+				rs = stmt.getGeneratedKeys();
 				
 				if(rs.next()) {
 					// 4 parameter for stmt + 1 identity key

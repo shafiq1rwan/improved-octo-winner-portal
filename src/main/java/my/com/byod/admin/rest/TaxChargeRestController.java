@@ -152,7 +152,8 @@ public class TaxChargeRestController {
 			stmt.setInt(2, jsonTaxChargeData.getInt("rate"));
 			stmt.setInt(3, jsonTaxChargeData.getInt("charge_type"));
 			stmt.setBoolean(4, jsonTaxChargeData.getBoolean("is_active"));
-			rs = stmt.executeQuery();
+			stmt.executeUpdate();
+			rs = stmt.getGeneratedKeys();
 			if(rs.next()) {
 				Long id = rs.getLong(1);
 				

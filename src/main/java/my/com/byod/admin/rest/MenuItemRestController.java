@@ -310,7 +310,8 @@ public class MenuItemRestController {
 			stmt.setBoolean(9, jsonMenuItemData.getBoolean("is_taxable"));
 			stmt.setBoolean(10, jsonMenuItemData.getBoolean("is_discountable"));
 			
-			rs = stmt.executeQuery();
+			stmt.executeUpdate();
+			rs = stmt.getGeneratedKeys();
 			if(rs.next()) {
 			// logging to file	
 			String [] parameters = {

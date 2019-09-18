@@ -139,7 +139,8 @@ public class ItemGroupRestController {
 			stmt.setString(1, jsonItemGroupData.getString("menu_item_group_name"));
 			stmt.setBoolean(2, isActive);
 				
-			rs = stmt.executeQuery();
+			stmt.executeUpdate();
+			rs = stmt.getGeneratedKeys();
 			if(rs.next()) {
 				// logging to file	
 				String [] parameters = {

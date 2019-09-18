@@ -588,8 +588,8 @@ public class StoreRestController {
 			
 			int count = 1;
 			sqlStatement = "INSERT INTO staff (store_id, staff_name, staff_username, staff_password, staff_role, staff_contact_hp_number,"
-			 		+ "staff_contact_email, is_active, created_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW()); SELECT LAST_INSERT_ID();";
-			stmt = connection.prepareStatement(sqlStatement);
+			 		+ "staff_contact_email, is_active, created_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW());";
+			stmt = connection.prepareStatement(sqlStatement,PreparedStatement.RETURN_GENERATED_KEYS);	// wan - 17092019
 			stmt.setLong(count++, jsonObj.getLong("store_id"));
 			stmt.setString(count++, jsonObj.getString("name"));
 			stmt.setString(count++, jsonObj.getString("username"));
@@ -599,7 +599,8 @@ public class StoreRestController {
 			stmt.setString(count++, jsonObj.getString("email"));
 			stmt.setLong(count++, 1);
 			
-			rs = stmt.executeQuery();
+			stmt.executeUpdate();
+			rs = stmt.getGeneratedKeys();
 			 
 			if(rs.next()) {
 				jsonObj.put("staff_id", rs.getInt(1));
@@ -669,7 +670,7 @@ public class StoreRestController {
 			
 			connection = dbConnectionUtil.retrieveConnection(request);
 			stmt = connection.prepareStatement("UPDATE staff SET staff_name = ?, staff_username = ?, staff_password = ?, staff_role = ?, staff_contact_hp_number = ?,"
-			 		+ "staff_contact_email = ?, is_active = ?, last_update_date = NOW() WHERE store_id = ? AND id = ?; SELECT LAST_INSERT_ID();");
+			 		+ "staff_contact_email = ?, is_active = ?, last_update_date = NOW() WHERE store_id = ? AND id = ?; ",PreparedStatement.RETURN_GENERATED_KEYS);	// wan - 17092019
 			
 			stmt.setString(count++, jsonObj.getString("name"));
 			stmt.setString(count++, jsonObj.getString("username"));
@@ -681,7 +682,8 @@ public class StoreRestController {
 			stmt.setLong(count++, jsonObj.getLong("store_id"));
 			stmt.setLong(count++, jsonObj.getLong("staff_id"));
 			
-			rs = (ResultSet) stmt.executeQuery();
+			stmt.executeUpdate();
+			rs = stmt.getGeneratedKeys();
 			 
 			if(rs.next()) {
 				jsonObj.put("staff_id", rs.getInt(1));
@@ -809,12 +811,13 @@ public class StoreRestController {
 			}
 			
 			int count = 1;
-			sqlStatement = "INSERT INTO table_setting (store_id, table_name, status_lookup_id, created_date) VALUES (?, ?, ?, NOW()); SELECT LAST_INSERT_ID();";
-			stmt = connection.prepareStatement(sqlStatement);
+			sqlStatement = "INSERT INTO table_setting (store_id, table_name, status_lookup_id, created_date) VALUES (?, ?, ?, NOW());";
+			stmt = connection.prepareStatement(sqlStatement,PreparedStatement.RETURN_GENERATED_KEYS);	// wan - 17092019
 			stmt.setLong(count++, jsonObj.getLong("store_id"));
 			stmt.setString(count++, jsonObj.getString("tableName"));
 			stmt.setLong(count++, 2);	
-			rs = stmt.executeQuery();
+			stmt.executeUpdate();
+			rs = stmt.getGeneratedKeys();
 			 
 			if(rs.next()) {
 				jsonObj.put("id", rs.getInt(1));
@@ -872,12 +875,13 @@ public class StoreRestController {
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Duplicate table name for this store.");
 			}
 			
-			stmt = connection.prepareStatement("UPDATE table_setting SET table_name = ?, last_update_date = NOW() WHERE store_id = ? AND id = ?; SELECT LAST_INSERT_ID();");	
+			stmt = connection.prepareStatement("UPDATE table_setting SET table_name = ?, last_update_date = NOW() WHERE store_id = ? AND id = ?;",PreparedStatement.RETURN_GENERATED_KEYS);	// wan - 17092019
 			stmt.setString(count++, jsonObj.getString("tableName"));
 			stmt.setLong(count++, jsonObj.getLong("store_id"));
 			stmt.setLong(count++, jsonObj.getLong("id"));
 			
-			rs = (ResultSet) stmt.executeQuery();
+			stmt.executeUpdate();
+			rs = stmt.getGeneratedKeys();
 			 
 			if(rs.next()) {
 				jsonObj.put("id", rs.getInt(1));
@@ -1827,13 +1831,14 @@ public class StoreRestController {
 			String prefix = getDevicePrefix(connection, deviceTypeId);				
 			String activationId = byodUtil.createUniqueActivationId(prefix);
 			stmt = connection.prepareStatement("INSERT INTO device_info (activation_id, activation_key, status_lookup_id, device_type_lookup_id, ref_id, created_date, group_category_id) "
-					+ "VALUES (?, ? ,? ,? ,? , NOW(), 0); SELECT LAST_INSERT_ID();");	
+					+ "VALUES (?, ? ,? ,? ,? , NOW(), 0);",PreparedStatement.RETURN_GENERATED_KEYS);	// wan - 17092019
 			stmt.setString(count++, activationId);
 			stmt.setString(count++, byodUtil.createRandomDigit(16));
 			stmt.setInt(count++, 1);
 			stmt.setLong(count++, deviceTypeId);
 			stmt.setLong(count++, referenceId);
-			rs = stmt.executeQuery();		
+			stmt.executeUpdate();
+			rs = stmt.getGeneratedKeys();
 			if(rs.next()) {
 				result = activationId;
 				
@@ -1875,12 +1880,13 @@ public class StoreRestController {
 			String url = deviceInfoDetail.getString("url");
 			
 			stmt = connection.prepareStatement("INSERT INTO device_info_detail (device_info_id, device_name, device_url, device_role_lookup_id) "
-					+ "VALUES (?, ? ,? ,?); SELECT LAST_INSERT_ID();");	
+					+ "VALUES (?, ? ,? ,?); ",PreparedStatement.RETURN_GENERATED_KEYS);	// wan - 17092019
 			stmt.setLong(count++, id);
 			stmt.setString(count++, name);
 			stmt.setString(count++, url);
 			stmt.setLong(count++, deviceRoleType);
-			rs = stmt.executeQuery();		
+			stmt.executeUpdate();
+			rs = stmt.getGeneratedKeys();	
 			if(rs.next()) {
 				flag = true;
 			}

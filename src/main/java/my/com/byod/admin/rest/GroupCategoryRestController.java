@@ -1418,14 +1418,15 @@ public class GroupCategoryRestController {
 		Long publishVersionId = null;
 
 		try {		
-			sqlStatement = "INSERT INTO publish_version (group_category_id, version_count, menu_file_path, menu_query_file_path, menu_img_file_path, publish_date) VALUES (?, ?, ?, ?, ?, NOW()); SELECT LAST_INSERT_ID();";
-			stmt = connection.prepareStatement(sqlStatement);
+			sqlStatement = "INSERT INTO publish_version (group_category_id, version_count, menu_file_path, menu_query_file_path, menu_img_file_path, publish_date) VALUES (?, ?, ?, ?, ?, NOW());";
+			stmt = connection.prepareStatement(sqlStatement,PreparedStatement.RETURN_GENERATED_KEYS); // wan - 17092019
 			stmt.setLong(1, groupCategoryId);
 			stmt.setLong(2, versionCount);
 			stmt.setString(3, menuFilePath);
 			stmt.setString(4, menuQueryFilePath);
 			stmt.setString(5, menuImgFilePath);
-			rs = stmt.executeQuery();
+			stmt.executeUpdate();
+			rs = stmt.getGeneratedKeys();
 			if(rs.next()) {
 				publishVersionId = rs.getLong(1);
 			}

@@ -223,7 +223,8 @@ public class CategoryRestController {
 				stmt.setString(4, imagePath);
 				stmt.setInt(5, getCategorySequenceNumber(jsonCategoryData.getLong("group_category_id"), connection) + 1);
 				stmt.setBoolean(6, jsonCategoryData.getBoolean("is_active"));
-				rs = stmt.executeQuery();
+				stmt.executeUpdate();
+				rs = stmt.getGeneratedKeys();
 				if(rs.next()) {
 					// logging to file	
 					String [] parameters = {

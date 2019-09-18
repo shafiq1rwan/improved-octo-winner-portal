@@ -191,7 +191,8 @@ public class ModifierGroupRestController {
 					.prepareStatement(sqlStatement,  Statement.RETURN_GENERATED_KEYS);
 			stmt.setString(1, jsonModifierGroupData.getString("modifier_group_name"));
 			stmt.setBoolean(2, isActive);
-			rs = stmt.executeQuery();
+			stmt.executeUpdate();
+			rs = stmt.getGeneratedKeys();
 			
 			if(rs.next()) {
 				// logging to file	
