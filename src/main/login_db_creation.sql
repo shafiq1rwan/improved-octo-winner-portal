@@ -1,3 +1,5 @@
+DROP SCHEMA IF EXISTS tenant;
+create schema tenant;
 USE tenant;
 CREATE TABLE users
 (
@@ -69,13 +71,13 @@ INSERT INTO users(`name`,email,mobileNumber,`address`,username,`password`,`enabl
 INSERT INTO authorities(user_id,authority)VALUES(6,'ROLE_SUPER_GROUP_ADMIN');
 
 -- Patch sample brand
-INSERT INTO brands(`name`, brand_db_domain, brand_db_name, brand_db_user, brand_db_password, brand_db_port)
-VALUES('kfc','localhost','KFC','sa','MPay@1234',1433),('sushi','localhost','SUSHI','sa','MPay@1234',1433);
+-- INSERT INTO brands(`name`, brand_db_domain, brand_db_name, brand_db_user, brand_db_password, brand_db_port)
+-- VALUES('kfc','localhost','KFC','sa','MPay@1234',1433),('sushi','localhost','SUSHI','sa','MPay@1234',1433);
 
 -- Patch: Assign brands to users
-INSERT INTO users_brands(brand_id,user_id,permission) VALUES(1,2,'0'),(2,3,'0'),(1,4,'0'),(1,5,'0');
+-- INSERT INTO users_brands(brand_id,user_id,permission) VALUES(1,2,'0'),(2,3,'0'),(1,4,'0'),(1,5,'0');
 
-INSERT INTO users_brands(brand_id,user_id,permission) VALUES(1,6,'0'),(2,6,'0');
+-- INSERT INTO users_brands(brand_id,user_id,permission) VALUES(1,6,'0'),(2,6,'0');
 
 -- Patch: Permission lookup
 INSERT INTO permission_lookup(perm_name) VALUES ('store'),('group-category'),('menu-item'),('user-config'),('report'),('setting');

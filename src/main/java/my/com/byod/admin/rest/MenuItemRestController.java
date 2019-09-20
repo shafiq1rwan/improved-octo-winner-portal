@@ -292,7 +292,7 @@ public class MenuItemRestController {
 			
 			if(barcode!=null) {
 				int existingBarcode = checkingExistingBarcode(barcode, request);
-				if(existingBarcode > 0) {
+				if(existingBarcode != 0) {
 					return ResponseEntity.status(HttpStatus.CONFLICT).contentType(MediaType.TEXT_PLAIN).body("Duplication Barcode Found");
 				}
 			}

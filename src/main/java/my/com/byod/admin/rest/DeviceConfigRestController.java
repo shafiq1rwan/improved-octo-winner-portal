@@ -13,10 +13,15 @@ import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.StringJoiner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
@@ -1774,88 +1779,97 @@ public class DeviceConfigRestController {
 	}
 	
 	public void generateLatestQueryFile(Connection connection, String brandId, Long groupCategoryId) throws Exception {
-		// sqlStatement - sql server script
-		// sqlStatement2 - my sql script
-		String sqlStatement = null;
-		String sqlStatement2 = null;
 		PreparedStatement ps1 = null;
-		PreparedStatement ps2 = null;
 		ResultSet rs1 = null;
-		ResultSet rs2 = null;
+		ResultSetMetaData metaData = null;
 		String result = "";
-		String result2 = "";
-		
-		String[] tableNames = {
-				"category",
-				"category_menu_item", 
-				"combo_detail",
-				"combo_item_detail",
-				"menu_item",
-				"menu_item_display_period",
-				"menu_item_group",
-				"menu_item_group_sequence",
-				"menu_item_modifier_group",
-				"menu_item_promo_period",
-				"modifier_group",
-				"modifier_item_sequence",
-				"tax_charge"};
+		String insertSql = "";
+		String sql = "";
+		StringJoiner columnName = null;
+		StringJoiner columnValue = null;
+		StringJoiner columnSubValue = null;
+
+		String[] tableNames = { "category", "category_menu_item", "combo_detail", "combo_item_detail", "menu_item",
+				"menu_item_display_period", "menu_item_group", "menu_item_group_sequence", "menu_item_modifier_group",
+				"menu_item_promo_period", "modifier_group", "modifier_item_sequence", "tax_charge" };
+
 		try {
-			for(String table : tableNames) {
-				sqlStatement = "EXEC sp_generate_inserts ?";
-				sqlStatement2 = "EXEC sp_generate_inserts_mysql ?";
-				
+			for (String table : tableNames) {
+
 				// filter for group category
-				if(table.equals("category")) {
-					sqlStatement += ", @from = \"from category where group_category_id = "+groupCategoryId+"\"";
-					sqlStatement2 += ", @from = \"from category where group_category_id = "+groupCategoryId+"\"";
+				if (table.equals("category")) {
+					sql = "select * from category where group_category_id = " + groupCategoryId + ";";
+				} else if (table.equals("tax_charge")) {
+					sql = "select a.* from tax_charge a INNER JOIN group_category_tax_charge b ON a.id = b.tax_charge_id "
+							+ "where b.group_category_id = " + groupCategoryId + ";";
+				} else {
+					sql = "select * from " + table + ";";
 				}
-				// filter for group category
-				if(table.equals("tax_charge")) {
-					sqlStatement += ", @from = \"from tax_charge a INNER JOIN group_category_tax_charge b ON a.id = b.tax_charge_id where group_category_id = "+groupCategoryId+"\"";					
-					sqlStatement2 += ", @from = \"from tax_charge a INNER JOIN group_category_tax_charge b ON a.id = b.tax_charge_id where group_category_id = "+groupCategoryId+"\"";					
+
+				// get records from cloud db
+				ps1 = connection.prepareStatement(sql);
+				rs1 = ps1.executeQuery();
+
+				if (rs1.next()) {
+
+					// get column name
+					columnName = new StringJoiner(",");
+					metaData = rs1.getMetaData();
+					for (int a = 1; a < metaData.getColumnCount() + 1; a++) {
+						columnName.add(metaData.getColumnName(a));
+					}
+
+					columnValue = new StringJoiner(",");
+					String temp = "";
+
+					// construct insert statement
+					do {
+						columnSubValue = new StringJoiner(",");
+						for (int i = 1; i < metaData.getColumnCount() + 1; i++) {
+							String val = "";
+							int type = metaData.getColumnType(i);
+							
+							if (rs1.getString(i) == null) {
+								val = rs1.getString(i);
+							}else if (type == Types.BLOB || type == Types.CHAR || type == Types.CLOB || type == Types.DATE
+									|| type == Types.LONGNVARCHAR || type == Types.LONGVARCHAR || type == Types.NCHAR
+									|| type == Types.NVARCHAR || type == Types.TIME || type == Types.TIMESTAMP
+									|| type == Types.VARCHAR) {
+								val = "'" + rs1.getString(i) + "'";
+							} else {
+								val = rs1.getString(i);
+							}
+
+							columnSubValue.add(val);
+						}
+						temp = "(" + columnSubValue.toString() + ")";
+						columnValue.add(temp);
+					} while (rs1.next());
+
+					insertSql = "Insert into " + table + " (" + columnName + ") Values " + columnValue + ";";
+					System.out.println("insertSql " + insertSql);
+					result += insertSql + "\r\n";
 				}
-				
-				ps1 = connection.prepareStatement(sqlStatement);
-				ps1.setString(1, table);
-				rs1 = ps1.executeQuery();			
-				while (rs1.next()) {
-					result += rs1.getString(1) +";\r\n";
-				}
-				
-				ps2 = connection.prepareStatement(sqlStatement2);
-				ps2.setString(1, table);
-				rs2 = ps2.executeQuery();				
-				while (rs2.next()) {
-					result2 += rs2.getString(1) +";\r\n";
-				}			
 			}
 
 			File checkFile = new File(filePath + brandId + "/" + groupCategoryId, "latest/query.txt");
 			// new file
 			Writer output = new BufferedWriter(new FileWriter(checkFile));
-            output.write(result);
-            output.close();
-            
-            checkFile = new File(filePath + brandId + "/" + groupCategoryId, "latest/queryMySql.txt");
-            output = new BufferedWriter(new FileWriter(checkFile));
-            output.write(result2);
-            output.close();       
-			
+			output.write(result);
+			output.close();
+
+			checkFile = new File(filePath + brandId + "/" + groupCategoryId, "latest/queryMySql.txt");
+			output = new BufferedWriter(new FileWriter(checkFile));
+			output.write(result);
+			output.close();
+
 		} catch (Exception ex) {
 			throw ex;
 		} finally {
-			if (rs1 != null) {
+			if (rs1 != null)
 				rs1.close();
-			}
-			if (ps1 != null) {
+			if (ps1 != null)
 				ps1.close();
-			}
-			if (rs2 != null) {
-				rs2.close();
-			}
-			if (ps2 != null) {
-				ps2.close();
-			}
 		}
 	}
 	

@@ -305,8 +305,8 @@ public class BrandManagementRestController {
 					"WHERE ub.user_id = u.id " + 
 					"AND " + 
 					"ub.brand_id = ?) > 0 " + 
-					"THEN CAST (1 AS TINYINT) " + 
-					"ELSE CAST (0 AS TINYINT) END as exist " + 
+					"THEN 1 " + 
+					"ELSE 0 END as exist " +  // wan - db migration trace
 					"FROM users u WHERE u.id != 1", new Object[] {brandId});
 			
 			if(!usersInBrand.isEmpty()) {

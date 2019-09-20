@@ -1023,8 +1023,8 @@ public class GroupCategoryRestController {
 		try {
 			System.out.println("initial: " + query);
 			if(insertTable!=null && !insertTable.equals("")) {
-				String tmpOn = "SET IDENTITY_INSERT [dbo].["+insertTable+"] ON;\r\n";
-				String tmpOff = "\r\nSET IDENTITY_INSERT [dbo].["+insertTable+"] OFF;";
+				String tmpOn = "";
+				String tmpOff = "";
 				query = tmpOn + query.substring(0, query.indexOf("(")+1) + "id, " + query.substring(query.indexOf("(")+1);
 				query = query.substring(0,  query.indexOf("(", query.indexOf("(")+1)+1 ) + "?, " + query.substring(query.indexOf("(", query.indexOf("(")+1)+1) + tmpOff;
 			}
@@ -1117,8 +1117,8 @@ public class GroupCategoryRestController {
 		
 		try {
 			if(insertTable!=null && !insertTable.equals("")) {
-				String tmpOn = "SET IDENTITY_INSERT [dbo].["+insertTable+"] ON;\r\n";
-				String tmpOff = "\r\nSET IDENTITY_INSERT [dbo].["+insertTable+"] OFF;";
+				String tmpOn = "";
+				String tmpOff = "";
 				// adding identity parameter to script
 				query = tmpOn + query.substring(0, query.indexOf("(")+1) + "id, " + query.substring(query.indexOf("(")+1);
 				query = query.substring(0,  query.indexOf("(", query.indexOf("(")+1)+1 ) + "?, " + query.substring(query.indexOf("(", query.indexOf("(")+1)+1) + tmpOff;
