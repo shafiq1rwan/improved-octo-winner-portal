@@ -299,6 +299,18 @@ CREATE TABLE menu_item_promo_period
 	promo_period_id BIGINT NOT NULL
 );
 
+CREATE TABLE `general_config` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `config_name` VARCHAR(255) NULL,
+  `config_value` VARCHAR(1000) NULL,
+  PRIMARY KEY (`id`));
+
+INSERT INTO `general_config` (`config_name`, `config_value`) VALUES ('mail', '{\"mail.host\": \"email-smtp.us-east-1.amazonaws.com\",\"mail.port\": \"587\",\"mail.username\": \"AKIAYOCWHBCJM5FBXSMB\",\"mail.password\": \"BENitUjfuVVhVqdTbTrZ50Mkkljh9JO7g0HTOA6LUAwx\",\"mail.transport.protocol\": \"smtp\",\"mail.smtp.auth\": \"true\",\"mail.smtp.starttls.enable\": \"true\",\"mail.debug\": \"true\"}');
+INSERT INTO `general_config` (`id`, `config_name`, `config_value`) VALUES ('2', 'portal_url', 'http://localhost:8081/user/signin');
+INSERT INTO `general_config` (`config_name`, `config_value`) VALUES ('mail_sender', 'cloud@mpay.my');
+
+
+
 /*Drop all Table*/
 -- DROP TABLE group_category;
 -- DROP TABLE store;
