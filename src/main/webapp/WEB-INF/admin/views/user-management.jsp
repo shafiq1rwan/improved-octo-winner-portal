@@ -202,7 +202,7 @@
 													<tr ng-repeat="brand in brands">
 															<td>{{brand.name}}</td>
 															<td>
-																<input type="checkbox" ng-model="brand.exist == true"
+																<input type="checkbox" ng-model="brand.exist"
 																ng-change="addIntoBrandList(brand)"/>				
 															</td>
 													</tr>
