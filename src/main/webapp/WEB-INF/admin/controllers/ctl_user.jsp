@@ -16,6 +16,7 @@
 		$scope.action = '';
 		
 		$scope.alertMessage = "";
+		$scope.enabled = "";
 		
 		var table;
 		var brands_array = [];
@@ -78,8 +79,8 @@
 					{"data": "id",
 						 "render": function ( data, type, full, meta ) {
 							 	var id = full.id;
-							    return '<div class="btn-toolbar justify-content-between"><button ng-click="promptEditUserModal('+ id +')" type="button" class="btn btn-primary custom-fontsize"><b><i class="fa fa-wrench"></i>Edit</b></button><button data-toggle="modal" data-target="#userBrandModal" data-keyboard="false" data-backdrop="static" ng-click="promptAssignBrandModal('+ id +')" type="button" class="btn btn-info custom-fontsize"><b><i class="fa fa-wrench"></i>Assign Brand</b></button>'
-							    	+'<button data-toggle="modal" data-target="#assignedBrandModel" data-keyboard="false" data-backdrop="static" ng-click="promptAssignedBrandModal('+ id +')" type="button" class="btn btn-default custom-fontsize"><b><i class="fa fa-wrench"></i>View Brands</b></button></div>'	
+							    return '<button ng-click="promptEditUserModal('+ id +')" type="button" class="btn btn-primary custom-fontsize"><b><i class="fa fa-wrench"></i> Edit</b></button> <button data-toggle="modal" data-target="#userBrandModal" data-keyboard="false" data-backdrop="static" ng-click="promptAssignBrandModal('+ id +')" type="button" class="btn btn-info custom-fontsize"><b><i class="fa fa-check-square-o"></i> Assign Brand</b></button> '
+							    	+'<button data-toggle="modal" data-target="#assignedBrandModel" data-keyboard="false" data-backdrop="static" ng-click="promptAssignedBrandModal('+ id +')" type="button" class="btn btn-default custom-fontsize"><b><i class="fa fa-list-ul"></i> View Brands</b></button>'	
 						 }
 					}
 					],			
@@ -99,6 +100,7 @@
 				function(response) {			
 					$scope.user = response.data; 
 					$scope.setModalType('update');
+					$scope.enabled = $scope.user.enabled == true;
 					$('#userModal').modal('toggle');
 				},
 				function(response) {
@@ -245,7 +247,7 @@
 						'mobileNumber' : $scope.user.mobileNumber,
 						'address' : $scope.user.address,
 						'username' : $scope.user.username,
-						'enabled' : $scope.user.enabled || false,
+						'enabled' : $scope.enabled,
 						'role' : $scope.user.authority,
 						'brand' : $scope.user.brand || null
 				};
@@ -253,6 +255,7 @@
 					
 				console.log("Submit User");
 				console.log(postData);
+				console.log("value enabled: "+$scope.enabled)
 
  				$http({
 					method : 'POST',
@@ -262,22 +265,23 @@
 				})
 				.then(
 					function(response) {
-						if(userUrl == 'signup'){
+						/* if(userUrl == 'signup'){
 							//if modal shown hide
 							$('#loading_modal').on('shown.bs.modal', function () {
 								$('#loading_modal').modal('hide');
 							});
-						}
+						} */
 						$scope.resetModal();
 						$('#userModal').modal('hide');
+						alert(response.data);
 						getUserInfo();
 					},
 					function(response) {
-	 					if(userUrl == 'signup'){
+	 					/* if(userUrl == 'signup'){
 							setTimeout(function(){
 								  $('#loading_modal').modal('hide');
 							}, 1000);
-						} 
+						}  */
 
 						if(response.status == '409'){
 							$scope.alertMessage = $sce.trustAsHtml(response.data.responseMessage);
@@ -339,6 +343,26 @@
 				function(response) {
 					$scope.resetModal();
 					$('#userBrandModal').modal('toggle');
+				},
+				function(response) {
+					alert(response.data);
+			});
+		}
+		
+		$scope.unassignFromBrand = function(id){
+			console.log("Brand Id: " + id);
+			console.log("User Id: " + $scope.user_id);
+
+ 			$http({
+				method : 'POST',
+				headers : {'Content-Type' : 'application/json'},
+				url : '${pageContext.request.contextPath}/users/unassign-brands?id='+$scope.user_id+'&brandId='+id
+			})
+			.then(
+				function(response) {
+					$scope.resetModal();
+					$('#assignedBrandModel').modal('hide');
+					alert(response.data);
 				},
 				function(response) {
 					alert(response.data);

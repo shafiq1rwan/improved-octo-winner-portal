@@ -145,7 +145,7 @@
 					<div class="row">
 						<div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
 							<div class="custom-control custom-checkbox">
-								<input type="checkbox" name="enabled" ng-model="user.enabled" class="custom-control-input" id="enabled">
+								<input type="checkbox" name="enabled" ng-model="enabled" class="custom-control-input" id="enabled">
 								<label class="custom-control-label" for="enabled">Enabled</label>							
 							</div>
 						</div>	
@@ -202,7 +202,7 @@
 													<tr ng-repeat="brand in brands">
 															<td>{{brand.name}}</td>
 															<td>
-																<input type="checkbox" ng-model="brand.exist"
+																<input type="checkbox" ng-model="brand.exist == true"
 																ng-change="addIntoBrandList(brand)"/>				
 															</td>
 													</tr>
@@ -251,6 +251,7 @@
 															<td>{{brand.name}}</td>
 															<td>
 																<button class="btn btn-danger" data-toggle="modal" data-target="#accessRightsModal" data-keyboard="false" data-backdrop="static" type="submit" ng-click="promptAccessRightsModal(brand.id)">Access Rights</button>
+																<button class="btn btn-primary" type="submit" ng-click="unassignFromBrand(brand.id)">Unassign</button>
 															</td>
 													</tr>
 												</tbody>
@@ -316,7 +317,7 @@
 	<!-- ACCESS RIGHTS MODAL ENDED -->
 	
 	<!-- Loading Modal [START] -->
-		<div class="modal fade" data-backdrop="static" id="loading_modal" role="dialog">
+	<%-- 	<div class="modal fade" data-backdrop="static" id="loading_modal" role="dialog">
 			<div class="modal-dialog modal-sm">
 			<div class="modal-content">
 				<div class="modal-body">
@@ -327,7 +328,7 @@
 				</div>
 			</div>
 			</div>
-		</div>
+		</div> --%>
 	<!-- Loading Modal [END] -->
 	
 	<!-- Alert Modal [START] -->

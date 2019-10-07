@@ -27,7 +27,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/tenant?useTimezone=true&serverTimezone=UTC
     username: root
-    password: root
+    password: 1234
 
 access-drive: C
 upload-path: byod-img/
@@ -36,7 +36,7 @@ menu-path: byod-menu/
 get-menu-path: /byod-menu/
 log-path: logger
 pdf-path: pdf-folder/
-byod-cloud-url: http://localhost:8080
+byod-cloud-url: http://localhost:8081
 
  
 server:
@@ -46,18 +46,19 @@ server:
 spring:
   profiles: uat-data
   datasource:
-    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
-    url: jdbc:sqlserver://192.168.79.5:1433;databaseName=tenant
-    username: sa
-    password: MPay@1234
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://192.168.79.42:3306/tenant?useTimezone=true&serverTimezone=UTC
+    username: root
+    password: MPay@USJ21
 
-access-drive: D
-upload-path: byod-img/
+access-drive: C
+upload-path: /opt/tomcat/apache-tomcat-8.5.45/webapps/byod/byod-img/
 get-upload-path: /byod-img/
-menu-path: byod-menu/
+menu-path: /opt/tomcat/apache-tomcat-8.5.45/webapps/byod/byod-menu/
 get-menu-path: /byod-menu/
-log-path: logger
-byod-cloud-url: http://175.136.246.76:8080/byod
+log-path: /opt/tomcat/apache-tomcat-8.5.45/webapps/byod/logger/
+pdf-path: /opt/tomcat/apache-tomcat-8.5.45/webapps/byod/pdf-folder/
+byod-cloud-url: http://192.168.79.41:8080/byod
 
 ---
 
@@ -75,6 +76,7 @@ get-upload-path: /byod-img/
 menu-path: byod-menu/
 get-menu-path: /byod-menu/
 log-path: logger
+pdf-path: pdf-folder/
 byod-cloud-url: http://localhost:8080
     
 ---

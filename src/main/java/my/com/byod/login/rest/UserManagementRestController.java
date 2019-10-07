@@ -1,6 +1,5 @@
 package my.com.byod.login.rest;
 
-import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -8,7 +7,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -20,22 +18,14 @@ import javax.sql.DataSource;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.dao.DataAccessException;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.jdbc.core.namedparam.SqlParameterSource;
-import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -44,10 +34,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import my.com.byod.admin.util.ByodUtil;
-import my.com.byod.admin.util.DbConnectionUtil;
 import my.com.byod.admin.util.UserEmailUtil;
 import my.com.byod.login.domain.ApplicationUser;
 import my.com.byod.login.service.ApplicationUserService;
@@ -94,9 +81,9 @@ public class UserManagementRestController {
 				throw new IllegalArgumentException(
 						constructJsonResponse("03", user.getMobileNumber() + " already being taken"));
 
-			//String randomPass = byodUtil.createRandomString(10);
-			//user.setPassword(randomPass);
-			user.setPassword(user.getUsername());
+			String randomPass = byodUtil.createRandomString(10);
+			user.setPassword(randomPass);
+//			user.setPassword(user.getUsername());
 			
 			Long userId = applicationUserService.createUser(user, jsonData.getString("role"));
 			if (userId == 0) {
@@ -111,10 +98,10 @@ public class UserManagementRestController {
 						return ResponseEntity.badRequest().contentType(MediaType.TEXT_PLAIN).body("Cannot assign user to brand");
 				}			
 				//send email
-//				boolean sendStatus = userEmailUtil.sendUserRegisterPassword(user.getUsername(),randomPass,user.getEmail());
-//				if(!sendStatus) {
-//					return ResponseEntity.badRequest().contentType(MediaType.TEXT_PLAIN).body("Cannot send email to user");
-//				}
+				boolean sendStatus = userEmailUtil.sendUserRegisterPassword(user.getName(),randomPass,user.getEmail());
+				if(!sendStatus) {
+					return ResponseEntity.badRequest().contentType(MediaType.TEXT_PLAIN).body("Cannot send email to user");
+				}
 			}
 		} catch (IllegalArgumentException ex) {
 			ex.printStackTrace();
@@ -139,7 +126,10 @@ public class UserManagementRestController {
 			user.setMobileNumber(jsonData.getString("mobileNumber"));
 			user.setAddress(jsonData.getString("address"));
 			user.setUsername(jsonData.getString("username"));
+//			int enable = jsonData.getInt("enabled");
+//			System.out.println("enable Value: "+enable);
 			user.setEnabled(jsonData.getBoolean("enabled"));
+			System.out.println("enabled value: "+jsonData.getBoolean("enabled"));
 
 			if (applicationUserService.findUserByEmail(user.getEmail(), user.getId()))
 				throw new IllegalArgumentException(
@@ -164,7 +154,8 @@ public class UserManagementRestController {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN)
 					.body("Internal Server Error");
 		}
-		return ResponseEntity.ok(null);
+		return ResponseEntity.status(HttpStatus.ACCEPTED).contentType(MediaType.TEXT_PLAIN)
+				.body("Update Success");
 	}
 
 	private String constructJsonResponse(String errorCode, String errorMessage) {
@@ -352,6 +343,8 @@ public class UserManagementRestController {
 			Long userId = jsonObject.getLong("userId");
 			JSONArray brandArray = jsonObject.optJSONArray("brands");
 			JSONArray tempArray = new JSONArray();
+			ArrayList listA = new ArrayList<>();
+			ArrayList listB = new ArrayList<>();
 			ResultSet rs = null;
 			
 			connection = dataSource.getConnection();
@@ -363,27 +356,44 @@ public class UserManagementRestController {
 				rs = stmt.executeQuery();
 				
 				while(rs.next()) {
+					
 					//backup existing data
 					JSONObject temp = new JSONObject();
 					temp.put("brand_id", rs.getLong("brand_id"));
-					temp.put("permission", rs.getString("permission"));
+					/*temp.put("permission", rs.getString("permission"));*/
 							
-					tempArray.put(temp);
+					/*tempArray.put(temp);*/
+					listA.add(rs.getLong("brand_id"));
 				}
 			}
 
-			stmt2 = connection.prepareStatement("DELETE FROM users_brands WHERE user_id = ?");
-			stmt2.setLong(1,userId);
-			stmt2.executeUpdate();
+//			stmt2 = connection.prepareStatement("DELETE FROM users_brands WHERE user_id = ?");
+//			stmt2.setLong(1,userId);
+//			stmt2.executeUpdate();
 			
-			if(brandArray.length()!= 0) {
+			for(int i = 0; i < brandArray.length(); i++) {
+				JSONObject jsonBrandObj = brandArray.getJSONObject(i);
+				listB.add(jsonBrandObj.getLong("id"));
+			}
+
+			if(listB.equals(listA)) {
+				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN)
+						.body("Brand already assigned to this user. Please check again");
+			}else {
+				listB.removeAll(listA);
+			}
+			System.out.println("result list: "+listB);
+			
+			if(brandArray.length() != 0) {
 				connection.setAutoCommit(false);
 				String insertionSql = "INSERT INTO users_brands(brand_id,user_id) VALUES (?,?)";
 
-				for(int i = 0; i < brandArray.length(); i++) {
-					JSONObject jsonBrandObj = brandArray.getJSONObject(i);
+				for(int i = 0; i < listB.size(); i++) {
+//					JSONObject jsonBrandObj = brandArray.getJSONObject(i);
+					Long brandId = (Long) listB.get(i);
+					
 						stmt3 = connection.prepareStatement(insertionSql);
-						stmt3.setLong(1, jsonBrandObj.getLong("id"));
+						stmt3.setLong(1, brandId);
 						stmt3.setLong(2, userId);
 						stmt3.executeUpdate();
 		
@@ -391,19 +401,19 @@ public class UserManagementRestController {
 				}
 				
 				//UPDATE BASED ON WHERE
-				if(tempArray.length()!=0) {
-					String updateSql = "UPDATE users_brands SET permission = ? WHERE user_id = ? AND brand_id = ?";
-					for(int j = 0; j < tempArray.length(); j++) {
-						JSONObject temp = tempArray.getJSONObject(j);
-							stmt3 = connection.prepareStatement(updateSql);
-							stmt3.setString(1, temp.getString("permission"));
-							stmt3.setLong(2, userId);
-							stmt3.setLong(3, temp.getLong("brand_id"));
-							stmt3.executeUpdate();
-			
-							connection.commit();
-					}
-				}
+//				if(tempArray.length()!=0) {
+//					String updateSql = "UPDATE users_brands SET permission = ? WHERE user_id = ? AND brand_id = ?";
+//					for(int j = 0; j < tempArray.length(); j++) {
+//						JSONObject temp = tempArray.getJSONObject(j);
+//							stmt3 = connection.prepareStatement(updateSql);
+//							stmt3.setString(1, temp.getString("permission"));
+//							stmt3.setLong(2, userId);
+//							stmt3.setLong(3, temp.getLong("brand_id"));
+//							stmt3.executeUpdate();
+//			
+//							connection.commit();
+//					}
+//				}
 
 			}
 			return ResponseEntity.ok(null);
@@ -688,5 +698,46 @@ public class UserManagementRestController {
 		}
 	}
 		
+	@PostMapping("/unassign-brands")
+	public ResponseEntity<?> unassignBrands(HttpServletRequest request, HttpServletResponse response, @RequestParam("id") Long id, @RequestParam("brandId") Long brandId){
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		
+		try {
+			
+			System.out.println("id: "+id);
+			System.out.println("brand_id: "+brandId);
+			
+			connection = dataSource.getConnection();
+			
+			stmt = connection.prepareStatement("DELETE FROM users_brands WHERE user_id = ? AND brand_id = ?");
+			stmt.setLong(1,id);
+			stmt.setLong(2, brandId);
+			stmt.executeUpdate();
+			
+			return ResponseEntity.status(HttpStatus.ACCEPTED).contentType(MediaType.TEXT_PLAIN).body("Unassigned Success");
+			
+		} catch(Exception ex) {
+			ex.printStackTrace();
+			if (connection != null) {
+				try {
+					connection.rollback();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN)
+					.body("Cannot unassign user from the brands. Please try again later");
+		} finally {
+			if(connection!=null) {
+				try {
+					connection.setAutoCommit(true);
+					connection.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
 
 }

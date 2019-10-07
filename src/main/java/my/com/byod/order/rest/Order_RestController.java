@@ -40,7 +40,7 @@ public class Order_RestController {
 	@Value("${menu-path}")
 	private String filePath;
 
-	@Value("${upload-path}")
+	@Value("${get-upload-path}")
 	private String imagePath;
 
 	@Autowired

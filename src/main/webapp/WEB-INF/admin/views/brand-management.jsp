@@ -106,7 +106,7 @@
 						</div>
 						<div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
 							<div class="form-group">
-								<label class="login-label">Db Name</label>
+								<label class="login-label">Db Name *(Must be lowercase)</label>
 								<input class="form-control" name="name" placeholder="Name" ng-model="brand.dbName" type="text" required> 
 							</div>
 						</div>
@@ -178,7 +178,11 @@
 													<tr ng-repeat="user in users">
 															<td>{{user.username}}</td>
 															<td>{{user.email}}</td>
-															<td >
+															<td ng-if="user.exist=='1'">
+																<input type="checkbox" ng-model="user.exist == true"
+																ng-change="addIntoUserList(user)"/>				
+															</td>
+															<td ng-if="user.exist=='0'">
 																<input type="checkbox" ng-model="user.exist"
 																ng-change="addIntoUserList(user)"/>				
 															</td>

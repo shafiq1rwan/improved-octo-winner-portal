@@ -100,8 +100,7 @@
 		}
 		
 		$scope.removeExistingTier = function(id){
-			$http
-			.delete(
+			$http.delete(
 				'${pageContext.request.contextPath}/menu/combo/deleteComboDetail?id='+id)
 			.then(
 				function(response) {	
@@ -564,8 +563,7 @@
 		}
 		
 		$scope.removeMenuItem = function(id){
-			$http
-			.delete(
+			$http.delete(
 				'${pageContext.request.contextPath}/menu/menuItem/deleteMenuItem?id='+id)
 			.then(
 				function(response) {
