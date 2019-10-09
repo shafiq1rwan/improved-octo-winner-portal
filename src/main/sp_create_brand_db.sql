@@ -535,6 +535,8 @@ IF NOT EXISTS(SELECT * FROM information_schema.schemata WHERE schema_name = p_db
 
 			call sp_exec(CONCAT('INSERT INTO ',p_db_name,'.role_lookup (role_name) VALUES (''Admin'');'));
             call sp_exec(CONCAT('INSERT INTO ',p_db_name,'.role_lookup (role_name) VALUES (''Store Manager'');'));
+            call sp_exec(CONCAT('INSERT INTO ',p_db_name,'.role_lookup (role_name) VALUES (''Kitchen'');'));
+            call sp_exec(CONCAT('INSERT INTO ',p_db_name,'.role_lookup (role_name) VALUES (''Waiter'');'));
 			call sp_exec(CONCAT('INSERT INTO ',p_db_name,'.store_type_lookup (store_type_name) VALUES (''Retail''),(''F&B'');'));
 			call sp_exec(CONCAT('INSERT INTO ',p_db_name,'.payment_delay_lookup (payment_delay_name) VALUES (''Pay Now/Later''), (''Pay Now''), (''Pay Later'');'));
 			call sp_exec(CONCAT('INSERT INTO ',p_db_name,'.login_type_lookup (login_type_name) VALUES (''Username & Password''), (''Scan QR'');'));
