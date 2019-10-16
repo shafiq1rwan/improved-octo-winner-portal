@@ -73,6 +73,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		        		  {
 		        				HttpSession session = request.getSession();
 		        		    	session.setAttribute("role", role);
+		        		    	session.setAttribute("username", user.getUsername());
+		        		    	System.out.println("username: "+user.getUsername());
 		        		  }
 		        		  response.sendRedirect(request.getContextPath()+"/byod-panel");
 		        	  }
