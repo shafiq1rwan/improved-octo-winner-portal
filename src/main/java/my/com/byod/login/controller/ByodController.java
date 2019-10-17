@@ -39,5 +39,12 @@ public class ByodController {
 		model.setViewName("/admin/views/user-management");
 		return model;
 	}
+	
+	@GetMapping(value = "/views/password_management")
+	public ModelAndView passwordManagementView() {
+		ModelAndView model = new ModelAndView();
+		model.setViewName("/admin/views/password_management");
+		return model;
+	}
 
 }

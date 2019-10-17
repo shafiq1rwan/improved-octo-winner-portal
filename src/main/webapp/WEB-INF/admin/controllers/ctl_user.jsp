@@ -79,7 +79,7 @@
 					{"data": "id",
 						 "render": function ( data, type, full, meta ) {
 							 	var id = full.id;
-							    return '<button ng-click="promptEditUserModal('+ id +')" type="button" class="btn btn-primary custom-fontsize"><b><i class="fa fa-wrench"></i> Edit</b></button> <button data-toggle="modal" data-target="#userBrandModal" data-keyboard="false" data-backdrop="static" ng-click="promptAssignBrandModal('+ id +')" type="button" class="btn btn-info custom-fontsize"><b><i class="fa fa-check-square-o"></i> Assign Brand</b></button> '
+							    return '<button ng-click="promptEditUserModal('+ id +')" type="button" class="btn btn-primary custom-fontsize"><b><i class="fa fa-pencil"></i> Edit</b></button> <button data-toggle="modal" data-target="#userBrandModal" data-keyboard="false" data-backdrop="static" ng-click="promptAssignBrandModal('+ id +')" type="button" class="btn btn-info custom-fontsize"><b><i class="fa fa-check-square-o"></i> Assign Brand</b></button> '
 							    	+'<button data-toggle="modal" data-target="#assignedBrandModel" data-keyboard="false" data-backdrop="static" ng-click="promptAssignedBrandModal('+ id +')" type="button" class="btn btn-default custom-fontsize"><b><i class="fa fa-list-ul"></i> View Brands</b></button>'	
 						 }
 					}

@@ -2,9 +2,6 @@ package my.com.byod.login.rest;
 
 import java.util.UUID;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailSender;
@@ -12,9 +9,9 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import my.com.byod.admin.util.UserEmailUtil;
 import my.com.byod.login.domain.ApplicationUser;
 import my.com.byod.login.service.ApplicationUserService;
 
@@ -27,10 +24,13 @@ public class ForgetPasswordRestController {
 
 	@Autowired
 	private MailSender mailSender;
+	
+	@Autowired
+	private UserEmailUtil UserEmailUtil;
 
 	@PostMapping(value = "/send-reset-email")
 	public String sendForgetPasswordEmail(@RequestBody String data) {
-		System.out.println("my data :" + data);
+		/*System.out.println("my data :" + data);*/
 		JSONObject jsonResult = new JSONObject();
 		
 		try {
@@ -43,10 +43,11 @@ public class ForgetPasswordRestController {
 				jsonResult.put("responseCode", "01");	
 			} else {
 				ApplicationUser user = applicationUserService.findUserByEmail(email);
+				String stringMail = UserEmailUtil.getConfigStr("portal_url");
 				if(user != null) {
 					String token = UUID.randomUUID().toString();
 					applicationUserService.createPasswordResetTokenForUser(token, user.getId());
-					mailSender.send(constructResetTokenEmail("http://localhost:8081", token, user.getId(), email));
+					mailSender.send(constructResetTokenEmail(stringMail, token, user.getId(), email));
 					
 					jsonResult.put("successMessage", "Email successfully send. Please check your email.");
 					jsonResult.put("responseCode", "00");	
@@ -68,7 +69,9 @@ public class ForgetPasswordRestController {
 	}
 
 	private SimpleMailMessage constructEmail(String subject, String body, String receiverEmail) {
+		String stringMail = UserEmailUtil.getConfigStr("mail_sender");
 		SimpleMailMessage email = new SimpleMailMessage();
+		email.setFrom(stringMail);
 		email.setSubject(subject);
 		email.setText(body);
 		email.setTo(receiverEmail);

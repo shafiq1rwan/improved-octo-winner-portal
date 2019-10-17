@@ -24,6 +24,9 @@
                 </li>
 			<%} %>  
                 
+                <li class="submenu">
+					<a href="${pageContext.request.contextPath}/byod-panel/#!password_management"><i class="fa fa-fw fa-gear"></i><span> Change Password </span> </a>
+                </li>
            </ul>
 
            <div class="clearfix"></div>

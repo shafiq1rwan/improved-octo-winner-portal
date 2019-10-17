@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Managepay | BYOD ADMIN</title>
+<title>ManagePay | BYOD ADMIN</title>
 
 <!-- Bootstrap CSS -->
 <link href="${pageContext.request.contextPath}/assets/plugins/bootstrap-4.1.3/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
@@ -45,7 +45,7 @@
 .card {
 	margin-bottom: 20px;
 	background-color: #080808a0;
-	border-radius: 4px;
+	border-radius: 10px;
 }
 
 .login-label {
@@ -96,7 +96,7 @@
 							</div>
 				
 						</form>
-						<a href="${pageContext.request.contextPath}/forget-password">Forget Password</a>	
+						<a href="${pageContext.request.contextPath}/forget-password">Forgot Password</a>	
 									
 					</div>
 				</div>

@@ -121,6 +121,13 @@ if it's not present, don't show loader */
 		       	checkSession:checkSession
 		    }
 		})
+		.when("/password_management", {
+			templateUrl : "${pageContext.request.contextPath}/views/password_management",
+			controller : "ctl_changepassword",
+			resolve : {
+		       	checkSession:checkSession
+		    }
+		})
 		.when('/Router_assign_modifier/:id',{
 			templateUrl : function(params){
 				return '${pageContext.request.contextPath}/user/views/assignModifier/'+ params.id
@@ -174,6 +181,7 @@ if it's not present, don't show loader */
 
 <jsp:include page="/WEB-INF/admin/controllers/ctl_brand.jsp" />
 <jsp:include page="/WEB-INF/admin/controllers/ctl_user.jsp" />
+<jsp:include page="/WEB-INF/admin/controllers/ctl_changepassword.jsp" />
 
 <!-- *****************************ANGULAR JS CONTROLLER***************************** -->
 </html>
