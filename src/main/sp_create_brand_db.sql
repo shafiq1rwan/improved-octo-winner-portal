@@ -54,6 +54,7 @@ IF NOT EXISTS(SELECT * FROM information_schema.schemata WHERE schema_name = p_db
 				menu_item_image_path LONGTEXT,
 				menu_item_base_price DECIMAL(10,2) DEFAULT 0.00,
 				menu_item_type INT DEFAULT 0, 
+				menu_quantity_stock INT DEFAULT 0, 
 				is_taxable TINYINT DEFAULT 0,
 				is_discountable TINYINT DEFAULT 0,
 				is_active TINYINT DEFAULT 1,
