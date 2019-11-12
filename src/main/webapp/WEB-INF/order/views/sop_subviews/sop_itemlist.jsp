@@ -1,3 +1,8 @@
+<style>
+.shadowBox {
+  box-shadow: 1px 1px 3px grey;
+}
+</style>
 <body>
 	<div id="item-list-overlay" class="page-overlay">
 		<div
@@ -26,9 +31,9 @@
 					<div
 						class="col-6 col-sm-6 col-md-4 col-lg-4 col-xl-3 sub-card-container"
 						ng-repeat="data in selectedCategory.itemList">
-						<div class="card" ng-click="switchToView('itemDetail', data)">
+						<div class="card shadowBox" ng-click="switchToView('itemDetail', data)">
 							<img class="max-img-height card-img-top" ng-src="${pageContext.request.contextPath}{{imagePath}}{{data.path}}"
-								alt="{{data.name}}">
+								alt="{{data.name}}" style="height: 130px; background-position: center;">
 							<div class="main-color main-text-color text-center sm-resp-font">
 								<b>{{priceTag}}{{data.price}}</b>
 							</div>

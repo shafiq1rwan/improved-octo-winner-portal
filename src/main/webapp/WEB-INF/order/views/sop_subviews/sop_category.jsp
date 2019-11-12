@@ -1,3 +1,8 @@
+<style>
+.shadowBox {
+  box-shadow: 1px 1px 3px grey;
+}
+</style>
 <body>
 	<div id="item-category-overlay" class="page-overlay">
 		<div
@@ -25,9 +30,9 @@
 				<div
 					class="col-6 col-sm-6 col-md-4 col-lg-4 col-xl-3 sub-card-container"
 					ng-repeat="data in menuList">
-					<div class="card" ng-click="switchToView('itemList', data)" style="height: 120px; widows: 120px">
+					<div class="card shadowBox" ng-click="switchToView('itemList', data)">
 						<img class="max-img-height card-img-top" ng-src="${pageContext.request.contextPath}{{imagePath}}{{data.path}}"
-							alt="{{data.name}}">
+							alt="{{data.name}}" style="height: 160px">
 						<div class="card-body d-flex flex-row">
 							<div
 								class="sub-card-body text-center align-self-center d-flex flex-column">
