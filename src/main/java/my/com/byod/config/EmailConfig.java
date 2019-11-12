@@ -26,17 +26,18 @@ public class EmailConfig {
 	public JavaMailSender getJavaMailSender() throws JSONException {
 		
 		JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-		mailSender.setHost(getConfig().getString("mail.host"));
-		mailSender.setPort(getConfig().getInt("mail.port"));
+		JSONObject getConfig = getConfig();
+		mailSender.setHost(getConfig.getString("mail.host"));
+		mailSender.setPort(getConfig.getInt("mail.port"));
 		
-		mailSender.setUsername(getConfig().getString("mail.username"));
-		mailSender.setPassword(getConfig().getString("mail.password"));
+		mailSender.setUsername(getConfig.getString("mail.username"));
+		mailSender.setPassword(getConfig.getString("mail.password"));
 	
 		Properties props = mailSender.getJavaMailProperties();
-	    props.put("mail.transport.protocol", getConfig().getString("mail.transport.protocol"));
-	    props.put("mail.smtp.auth", getConfig().getString("mail.smtp.auth"));
-	    props.put("mail.smtp.starttls.enable", getConfig().getString("mail.smtp.starttls.enable"));
-	    props.put("mail.debug", getConfig().getString("mail.debug"));
+	    props.put("mail.transport.protocol", getConfig.getString("mail.transport.protocol"));
+	    props.put("mail.smtp.auth", getConfig.getString("mail.smtp.auth"));
+	    props.put("mail.smtp.starttls.enable", getConfig.getString("mail.smtp.starttls.enable"));
+	    props.put("mail.debug", getConfig.getString("mail.debug"));
 	    return mailSender;
 	}
 	

@@ -317,7 +317,7 @@
 	<!-- ACCESS RIGHTS MODAL ENDED -->
 	
 	<!-- Loading Modal [START] -->
-	<%-- 	<div class="modal fade" data-backdrop="static" id="loading_modal" role="dialog">
+		<div class="modal fade" data-backdrop="static" id="loading_modal" role="dialog">
 			<div class="modal-dialog modal-sm">
 			<div class="modal-content">
 				<div class="modal-body">
@@ -328,7 +328,7 @@
 				</div>
 			</div>
 			</div>
-		</div> --%>
+		</div>
 	<!-- Loading Modal [END] -->
 	
 	<!-- Alert Modal [START] -->

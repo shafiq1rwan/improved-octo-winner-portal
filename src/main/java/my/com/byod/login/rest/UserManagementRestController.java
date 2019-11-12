@@ -98,10 +98,18 @@ public class UserManagementRestController {
 						return ResponseEntity.badRequest().contentType(MediaType.TEXT_PLAIN).body("Cannot assign user to brand");
 				}			
 				//send email
-				boolean sendStatus = userEmailUtil.sendUserRegisterPassword(user.getName(),randomPass,user.getEmail());
+				Thread sendMailThread = new Thread(){
+				    public void run(){
+				      System.out.println("Send Mail Running");
+				      boolean sendStatus = userEmailUtil.sendUserRegisterPassword(user.getName(),randomPass,user.getEmail());
+				      System.out.println("Send Mail End with status = " + sendStatus);
+				    }
+				};
+				sendMailThread.start();
+				/*boolean sendStatus = userEmailUtil.sendUserRegisterPassword(user.getName(),randomPass,user.getEmail());
 				if(!sendStatus) {
 					return ResponseEntity.badRequest().contentType(MediaType.TEXT_PLAIN).body("Cannot send email to user");
-				}
+				}*/
 			}
 		} catch (IllegalArgumentException ex) {
 			ex.printStackTrace();
