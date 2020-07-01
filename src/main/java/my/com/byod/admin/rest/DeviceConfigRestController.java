@@ -492,6 +492,7 @@ public class DeviceConfigRestController {
 
 				if(transactions.length() != 0) {
 					transactionFlag = performTransactionOperations(connection, transactions, storeId);
+					System.out.println("transaction JSON: "+transactions.toString());
 				} else {
 					transactionFlag = true;
 				}
@@ -855,7 +856,7 @@ public class DeviceConfigRestController {
 					+ "terminal_serial_number = ?, transaction_currency = ?, transaction_amount = ?, transaction_tips = ?, "
 					+ "transaction_status = ?, unique_trans_number = ?, qr_content = ?, created_date = ?, "
 					+ "response_code = ? ,response_message = ?, updated_date = ?, wifi_ip = ?, wifi_port = ?, approval_code = ?, "
-					+ "bank_mid = ?, bank_tid = ?, transaction_date = ?, transaction_time = ?, original_invoice_number = ? "
+					+ "bank_mid = ?, bank_tid = ?, transaction_date = ?, transaction_time = ?, original_invoice_number = ?, "
 					+ "invoice_number = ?, merchant_info = ?, card_issuer_name = ?, masked_card_number = ?, card_expiry_date = ?, "
 					+ "batch_number = ?, rrn = ?, card_issuer_id = ?, cardholder_name = ?, aid = ?, app_label = ?, tc = ?, terminal_verification_result =?, "
 					+ "original_trace_number = ?, trace_number = ?, qr_issuer_type = ?, mpay_mid = ?, mpay_tid = ?, "
@@ -1011,7 +1012,7 @@ public class DeviceConfigRestController {
 
 					stmt.setLong(51, obj.getLong("transaction_id"));	
 					stmt.setLong(52, storeId);
-					
+					System.out.println("executeUpdate: "+stmt.toString());
 					stmt.executeUpdate();
 					stmt.close();
 				} 
