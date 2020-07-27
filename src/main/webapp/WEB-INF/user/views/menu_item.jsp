@@ -10,7 +10,10 @@
 	display: inline;
     margin-right: 8px;
 }
-
+.ii:hover {
+	/* opacity: 0.5; */
+	color: red;
+}
 </style>
 <body class="adminbody">
 
@@ -125,7 +128,7 @@
 										
 										<div class="form-group">
 											<label for="menuBackendId">Backend Id</label>
-    										<input type="text" class="form-control" id="menuBackendId" ng-model = "menu_item.backend_id" required/>
+    										<input type="text" class="form-control" id="menuBackendId" ng-model = "menu_item.backend_id" placeholder="Backend ID" required/>
 										</div>	
 		
 										<div class="form-row">																			 
@@ -133,12 +136,11 @@
 												<label for="taxable">Taxable</label>
 												<input type="checkbox" id="taxable" ng-model = "menu_item.is_taxable" />
 											</div>
-											<div class="form-group col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6" ng-if="!disableInputs">
+											<div class="form-group col-4 col-sm-4 col-md-4 col-lg-4 col-xl-6" ng-if="!disableInputs">
 												<label for="discountable">Discountable</label>
 												<input type="checkbox" id="discountable" ng-model = "menu_item.is_discountable" ng-disabled ="disableInputs"/>
 											</div>
-
-										</div>																		
+										</div>
 									</div>						
 									<div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">	
 										<div class="form-group">
@@ -150,6 +152,11 @@
 											<label for="menuItemBarcode">Barcode Number</label>
     										<input type="text" class="form-control" id="menuItemBarcode" placeholder="Barcode Number" ng-model = "menu_item.menu_item_barcode" />
 										</div>
+										
+										<div class="form-group">
+												<!-- <label for="taxable">Quantity/Stock</label>
+												<input type="number" class="form-control" id="menuQuantityStock" ng-model = "menu_item.menu_quantity_stock" placeholder="0" required/> -->
+											</div>
 									</div>
 								</div>
 							
@@ -168,7 +175,7 @@
 									 		<img style="max-width:100%;max-height:100%;" ng-show="menu_item.image_path!=null"  ng-src="{{menu_item.image_path}}"/>
 									 	</div>									
 										<div class="form-group">																	
-											<label class="login-label">Image</label> 
+											<label class="login-label">Image <i class="fa fa-info-circle ii" data-toggle="tooltip" data-placement="top" title="Image cannot exceed 150kb, image aspect ratio is within 1:1 to 2:1, minimum width of 300px and minimum height of 200px."></i></label> 
 											<input id="menuItemImage" type="file" accept="image/*"/> 
 										</div>
 									</div>
@@ -331,4 +338,9 @@
 		
 	</div>
 </body>
+<script>
+$(document).ready(function(){
+  $('[data-toggle="tooltip"]').tooltip();
+});
+</script>
 </html>

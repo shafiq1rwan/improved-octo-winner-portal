@@ -20,20 +20,20 @@ import org.springframework.web.servlet.ModelAndView;
 
 import my.com.byod.admin.util.DbConnectionUtil;
 
-
 @RestController
 @RequestMapping("/user")
 public class UserLoginRestController {
-	
-	/*@Autowired
-	UserService adminService;*/
-	
+
+	/*
+	 * @Autowired UserService adminService;
+	 */
+
 	@Autowired
 	StoreRestController storeRestController;
-	
+
 	@Autowired
 	DbConnectionUtil dbConnectionUtil;
-	
+
 	// SIGNIN
 	@RequestMapping(value = { "/signin" }, method = RequestMethod.GET)
 	public ModelAndView signIn() {
@@ -41,22 +41,25 @@ public class UserLoginRestController {
 		model.setViewName("/login");
 		return model;
 	}
-	
+
 	// SEND HOME
-	@RequestMapping(value = {""}, method = RequestMethod.GET)
-	public ModelAndView home(/*Authentication authentication*/HttpServletRequest request) {		
-		/*User user = (User) authentication.getPrincipal();
-		com.managepay.byod.model.User dbUser = adminService.getAdminDetail(user.getUsername());*/
-		
+	@RequestMapping(value = { "" }, method = RequestMethod.GET)
+	public ModelAndView home(/* Authentication authentication */HttpServletRequest request) {
+		/*
+		 * User user = (User) authentication.getPrincipal();
+		 * com.managepay.byod.model.User dbUser =
+		 * adminService.getAdminDetail(user.getUsername());
+		 */
+
 		HttpSession session = request.getSession(false);
 		ModelAndView model = new ModelAndView();
-/*model.addObject("role", dbUser.getRoles());*/
+		/* model.addObject("role", dbUser.getRoles()); */
 
-		if(session != null) {
+		if (session != null) {
 			JSONObject accessRight = (JSONObject) session.getAttribute("access_rights");
-			if(accessRight!=null) {
+			if (accessRight != null) {
 				model.setViewName("/user/home");
-			}else  {
+			} else {
 				return new ModelAndView("redirect:/byod-panel");
 			}
 		} else {
@@ -64,7 +67,7 @@ public class UserLoginRestController {
 		}
 		return model;
 	}
-	
+
 	// USER - 403 UN-Authorize Access
 	@RequestMapping(value = { "/403" }, method = { RequestMethod.GET, RequestMethod.POST })
 	public ModelAndView user_403Page() {
@@ -72,33 +75,36 @@ public class UserLoginRestController {
 		model.setViewName("/user/403");
 		return model;
 	}
-	
+
 	// USER - CHECK SESSION
 	@RequestMapping(value = { "/checksession" }, method = RequestMethod.GET)
 	public ResponseEntity<String> check_session(HttpServletRequest request) {
 		HttpSession session = request.getSession(false);
 		String status = null;
-		
+
 		if (session != null) {
 			status = "exist";
 		}
 		return ResponseEntity.status(HttpStatus.OK).body(status);
 	}
-	
-	//USER - CHECK ACCESS RIGHTS
-	@RequestMapping(value = {"/checkaccessrights/{access}"}, method = RequestMethod.GET)
-	public ResponseEntity<String> check_access_rights(HttpServletRequest request, @PathVariable("access") String access) throws JSONException{
+
+	// USER - CHECK ACCESS RIGHTS
+	@RequestMapping(value = { "/checkaccessrights/{access}" }, method = RequestMethod.GET)
+	public ResponseEntity<String> check_access_rights(HttpServletRequest request, @PathVariable("access") String access)
+			throws JSONException {
 		HttpSession session = request.getSession();
 		String result = null;
-		
-		if(session != null) {
-			JSONObject accessRight = (JSONObject) session.getAttribute("access_rights");
-/*			System.out.println("AccessRights :" + accessRight.toString());
-			System.out.println("Access :" + access);
-			System.out.println("Access Result:" + accessRight.getJSONObject("accessRights").getBoolean(access));*/
 
-			if(accessRight!=null) {
-				if(accessRight.getJSONObject("accessRights").getBoolean(access)) {
+		if (session != null) {
+			JSONObject accessRight = (JSONObject) session.getAttribute("access_rights");
+			/*
+			 * System.out.println("AccessRights :" + accessRight.toString());
+			 * System.out.println("Access :" + access); System.out.println("Access Result:"
+			 * + accessRight.getJSONObject("accessRights").getBoolean(access));
+			 */
+
+			if (accessRight != null) {
+				if (accessRight.getJSONObject("accessRights").getBoolean(access)) {
 					result = "authorized";
 				}
 			}
@@ -107,7 +113,7 @@ public class UserLoginRestController {
 		}
 		return ResponseEntity.status(HttpStatus.OK).body(result);
 	}
-	
+
 	@RequestMapping(value = { "/views/unauthorized" }, method = RequestMethod.GET)
 	public ModelAndView viewUnauthorized() {
 		ModelAndView model = new ModelAndView();
@@ -120,22 +126,19 @@ public class UserLoginRestController {
 		ModelAndView model = new ModelAndView();
 		if (condition.equals("lock")) {
 			model.addObject("exceptionMsg", "Hit attempt limit. Please proceed with \"Forgot Password\"");
-		} 
-		else if (condition.equals("timeout")) {
+		} else if (condition.equals("timeout")) {
 			model.addObject("exceptionMsg", "Session timeout");
-		}
-		else if (condition.equals("not-exist")) {
+		} else if (condition.equals("not-exist")) {
 			model.addObject("exceptionMsg", "User not exist");
-		}
-		else {
+		} else {
 			model.addObject("exceptionMsg", "Invalid access");
 		}
-		
+
 		model.setViewName("/login");
-	
-	return model;
+
+		return model;
 	}
-		
+
 	// Store
 	@RequestMapping(value = { "/views/store" }, method = RequestMethod.GET)
 	public ModelAndView viewBrand() {
@@ -143,24 +146,24 @@ public class UserLoginRestController {
 		model.setViewName("/user/views/store");
 		return model;
 	}
-	
+
 	// Store - ECPOS
 	@RequestMapping(value = { "/views/store/{id}/ecpos" }, method = RequestMethod.GET)
-	public ModelAndView viewECPos(@PathVariable(value = "id") long id, HttpServletRequest request, HttpServletResponse response) {
+	public ModelAndView viewECPos(@PathVariable(value = "id") long id, HttpServletRequest request,
+			HttpServletResponse response) {
 		ModelAndView model = new ModelAndView();
 		Connection connection = null;
 		try {
 			connection = dbConnectionUtil.retrieveConnection(request);
-			if(storeRestController.getEcposStatus(connection, id)) {
+			if (storeRestController.getEcposStatus(connection, id)) {
 				model.setViewName("/user/views/ecpos");
-			}
-			else {
+			} else {
 				model.setViewName("/user/views/unauthorized");
 			}
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		} finally {
-			if(connection!=null)
+			if (connection != null)
 				try {
 					connection.close();
 				} catch (SQLException e) {
@@ -170,31 +173,31 @@ public class UserLoginRestController {
 		}
 		return model;
 	}
-	
+
 	// Store - BYOD
 	@RequestMapping(value = { "/views/store/{id}/byod" }, method = RequestMethod.GET)
 	public ModelAndView viewBYOD(@PathVariable(value = "id") long id) {
 		ModelAndView model = new ModelAndView();
 		model.setViewName("/user/views/byod");
 		return model;
-	}		
-		
+	}
+
 	// Store - KIOSK
 	@RequestMapping(value = { "/views/store/{id}/kiosk" }, method = RequestMethod.GET)
 	public ModelAndView viewKIOSK(@PathVariable(value = "id") long id) {
 		ModelAndView model = new ModelAndView();
 		model.setViewName("/user/views/kiosk");
 		return model;
-	}		
-	
+	}
+
 	// Store - Transaction
 	@RequestMapping(value = { "/views/store/{id}/transaction" }, method = RequestMethod.GET)
 	public ModelAndView viewTransaction(@PathVariable(value = "id") long id) {
 		ModelAndView model = new ModelAndView();
 		model.setViewName("/user/views/transaction");
 		return model;
-	}		
-	
+	}
+
 	// Group Category
 	@RequestMapping(value = { "/views/groupCategory" }, method = RequestMethod.GET)
 	public ModelAndView viewGroupCategory() {
@@ -202,7 +205,7 @@ public class UserLoginRestController {
 		model.setViewName("/user/views/group_category");
 		return model;
 	}
-	
+
 	// Profile
 	@RequestMapping(value = { "/views/profile" }, method = RequestMethod.GET)
 	public ModelAndView viewProfile() {
@@ -210,7 +213,7 @@ public class UserLoginRestController {
 		model.setViewName("/user/views/profile");
 		return model;
 	}
-	
+
 	// Master Menu
 	@RequestMapping(value = { "/views/menu" }, method = RequestMethod.GET)
 	public ModelAndView viewMenu() {
@@ -218,7 +221,7 @@ public class UserLoginRestController {
 		model.setViewName("/user/views/menu");
 		return model;
 	}
-	
+
 	// Add Menu
 	@RequestMapping(value = { "/views/addMenu" }, method = RequestMethod.GET)
 	public ModelAndView addMenu() {
@@ -226,7 +229,7 @@ public class UserLoginRestController {
 		model.setViewName("/user/views/add_menu");
 		return model;
 	}
-	
+
 	// Dashboard
 	@RequestMapping(value = { "/views/dashboard" }, method = RequestMethod.GET)
 	public ModelAndView viewMenuDashboard() {
@@ -234,9 +237,9 @@ public class UserLoginRestController {
 		model.setViewName("/user/views/dashboard");
 		return model;
 	}
-	
+
 	// Category
-	@RequestMapping(value = {"/views/groupCategory/{id}/category"}, method = RequestMethod.GET)
+	@RequestMapping(value = { "/views/groupCategory/{id}/category" }, method = RequestMethod.GET)
 	public ModelAndView viewCategory(@PathVariable(value = "id") long id) {
 		ModelAndView model = new ModelAndView();
 		model.setViewName("/user/views/category");
@@ -244,7 +247,7 @@ public class UserLoginRestController {
 	}
 
 	// Item Group
-	@RequestMapping(value = {"/views/itemGroup"}, method = RequestMethod.GET)
+	@RequestMapping(value = { "/views/itemGroup" }, method = RequestMethod.GET)
 	public ModelAndView viewItemGroup() {
 		ModelAndView model = new ModelAndView();
 		model.setViewName("/user/views/item_group");
@@ -252,49 +255,73 @@ public class UserLoginRestController {
 	}
 
 	// Modifier Group
-	@RequestMapping(value = {"/views/modifierGroup"}, method = RequestMethod.GET)
+	@RequestMapping(value = { "/views/modifierGroup" }, method = RequestMethod.GET)
 	public ModelAndView viewModifierGroup() {
 		ModelAndView model = new ModelAndView();
 		model.setViewName("/user/views/modifier_group");
 		return model;
 	}
-	
-	@RequestMapping(value = {"/views/menuItem"}, method = RequestMethod.GET)
+
+	@RequestMapping(value = { "/views/menuItem" }, method = RequestMethod.GET)
 	public ModelAndView viewMenuItem() {
 		ModelAndView model = new ModelAndView();
 		model.setViewName("/user/views/menu_item");
 		return model;
 	}
-	
-	//Combo
-	@RequestMapping(value = {"/views/combo/{id}"}, method = RequestMethod.GET)
+
+	// Combo
+	@RequestMapping(value = { "/views/combo/{id}" }, method = RequestMethod.GET)
 	public ModelAndView viewCombo(@PathVariable("id") long id) {
 		ModelAndView model = new ModelAndView();
 		model.setViewName("/user/views/combo");
 		return model;
 	}
-	
-	//Assign Modifier
-	@RequestMapping(value = {"/views/assignModifier/{id}"}, method = RequestMethod.GET)
+
+	// Assign Modifier
+	@RequestMapping(value = { "/views/assignModifier/{id}" }, method = RequestMethod.GET)
 	public ModelAndView viewAssignModifier(@PathVariable("id") long id) {
 		ModelAndView model = new ModelAndView();
 		model.setViewName("/user/views/assign_modifier");
 		return model;
 	}
-	
-	//Report
-	@RequestMapping(value = {"/views/report"}, method = RequestMethod.GET)
+
+	// Report
+	@RequestMapping(value = { "/views/report" }, method = RequestMethod.GET)
 	public ModelAndView viewReport() {
 		ModelAndView model = new ModelAndView();
 		model.setViewName("/user/views/report");
 		return model;
 	}
-	
+
 	// Setting
 	@RequestMapping(value = { "/views/setting" }, method = RequestMethod.GET)
 	public ModelAndView viewSetting() {
 		ModelAndView model = new ModelAndView();
 		model.setViewName("/user/views/setting");
+		return model;
+	}
+
+	// Report Best Selling Item
+	@RequestMapping(value = { "/views/reportBSI" }, method = RequestMethod.GET)
+	public ModelAndView viewReportBSI() {
+		ModelAndView model = new ModelAndView();
+		model.setViewName("/user/views/reportBSI");
+		return model;
+	}
+
+	// Report Sales by Employee
+	@RequestMapping(value = { "/views/reportSBE" }, method = RequestMethod.GET)
+	public ModelAndView viewReportSBE() {
+		ModelAndView model = new ModelAndView();
+		model.setViewName("/user/views/reportSBE");
+		return model;
+	}
+
+	// Report Sales by Payment Type
+	@RequestMapping(value = { "/views/reportSBPT" }, method = RequestMethod.GET)
+	public ModelAndView viewReportSBPT() {
+		ModelAndView model = new ModelAndView();
+		model.setViewName("/user/views/reportSBPT");
 		return model;
 	}
 }

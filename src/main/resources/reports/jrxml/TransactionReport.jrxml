@@ -19,7 +19,7 @@
 	<parameter name="endDate" class="java.lang.String"/>
 	<queryString>
 		<![CDATA[select distinct t.check_number, s.staff_name, round(t.transaction_amount,2) as 'amount', concat(pt.name,' - ', pm.name) as 'payment_approach', dt.name as 'device_name'
-			FROM [transaction] t 
+			FROM transaction t 
 			INNER JOIN staff s ON t.staff_id = s.id 
 			INNER JOIN payment_method_lookup pm ON pm.id = t.payment_method 
 			INNER JOIN payment_type_lookup pt ON pt.id = t.payment_type
@@ -27,7 +27,7 @@
 			INNER JOIN device_type_lookup dt ON dt.id = cd.device_type
 			WHERE cast(t.created_date AS date) between $P{startDate} AND $P{endDate}
 			AND t.transaction_status = 3
-			ORDER BY t.check_number;]]>
+			ORDER BY t.check_number]]>
 	</queryString>
 	<field name="check_number" class="java.lang.Long">
 		<property name="com.jaspersoft.studio.field.label" value="check_number"/>

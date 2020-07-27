@@ -1,13 +1,10 @@
 <script>
-	app.controller('ctl_report',function($scope, $http, $window, $routeParams, $location) {	
+	app.controller('ctl_reportBSI',function($scope, $http, $window, $routeParams, $location) {	
 		$scope.reportStartDate;
 		$scope.reportEndDate;
-		$scope.reportType;
 		$scope.stateItem = [];
 		$scope.reportTypeItem = [];
 		$scope.storeItem = [];
-		$scope.employeeItem = [];
-		$scope.storeId;
 
 		$scope.initiation = function(){
 			$scope.reportStartDate = new Date();
@@ -20,7 +17,7 @@
 	
 			var date1 = moment($scope.reportStartDate).format();
 			var date2 = moment($scope.reportEndDate).format();
-			var reportType = 1;
+			var reportType = 2;
 			var store = $scope.storeName;
 			var employee = "undefined";
 			var paymentType = "undefined";
@@ -32,16 +29,15 @@
 			
 			var date1 = moment($scope.reportStartDate).format();
 			var date2 = moment($scope.reportEndDate).format();
-			var reportType = 1;
 			var store = $scope.storeName;
 			var employee = "undefined";
 			var paymentType = "undefined";
 			
-			$('#menuItem_dtable')
+			$('#menuItem_dtable2')
 			.DataTable(
 					{
 						"ajax" : {
-							"url" : '${pageContext.request.contextPath}/report/transaction_report_list/'+date1+"/"+date2+"/"+reportType+"/"+store+"/"+employee+"/"+paymentType,
+							"url" : '${pageContext.request.contextPath}/report/getBestSellingItem/'+date1+"/"+date2+"/"+store,
 							"dataSrc": function ( json ) {                
 				                return json;
 				            },  
@@ -59,13 +55,10 @@
 						"searching" : true,
 						"columns" : [ 
 							{"data" : "no"}, 
-							{"data" : "store_name"}, 
-							{"data" : "store_address"}, 
-							{"data" : "staff_name"}, 
-							{"data" : "method_pay"}, 
-							{"data" : "type_pay"}, 
-							{"data" : "money"}, 
-							{"data" : "trx_date"}
+							{"data" : "total_item"}, 
+							{"data" : "item_name"}, 
+							{"data" : "item_price"}, 
+							{"data" : "trxdate"}, 
 						],
 						"scrollX" : true
 					});
@@ -122,25 +115,6 @@
 			});
 		}
 		
-		$scope.getEmployeeName = function(){
-			
-			var storeId = $scope.storeName;
-			
-			$http
-			.get(
-				'${pageContext.request.contextPath}/report/getEmployeeName/'+storeId)
-			.then(
-				function(response) {	
-					$scope.employeeItem = response.data;
-				},
-				function(response) {
-					swal({
-						  title: "Error",
-						  text: response.data,
-						  icon: "warning",
-						  dangerMode: true,
-					});
-			});
-		}
+		
 	});
 </script>

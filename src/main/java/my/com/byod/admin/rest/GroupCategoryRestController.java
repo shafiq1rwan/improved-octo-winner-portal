@@ -1122,6 +1122,7 @@ public class GroupCategoryRestController {
 				// adding identity parameter to script
 				query = tmpOn + query.substring(0, query.indexOf("(")+1) + "id, " + query.substring(query.indexOf("(")+1);
 				query = query.substring(0,  query.indexOf("(", query.indexOf("(")+1)+1 ) + "?, " + query.substring(query.indexOf("(", query.indexOf("(")+1)+1) + tmpOff;
+				System.out.println("query script: "+query);
 			}
 			
 			System.out.println(query);

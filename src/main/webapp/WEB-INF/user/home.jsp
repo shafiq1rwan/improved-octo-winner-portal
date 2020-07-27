@@ -262,6 +262,36 @@ if it's not present, don't show loader */
 		       	checkSession:checkSession
 		    }
 		})
+		.when('/Router_reportBSI',{
+			templateUrl : function(params){
+				return '${pageContext.request.contextPath}/user/views/reportBSI'
+			},
+			controller : "ctl_reportBSI",
+			resolve : {
+		       	checkSession:checkSession,
+		       	checkPageAccess:checkPageAccess('report')
+		    }
+		})
+		.when('/Router_reportSBE',{
+			templateUrl : function(params){
+				return '${pageContext.request.contextPath}/user/views/reportSBE'
+			},
+			controller : "ctl_reportSBE",
+			resolve : {
+		       	checkSession:checkSession,
+		       	checkPageAccess:checkPageAccess('report')
+		    }
+		})
+		.when('/Router_reportSBPT',{
+			templateUrl : function(params){
+				return '${pageContext.request.contextPath}/user/views/reportSBPT'
+			},
+			controller : "ctl_reportSBPT",
+			resolve : {
+		       	checkSession:checkSession,
+		       	checkPageAccess:checkPageAccess('report')
+		    }
+		})
 		.when('/Router_setting',{
 			templateUrl : function(params){
 				return '${pageContext.request.contextPath}/user/views/setting'
@@ -364,5 +394,8 @@ if it's not present, don't show loader */
 <jsp:include page="/WEB-INF/user/controller/ctl_dashboard.jsp" />
 <jsp:include page="/WEB-INF/user/controller/ctl_report.jsp" />
 <jsp:include page="/WEB-INF/user/controller/ctl_setting.jsp" />
+<jsp:include page="/WEB-INF/user/controller/ctl_reportBSI.jsp" />
+<jsp:include page="/WEB-INF/user/controller/ctl_reportSBE.jsp" />
+<jsp:include page="/WEB-INF/user/controller/ctl_reportSBPT.jsp" />
 <!-- *****************************ANGULAR JS CONTROLLER***************************** -->
 </html>

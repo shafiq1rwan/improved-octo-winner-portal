@@ -1,13 +1,12 @@
 <script>
-	app.controller('ctl_report',function($scope, $http, $window, $routeParams, $location) {	
+	app.controller('ctl_reportSBPT',function($scope, $http, $window, $routeParams, $location) {	
 		$scope.reportStartDate;
 		$scope.reportEndDate;
-		$scope.reportType;
+		/* $scope.reportType; */
 		$scope.stateItem = [];
-		$scope.reportTypeItem = [];
+		/* $scope.reportTypeItem = []; */
 		$scope.storeItem = [];
-		$scope.employeeItem = [];
-		$scope.storeId;
+		$scope.paymentItem = [];
 
 		$scope.initiation = function(){
 			$scope.reportStartDate = new Date();
@@ -20,10 +19,10 @@
 	
 			var date1 = moment($scope.reportStartDate).format();
 			var date2 = moment($scope.reportEndDate).format();
-			var reportType = 1;
+			var reportType = 4;
 			var store = $scope.storeName;
 			var employee = "undefined";
-			var paymentType = "undefined";
+			var paymentType = $scope.paymentType;
 			
 			window.open('${pageContext.request.contextPath}/report/transaction_report/'+date1+"/"+date2+"/"+reportType+"/"+store+"/"+employee+"/"+paymentType);
 		}
@@ -32,12 +31,12 @@
 			
 			var date1 = moment($scope.reportStartDate).format();
 			var date2 = moment($scope.reportEndDate).format();
-			var reportType = 1;
+			var reportType = 4;
 			var store = $scope.storeName;
 			var employee = "undefined";
-			var paymentType = "undefined";
+			var paymentType = $scope.paymentType;
 			
-			$('#menuItem_dtable')
+			$('#menuItem_dtable4')
 			.DataTable(
 					{
 						"ajax" : {
@@ -56,7 +55,6 @@
 						},
 						"processing": true,
 						"destroy" : true,
-						"searching" : true,
 						"columns" : [ 
 							{"data" : "no"}, 
 							{"data" : "store_name"}, 
@@ -73,7 +71,7 @@
 		
 		$scope.getDropdownList = function(){
 			
-			$http
+			/* $http
 			.get(
 				'${pageContext.request.contextPath}/report/getState/')
 			.then(
@@ -87,14 +85,14 @@
 						  icon: "warning",
 						  dangerMode: true,
 					});
-			});
+			}); */
 			
 			$http
 			.get(
-				'${pageContext.request.contextPath}/report/getReportType/')
+				'${pageContext.request.contextPath}/report/getPaymentMethod/')
 			.then(
 				function(response) {	
-					$scope.reportTypeItem = response.data;
+					$scope.paymentItem = response.data;
 				},
 				function(response) {
 					swal({
@@ -122,25 +120,6 @@
 			});
 		}
 		
-		$scope.getEmployeeName = function(){
-			
-			var storeId = $scope.storeName;
-			
-			$http
-			.get(
-				'${pageContext.request.contextPath}/report/getEmployeeName/'+storeId)
-			.then(
-				function(response) {	
-					$scope.employeeItem = response.data;
-				},
-				function(response) {
-					swal({
-						  title: "Error",
-						  text: response.data,
-						  icon: "warning",
-						  dangerMode: true,
-					});
-			});
-		}
+		
 	});
 </script>

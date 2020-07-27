@@ -138,6 +138,7 @@ IF NOT EXISTS(SELECT * FROM information_schema.schemata WHERE schema_name = p_db
 				backend_id NVARCHAR(50) NOT NULL UNIQUE,
 				store_name NVARCHAR(150) NOT NULL UNIQUE,
 				store_logo_path LONGTEXT,
+				state_id INT NOT NULL,
 				store_address NVARCHAR(150),
 				store_longitude DECIMAL(15,8),
 				store_latitude DECIMAL(15,8),
@@ -533,6 +534,18 @@ IF NOT EXISTS(SELECT * FROM information_schema.schemata WHERE schema_name = p_db
 				created_date DATETIME(3) NOT NULL,
 				last_update_date DATETIME(3)
 			);'));
+			
+			call sp_exec(CONCAT('CREATE TABLE ',p_db_name,'.state_lookup 
+			(
+				id BIGINT PRIMARY KEY AUTO_INCREMENT NOT NULL,
+				name VARCHAR(255) NOT NULL,
+			);'));
+			
+			call sp_exec(CONCAT('CREATE TABLE ',p_db_name,'.reporttype_lookup 
+			(
+				id BIGINT PRIMARY KEY AUTO_INCREMENT NOT NULL,
+				name VARCHAR(255) NOT NULL,
+			);'));
 
 			call sp_exec(CONCAT('INSERT INTO ',p_db_name,'.role_lookup (role_name) VALUES (''Admin'');'));
             call sp_exec(CONCAT('INSERT INTO ',p_db_name,'.role_lookup (role_name) VALUES (''Store Manager'');'));
@@ -585,7 +598,31 @@ IF NOT EXISTS(SELECT * FROM information_schema.schemata WHERE schema_name = p_db
 			call sp_exec(CONCAT('INSERT into ',p_db_name,'.general_configuration (`description`, `parameter`, `value`) VALUE (''BYOD Setting - Main Button Background Color'', ''mainButtonBackgroundColor'', ''#C41230'');'));
 			call sp_exec(CONCAT('INSERT into ',p_db_name,'.general_configuration (`description`, `parameter`, `value`) VALUE (''BYOD Setting - Main Button Background Hover Color'', ''mainButtonBackgroundHoverColor'', ''#C41230'');'));
 			call sp_exec(CONCAT('INSERT into ',p_db_name,'.general_configuration (`description`, `parameter`, `value`) VALUE (''BYOD Setting - Main Button Background Focus Color'', ''mainButtonBackgroundFocusColor'', ''#C41230'');'));
-            
+			
+			call sp_exec(CONCAT('INSERT into ',p_db_name,'.`state_lookup` (`name`) VALUES (''JOHOR'');'));
+            call sp_exec(CONCAT('INSERT into ',p_db_name,'.`state_lookup` (`name`) VALUES (''KEDAH'');'));
+			call sp_exec(CONCAT('INSERT into ',p_db_name,'.`state_lookup` (`name`) VALUES (''KELANTAN'');'));
+			call sp_exec(CONCAT('INSERT into ',p_db_name,'.`state_lookup` (`name`) VALUES (''WILAYAH PERSEKUTUAN KUALA LUMPUR'');'));
+			call sp_exec(CONCAT('INSERT into ',p_db_name,'.`state_lookup` (`name`) VALUES (''WILAYAH PERSEKUTUAN LABUAN'');'));
+			call sp_exec(CONCAT('INSERT into ',p_db_name,'.`state_lookup` (`name`) VALUES (''MELAKA'');'));
+			call sp_exec(CONCAT('INSERT into ',p_db_name,'.`state_lookup` (`name`) VALUES (''NEGERI SEMBILAN'');'));
+			call sp_exec(CONCAT('INSERT into ',p_db_name,'.`state_lookup` (`name`) VALUES (''PAHANG'');'));
+			call sp_exec(CONCAT('INSERT into ',p_db_name,'.`state_lookup` (`name`) VALUES (''PULAU PINANG'');'));
+			call sp_exec(CONCAT('INSERT into ',p_db_name,'.`state_lookup` (`name`) VALUES (''PERAK'');'));
+			call sp_exec(CONCAT('INSERT into ',p_db_name,'.`state_lookup` (`name`) VALUES (''PERLIS'');'));
+			call sp_exec(CONCAT('INSERT into ',p_db_name,'.`state_lookup` (`name`) VALUES (''PUTRAJAYA'');'));
+			call sp_exec(CONCAT('INSERT into ',p_db_name,'.`state_lookup` (`name`) VALUES (''SABAH'');'));
+			call sp_exec(CONCAT('INSERT into ',p_db_name,'.`state_lookup` (`name`) VALUES (''SARAWAK'');'));
+			call sp_exec(CONCAT('INSERT into ',p_db_name,'.`state_lookup` (`name`) VALUES (''SELANGOR'');'));
+			call sp_exec(CONCAT('INSERT into ',p_db_name,'.`state_lookup` (`name`) VALUES (''TERENGGANU'');'));
+			call sp_exec(CONCAT('INSERT into ',p_db_name,'.`state_lookup` (`name`) VALUES (''NOT APPLICABLE'');'));
+			
+			call sp_exec(CONCAT('INSERT into ',p_db_name,'.`reporttype_lookup` (`name`) VALUES (''Summary Report'');'));
+			call sp_exec(CONCAT('INSERT into ',p_db_name,'.`reporttype_lookup` (`name`) VALUES (''Best Selling Item'');'));
+			call sp_exec(CONCAT('INSERT into ',p_db_name,'.`reporttype_lookup` (`name`) VALUES (''Sales by Employee'');'));
+			call sp_exec(CONCAT('INSERT into ',p_db_name,'.`reporttype_lookup` (`name`) VALUES (''Sales by Payment Type'');'));
+			call sp_exec(CONCAT('INSERT into ',p_db_name,'.`reporttype_lookup` (`name`) VALUES (''Sales by Modifiers'');'));
+			
 		END IF;
 
 		SET p_db_creation_result = 1;

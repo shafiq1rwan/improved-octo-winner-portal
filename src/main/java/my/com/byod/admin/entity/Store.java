@@ -72,6 +72,9 @@ public class Store {
 	@JsonProperty("store_tax_type_id")
 	private Long storeTaxTypeId;
 	
+	@JsonProperty("store_state")
+	private Integer storeState; 
+	
 	public Store() {
 	}
 
@@ -249,6 +252,14 @@ public class Store {
 
 	public void setStoreTaxTypeId(Long storeTaxTypeId) {
 		this.storeTaxTypeId = storeTaxTypeId;
+	}
+
+	public Integer getStoreState() {
+		return storeState;
+	}
+
+	public void setStoreState(Integer storeState) {
+		this.storeState = storeState;
 	}
 
 }

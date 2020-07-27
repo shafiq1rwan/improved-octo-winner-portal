@@ -457,6 +457,7 @@
 						$scope.menu_item.image_path = "${pageContext.request.contextPath}" + response.data.menu_item_image_path;
 						$scope.menu_item.menu_item_base_price = response.data.menu_item_base_price;
 						$scope.menu_item.menu_item_type = response.data.menu_item_type;
+						$scope.menu_item.menu_quantity_stock = response.data.menu_quantity_stock;
 						$scope.menu_item.is_taxable = response.data.is_taxable;			
 						$scope.menu_item.is_discountable = response.data.is_discountable;
 						$scope.menu_item.is_active = response.data.is_active;
@@ -533,8 +534,10 @@
 					"menu_item_image_path": $scope.upload_image?$scope.menu_item.image_path: null,
 					"menu_item_base_price": $scope.menu_item.menu_item_base_price || 0.00,
 					"menu_item_type": $scope.menu_item.menu_item_type || 0,
+					"menu_quantity_stock": $scope.menu_item.menu_quantity_stock || 0,
 					"is_taxable" : $scope.menu_item.is_taxable || false,
-					"is_discountable": $scope.menu_item.is_discountable || false
+					"is_discountable": $scope.menu_item.is_discountable || false,
+					"menu_quantity_stock": $scope.menu_item.menu_quantity_stock || 0
 				});
 				
 				console.log("Submitted Data");

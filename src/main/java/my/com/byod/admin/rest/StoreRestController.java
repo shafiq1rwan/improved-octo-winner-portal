@@ -219,7 +219,7 @@ public class StoreRestController {
 			endTime.set(Calendar.MILLISECOND, 0);
 			
 			String sqlStatement = "INSERT INTO store(backend_id,store_name,store_logo_path,store_address,store_longitude,store_latitude,store_country,store_currency, " + 
-					"is_publish, store_start_operating_time, store_end_operating_time, ecpos, store_contact_person, store_contact_hp_number, store_contact_email, store_type_id, kiosk_payment_delay_id, byod_payment_delay_id, store_tax_type_id, ecpos_takeaway_detail_flag, login_type_id, login_switch_flag, created_date) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,NOW());";
+					"is_publish, store_start_operating_time, store_end_operating_time, ecpos, store_contact_person, store_contact_hp_number, store_contact_email, store_type_id, kiosk_payment_delay_id, byod_payment_delay_id, store_tax_type_id, ecpos_takeaway_detail_flag, login_type_id, login_switch_flag, created_date, state_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,NOW(),?);";
 			int count = 1;
 			stmt = connection.prepareStatement(sqlStatement);
 			stmt.setString(count++, backendId);
@@ -244,6 +244,7 @@ public class StoreRestController {
 			stmt.setBoolean(count++, store.getEcposTakeawayDetailFlag());
 			stmt.setLong(count++, store.getLoginTypeId());
 			stmt.setBoolean(count++, store.getLoginSwitchFlag());
+			stmt.setInt(count++, store.getStoreState());
 			stmt.executeUpdate();
 
 		} catch (Exception ex) {
@@ -359,6 +360,7 @@ public class StoreRestController {
 			jsonResult.put("paymentDelayType", getPaymentDelayType(connection));
 			jsonResult.put("storeTaxType", getStoreTaxType(connection));
 			jsonResult.put("storeLoginType", getStoreLoginType(connection));
+			jsonResult.put("storeState", getStateLookup(connection));
 			
 			return ResponseEntity.ok(jsonResult.toString());
 		} catch(Exception ex) {
@@ -572,7 +574,12 @@ public class StoreRestController {
 			if(!jsonObj.has("role_id") || jsonObj.getLong("role_id")==0) {
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Role cannot be empty.");
 			}
-			
+			if(jsonObj.getString("username").length() < 7) {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Username must be more than 7 characters.");
+			}
+			if(jsonObj.getString("password").length() < 7) {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Password must be more than 7 characters.");
+			}
 			String encPassword = AESEncryption.encrypt(jsonObj.getString("password"));		
 			connection = dbConnectionUtil.retrieveConnection(request);
 			
@@ -2152,6 +2159,34 @@ public class StoreRestController {
 				JSONObject jsonObj = new JSONObject();
 				jsonObj.put("id", rs.getLong("id"));				
 				jsonObj.put("login_type_name", rs.getString("login_type_name"));							
+				jsonArr.put(jsonObj);
+			}
+		} catch(Exception ex) {
+			throw ex;
+		} finally {
+			if (stmt != null) {
+				stmt.close();
+			}
+			if (rs != null) {
+				rs.close();
+			}
+		}
+		return jsonArr;
+	}
+	
+	public JSONArray getStateLookup(Connection connection) throws Exception{
+		JSONArray jsonArr = new JSONArray();
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		
+		try {
+			stmt = connection.prepareStatement("SELECT * FROM state_lookup ");
+			rs = (ResultSet) stmt.executeQuery();
+			
+			while(rs.next()) {
+				JSONObject jsonObj = new JSONObject();
+				jsonObj.put("id", rs.getLong("id"));				
+				jsonObj.put("name", rs.getString("name"));							
 				jsonArr.put(jsonObj);
 			}
 		} catch(Exception ex) {

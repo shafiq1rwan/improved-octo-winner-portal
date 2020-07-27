@@ -43,9 +43,11 @@ public class ReportRestController {
 	@Autowired
 	private DbConnectionUtil dbConnectionUtil;
 
-	@RequestMapping(value = { "/transaction_report/{date1}/{date2}/{reportType}" }, method = { RequestMethod.GET })
+	@RequestMapping(value = { "/transaction_report/{date1}/{date2}/{reportType}/{store}/{employee}/{paymentType}" }, method = {
+			RequestMethod.GET })
 	public void generateTransactionReport(@PathVariable String date1, @PathVariable String date2,
-			@PathVariable String reportType, HttpServletRequest request, HttpServletResponse response) {
+			@PathVariable String reportType, @PathVariable String store, @PathVariable String employee,
+			@PathVariable String paymentType, HttpServletRequest request, HttpServletResponse response) {
 
 		Connection connection = null;
 
@@ -54,6 +56,8 @@ public class ReportRestController {
 			System.out.println("date1: " + date1);
 			System.out.println("date2: " + date2);
 			System.out.println("reportType: " + reportType);
+			System.out.println("storeName: " + store);
+			System.out.println("employeeName: " + employee);
 
 			String subStr1 = date1.substring(0, 10);
 			String subStr2 = date2.substring(0, 10);
@@ -66,9 +70,21 @@ public class ReportRestController {
 
 			String newSubStr2 = new SimpleDateFormat("yyyy-MM-dd").format(datePlusOne);
 
-			if(reportType.equalsIgnoreCase("1") || reportType.equalsIgnoreCase("undefined")) {
-				summaryReport(subStr1, newSubStr2, request, connection, response);	
-			}else if(reportType.equalsIgnoreCase("2")) {
+			if (reportType.equalsIgnoreCase("1") || reportType.equalsIgnoreCase("3")
+					|| reportType.equalsIgnoreCase("4")) {
+
+				String title = "";
+
+				if (reportType.equalsIgnoreCase("1")) {
+					title = "Summary Sales Report";
+				} else if (reportType.equalsIgnoreCase("3")) {
+					title = "Sales by Employee Report";
+				} else if (reportType.equalsIgnoreCase("4")) {
+					title = "Sales by Payment Type Report";
+				}
+
+				summaryReport(subStr1, newSubStr2, request, connection, response, store, title, employee, paymentType);
+			} else if (reportType.equalsIgnoreCase("2")) {
 				bestSellingItemReport(subStr1, newSubStr2, request, connection, response);
 			}
 
@@ -127,14 +143,23 @@ public class ReportRestController {
 		}
 	}
 
-	@GetMapping(value = { "/transaction_report_list/{date1}/{date2}/{reportType}" }, produces = "application/json")
+	@GetMapping(value = {
+			"/transaction_report_list/{date1}/{date2}/{reportType}/{store}/{employee}/{paymentType}" }, produces = "application/json")
 	public ResponseEntity<?> getTransactionReport(@PathVariable String date1, @PathVariable String date2,
-			@PathVariable String reportType, HttpServletRequest request, HttpServletResponse response) {
+			@PathVariable String reportType, @PathVariable String store, @PathVariable String employee,
+			@PathVariable String paymentType, HttpServletRequest request, HttpServletResponse response) {
 
 		Connection connection = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		JSONArray jsonArray = new JSONArray();
+
+		System.out.println("date1: " + date1);
+		System.out.println("date2: " + date2);
+		System.out.println("reportType: " + reportType);
+		System.out.println("storeName: " + store);
+		System.out.println("employeeName: " + employee);
+		System.out.println("paymentType: " + paymentType);
 
 		try {
 
@@ -148,7 +173,8 @@ public class ReportRestController {
 			datePlusOne = cal.getTime();
 
 			String newSubStr2 = new SimpleDateFormat("yyyy-MM-dd").format(datePlusOne);
-			StringBuffer query = new StringBuffer("select st.store_name as store_name, st.store_address as store_address, ");
+			StringBuffer query = new StringBuffer(
+					"select st.store_name as store_name, st.store_address as store_address, ");
 			query.append("stf.staff_name as staff_name, pml.name as method_pay, ptl.name as type_pay, ");
 			query.append("truncate(tt.transaction_amount,2) as money, tt.created_date as trx_date ");
 			query.append("from transaction tt ");
@@ -158,7 +184,19 @@ public class ReportRestController {
 			query.append("left join store st on (tt.store_id = st.id) ");
 			query.append("left join staff stf on (tt.staff_id = stf.id) ");
 			query.append("where tt.transaction_status = 3 ");
-			query.append("and tt.created_date between '" + subStr1 + "' and '" + newSubStr2 + "' ");
+			query.append("and tt.created_date between '" + subStr1 + "' and '" + newSubStr2 + "'");
+
+			if (!store.equalsIgnoreCase("undefined")) {
+				query.append(" and st.id = " + store);
+			}
+
+			if (!employee.equalsIgnoreCase("undefined")) {
+				query.append(" and stf.id = " + employee);
+			}
+
+			if (!paymentType.equalsIgnoreCase("undefined")) {
+				query.append(" and pml.id = " + paymentType);
+			}
 
 			connection = dbConnectionUtil.retrieveConnection(request);
 			stmt = connection.prepareStatement(query.toString());
@@ -199,7 +237,7 @@ public class ReportRestController {
 	}
 
 	public void summaryReport(String subStr1, String subStr2, HttpServletRequest request, Connection connection,
-			HttpServletResponse response) {
+			HttpServletResponse response, String store, String title, String employee, String paymentType) {
 
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
@@ -214,6 +252,18 @@ public class ReportRestController {
 		query.append("left join staff stf on (tt.staff_id = stf.id) ");
 		query.append("where tt.transaction_status = 3 ");
 		query.append("and tt.created_date between '" + subStr1 + "' and '" + subStr2 + "' ");
+
+		if (!store.equalsIgnoreCase("undefined")) {
+			query.append(" and st.id = " + store);
+		}
+
+		if (!employee.equalsIgnoreCase("undefined")) {
+			query.append(" and stf.id = " + employee);
+		}
+
+		if (!paymentType.equalsIgnoreCase("undefined")) {
+			query.append(" and pml.id = " + paymentType);
+		}
 
 		connection = dbConnectionUtil.retrieveConnection(request);
 		try {
@@ -251,7 +301,7 @@ public class ReportRestController {
 			style2.setBorderBottom(BorderStyle.DOUBLE);
 
 			cell = row.createCell(0);
-			cell.setCellValue("Summary Report");
+			cell.setCellValue(title);
 			cell.setCellStyle(style);
 
 			// Report Header
@@ -269,10 +319,10 @@ public class ReportRestController {
 			cell.setCellValue("Staff Name");
 			cell.setCellStyle(style);
 			cell = row.createCell(4);
-			cell.setCellValue("Payment Method");
+			cell.setCellValue("Payment Type");
 			cell.setCellStyle(style);
 			cell = row.createCell(5);
-			cell.setCellValue("Payment Type");
+			cell.setCellValue("Payment Method");
 			cell.setCellStyle(style);
 			cell = row.createCell(6);
 			cell.setCellValue("Sales (RM)");
@@ -381,14 +431,18 @@ public class ReportRestController {
 				"select count(cd.menu_item_name) as total_item, cd.menu_item_name as item_name, cd.menu_item_price as item_price, tt.created_date as trxdate from check_detail cd ");
 		query.append("left join `check` ch on (cd.check_id = ch.id) ");
 		query.append("left join transaction tt on (cd.check_id = tt.check_id) ");
-		query.append("where tt.transaction_status = 3 group by cd.menu_item_name ");
+		query.append("where tt.transaction_status = 3 ");
+		query.append("and tt.created_date between '" + subStr1 + "' and '" + subStr2 + "' ");
+		query.append("group by cd.menu_item_name");
 
 		connection = dbConnectionUtil.retrieveConnection(request);
 		try {
 			stmt = connection.prepareStatement(query.toString());
 			rs = stmt.executeQuery();
 
-			DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/ddHH:mm:ss");
+			System.out.println(stmt);
+
+			DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
 			LocalDateTime now = LocalDateTime.now();
 
 			// create a small spreadsheet
@@ -427,13 +481,13 @@ public class ReportRestController {
 			cell.setCellValue("#");
 			cell.setCellStyle(style);
 			cell = row.createCell(1);
-			cell.setCellValue("Branch Name");
+			cell.setCellValue("Item Sold");
 			cell.setCellStyle(style);
 			cell = row.createCell(2);
 			cell.setCellValue("Item");
 			cell.setCellStyle(style);
 			cell = row.createCell(3);
-			cell.setCellValue("Item Sold");
+			cell.setCellValue("Price");
 			cell.setCellStyle(style);
 			cell = row.createCell(4);
 			cell.setCellValue("Date");
@@ -494,7 +548,7 @@ public class ReportRestController {
 			}
 		}
 	}
-	
+
 	@GetMapping(value = "/getReportType", produces = "application/json")
 	public ResponseEntity<?> getReportType(HttpServletRequest request, HttpServletResponse response) {
 		JSONArray jsonResult = new JSONArray();
@@ -516,7 +570,7 @@ public class ReportRestController {
 			}
 		}
 	}
-	
+
 	public JSONArray getReportTypeLookup(Connection connection) throws Exception {
 		JSONArray jsonArr = new JSONArray();
 		PreparedStatement stmt = null;
@@ -543,5 +597,177 @@ public class ReportRestController {
 			}
 		}
 		return jsonArr;
+	}
+
+	@GetMapping(value = "/getStoreList", produces = "application/json")
+	public ResponseEntity<?> getStoreList(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		JSONArray jsonArr = new JSONArray();
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+
+		try {
+			connection = dbConnectionUtil.retrieveConnection(request);
+			stmt = connection.prepareStatement("SELECT * FROM store ");
+			rs = (ResultSet) stmt.executeQuery();
+
+			while (rs.next()) {
+				JSONObject jsonObj = new JSONObject();
+				jsonObj.put("id", rs.getLong("id"));
+				jsonObj.put("name", rs.getString("store_name"));
+				jsonArr.put(jsonObj);
+			}
+			return ResponseEntity.ok(jsonArr.toString());
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return ResponseEntity.badRequest().body(ex.getMessage());
+		} finally {
+			if (stmt != null) {
+				stmt.close();
+			}
+			if (rs != null) {
+				rs.close();
+			}
+		}
+	}
+
+	@GetMapping(value = { "/getBestSellingItem/{date1}/{date2}/{store}" }, produces = "application/json")
+	public ResponseEntity<?> getBestSellingItem(@PathVariable String date1, @PathVariable String date2,
+			@PathVariable String store, HttpServletRequest request, HttpServletResponse response) {
+
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		JSONArray jsonArray = new JSONArray();
+
+		try {
+
+			String subStr1 = date1.substring(0, 10);
+			String subStr2 = date2.substring(0, 10);
+
+			Date datePlusOne = new SimpleDateFormat("yyyy-MM-dd").parse(subStr2);
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(datePlusOne);
+			cal.add(Calendar.DATE, 1);
+			datePlusOne = cal.getTime();
+
+			String newSubStr2 = new SimpleDateFormat("yyyy-MM-dd").format(datePlusOne);
+			StringBuffer query = new StringBuffer(
+					"select count(cd.menu_item_name) as total_item, cd.menu_item_name as item_name, cd.menu_item_price as item_price, tt.created_date as trxdate from check_detail cd ");
+			query.append("left join `check` ch on (cd.check_id = ch.id) ");
+			query.append("left join transaction tt on (cd.check_id = tt.check_id) ");
+			query.append("where tt.transaction_status = 3 ");
+			query.append("and tt.created_date between '" + subStr1 + "' and '" + newSubStr2 + "' ");
+			
+			if (!store.equalsIgnoreCase("undefined")) {
+				query.append("and tt.store_id = " + store);
+			}
+			
+			query.append(" group by cd.menu_item_name");
+
+			connection = dbConnectionUtil.retrieveConnection(request);
+			stmt = connection.prepareStatement(query.toString());
+			rs = stmt.executeQuery();
+			int i = 1;
+
+			while (rs.next()) {
+				JSONObject jsonObj = new JSONObject();
+				jsonObj.put("no", i++);
+				jsonObj.put("total_item", rs.getString("total_item"));
+				jsonObj.put("item_name", rs.getString("item_name"));
+				jsonObj.put("item_price", rs.getString("item_price"));
+				jsonObj.put("trxdate", rs.getString("trxdate"));
+				jsonArray.put(jsonObj);
+			}
+
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		} finally {
+			try {
+				if (stmt != null)
+					stmt.close();
+				if (rs != null) {
+					rs.close();
+					rs = null;
+				}
+				if (connection != null) {
+					connection.close();
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		return ResponseEntity.ok().body(jsonArray.toString());
+	}
+
+	@GetMapping(value = "/getEmployeeName/{storeId}", produces = "application/json")
+	public ResponseEntity<?> getEmployeeName(@PathVariable String storeId, HttpServletRequest request,
+			HttpServletResponse response) throws Exception {
+		JSONArray jsonArr = new JSONArray();
+		JSONObject jsonEmpty = new JSONObject();
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+
+		jsonEmpty.put("id", 0);
+		jsonEmpty.put("name", "");
+		jsonArr.put(jsonEmpty);
+
+		try {
+			connection = dbConnectionUtil.retrieveConnection(request);
+			stmt = connection.prepareStatement("SELECT id, staff_name FROM staff where store_id=" + storeId);
+			rs = (ResultSet) stmt.executeQuery();
+
+			while (rs.next()) {
+				JSONObject jsonObj = new JSONObject();
+				jsonObj.put("id", rs.getLong("id"));
+				jsonObj.put("name", rs.getString("staff_name"));
+				jsonArr.put(jsonObj);
+			}
+			return ResponseEntity.ok(jsonArr.toString());
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return ResponseEntity.badRequest().body(ex.getMessage());
+		} finally {
+			if (stmt != null) {
+				stmt.close();
+			}
+			if (rs != null) {
+				rs.close();
+			}
+		}
+	}
+
+	@GetMapping(value = "/getPaymentMethod/", produces = "application/json")
+	public ResponseEntity<?> getPaymentMethod(HttpServletRequest request, HttpServletResponse response)
+			throws Exception {
+		JSONArray jsonArr = new JSONArray();
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+
+		try {
+			connection = dbConnectionUtil.retrieveConnection(request);
+			stmt = connection.prepareStatement("select * from payment_method_lookup");
+			rs = (ResultSet) stmt.executeQuery();
+
+			while (rs.next()) {
+				JSONObject jsonObj = new JSONObject();
+				jsonObj.put("id", rs.getLong("id"));
+				jsonObj.put("name", rs.getString("name"));
+				jsonArr.put(jsonObj);
+			}
+			return ResponseEntity.ok(jsonArr.toString());
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return ResponseEntity.badRequest().body(ex.getMessage());
+		} finally {
+			if (stmt != null) {
+				stmt.close();
+			}
+			if (rs != null) {
+				rs.close();
+			}
+		}
 	}
 }

@@ -1,5 +1,5 @@
 <script>
-	app.controller('ctl_report',function($scope, $http, $window, $routeParams, $location) {	
+	app.controller('ctl_reportSBE',function($scope, $http, $window, $routeParams, $location) {	
 		$scope.reportStartDate;
 		$scope.reportEndDate;
 		$scope.reportType;
@@ -20,9 +20,9 @@
 	
 			var date1 = moment($scope.reportStartDate).format();
 			var date2 = moment($scope.reportEndDate).format();
-			var reportType = 1;
+			var reportType = 3;
 			var store = $scope.storeName;
-			var employee = "undefined";
+			var employee = $scope.employeeName;
 			var paymentType = "undefined";
 			
 			window.open('${pageContext.request.contextPath}/report/transaction_report/'+date1+"/"+date2+"/"+reportType+"/"+store+"/"+employee+"/"+paymentType);
@@ -34,10 +34,10 @@
 			var date2 = moment($scope.reportEndDate).format();
 			var reportType = 1;
 			var store = $scope.storeName;
-			var employee = "undefined";
+			var employee = $scope.employeeName;
 			var paymentType = "undefined";
 			
-			$('#menuItem_dtable')
+			$('#menuItem_dtable3')
 			.DataTable(
 					{
 						"ajax" : {
@@ -56,7 +56,7 @@
 						},
 						"processing": true,
 						"destroy" : true,
-						"searching" : true,
+						"deferRender": true,
 						"columns" : [ 
 							{"data" : "no"}, 
 							{"data" : "store_name"}, 

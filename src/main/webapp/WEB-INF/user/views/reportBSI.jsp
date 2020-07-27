@@ -9,7 +9,7 @@
 					<div class="row">
 						<div class="col-xl-12">
 							<div class="breadcrumb-holder">
-								<h1 class="main-title float-left">Summary Sales Report</h1>
+								<h1 class="main-title float-left">Best Selling Item Report</h1>
 								<ol class="breadcrumb float-right">
 									<li class="breadcrumb-item active">Report</li>
 								</ol>
@@ -33,8 +33,7 @@
 												style="padding-right: 2px; padding-left: 2px;">
 												<form ng-submit="generateReport()">
 													<div class="row">
-														<div
-															class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
+														<div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
 															<table width='100%'>
 																<tbody>
 																	<tr>
@@ -58,18 +57,15 @@
 																					ng-options="mit.id as mit.name for mit in storeItem">
 																				</select>
 																			</div></td>
-																		<td
-																			style="padding-top: 10px; padding-left: 10px; padding-right: 10px"><div
-																				class="form-group">
-																				<label for="startDate"> </label><br>
+																		<td style="padding-top: 10px; padding-left: 10px; padding-right: 10px"><div class="form-group">
+																		<label for="startDate"> </label><br>
 																				<button id="" class="btn btn-block btn-primary"
 																					type="button" ng-click="refreshTable()">
 																					<i class="fas fa-search"></i> Run Report
 																				</button>
 																			</div></td>
-																		<td style="padding-top: 10px"><div
-																				class="form-group">
-																				<label for="startDate"> </label><br>
+																		<td style="padding-top: 10px"><div class="form-group">
+																		<label for="startDate"> </label><br>
 																				<button class="btn btn-block"
 																					style="background: #605ca8; color: white;"
 																					type="submit">
@@ -80,19 +76,17 @@
 																</tbody>
 															</table>
 														</div>
-s													</div>
+													</div>
+													<!-- <br /> -->
 													<div class="row">
-														<table id="menuItem_dtable"
-															class="table table-bordered display" style="width: 100%">
+														<table id="menuItem_dtable2" class="table table-bordered"
+															style="width: 100%">
 															<thead>
 																<tr>
 																	<th>No</th>
-																	<th>Branch Name</th>
-																	<th>Branch Address</th>
-																	<th>Staff Name</th>
-																	<th>Payment Type</th>
-																	<th>Payment Method</th>
-																	<th>Sales (RM)</th>
+																	<th>Total Item</th>
+																	<th>Item Name</th>
+																	<th>Item Price</th>
 																	<th>Date</th>
 																</tr>
 															</thead>

@@ -123,7 +123,8 @@
 					store_tax_type_id : $scope.store.storeTaxType.id,
 					ecpos_takeaway_detail_flag : $scope.store.ecpos ? $scope.store.ecposTakeawayDetailFlag: undefined,
 					login_type_id : $scope.store.ecpos ? $scope.store.storeLoginType.id: 0,
-					login_switch_flag : $scope.store.ecpos ? $scope.store.storeLoginSwitchFlag: undefined 
+					login_switch_flag : $scope.store.ecpos ? $scope.store.storeLoginSwitchFlag: undefined,
+					store_state : $scope.store.storeState.id
 				}
 				
 			console.log(postdata);
@@ -215,6 +216,7 @@
 					$scope.paymentDelayType = response.data.paymentDelayType;
 					$scope.storeTaxType = response.data.storeTaxType;
 					$scope.storeLoginType = response.data.storeLoginType;
+					$scope.storeState = response.data.storeState;
 				}
 			});
 			

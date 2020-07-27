@@ -72,6 +72,7 @@ if it's not present, don't show loader */
 	<%-- <script src="${pageContext.request.contextPath}/assets2/js/jquery.min.js"></script> --%>
 	<script src="${pageContext.request.contextPath}/assets/plugins/datatable-1.10.16/js/jquery.dataTables.min.js"></script>
 	<script src="${pageContext.request.contextPath}/assets/plugins/datatable-1.10.16/js/dataTables.bootstrap4.min.js"></script>
+	<script src="${pageContext.request.contextPath}/assets/plugins/bootstrap-4.1.3/bootstrap.min.js"></script>
 	<script src="${pageContext.request.contextPath}/assets/plugins/datatable-1.10.16/extensions/Select/js/dataTables.select.min.js"></script>
 	<script src="${pageContext.request.contextPath}/assets/plugins/datatable-1.10.16/extensions/Buttons/js/dataTables.buttons.min.js"></script>
 	<script src="${pageContext.request.contextPath}/assets/plugins/datatable-1.10.16/extensions/RowReorder/js/dataTables.rowReorder.min.js"></script>
