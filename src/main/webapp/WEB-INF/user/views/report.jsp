@@ -80,7 +80,7 @@
 																</tbody>
 															</table>
 														</div>
-s													</div>
+													</div>
 													<div class="row">
 														<table id="menuItem_dtable"
 															class="table table-bordered display" style="width: 100%">

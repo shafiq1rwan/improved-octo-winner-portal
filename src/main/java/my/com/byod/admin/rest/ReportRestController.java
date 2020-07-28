@@ -85,7 +85,7 @@ public class ReportRestController {
 
 				summaryReport(subStr1, newSubStr2, request, connection, response, store, title, employee, paymentType);
 			} else if (reportType.equalsIgnoreCase("2")) {
-				bestSellingItemReport(subStr1, newSubStr2, request, connection, response);
+				bestSellingItemReport(subStr1, newSubStr2, request, connection, response, store);
 			}
 
 		} catch (Exception ex) {
@@ -421,10 +421,11 @@ public class ReportRestController {
 
 	/**
 	 * @author shafiq.irwan
+	 * @param store 
 	 * @date 17-07-2020
 	 */
 	public void bestSellingItemReport(String subStr1, String subStr2, HttpServletRequest request, Connection connection,
-			HttpServletResponse response) {
+			HttpServletResponse response, String store) {
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		StringBuffer query = new StringBuffer(
@@ -433,7 +434,12 @@ public class ReportRestController {
 		query.append("left join transaction tt on (cd.check_id = tt.check_id) ");
 		query.append("where tt.transaction_status = 3 ");
 		query.append("and tt.created_date between '" + subStr1 + "' and '" + subStr2 + "' ");
-		query.append("group by cd.menu_item_name");
+		
+		if(!store.equalsIgnoreCase("undefined")) {
+			query.append("and tt.store_id = "+store);
+		}
+		
+		query.append(" group by cd.menu_item_name");
 
 		connection = dbConnectionUtil.retrieveConnection(request);
 		try {
