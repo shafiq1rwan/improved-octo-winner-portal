@@ -29,7 +29,7 @@
 						<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
 							<div class="card mb-3">
 								<div class="card-header d-flex flex-row justify-content-between">
-									<h3>Modifier Group List</h3>
+									<h3> </h3>
 									<button type="button"
 										class="btn btn-social pull-right btn-primary bg-aqua"
 										data-toggle="modal" data-target="#createModifierGroupModal" data-backdrop="static" data-keyboard="false"

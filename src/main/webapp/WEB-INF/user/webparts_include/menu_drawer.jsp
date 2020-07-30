@@ -53,8 +53,8 @@
                       <a href="" ng-click="$event.preventDefault()"><i class="far fa-file"></i> <span> Report </span> 
                       <span class="far menu-arrow"></span></a>
                       <ul class="list-unstyled">
-                      	<li><a href="${pageContext.request.contextPath}/user/#!Router_report">Summary Report</a></li>
-                      	<li><a href="${pageContext.request.contextPath}/user/#!Router_reportBSI">Sales by Item</a></li>
+                      	<li><a href="${pageContext.request.contextPath}/user/#!Router_reportBSI">Best Selling Item</a></li>
+                      	<li><a href="${pageContext.request.contextPath}/user/#!Router_report">Sales by Store</a></li>
                       	<li><a href="${pageContext.request.contextPath}/user/#!Router_reportSBE">Sales by Employee</a></li>
                       	<li><a href="${pageContext.request.contextPath}/user/#!Router_reportSBPT">Sales by Payment Type</a></li>
                       </ul>

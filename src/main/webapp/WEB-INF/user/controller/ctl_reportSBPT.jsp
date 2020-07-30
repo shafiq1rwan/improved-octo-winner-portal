@@ -59,7 +59,7 @@
 							{"data" : "no"}, 
 							{"data" : "store_name"}, 
 							{"data" : "store_address"}, 
-							{"data" : "staff_name"}, 
+							/* {"data" : "staff_name"},  */
 							{"data" : "method_pay"}, 
 							{"data" : "type_pay"}, 
 							{"data" : "money"}, 

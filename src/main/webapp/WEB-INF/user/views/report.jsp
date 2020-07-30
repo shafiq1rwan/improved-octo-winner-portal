@@ -9,7 +9,7 @@
 					<div class="row">
 						<div class="col-xl-12">
 							<div class="breadcrumb-holder">
-								<h1 class="main-title float-left">Summary Sales Report</h1>
+								<h1 class="main-title float-left">Sales by Store Report</h1>
 								<ol class="breadcrumb float-right">
 									<li class="breadcrumb-item active">Report</li>
 								</ol>
@@ -22,7 +22,7 @@
 						<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
 							<div class="card mb-3">
 								<div class="card-header d-flex flex-row justify-content-between">
-									<h3>Report</h3>
+									<h3> </h3>
 								</div>
 
 								<div class="card-body">
@@ -54,8 +54,10 @@
 																		<td><div class="form-group">
 																				<label for="storeName">Store Name</label> <select
 																					id="storeName" class="form-control"
-																					ng-model="storeName" ng-change="storeName == 1"
+																					ng-model="storeName"
 																					ng-options="mit.id as mit.name for mit in storeItem">
+																					<option value="" disabled selected hidden>Choose a store</option>
+																					<option value="0">All Store</option> 
 																				</select>
 																			</div></td>
 																		<td
@@ -64,7 +66,7 @@
 																				<label for="startDate"> </label><br>
 																				<button id="" class="btn btn-block btn-primary"
 																					type="button" ng-click="refreshTable()">
-																					<i class="fas fa-search"></i> Run Report
+																					<i class="fas fa-search"></i> Run
 																				</button>
 																			</div></td>
 																		<td style="padding-top: 10px"><div
@@ -73,7 +75,7 @@
 																				<button class="btn btn-block"
 																					style="background: #605ca8; color: white;"
 																					type="submit">
-																					<i class="fas fa-cloud-download"></i> Export Report
+																					<i class="fas fa-cloud-download"></i> Export
 																				</button>
 																			</div></td>
 																	</tr>
@@ -87,13 +89,10 @@
 															<thead>
 																<tr>
 																	<th>No</th>
-																	<th>Branch Name</th>
-																	<th>Branch Address</th>
-																	<th>Staff Name</th>
-																	<th>Payment Type</th>
-																	<th>Payment Method</th>
-																	<th>Sales (RM)</th>
 																	<th>Date</th>
+																	<th>Store Name</th>
+																	<th>Store Address</th>
+																	<th>Sales (RM)</th>
 																</tr>
 															</thead>
 														</table>

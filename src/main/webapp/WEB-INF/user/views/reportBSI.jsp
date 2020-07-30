@@ -22,7 +22,7 @@
 						<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
 							<div class="card mb-3">
 								<div class="card-header d-flex flex-row justify-content-between">
-									<h3>Report</h3>
+									<h3> </h3>
 								</div>
 
 								<div class="card-body">
@@ -33,7 +33,8 @@
 												style="padding-right: 2px; padding-left: 2px;">
 												<form ng-submit="generateReport()">
 													<div class="row">
-														<div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
+														<div
+															class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
 															<table width='100%'>
 																<tbody>
 																	<tr>
@@ -51,25 +52,30 @@
 																					md-placeholder="Enter date" required></md-datepicker>
 																			</div></td>
 																		<td><div class="form-group">
-																				<label for="storeName">Store Name</label> <select
+																				<label for="storeName">Store Name</label> 
+																				<select
 																					id="storeName" class="form-control"
-																					ng-model="storeName" ng-change="storeName == 1"
+																					ng-model="storeName" ng-change="mit.id == 1"
 																					ng-options="mit.id as mit.name for mit in storeItem">
+																					<option value="" disabled selected hidden>Choose a store</option>
 																				</select>
 																			</div></td>
-																		<td style="padding-top: 10px; padding-left: 10px; padding-right: 10px"><div class="form-group">
-																		<label for="startDate"> </label><br>
+																		<td
+																			style="padding-top: 10px; padding-left: 10px; padding-right: 10px"><div
+																				class="form-group">
+																				<label for="startDate"> </label><br>
 																				<button id="" class="btn btn-block btn-primary"
 																					type="button" ng-click="refreshTable()">
-																					<i class="fas fa-search"></i> Run Report
+																					<i class="fas fa-search"></i> Run
 																				</button>
 																			</div></td>
-																		<td style="padding-top: 10px"><div class="form-group">
-																		<label for="startDate"> </label><br>
+																		<td style="padding-top: 10px"><div
+																				class="form-group">
+																				<label for="startDate"> </label><br>
 																				<button class="btn btn-block"
 																					style="background: #605ca8; color: white;"
 																					type="submit">
-																					<i class="fas fa-cloud-download"></i> Export Report
+																					<i class="fas fa-cloud-download"></i> Export
 																				</button>
 																			</div></td>
 																	</tr>
@@ -86,8 +92,7 @@
 																	<th>No</th>
 																	<th>Total Item</th>
 																	<th>Item Name</th>
-																	<th>Item Price</th>
-																	<th>Date</th>
+																	<th>Item Price (RM)</th>
 																</tr>
 															</thead>
 														</table>

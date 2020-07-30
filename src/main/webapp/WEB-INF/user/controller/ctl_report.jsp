@@ -41,7 +41,7 @@
 			.DataTable(
 					{
 						"ajax" : {
-							"url" : '${pageContext.request.contextPath}/report/transaction_report_list/'+date1+"/"+date2+"/"+reportType+"/"+store+"/"+employee+"/"+paymentType,
+							"url" : '${pageContext.request.contextPath}/report/salesByStore/'+date1+"/"+date2+"/"+reportType+"/"+store,
 							"dataSrc": function ( json ) {                
 				                return json;
 				            },  
@@ -59,13 +59,10 @@
 						"searching" : true,
 						"columns" : [ 
 							{"data" : "no"}, 
+							{"data" : "trx_date"},
 							{"data" : "store_name"}, 
 							{"data" : "store_address"}, 
-							{"data" : "staff_name"}, 
-							{"data" : "method_pay"}, 
-							{"data" : "type_pay"}, 
-							{"data" : "money"}, 
-							{"data" : "trx_date"}
+							{"data" : "money"}
 						],
 						"scrollX" : true
 					});

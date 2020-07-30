@@ -36,6 +36,7 @@
 			var store = $scope.storeName;
 			var employee = $scope.employeeName;
 			var paymentType = "undefined";
+			var totalSales = 0.00;
 			
 			$('#menuItem_dtable3')
 			.DataTable(
@@ -62,8 +63,8 @@
 							{"data" : "store_name"}, 
 							{"data" : "store_address"}, 
 							{"data" : "staff_name"}, 
-							{"data" : "method_pay"}, 
-							{"data" : "type_pay"}, 
+							/* {"data" : "method_pay"}, 
+							{"data" : "type_pay"},  */
 							{"data" : "money"}, 
 							{"data" : "trx_date"}
 						],
