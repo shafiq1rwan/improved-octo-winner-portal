@@ -659,8 +659,8 @@ public class DeviceConfigRestController {
 			insertionSqlStatement = "INSERT INTO `check`(store_id, check_id, check_number, staff_id, order_type, table_number, "
 					+ "total_item_quantity, total_amount, total_amount_with_tax, total_amount_with_tax_rounding_adjustment, "
 					+ "grand_total_amount, tender_amount, overdue_amount, "
-					+ "check_status, created_date, updated_date, customer_name, device_id) VALUES "
-					+ "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+					+ "check_status, created_date, updated_date, customer_name, device_id, receipt_number, check_ref_no) VALUES "
+					+ "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 			
 			insertionSqlStatement2 = "INSERT INTO `check_tax_charge`(store_id, check_id, check_number, tax_charge_id, total_charge_amount,total_charge_amount_rounding_adjustment,grand_total_charge_amount) VALUES "
 					+ "(?, ?, ?, ?, ?, ?, ?)";
@@ -668,7 +668,7 @@ public class DeviceConfigRestController {
 			updateSqlStatement = "UPDATE `check` SET check_number = ?, staff_id = ?, order_type = ?, table_number = ?, total_item_quantity = ?, "
 					+ "total_amount = ?, total_amount_with_tax = ?, total_amount_with_tax_rounding_adjustment = ?, "
 					+ "grand_total_amount = ?, tender_amount = ?, overdue_amount = ?, "
-					+ "check_status = ?, created_date = ?, updated_date = ?, customer_name = ?, device_id = ? WHERE check_id = ? and store_id = ?";
+					+ "check_status = ?, created_date = ?, updated_date = ?, customer_name = ?, device_id = ?, receipt_number = ?, check_ref_no = ? WHERE check_id = ? and store_id = ?";
 			
 			updateSqlStatement2 = "UPDATE `check_tax_charge` SET check_number = ?, tax_charge_id = ?, total_charge_amount = ?, total_charge_amount_rounding_adjustment = ?, grand_total_charge_amount = ? WHERE check_id = ? and store_id = ?";
 
@@ -717,9 +717,16 @@ public class DeviceConfigRestController {
 					if(obj.isNull("device_id")) stmt.setNull(16, java.sql.Types.BIGINT);
 					else stmt.setString(16, obj.getString("device_id"));
 
-					stmt.setLong(17, obj.getLong("check_id"));
-					stmt.setLong(18, storeId);
-
+					//New added on 06/10/2020
+					if(obj.isNull("receipt_number")) stmt.setNull(17, java.sql.Types.VARCHAR);
+					else stmt.setString(17, obj.getString("receipt_number"));
+					
+					if(obj.isNull("check_ref_no")) stmt.setNull(18, java.sql.Types.VARCHAR);
+					else stmt.setString(18, obj.getString("check_ref_no"));
+					
+					stmt.setLong(19, obj.getLong("check_id"));
+					stmt.setLong(20, storeId);
+					
 					stmt.executeUpdate();
 					stmt.close();
 					
@@ -795,6 +802,12 @@ public class DeviceConfigRestController {
 					
 					if(obj.isNull("device_id")) stmt.setNull(18, java.sql.Types.BIGINT);
 					else stmt.setString(18, obj.getString("device_id"));
+					
+					if(obj.isNull("receipt_number")) stmt.setNull(19, java.sql.Types.VARCHAR);
+					else stmt.setString(19, obj.getString("receipt_number"));
+					
+					if(obj.isNull("check_ref_no")) stmt.setNull(20, java.sql.Types.VARCHAR);
+					else stmt.setString(20, obj.getString("check_ref_no"));
 					
 					stmt.executeUpdate();
 					stmt.close();
