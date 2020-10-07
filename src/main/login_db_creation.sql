@@ -52,6 +52,13 @@ CREATE TABLE password_reset_token
 	`expiry_date` DATETIME(3) NOT NULL
 );
 
+CREATE TABLE `general_config` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `config_name` varchar(255) DEFAULT NULL,
+  `config_value` varchar(1000) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+);
+
 -- CREATE TABLE alt_permission_lookup
 -- (
 --	id BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,
@@ -69,6 +76,10 @@ INSERT INTO authorities(user_id,authority)VALUES(1,'ROLE_SUPER_ADMIN'),(2,'ROLE_
 
 INSERT INTO users(`name`,email,mobileNumber,`address`,username,`password`,`enabled`) VALUES ('cg', 'cg@mpsb.net','010-3456789','usj21','CG','$2a$10$wohHqv2iUEhboYehz8AP8eVvnIreAeH4ZTZYyubCE8JkLbzjEK4c2',1);
 INSERT INTO authorities(user_id,authority)VALUES(6,'ROLE_SUPER_GROUP_ADMIN');
+
+INSERT INTO `tenant`.`general_config` (`id`, `config_name`, `config_value`) VALUES ('1', 'mail_properties', '{\"mail.host\": \"email-smtp.us-east-1.amazonaws.com\",\"mail.port\": \"587\",\"mail.username\": \"AKIAYOCWHBCJM5FBXSMB\",\"mail.password\": \"BENitUjfuVVhVqdTbTrZ50Mkkljh9JO7g0HTOA6LUAwx\",\"mail.transport.protocol\": \"smtp\",\"mail.smtp.auth\": \"true\",\"mail.smtp.starttls.enable\": \"true\",\"mail.debug\": \"false\"}');
+INSERT INTO `tenant`.`general_config` (`id`, `config_name`, `config_value`) VALUES ('2', 'portal_url', 'https://uat.mpay.my/byod/user/signin');
+INSERT INTO `tenant`.`general_config` (`id`, `config_name`, `config_value`) VALUES ('3', 'mail_sender', 'cloud@mpay.my');
 
 -- Patch sample brand
 -- INSERT INTO brands(`name`, brand_db_domain, brand_db_name, brand_db_user, brand_db_password, brand_db_port)

@@ -360,7 +360,7 @@ public class StoreRestController {
 			jsonResult.put("paymentDelayType", getPaymentDelayType(connection));
 			jsonResult.put("storeTaxType", getStoreTaxType(connection));
 			jsonResult.put("storeLoginType", getStoreLoginType(connection));
-			jsonResult.put("storeState", getStateLookup(connection));
+//			jsonResult.put("storeState", getStateLookup(connection));
 			
 			return ResponseEntity.ok(jsonResult.toString());
 		} catch(Exception ex) {

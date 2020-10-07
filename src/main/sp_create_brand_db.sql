@@ -1,17 +1,5 @@
--- ================================================
--- Template generated from Template Explorer using:
--- Create Procedure (New Menu).SQL
---
--- Use the Specify Values for Template Parameters 
--- command (Ctrl-Shift-M) to fill in the parameter 
--- values below.
---
--- This block of comments will not be included in
--- the definition of the procedure.
--- ================================================
-DELIMITER \\
-
-DROP PROCEDURE IF EXISTS `tenant`.`create_brand_db`\\
+DELIMITER $$
+DROP PROCEDURE IF EXISTS `tenant`.`create_brand_db`$$
 CREATE PROCEDURE `tenant`.`create_brand_db` (IN p_db_name VARCHAR(100),OUT p_db_creation_result INT)
 BEGIN
 
@@ -365,6 +353,7 @@ IF NOT EXISTS(SELECT * FROM information_schema.schemata WHERE schema_name = p_db
 				check_id BIGINT NOT NULL,
 				check_number BIGINT NOT NULL,
 				check_ref_no varchar(45) DEFAULT NULL,
+				receipt_number varchar(100) DEFAULT NULL,
 				staff_id BIGINT NULL,
 				order_type BIGINT NOT NULL,
 				customer_name varchar(250) NULL,
@@ -629,6 +618,6 @@ IF NOT EXISTS(SELECT * FROM information_schema.schemata WHERE schema_name = p_db
 ELSE
 		SET p_db_creation_result = 0;
 END IF;
-END\\
+END$$
 
 DELIMITER ;

@@ -1,7 +1,7 @@
 spring:
   profiles:
     active:
-    - development-data
+    - production-data
     - application-data
     - language-pack-en
     - language-pack-cn
@@ -52,32 +52,32 @@ spring:
     password: MPay@USJ21
 
 access-drive: C
-upload-path: /opt/tomcat/apache-tomcat-8.5.45/webapps/byod/byod-img/
+upload-path: /opt/tomcat/apache-tomcat-8.5.47/webapps/byod/byod-img/
 get-upload-path: /byod-img/
-menu-path: /opt/tomcat/apache-tomcat-8.5.45/webapps/byod/byod-menu/
+menu-path: /opt/tomcat/apache-tomcat-8.5.47/webapps/byod/byod-menu/
 get-menu-path: /byod-menu/
-log-path: /opt/tomcat/apache-tomcat-8.5.45/webapps/byod/logger/
-pdf-path: /opt/tomcat/apache-tomcat-8.5.45/webapps/byod/pdf-folder/
-byod-cloud-url: http://192.168.79.41:8080/byod
+log-path: /opt/tomcat/apache-tomcat-8.5.47/webapps/byod/logger/
+pdf-path: /opt/tomcat/apache-tomcat-8.5.47/webapps/byod/pdf-folder/
+byod-cloud-url: https://uat.mpay.my/byod
 
 ---
 
 spring:
   profiles: production-data
   datasource:
-    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
-    url: jdbc:sqlserver://localhost:1433;databaseName=tenant
-    username: sa
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://10.152.72.4:3306/tenant?useTimezone=true&serverTimezone=UTC
+    username: root
     password: MPay@1234
     
 access-drive: C
-upload-path: byod-img/
+upload-path: /opt/tomcat/apache-tomcat-8.5.47/webapps/byod/byod-img/
 get-upload-path: /byod-img/
-menu-path: byod-menu/
+menu-path: /opt/tomcat/apache-tomcat-8.5.47/webapps/byod/byod-menu/
 get-menu-path: /byod-menu/
-log-path: logger
-pdf-path: pdf-folder/
-byod-cloud-url: http://localhost:8080
+log-path: /opt/tomcat/apache-tomcat-8.5.47/webapps/byod/logger/
+pdf-path: /opt/tomcat/apache-tomcat-8.5.47/webapps/byod/pdf-folder/
+byod-cloud-url: https://www.mpay.my/byod
     
 ---
 
