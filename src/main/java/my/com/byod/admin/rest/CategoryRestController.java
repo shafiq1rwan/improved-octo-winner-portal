@@ -314,15 +314,15 @@ public class CategoryRestController {
 							String.valueOf(jsonCategoryData.getLong("id"))};
 					
 				} else {
-					stmt.setLong(4, jsonCategoryData.getLong("id"));
-					stmt.setString(5, imagePath);
+					stmt.setString(4, imagePath);
+					stmt.setLong(5, jsonCategoryData.getLong("id"));
 					
 					// logging to file	
 					parameters = new String []{
 							jsonCategoryData.getString("category_name")==null?"null":"'"+jsonCategoryData.getString("category_name")+"'",
 							description==null?"null":"'"+description+"'",
-							imagePath==null?"null":"'"+imagePath+"'",
 							String.valueOf(jsonCategoryData.getBoolean("is_active")?1:0),
+							imagePath==null?"null":"'"+imagePath+"'",
 							String.valueOf(jsonCategoryData.getLong("id"))};
 				}
 				stmt.executeUpdate();
