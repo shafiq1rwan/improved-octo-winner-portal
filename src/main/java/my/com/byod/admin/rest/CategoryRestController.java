@@ -314,8 +314,8 @@ public class CategoryRestController {
 							String.valueOf(jsonCategoryData.getLong("id"))};
 					
 				} else {
-					stmt.setString(4, imagePath);
-					stmt.setLong(5, jsonCategoryData.getLong("id"));
+					stmt.setLong(4, jsonCategoryData.getLong("id"));
+					stmt.setString(5, imagePath);
 					
 					// logging to file	
 					parameters = new String []{
