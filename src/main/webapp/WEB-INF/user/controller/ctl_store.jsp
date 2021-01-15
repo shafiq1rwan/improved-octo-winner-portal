@@ -301,6 +301,9 @@
 						$scope.store.byodPaymentDelayType.id = response.data.byod_payment_delay_id;
 						$scope.store.storeTaxType.id = response.data.store_tax_type_id;
 						$scope.store.ecposTakeawayDetailFlag = response.data.ecpos_takeaway_detail_flag;
+
+						//New State
+						$scope.store.storeState = response.data.store_state;
 						if(response.data.login_type_id!=0){
 							// initialize storeLoginType
 							$scope.store.storeLoginType = {};

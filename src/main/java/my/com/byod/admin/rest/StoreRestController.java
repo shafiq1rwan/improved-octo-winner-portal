@@ -174,6 +174,7 @@ public class StoreRestController {
 				store.setKioskPaymentDelayId(rs.getLong("kiosk_payment_delay_id"));
 				store.setByodPaymentDelayId(rs.getLong("byod_payment_delay_id"));
 				store.setStoreTaxTypeId(rs.getLong("store_tax_type_id"));
+				store.setStoreState(rs.getInt("state_id"));
 			}
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -360,7 +361,7 @@ public class StoreRestController {
 			jsonResult.put("paymentDelayType", getPaymentDelayType(connection));
 			jsonResult.put("storeTaxType", getStoreTaxType(connection));
 			jsonResult.put("storeLoginType", getStoreLoginType(connection));
-//			jsonResult.put("storeState", getStateLookup(connection));
+			jsonResult.put("storeState", getStateLookup(connection));
 			
 			return ResponseEntity.ok(jsonResult.toString());
 		} catch(Exception ex) {

@@ -107,14 +107,14 @@
 									<input class="form-control" name="storeAddress" placeholder="Address" ng-model="store.address" type="text" required> 
 								</div>
 							</div>
-							<!-- <div class="col-8 col-sm-8 col-md-8 col-lg-8 col-xl-8">
+							<div class="col-4 col-sm-4 col-md-4 col-lg-4 col-xl-4">
 								<div class="form-group">
 									<label class="login-label">State</label>
 									<select class="form-control" ng-model="store.storeState" ng-options="x.name for x in storeState track by x.id" required>
 										<option value="" disabled>Please choose a state</option>
 									</select> 
 								</div>
-							</div> -->
+							</div>
 							<!-- <div class="col-4 col-sm-4 col-md-4 col-lg-4 col-xl-4">
 								<div class="form-group">
 									<label class="login-label">Table Count</label>
