@@ -553,7 +553,7 @@ IF NOT EXISTS(SELECT * FROM information_schema.schemata WHERE schema_name = p_db
 			call sp_exec(CONCAT('INSERT INTO ',p_db_name,'.check_status_lookup (id,name) values (1, ''New''), (2, ''Pending''), (3, ''Closed''), (4, ''Cancelled'');'));
 			call sp_exec(CONCAT('INSERT INTO ',p_db_name,'.order_type_lookup (id,name) values (1, ''table''), (2, ''take away''), (3, ''deposit'');'));
 			call sp_exec(CONCAT('insert into ',p_db_name,'.transaction_type_lookup (id,name) values (1, ''Sale''), (2, ''Void''), (3, ''Refund''), (4, ''Reversal'');'));
-			call sp_exec(CONCAT('insert into ',p_db_name,'.payment_method_lookup (id,name) values (1, ''Cash''), (2, ''Card''), (3, ''QR'');'));
+			call sp_exec(CONCAT('insert into ',p_db_name,'.payment_method_lookup (id,name) values (1, ''Cash''), (2, ''Card''), (3, ''QR''), (4, ''Static QR'');'));
 			call sp_exec(CONCAT('insert into ',p_db_name,'.payment_type_lookup (id,name) values (1, ''Full Payment''), (2, ''Partial Payment'');'));
 			call sp_exec(CONCAT('insert into ',p_db_name,'.nii_type_lookup (id,name) values (1, ''VISA/MASTER/JCB''), (2, ''AMEX''), (3, ''MCCS''), (4, ''UNIONPAY'');'));
 			call sp_exec(CONCAT('insert into ',p_db_name,'.transaction_settlement_status_lookup (id,name) values (1, ''New''), (2, ''Pending''), (3, ''Approved''), (4, ''Declined''), (5, ''Voided''), (6, ''Refunded''), (7, ''Reversed'');'));
