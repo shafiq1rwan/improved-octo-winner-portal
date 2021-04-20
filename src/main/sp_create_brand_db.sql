@@ -45,6 +45,7 @@ IF NOT EXISTS(SELECT * FROM information_schema.schemata WHERE schema_name = p_db
 				menu_quantity_stock INT DEFAULT 0, 
 				is_taxable TINYINT DEFAULT 0,
 				is_discountable TINYINT DEFAULT 0,
+				is_weighable TINYINT DEFAULT 0,
 				is_active TINYINT DEFAULT 1,
 				created_date DATETIME(3) NOT NULL
 			);'));

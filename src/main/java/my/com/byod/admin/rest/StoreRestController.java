@@ -245,7 +245,8 @@ public class StoreRestController {
 			stmt.setBoolean(count++, store.getEcposTakeawayDetailFlag());
 			stmt.setLong(count++, store.getLoginTypeId());
 			stmt.setBoolean(count++, store.getLoginSwitchFlag());
-			stmt.setInt(count++, store.getStoreState());
+//			stmt.setInt(count++, store.getStoreState().equals(null) ? 0 : store.getStoreState());
+			stmt.setInt(count++, 0);
 			stmt.executeUpdate();
 
 		} catch (Exception ex) {

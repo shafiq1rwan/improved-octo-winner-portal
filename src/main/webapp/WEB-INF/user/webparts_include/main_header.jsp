@@ -16,9 +16,9 @@
                            </a>
                            <div class="dropdown-menu dropdown-menu-right profile-dropdown ">
                                <!-- item-->
-                               <a href="${pageContext.request.contextPath}/user/#!Router_profile" class="dropdown-item notify-item">
+                               <%-- <a href="${pageContext.request.contextPath}/user/#!Router_profile" class="dropdown-item notify-item">
                                    <i class="fa fa-user"></i> <span>Profile</span>
-                               </a>
+                               </a> --%>
 
                                <!-- item-->
                                <a href="${pageContext.request.contextPath}/byod-panel" class="dropdown-item notify-item">

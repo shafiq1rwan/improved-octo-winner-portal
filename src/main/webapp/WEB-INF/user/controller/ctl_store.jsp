@@ -123,8 +123,8 @@
 					store_tax_type_id : $scope.store.storeTaxType.id,
 					ecpos_takeaway_detail_flag : $scope.store.ecpos ? $scope.store.ecposTakeawayDetailFlag: undefined,
 					login_type_id : $scope.store.ecpos ? $scope.store.storeLoginType.id: 0,
-					login_switch_flag : $scope.store.ecpos ? $scope.store.storeLoginSwitchFlag: undefined,
-					store_state : $scope.store.storeState.id
+					login_switch_flag : $scope.store.ecpos ? $scope.store.storeLoginSwitchFlag: undefined
+					/* store_state : $scope.store.storeState.id */
 				}
 				
 			console.log(postdata);
@@ -216,7 +216,7 @@
 					$scope.paymentDelayType = response.data.paymentDelayType;
 					$scope.storeTaxType = response.data.storeTaxType;
 					$scope.storeLoginType = response.data.storeLoginType;
-					$scope.storeState = response.data.storeState;
+					/* $scope.storeState = response.data.storeState; */
 				}
 			});
 			
@@ -246,7 +246,8 @@
 						 "render": function ( data, type, full, meta ) {
 							 	var id = full.id;
 							 	var ecpos = full.store_ecpos;
-							    return '<div class="d-flex justify-content-start"><a ng-href="${pageContext.request.contextPath}/user/#!Router_store_transaction/'+id+'" class="btn btn-outline-success ml-1 mr-1 custom-fontsize"><i class="far fa-list-alt"></i> Transactions</a><a ng-href="${pageContext.request.contextPath}/user/#!Router_store_byod/'+id+'" class="btn btn-outline-info ml-1 mr-1 custom-fontsize">BYOD</a><a ng-href="${pageContext.request.contextPath}/user/#!Router_store_kiosk/'+id+'" class="btn btn-outline-info ml-1 mr-1 custom-fontsize">KIOSK</a><a ng-show='+ecpos+' ng-href="${pageContext.request.contextPath}/user/#!Router_store_ecpos/'+id+'" class="btn btn-outline-info ml-1 mr-1 custom-fontsize">ECPOS</a></div>'
+							    /* return '<div class="d-flex justify-content-start"><a ng-href="${pageContext.request.contextPath}/user/#!Router_store_transaction/'+id+'" class="btn btn-outline-success ml-1 mr-1 custom-fontsize"><i class="far fa-list-alt"></i> Transactions</a><a ng-href="${pageContext.request.contextPath}/user/#!Router_store_byod/'+id+'" class="btn btn-outline-info ml-1 mr-1 custom-fontsize">BYOD</a><a ng-href="${pageContext.request.contextPath}/user/#!Router_store_kiosk/'+id+'" class="btn btn-outline-info ml-1 mr-1 custom-fontsize">KIOSK</a><a ng-show='+ecpos+' ng-href="${pageContext.request.contextPath}/user/#!Router_store_ecpos/'+id+'" class="btn btn-outline-info ml-1 mr-1 custom-fontsize">ECPOS</a></div>' */
+							 	return '<div class="d-flex justify-content-start"><a ng-href="${pageContext.request.contextPath}/user/#!Router_store_transaction/'+id+'" class="btn btn-success ml-1 mr-1 custom-fontsize"><i class="far fa-list-alt"></i> Transactions</a><a ng-show='+ecpos+' ng-href="${pageContext.request.contextPath}/user/#!Router_store_ecpos/'+id+'" class="btn btn-info ml-1 mr-1 custom-fontsize"><i class="fa fa-cog"></i> POS</a></div>'
 						 }
 					}
 				],			
@@ -303,7 +304,7 @@
 						$scope.store.ecposTakeawayDetailFlag = response.data.ecpos_takeaway_detail_flag;
 
 						//New State
-						$scope.store.storeState = response.data.store_state;
+						/* $scope.store.storeState = response.data.store_state; */
 						if(response.data.login_type_id!=0){
 							// initialize storeLoginType
 							$scope.store.storeLoginType = {};

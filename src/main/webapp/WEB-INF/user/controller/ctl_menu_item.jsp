@@ -460,6 +460,8 @@
 						$scope.menu_item.menu_quantity_stock = response.data.menu_quantity_stock;
 						$scope.menu_item.is_taxable = response.data.is_taxable;			
 						$scope.menu_item.is_discountable = response.data.is_discountable;
+						// New Weighable
+						$scope.menu_item.is_weighable = response.data.is_weighable;
 						$scope.menu_item.is_active = response.data.is_active;
 						$scope.action = 'update';
 						$scope.disableInputs = ($scope.menu_item.menu_item_type == 2);
@@ -537,6 +539,8 @@
 					"menu_quantity_stock": $scope.menu_item.menu_quantity_stock || 0,
 					"is_taxable" : $scope.menu_item.is_taxable || false,
 					"is_discountable": $scope.menu_item.is_discountable || false,
+					// New Weighable
+					"is_weighable": $scope.menu_item.is_weighable || false,
 					"menu_quantity_stock": $scope.menu_item.menu_quantity_stock || 0
 				});
 				
