@@ -528,13 +528,13 @@ IF NOT EXISTS(SELECT * FROM information_schema.schemata WHERE schema_name = p_db
 			call sp_exec(CONCAT('CREATE TABLE ',p_db_name,'.state_lookup 
 			(
 				id BIGINT PRIMARY KEY AUTO_INCREMENT NOT NULL,
-				name VARCHAR(255) NOT NULL,
+				name VARCHAR(255) NOT NULL
 			);'));
 			
 			call sp_exec(CONCAT('CREATE TABLE ',p_db_name,'.reporttype_lookup 
 			(
 				id BIGINT PRIMARY KEY AUTO_INCREMENT NOT NULL,
-				name VARCHAR(255) NOT NULL,
+				name VARCHAR(255) NOT NULL
 			);'));
 
 			call sp_exec(CONCAT('INSERT INTO ',p_db_name,'.role_lookup (role_name) VALUES (''Admin'');'));
