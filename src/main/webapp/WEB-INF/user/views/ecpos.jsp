@@ -59,7 +59,7 @@
 						<div class="card mb-3 shadow" ng-repeat="item in store.ecpos">				
 							<div class="card-body">		
 								<div class="form-section" id="test">
-									<div class="btn btn-outline-success pull-right" ng-click="ecposModalType('update', $index)"><i class="fa fa-edit"></i> Edit</div>
+									<div class="btn btn-success pull-right" ng-click="ecposModalType('update', $index)"><span class="btn-label"><i class="fa fa-edit"></i></span> Edit</div>
 									<h5>ECPOS # {{store.ecpos.length - $index}} <b ng-show="item.device_role_lookup_id==1">(Master)</b></h5>
 									<br>
 									<div class="row">
@@ -115,19 +115,19 @@
 							<div class="card-footer">
 								<div class="d-flex justify-content-end" ng-show="item.device_role_lookup_id==1" role="toolbar" aria-label="Toolbar with button groups">
 									<div class="btn-toolbar">							
-				  						<button type="button" ng-click="syncTransactions(item.activation_id)" class="btn btn-outline-secondary">Synchronize Transactions</button>															
-				  						<button type="button" ng-click="resendActivationInfo(item.activation_id)" class="btn btn-outline-secondary">Resend Activation ID</button>
-				  						<button type="button" ng-click="reactivateDevice(item.activation_id)" class="btn btn-outline-secondary">Reactivate ECPOS</button>
-				  						<button type="button" ng-click="terminateDevice(item.activation_id)" class="btn btn-outline-secondary">Terminate ECPOS</button>
+				  						<!-- <button type="button" ng-click="syncTransactions(item.activation_id)" class="btn btn-outline-secondary" style="margin-right: 10px;">Synchronize Transactions</button> -->															
+				  						<!-- <button type="button" ng-click="resendActivationInfo(item.activation_id)" class="btn btn-secondary" style="margin-right: 10px;">Resend Activation ID</button> -->
+				  						<button type="button" ng-click="reactivateDevice(item.activation_id)" class="btn btn-secondary" style="margin-right: 10px;">Reactivate ECPOS</button>
+				  						<button type="button" ng-click="terminateDevice(item.activation_id)" class="btn btn-danger">Terminate ECPOS</button>
 			  						</div>				  				
 								</div>	
 								<div class="d-flex justify-content-between" ng-show="item.device_role_lookup_id==2" role="toolbar" aria-label="Toolbar with button groups">
 									<button type="button" ng-click="convertToMaster(item.activation_id)" class="btn btn-primary">Make Master</button>
 									<div class="btn-toolbar">							
-				  						<button type="button" ng-click="syncTransactions(item.activation_id)" class="btn btn-outline-secondary">Synchronize Transactions</button>															
-				  						<button type="button" ng-click="resendActivationInfo(item.activation_id)" class="btn btn-outline-secondary">Resend Activation ID</button>
-				  						<button type="button" ng-click="reactivateDevice(item.activation_id)" class="btn btn-outline-secondary">Reactivate ECPOS</button>
-				  						<button type="button" ng-click="terminateDevice(item.activation_id)" class="btn btn-outline-secondary">Terminate ECPOS</button>
+				  						<!-- <button type="button" ng-click="syncTransactions(item.activation_id)" class="btn btn-outline-secondary" style="margin-right: 10px;">Synchronize Transactions</button> -->															
+				  						<!-- <button type="button" ng-click="resendActivationInfo(item.activation_id)" class="btn btn-secondary" style="margin-right: 10px;">Resend Activation ID</button> -->
+				  						<button type="button" ng-click="reactivateDevice(item.activation_id)" class="btn btn-secondary" style="margin-right: 10px;">Reactivate ECPOS</button>
+				  						<button type="button" ng-click="terminateDevice(item.activation_id)" class="btn btn-danger">Terminate ECPOS</button>
 			  						</div>				  				
 								</div>	
 							</div>														
