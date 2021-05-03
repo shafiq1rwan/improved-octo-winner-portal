@@ -368,7 +368,8 @@ IF NOT EXISTS(SELECT * FROM information_schema.schemata WHERE schema_name = p_db
 				overdue_amount DECIMAL(25, 4) NOT NULL,
 				check_status BIGINT NOT NULL,
 				created_date DATETIME(3) NOT NULL,
-				updated_date DATETIME(3) NULL
+				updated_date DATETIME(3) NULL,
+				receipt_number varchar(255) NULL
 			);'));
 			
 			call sp_exec(CONCAT('CREATE TABLE ',p_db_name,'.check_tax_charge 
