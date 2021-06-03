@@ -360,6 +360,7 @@ public class DeviceConfigRestController {
 					JSONArray ecposStaffInfo = getEcposStaffInfo(connection, storeId);
 					JSONArray ecposTableSetting = getEcposTableSetting(connection, storeId);
 					JSONArray ecposStaffRole = getEcposStaffRole(connection);
+					JSONObject ecposHotelDetails = getEcposHotelDetails(connection);
 					
 					JSONObject ecposSetting = new JSONObject();
 					ecposSetting.put("deviceName", deviceInfo.getString("deviceName"));
@@ -369,6 +370,7 @@ public class DeviceConfigRestController {
 					result.put("tableSetting", ecposTableSetting);
 					result.put("staffRole", ecposStaffRole);
 					result.put("ecposSetting", ecposSetting);
+					result.put("ecposHotelDetails", ecposHotelDetails);
 				}
 				else if(deviceInfo.getLong("deviceType")==3) {
 					// kiosk
@@ -1547,7 +1549,8 @@ public class DeviceConfigRestController {
 		ResultSet rs1 = null;
 		JSONArray result = new JSONArray();
 		try {
-			sqlStatement = "SELECT id, table_name, status_lookup_id, created_date, last_update_date FROM table_setting "
+			sqlStatement = "SELECT id, table_name, status_lookup_id, created_date, last_update_date, "
+					+ "hotel_floor_no, hotel_room_type, hotel_room_category FROM table_setting "
 					+ "WHERE store_id = ? ";
 			ps1 = connection.prepareStatement(sqlStatement);
 			ps1.setLong(1, storeId);
@@ -1560,8 +1563,78 @@ public class DeviceConfigRestController {
 				jsonObject.put("statusLookupId", rs1.getLong("status_lookup_id"));
 				jsonObject.put("createdDate", rs1.getString("created_date"));
 				jsonObject.put("lastUpdateDate", rs1.getString("last_update_date")==null?"":rs1.getString("last_update_date"));
+				jsonObject.put("floorNo", rs1.getString("hotel_floor_no"));
+				jsonObject.put("roomType", rs1.getString("hotel_room_type"));
+				jsonObject.put("roomCategory", rs1.getString("hotel_room_category"));
+				jsonObject.put("storeId", storeId);
 				result.put(jsonObject);
 			}
+			
+		} catch (Exception ex) {
+			throw ex;
+		} finally {
+			if (rs1 != null) {
+				rs1.close();
+			}
+			if (ps1 != null) {
+				ps1.close();
+			}
+		}
+		return result;
+	}
+	
+	private JSONObject getEcposHotelDetails(Connection connection) throws Exception {
+		String sqlStatement = null;
+		PreparedStatement ps1 = null;
+		ResultSet rs1 = null;
+		JSONObject result = new JSONObject();
+		JSONArray roomTypeArr = new JSONArray();
+		JSONArray roomCategoryArr = new JSONArray();
+		//JSONArray roomStatusArr = new JSONArray();
+		
+		try {
+			sqlStatement = "select * from hotel_room_type;";
+			ps1 = connection.prepareStatement(sqlStatement);
+			rs1 = ps1.executeQuery();	
+			
+			while (rs1.next()) {
+				JSONObject jsonObject = new JSONObject();
+				jsonObject.put("id", rs1.getLong("id"));
+				jsonObject.put("name", rs1.getString("name"));
+				jsonObject.put("imagePath", rs1.getString("image_path"));
+				jsonObject.put("basePrice", rs1.getString("hotel_room_base_price"));
+				roomTypeArr.put(jsonObject);
+			}
+			result.put("roomTypeArr", roomTypeArr);
+			
+			if(rs1 != null) {rs1.close();}
+			if(ps1 != null) {ps1.close();}
+			sqlStatement = "select * from hotel_room_category_lookup;";
+			ps1 = connection.prepareStatement(sqlStatement);
+			rs1 = ps1.executeQuery();	
+			
+			while (rs1.next()) {
+				JSONObject jsonObject = new JSONObject();
+				jsonObject.put("id", rs1.getLong("id"));
+				jsonObject.put("name", rs1.getString("name"));
+				roomCategoryArr.put(jsonObject);
+			}
+			result.put("roomCategoryArr", roomCategoryArr);
+			
+			/*if(rs1 != null) {rs1.close();}
+			if(ps1 != null) {ps1.close();}
+			sqlStatement = "select * from hotel_status_lookup;";
+			ps1 = connection.prepareStatement(sqlStatement);
+			rs1 = ps1.executeQuery();	
+			
+			while (rs1.next()) {
+				JSONObject jsonObject = new JSONObject();
+				jsonObject.put("id", rs1.getLong("id"));
+				jsonObject.put("name", rs1.getString("name"));
+				jsonObject.put("bgColor", rs1.getString("bg_color"));
+				roomStatusArr.put(jsonObject);
+			}
+			result.put("roomStatusArr", roomStatusArr);*/
 			
 		} catch (Exception ex) {
 			throw ex;

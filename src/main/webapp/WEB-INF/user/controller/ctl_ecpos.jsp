@@ -31,6 +31,17 @@
 				$scope.store.backend_id = response.data.backend_id;
 				$scope.store.ecpos = response.data.ecpos;
 				$scope.store.ecpos_count = $scope.store.ecpos.length;
+				$scope.store.type_id = response.data.store_type_id;
+				if ($scope.store.type_id == 3) {
+					$('#manageTableBtn').hide();
+					$scope.refreshRoom();
+					$scope.refreshRoomType();
+					$scope.refreshRoomCategory();
+				} else {
+					$('#manageRoomBtn').hide();
+					$scope.refreshTable();
+					$scope.refreshTable2();
+				}
 				console.log($scope.store);		
 			});
 		}
@@ -570,6 +581,68 @@
 			});
 		}
 		
+		// room modal setting
+		$scope.resetRoomModal = function(){
+			$scope.actionRoom = '';
+			$scope.room = {};
+			$('#roomModal').modal('toggle');
+			$('#roomListModal').modal('toggle');
+		}
+		
+		$scope.resetRoomTypeListModal = function(){
+			$scope.actionRoomType = '';
+			$('#roomTypeListModal').modal('toggle');
+			$('#roomListModal').modal('toggle');
+		}
+		
+		$scope.resetRoomTypeModal = function(){
+			$scope.actionRoomType = '';
+			$scope.roomType = {};
+			$('#roomTypeModal').modal('toggle');
+			$('#roomTypeListModal').modal('toggle');
+		}
+		
+		$scope.resetRoomCategoryListModal = function(){
+			$scope.actionRoomCategory = '';
+			$scope.roomCategory = {};
+			$('#roomCategoryListModal').modal('toggle');
+			$('#roomListModal').modal('toggle');
+		}
+		
+		$scope.resetRoomCategoryModal = function(){
+			$scope.actionRoomCategory = '';
+			$scope.roomCategory = {};
+			$('#roomCategoryModal').modal('toggle');
+			$('#roomCategoryListModal').modal('toggle');
+		}
+		
+		$scope.roomModalType = function(action){
+			$scope.actionRoom = action;
+			$('#roomListModal').modal('toggle');
+		}
+		
+		$scope.roomTypeListModalType = function(){
+			$scope.actionRoomType = '';
+			$('#roomListModal').modal('toggle');
+			$('#roomTypeListModal').modal('toggle');
+		}
+		
+		$scope.roomCategoryListModalType = function(){
+			$scope.actionRoomCategory = '';
+			$('#roomListModal').modal('toggle');
+			$('#roomCategoryListModal').modal('toggle');
+		}
+		
+		$scope.roomTypeModalType = function(action){
+			$scope.actionRoomType = action;
+			$('#roomTypeListModal').modal('toggle');
+		}
+		
+		$scope.roomCategoryModalType = function(action){
+			$scope.actionRoomCategory = action;
+			$('#roomCategoryListModal').modal('toggle');
+		}
+		
 		// table modal setting
 		$scope.resetTableModal = function(){
 			$scope.actionTable = '';
@@ -656,6 +729,215 @@
 			});
 		}
 		
+		$scope.submitRoom = function(){
+			if($scope.actionRoom == 'create'){
+				swal({
+					  title: "Are you sure?",
+					  text: "Please confirm to add a room",
+					  icon: "warning",
+					  buttons: true,
+					  dangerMode: true,
+					})
+					.then((willCreate) => {
+					  if (willCreate) {
+						  $scope.postRequestRoom();
+					}
+				});
+			}
+			else if($scope.actionRoom == 'update'){
+				 $scope.postRequestRoom();
+			}
+		}
+		
+		$scope.postRequestRoom = function(){
+			var postdata = {
+					id : $scope.actionRoom == 'create' ? undefined : $scope.room.id,
+					store_id: $scope.store.id,
+					room_number : $scope.room.number,
+					room_floor : $scope.room.floor,
+					room_type : $scope.room.type,
+					room_category : $scope.room.category
+				}
+				console.log(postdata);
+				
+			$http({
+				method : 'POST',
+				headers : {'Content-Type' : 'application/json'},
+				url : $scope.actionRoom == 'create' ? '${pageContext.request.contextPath}/menu/store/ecpos/createRoom' : '${pageContext.request.contextPath}/menu/store/ecpos/updateRoom',
+				data : postdata
+			})
+			.then(function(response) {
+				if (response.status == "403") {
+					alert("Session TIME OUT");
+					$(location).attr('href','${pageContext.request.contextPath}/user');			
+				} else if(response.status == "200") {
+					// ok
+					if($scope.actionRoom == 'create'){
+						swal("The table has been created", {
+							icon: "success",
+						});
+					}
+					else if($scope.actionRoom == 'update'){
+						swal("The table has been updated", {
+							icon: "success",
+						});
+					}
+					$scope.resetRoomModal();
+					$('#roomModal').modal('toggle');
+					$('#roomListModal').modal('toggle');
+					$scope.refreshRoom();
+				}
+			}, function(response){
+				console.log(response);
+				swal({
+				  title: "Error",
+				  text: response.data,
+				  icon: "warning",
+				  dangerMode: true,
+				});
+			});
+		}
+		
+		$scope.submitRoomType = function(){
+			if($scope.actionRoomType == 'create'){
+				if($scope.roomType.image_path == null || $scope.roomType.image_path ==''){
+					swal({
+						  title: "Error",
+						  text: "Please upload an image",
+						  icon: "warning",
+						  dangerMode: true,
+						});
+					focus($('#roomTypeImage'));
+				}else{
+					swal({
+						  title: "Are you sure?",
+						  text: "Please confirm to add a room type",
+						  icon: "warning",
+						  buttons: true,
+						  dangerMode: true,
+						})
+						.then((willCreate) => {
+						  if (willCreate) {
+							  $scope.postRequestRoomType();
+						}
+					});
+				}
+			}
+			else if($scope.actionRoomType == 'update'){
+				$scope.postRequestRoomType();
+			}
+		}
+		
+		$scope.postRequestRoomType = function(){
+			var postdata = {
+					id : $scope.actionRoomType == 'create' ? undefined : $scope.roomType.id,
+					roomType_name : $scope.roomType.name,
+					roomType_price : $scope.roomType.base_price,
+					roomType_image_path : $scope.upload_image ? $scope.roomType.image_path : null
+				}
+				console.log(postdata);
+			$http({
+				method : 'POST',
+				headers : {'Content-Type' : 'application/json'},
+				url : $scope.actionRoomType == 'create' ? '${pageContext.request.contextPath}/menu/store/ecpos/createRoomType' : '${pageContext.request.contextPath}/menu/store/ecpos/updateRoomType',
+				data : postdata
+			})
+			.then(function(response) {
+				if (response.status == "403") {
+					alert("Session TIME OUT");
+					$(location).attr('href','${pageContext.request.contextPath}/user');			
+				} else if(response.status == "200") {
+					// ok
+					if($scope.actionRoomType == 'create'){
+						swal("The table has been created", {
+							icon: "success",
+						});
+					}
+					else if($scope.actionRoomType == 'update'){
+						swal("The table has been updated", {
+							icon: "success",
+						});
+					}
+					$scope.resetRoomTypeModal();
+					$('#roomTypeModal').modal('toggle');
+					$('#roomTypeListModal').modal('toggle');
+					$scope.refreshRoomType();
+				}
+			}, function(response){
+				console.log(response);
+				swal({
+				  title: "Error",
+				  text: response.data,
+				  icon: "warning",
+				  dangerMode: true,
+				});
+			});
+		}
+		
+		$scope.submitRoomCategory = function(){
+			if($scope.actionRoomCategory == 'create'){
+				swal({
+					  title: "Are you sure?",
+					  text: "Please confirm to add a room category",
+					  icon: "warning",
+					  buttons: true,
+					  dangerMode: true,
+					})
+					.then((willCreate) => {
+					  if (willCreate) {
+						  $scope.postRequestRoomCategory();
+					}
+				});
+			}
+			else if($scope.actionRoomCategory == 'update'){
+				$scope.postRequestRoomCategory();
+			}
+		}
+		
+		$scope.postRequestRoomCategory = function(){
+			var postdata = {
+					id : $scope.actionRoomCategory == 'create' ? undefined : $scope.roomCategory.id,
+					roomCategory_name : $scope.roomCategory.name
+				}
+				console.log(postdata);
+			$http({
+				method : 'POST',
+				headers : {'Content-Type' : 'application/json'},
+				url : $scope.actionRoomCategory == 'create' ? '${pageContext.request.contextPath}/menu/store/ecpos/createRoomCategory' : '${pageContext.request.contextPath}/menu/store/ecpos/updateRoomCategory',
+				data : postdata
+			})
+			.then(function(response) {
+				if (response.status == "403") {
+					alert("Session TIME OUT");
+					$(location).attr('href','${pageContext.request.contextPath}/user');			
+				} else if(response.status == "200") {
+					// ok
+					if($scope.actionRoomCategory == 'create'){
+						swal("The table has been created", {
+							icon: "success",
+						});
+					}
+					else if($scope.actionRoomCategory == 'update'){
+						swal("The table has been updated", {
+							icon: "success",
+						});
+					}
+					$scope.resetRoomCategoryModal();
+					$('#roomCategoryModal').modal('toggle');
+					$('#roomCategoryListModal').modal('toggle');
+					$scope.refreshRoomCategory();
+				}
+			}, function(response){
+				console.log(response);
+				swal({
+				  title: "Error",
+				  text: response.data,
+				  icon: "warning",
+				  dangerMode: true,
+				});
+			});
+		}
+		
 		$scope.refreshTable2 = function(){
 			var table = $('#tableList_dtable').DataTable({
 				"ajax" : {
@@ -704,7 +986,161 @@
 			});
 		}
 		
-		$scope.getDeviceInfo();
+		$scope.refreshRoom = function(){
+			var table = $('#roomList_dtable').DataTable({
+				"ajax" : {
+					"url" : "${pageContext.request.contextPath}/menu/store/ecpos/getAllRooms?store_id="+$scope.store.id,
+					"dataSrc": function ( json ) {
+						/* $scope.$apply(function() {
+							$scope.tableCount = JSON.stringify(json.tableCount);
+						}); */
+						return json.data;
+		            },
+					"statusCode" : {
+						403 : function() {
+							alert("Session TIME OUT");
+							$(location).attr('href', '${pageContext.request.contextPath}/user');
+						}
+					}
+				},
+				destroy : true,
+				"order" : [ [ 0, "asc" ] ] ,
+				"columns" : [ 
+					{"data" : "id", "width": "5%"}, 
+					{"data" : "roomNumber"},
+					{"data" : "roomFloor"},
+					{"data" : "roomType"},
+					{"data" : "roomCategory"},
+					{"data" : "roomPrice"}
+				]			
+			});
+			
+			$('#roomList_dtable tbody').off('click', 'tr');
+			$('#roomList_dtable tbody').on('click', 'tr', function(evt) {				
+				$scope.actionRoom = 'update';
+				$scope.room = {}
+				$scope.room.id = table.row(this).data().id;
+				$http({
+					method : 'GET',
+					headers : {'Content-Type' : 'application/json'},
+					url : '${pageContext.request.contextPath}/menu/store/ecpos/roomById?store_id='+$scope.store.id + '&id=' + $scope.room.id		
+				})
+				.then(function(response) {
+					if (response.status == "404") {
+						alert("Unable to find table detail");
+					} else{
+						$scope.room.number = response.data.roomNumber;
+						$scope.room.floor = response.data.roomFloor;
+						$scope.room.type = response.data.roomType;
+						$scope.room.category = response.data.roomCategory;
+						
+						$('#roomListModal').modal('toggle');
+						$('#roomModal').modal('toggle');
+					}
+				});
+			});
+		}
+		
+		$scope.refreshRoomType = function(){
+			var table = $('#roomTypeList_dtable').DataTable({
+				"ajax" : {
+					"url" : "${pageContext.request.contextPath}/menu/store/ecpos/getAllRoomTypes",
+					"dataSrc": function ( json ) {
+						/* $scope.$apply(function() {
+							$scope.tableCount = JSON.stringify(json.tableCount);
+						}); */
+						$scope.room_types = json.data;
+						return json.data;
+		            },
+					"statusCode" : {
+						403 : function() {
+							alert("Session TIME OUT");
+							$(location).attr('href', '${pageContext.request.contextPath}/user');
+						}
+					}
+				},
+				destroy : true,
+				"order" : [ [ 0, "asc" ] ] ,
+				"columns" : [ 
+					{"data" : "id", "width": "5%"}, 
+					{"data" : "name"},
+					{"data" : "base_price"}
+				]			
+			});
+			
+			$('#roomTypeList_dtable tbody').off('click', 'tr');
+			$('#roomTypeList_dtable tbody').on('click', 'tr', function(evt) {				
+				$scope.actionRoomType = 'update';
+				$scope.roomType = {}
+				$scope.roomType.id = table.row(this).data().id;
+				$http({
+					method : 'GET',
+					headers : {'Content-Type' : 'application/json'},
+					url : '${pageContext.request.contextPath}/menu/store/ecpos/roomTypeById?roomType_id=' + $scope.roomType.id
+				})
+				.then(function(response) {
+					if (response.status == "404") {
+						alert("Unable to find room type detail");
+					} else{
+						$scope.roomType.name = response.data.name;
+						$scope.roomType.image_path = "${pageContext.request.contextPath}" + response.data.image_path;
+						$scope.roomType.base_price = response.data.base_price;
+						
+						$('#roomTypeListModal').modal('toggle');
+						$('#roomTypeModal').modal('toggle');
+					}
+				});
+			});
+		}
+		
+		$scope.refreshRoomCategory = function(){
+			var table = $('#roomCategoryList_dtable').DataTable({
+				"ajax" : {
+					"url" : "${pageContext.request.contextPath}/menu/store/ecpos/getAllRoomCategories",
+					"dataSrc": function ( json ) {
+						/* $scope.$apply(function() {
+							$scope.tableCount = JSON.stringify(json.tableCount);
+						}); */
+						$scope.room_categories = json.data;
+						return json.data;
+		            },
+					"statusCode" : {
+						403 : function() {
+							alert("Session TIME OUT");
+							$(location).attr('href', '${pageContext.request.contextPath}/user');
+						}
+					}
+				},
+				destroy : true,
+				"order" : [ [ 0, "asc" ] ] ,
+				"columns" : [ 
+					{"data" : "id", "width": "5%"}, 
+					{"data" : "name"}
+				]			
+			});
+			
+			$('#roomCategoryList_dtable tbody').off('click', 'tr');
+			$('#roomCategoryList_dtable tbody').on('click', 'tr', function(evt) {
+				$scope.actionRoomCategory = 'update';
+				$scope.roomCategory = {}
+				$scope.roomCategory.id = table.row(this).data().id;
+				$http({
+					method : 'GET',
+					headers : {'Content-Type' : 'application/json'},
+					url : '${pageContext.request.contextPath}/menu/store/ecpos/roomCategoryById?roomCategory_id=' + $scope.roomCategory.id		
+				})
+				.then(function(response) {
+					if (response.status == "404") {
+						alert("Unable to find room category detail");
+					} else{
+						$scope.roomCategory.name = response.data.name;
+						
+						$('#roomCategoryListModal').modal('toggle');
+						$('#roomCategoryModal').modal('toggle');
+					}
+				});
+			});
+		}
 		
 		$scope.displayQRPdf = function(){		
 			$http.get("${pageContext.request.contextPath}/menu/store/ecpos/displayStaffQRPdf",{responseType: 'arraybuffer'})
@@ -718,8 +1154,73 @@
 		}
 		
 		$(document).ready(function() {
-			$scope.refreshTable();
-			$scope.refreshTable2();
+			$scope.getDeviceInfo();
+			
+			$('input[type=file]').change(function(event) {
+				var element = event.target.id;			
+				var _URL = window.URL || window.webkitURL;
+				var file = this.files[0];
+				fileCheck(file);	
+			});
+		    
+			function fileCheck(file) {	
+				if(file)
+					{
+				     var img = new Image(),
+			        	msg, 
+			        	errorFlag = false;
+			        img.src = window.URL.createObjectURL(file);
+			        img.onload = function() {
+		            	var width = img.naturalWidth,
+			                height = img.naturalHeight,
+			                aspectRatio = width/height,
+			                extension = $('#roomTypeImage').val().split('.').pop();
+		            	      
+			        	if (['png', 'jpg', 'jpeg'].indexOf(extension) == -1) {
+							msg = 'Make sure that the image is in png / jpg / jpeg format.';
+							errorFlag = true;
+					 	}		          
+			        	else if (file.size > 150000) {
+			        		msg = 'Image file must not exceed 150kb.';
+			        		errorFlag = true;
+						}		          
+			        	else if(aspectRatio<1 || aspectRatio>2){
+			        		msg = 'Make sure that the image aspect ratio is within 1:1 to 2:1.';
+			        		errorFlag = true;
+						}	
+			        	else if(width < 300){
+			        		msg = 'Make sure that the image has minimum width of 300px.';
+			        		errorFlag = true;
+						}
+						else if(height < 200){
+							msg = 'Make sure that the image has minimum height of 200px.';
+							errorFlag = true;
+						}
+			          	
+			        	if(errorFlag){        		
+			        		$('#roomTypeImage').val('');
+			        		alert(msg);		        		
+			        		return false;
+			        	}
+			        	
+			          	// if successful validation
+			        	var reader = new FileReader();
+			        	reader.readAsDataURL(file); 
+			        	reader.onloadend = function() {
+				       	  	$scope.roomType.image_path = reader.result;  
+				        	$scope.$apply();
+				        	$scope.upload_image = true;
+			        	}		          
+			        };
+			        
+			        img.onerror = function() {
+			        	msg = 'Invalid image file.';			        	
+			        	alert(msg);
+						return false;
+			        };
+				}				
+				
+			}
 		});
 	});
 	

@@ -368,7 +368,8 @@ IF NOT EXISTS(SELECT * FROM information_schema.schemata WHERE schema_name = p_db
 				overdue_amount DECIMAL(25, 4) NOT NULL,
 				check_status BIGINT NOT NULL,
 				created_date DATETIME(3) NOT NULL,
-				updated_date DATETIME(3) NULL
+				updated_date DATETIME(3) NULL,
+				receipt_number varchar(255) NULL
 			);'));
 			
 			call sp_exec(CONCAT('CREATE TABLE ',p_db_name,'.check_tax_charge 
@@ -522,7 +523,10 @@ IF NOT EXISTS(SELECT * FROM information_schema.schemata WHERE schema_name = p_db
 				table_name NVARCHAR(150) NOT NULL,
 				status_lookup_id BIGINT,
 				created_date DATETIME(3) NOT NULL,
-				last_update_date DATETIME(3)
+				last_update_date DATETIME(3),
+				hotel_floor_no int NULL,
+				hotel_room_type int NULL,
+				hotel_room_category int NULL
 			);'));
 			
 			call sp_exec(CONCAT('CREATE TABLE ',p_db_name,'.state_lookup 
@@ -536,12 +540,30 @@ IF NOT EXISTS(SELECT * FROM information_schema.schemata WHERE schema_name = p_db
 				id BIGINT PRIMARY KEY AUTO_INCREMENT NOT NULL,
 				name VARCHAR(255) NOT NULL
 			);'));
+			
+			call sp_exec(CONCAT('CREATE TABLE ',p_db_name,'.hotel_room_category_lookup 
+			(
+				id BIGINT PRIMARY KEY AUTO_INCREMENT NOT NULL,
+				name VARCHAR(50) NOT NULL,
+				created_date DATETIME NOT NULL,
+				last_updated_date DATETIME NULL
+			);'));
+			
+			call sp_exec(CONCAT('CREATE TABLE ',p_db_name,'.hotel_room_type 
+			(
+				id BIGINT PRIMARY KEY AUTO_INCREMENT NOT NULL,
+				name VARCHAR(50) NOT NULL,
+				image_path VARCHAR(50) NOT NULL,
+				hotel_room_base_price DECIMAL(10,2) NULL,
+				created_date DATETIME NOT NULL,
+				last_updated_date DATETIME NULL
+			);'));
 
 			call sp_exec(CONCAT('INSERT INTO ',p_db_name,'.role_lookup (role_name) VALUES (''Admin'');'));
             call sp_exec(CONCAT('INSERT INTO ',p_db_name,'.role_lookup (role_name) VALUES (''Store Manager'');'));
             call sp_exec(CONCAT('INSERT INTO ',p_db_name,'.role_lookup (role_name) VALUES (''Kitchen'');'));
             call sp_exec(CONCAT('INSERT INTO ',p_db_name,'.role_lookup (role_name) VALUES (''Waiter'');'));
-			call sp_exec(CONCAT('INSERT INTO ',p_db_name,'.store_type_lookup (store_type_name) VALUES (''Retail''),(''F&B'');'));
+			call sp_exec(CONCAT('INSERT INTO ',p_db_name,'.store_type_lookup (store_type_name) VALUES (''Retail''),(''F&B''),(''Hotel'');'));
 			call sp_exec(CONCAT('INSERT INTO ',p_db_name,'.payment_delay_lookup (payment_delay_name) VALUES (''Pay Now/Later''), (''Pay Now''), (''Pay Later'');'));
 			call sp_exec(CONCAT('INSERT INTO ',p_db_name,'.login_type_lookup (login_type_name) VALUES (''Username & Password''), (''Scan QR'');'));
 			call sp_exec(CONCAT('INSERT INTO ',p_db_name,'.charge_type_lookup (charge_type_number,charge_type_name) VALUES (1, ''Total Tax''),(2, ''Overall Tax'');'));
@@ -574,6 +596,7 @@ IF NOT EXISTS(SELECT * FROM information_schema.schemata WHERE schema_name = p_db
 			call sp_exec(CONCAT('INSERT INTO ',p_db_name,'.backend_sequence(`id`, `backend_sequence_code`, `backend_sequence_name`, `backend_sequence`, `modified_date`) VALUES(8, ''TIF'',''Temporary Image File'', 0,NOW());'));
 			call sp_exec(CONCAT('INSERT INTO ',p_db_name,'.backend_sequence(`id`, `backend_sequence_code`, `backend_sequence_name`, `backend_sequence`, `modified_date`) VALUES(9, ''MIF'',''Menu Image File'', 0,NOW());'));
 			call sp_exec(CONCAT('INSERT INTO ',p_db_name,'.backend_sequence(`id`, `backend_sequence_code`, `backend_sequence_name`, `backend_sequence`, `modified_date`) VALUES(10, ''ST'',''Setting Logo Image'', 0,NOW());'));
+			call sp_exec(CONCAT('INSERT INTO ',p_db_name,'.backend_sequence(`id`, `backend_sequence_code`, `backend_sequence_name`, `backend_sequence`, `modified_date`) VALUES(11, ''imgRT'',''Hotel Room Type Image'', 0,NOW());'));
 			call sp_exec(CONCAT('INSERT into ',p_db_name,'.general_configuration (`description`, `parameter`, `value`) VALUE (''BYOD Setting - Application Name'', ''appName'', ''BYOD'');'));
 			call sp_exec(CONCAT('INSERT into ',p_db_name,'.general_configuration (`description`, `parameter`, `value`) VALUE (''BYOD Setting - Main Logo Image'', ''mainLogoPath'', ''/assets/images/byodadmin/default/default_main_logo.png'');'));
 			call sp_exec(CONCAT('INSERT into ',p_db_name,'.general_configuration (`description`, `parameter`, `value`) VALUE (''BYOD Setting - Shortcut Logo Image'', ''shortcutLogoPath'', ''/assets/images/byodadmin/default/default_shortcut_logo.png'');'));

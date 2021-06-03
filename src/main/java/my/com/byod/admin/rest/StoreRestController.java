@@ -402,6 +402,7 @@ public class StoreRestController {
 				jsonObj.put("backend_id", rs.getString("backend_id"));
 				jsonObj.put("store_name", rs.getString("store_name"));
 				jsonObj.put("ecpos", getDeviceInfoByStoreId(connection, 1, store_id));
+				jsonObj.put("store_type_id", rs.getString("store_type_id"));
 			}
 			
 		}catch(Exception ex) {
@@ -755,6 +756,133 @@ public class StoreRestController {
 		return jsonObjResult.toString();
 	}
 	
+	@GetMapping(value = {"/ecpos/getAllRooms"}, produces = "application/json")
+	public String getAllRooms(@RequestParam("store_id") Long store_id, HttpServletRequest request, HttpServletResponse response) {
+		JSONArray jsonArray = new JSONArray();
+		JSONObject jsonObj = null;
+		JSONObject jsonObjResult = null;
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		
+		try {
+			connection = dbConnectionUtil.retrieveConnection(request);
+			// get all active tables
+			stmt = connection.prepareStatement("SELECT a.*, b.name as 'hotel_room_type_name', "
+					+ "b.hotel_room_base_price, c.name as 'hotel_room_category_name' "
+					+ "FROM table_setting a "
+					+ "left join hotel_room_type b on a.hotel_room_type = b.id "
+					+ "left join hotel_room_category_lookup c on a.hotel_room_category = c.id "
+			 		+ "WHERE store_id = ?;");
+			stmt.setLong(1, store_id);
+			rs = (ResultSet) stmt.executeQuery();
+			 
+			while(rs.next()) {
+				jsonObj = new JSONObject();
+				jsonObj.put("id", rs.getLong("id"));
+				jsonObj.put("roomNumber", rs.getString("table_name"));
+				jsonObj.put("roomFloor", rs.getString("hotel_floor_no"));
+				jsonObj.put("roomType", rs.getString("hotel_room_type_name"));
+				jsonObj.put("roomCategory", rs.getString("hotel_room_category_name"));
+				jsonObj.put("roomPrice", rs.getString("hotel_room_base_price"));
+				jsonArray.put(jsonObj);
+			}
+			jsonObjResult = new JSONObject();
+			jsonObjResult.put("data", jsonArray);
+			/*jsonObjResult.put("tableCount", jsonArray.length());*/
+			
+		}catch(Exception ex) {
+			ex.printStackTrace();
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return jsonObjResult.toString();
+	}
+	
+	@GetMapping(value = {"/ecpos/getAllRoomTypes"}, produces = "application/json")
+	public String getAllRoomTypes(HttpServletRequest request, HttpServletResponse response) {
+		JSONArray jsonArray = new JSONArray();
+		JSONObject jsonObj = null;
+		JSONObject jsonObjResult = null;
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		
+		try {
+			connection = dbConnectionUtil.retrieveConnection(request);
+			// get all hotel room types
+			stmt = connection.prepareStatement("SELECT * FROM hotel_room_type;");
+			rs = (ResultSet) stmt.executeQuery();
+			 
+			while(rs.next()) {
+				jsonObj = new JSONObject();
+				jsonObj.put("id", rs.getLong("id"));
+				jsonObj.put("name", rs.getString("name"));
+				jsonObj.put("base_price", rs.getString("hotel_room_base_price"));
+				jsonArray.put(jsonObj);
+			}
+			jsonObjResult = new JSONObject();
+			jsonObjResult.put("data", jsonArray);
+			
+		}catch(Exception ex) {
+			ex.printStackTrace();
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return jsonObjResult.toString();
+	}
+	
+	@GetMapping(value = {"/ecpos/getAllRoomCategories"}, produces = "application/json")
+	public String getAllRoomCategories(HttpServletRequest request, HttpServletResponse response) {
+		JSONArray jsonArray = new JSONArray();
+		JSONObject jsonObj = null;
+		JSONObject jsonObjResult = null;
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		
+		try {
+			connection = dbConnectionUtil.retrieveConnection(request);
+			// get all hotel room categories
+			stmt = connection.prepareStatement("SELECT * FROM hotel_room_category_lookup;");
+			rs = (ResultSet) stmt.executeQuery();
+			 
+			while(rs.next()) {
+				jsonObj = new JSONObject();
+				jsonObj.put("id", rs.getLong("id"));
+				jsonObj.put("name", rs.getString("name"));
+				jsonObj.put("created_date", rs.getString("created_date"));
+				jsonArray.put(jsonObj);
+			}
+			jsonObjResult = new JSONObject();
+			jsonObjResult.put("data", jsonArray);
+			
+		}catch(Exception ex) {
+			ex.printStackTrace();
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return jsonObjResult.toString();
+	}
+	
 	@GetMapping(value = {"/ecpos/tableById"}, produces = "application/json")
 	public String getTableById(@RequestParam("store_id") Long store_id, @RequestParam("id") Long id, HttpServletRequest request, HttpServletResponse response) {
 		//JSONArray jsonArray = new JSONArray();
@@ -776,6 +904,115 @@ public class StoreRestController {
 				jsonObj.put("id", rs.getLong("id"));
 				jsonObj.put("tableName", rs.getString("table_name"));
 				jsonObj.put("createdDate", rs.getString("created_date"));
+			}			
+			
+		}catch(Exception ex) {
+			ex.printStackTrace();
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return jsonObj.toString();
+	}
+	
+	@GetMapping(value = {"/ecpos/roomById"}, produces = "application/json")
+	public String getRoomById(@RequestParam("store_id") Long store_id, @RequestParam("id") Long id, HttpServletRequest request, HttpServletResponse response) {
+		JSONObject jsonObj = null;
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		
+		try {
+			connection = dbConnectionUtil.retrieveConnection(request);
+			 stmt = connection.prepareStatement("SELECT * FROM table_setting WHERE store_id = ? AND id = ? ");
+			 stmt.setLong(1, store_id);
+			 stmt.setLong(2, id);
+			 rs = (ResultSet) stmt.executeQuery();
+			 
+			if(rs.next()) {
+				jsonObj = new JSONObject();
+				jsonObj.put("id", rs.getLong("id"));
+				jsonObj.put("roomNumber", rs.getString("table_name"));
+				jsonObj.put("roomFloor", rs.getString("hotel_floor_no"));
+				jsonObj.put("roomType", rs.getInt("hotel_room_type"));
+				jsonObj.put("roomCategory", rs.getInt("hotel_room_category"));
+			}			
+			
+		}catch(Exception ex) {
+			ex.printStackTrace();
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return jsonObj.toString();
+	}
+	
+	@GetMapping(value = {"/ecpos/roomTypeById"}, produces = "application/json")
+	public String getRoomTypeById(@RequestParam("roomType_id") Long roomType_id, HttpServletRequest request, HttpServletResponse response) {
+		JSONObject jsonObj = null;
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		
+		try {
+			connection = dbConnectionUtil.retrieveConnection(request);
+			String brandId = byodUtil.getGeneralConfig(connection, "BRAND_ID");
+			stmt = connection.prepareStatement("SELECT * FROM hotel_room_type WHERE id = ?;");
+			stmt.setLong(1, roomType_id);
+			rs = (ResultSet) stmt.executeQuery();
+			 
+			if(rs.next()) {
+				jsonObj = new JSONObject();
+				jsonObj.put("id", rs.getLong("id"));
+				jsonObj.put("name", rs.getString("name"));
+				jsonObj.put("image_path", displayFilePath + brandId + "/" + rs.getString("image_path"));
+				jsonObj.put("base_price", rs.getString("hotel_room_base_price"));
+				jsonObj.put("created_date", rs.getString("created_date"));
+			}			
+			
+		}catch(Exception ex) {
+			ex.printStackTrace();
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return jsonObj.toString();
+	}
+	
+	@GetMapping(value = {"/ecpos/roomCategoryById"}, produces = "application/json")
+	public String getRoomCategoryById(@RequestParam("roomCategory_id") Long roomCategory_id, HttpServletRequest request, HttpServletResponse response) {
+		JSONObject jsonObj = null;
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		
+		try {
+			connection = dbConnectionUtil.retrieveConnection(request);
+			
+			stmt = connection.prepareStatement("SELECT * FROM hotel_room_category_lookup WHERE id = ?;");
+			stmt.setLong(1, roomCategory_id);
+			rs = (ResultSet) stmt.executeQuery();
+			 
+			if(rs.next()) {
+				jsonObj = new JSONObject();
+				jsonObj.put("id", rs.getLong("id"));
+				jsonObj.put("name", rs.getString("name"));
+				jsonObj.put("created_date", rs.getString("created_date"));
 			}			
 			
 		}catch(Exception ex) {
@@ -887,6 +1124,328 @@ public class StoreRestController {
 			stmt = connection.prepareStatement("UPDATE table_setting SET table_name = ?, last_update_date = NOW() WHERE store_id = ? AND id = ?;",PreparedStatement.RETURN_GENERATED_KEYS);	// wan - 17092019
 			stmt.setString(count++, jsonObj.getString("tableName"));
 			stmt.setLong(count++, jsonObj.getLong("store_id"));
+			stmt.setLong(count++, jsonObj.getLong("id"));
+			
+			stmt.executeUpdate();
+			rs = stmt.getGeneratedKeys();
+			 
+			if(rs.next()) {
+				jsonObj.put("id", rs.getInt(1));
+			}
+			
+		}catch(Exception ex) {
+			ex.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Server error. Please contact support.");
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.OK);
+	}
+	
+	@PostMapping(value = {"/ecpos/createRoom"}, produces = "application/json")
+	public ResponseEntity<?> createRoom(@RequestBody String formfield, HttpServletRequest request, HttpServletResponse response) {
+		JSONObject jsonObj = null;
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		
+		try {
+			jsonObj  =  new JSONObject(formfield);		
+			if(!jsonObj.has("store_id")) {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Unable to find store detail.");
+			}
+			if(jsonObj.getString("room_number")==null || jsonObj.getString("room_number").trim().equals("")) {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Room number cannot be empty.");
+			}
+				
+			connection = dbConnectionUtil.retrieveConnection(request);		
+			// check for existing table name
+			String sqlStatement = "SELECT id FROM table_setting WHERE table_name = ? AND store_id = ?";
+			stmt = connection.prepareStatement(sqlStatement);
+			stmt.setString(1, jsonObj.getString("room_number"));
+			stmt.setLong(2, jsonObj.getLong("store_id"));
+			rs = stmt.executeQuery();
+			if(rs.next()) {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Duplicate table name for this store.");
+			}
+			
+			int count = 1;
+			sqlStatement = "INSERT INTO table_setting (store_id, table_name, status_lookup_id, created_date, hotel_floor_no, hotel_room_type, hotel_room_category) "
+					+ "VALUES (?, ?, ?, NOW(), ?, ?, ?);";
+			stmt = connection.prepareStatement(sqlStatement,PreparedStatement.RETURN_GENERATED_KEYS);	// wan - 17092019
+			stmt.setLong(count++, jsonObj.getLong("store_id"));
+			stmt.setString(count++, jsonObj.getString("room_number"));
+			stmt.setLong(count++, 2);
+			stmt.setInt(count++, Integer.parseInt(jsonObj.getString("room_floor")));
+			stmt.setInt(count++, jsonObj.getInt("room_type"));
+			stmt.setInt(count++, jsonObj.getInt("room_category"));
+			stmt.executeUpdate();
+			rs = stmt.getGeneratedKeys();
+			 
+			if(rs.next()) {
+				jsonObj.put("id", rs.getInt(1));
+			}
+			
+		}catch(Exception ex) {
+			ex.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Server error. Please contact support.");
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.OK);
+	}
+	
+	@PostMapping(value = {"/ecpos/updateRoom"}, produces = "application/json")
+	public ResponseEntity<?> updateRoom(@RequestBody String formfield, HttpServletRequest request, HttpServletResponse response) {
+		//JSONArray jsonArray = new JSONArray();
+		JSONObject jsonObj = null;
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		int count = 1;
+		
+		try {
+			jsonObj  =  new JSONObject(formfield);
+			
+			if(!jsonObj.has("store_id")) {
+				jsonObj.put("error", "Unable to find store detail");
+				return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.NOT_FOUND);
+			}
+			if(!jsonObj.has("id")) {
+				jsonObj.put("error", "Unable to find table detail");
+				return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.NOT_FOUND);
+			}
+			if(jsonObj.getString("room_number")==null || jsonObj.getString("room_number").trim().equals("")) {
+				jsonObj.put("error", "Room number cannot be empty");
+				return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.BAD_REQUEST);
+			}
+			
+			connection = dbConnectionUtil.retrieveConnection(request);	
+			
+			stmt = connection.prepareStatement("UPDATE table_setting SET table_name = ?, last_update_date = NOW(), "
+					+ "hotel_floor_no = ?, hotel_room_type = ?, hotel_room_category = ? "
+					+ "WHERE store_id = ? AND id = ?;",PreparedStatement.RETURN_GENERATED_KEYS);	// wan - 17092019
+			stmt.setString(count++, jsonObj.getString("room_number"));
+			stmt.setString(count++, jsonObj.getString("room_floor"));
+			stmt.setInt(count++, jsonObj.getInt("room_type"));
+			stmt.setInt(count++, jsonObj.getInt("room_category"));
+			stmt.setLong(count++, jsonObj.getLong("store_id"));
+			stmt.setLong(count++, jsonObj.getLong("id"));
+			
+			stmt.executeUpdate();
+			rs = stmt.getGeneratedKeys();
+			 
+			if(rs.next()) {
+				jsonObj.put("id", rs.getInt(1));
+			}
+			
+		}catch(Exception ex) {
+			ex.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Server error. Please contact support.");
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.OK);
+	}
+	
+	@PostMapping(value = {"/ecpos/createRoomType"}, produces = "application/json")
+	public ResponseEntity<?> createRoomType(@RequestBody String formfield, HttpServletRequest request, HttpServletResponse response) {
+		JSONObject jsonObj = null;
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		
+		try {
+			jsonObj  =  new JSONObject(formfield);
+			connection = dbConnectionUtil.retrieveConnection(request);		
+			
+			String sqlStatement = "SELECT id FROM hotel_room_type WHERE name = ?";
+			stmt = connection.prepareStatement(sqlStatement);
+			stmt.setString(1, jsonObj.getString("roomType_name"));
+			rs = stmt.executeQuery();
+			if(rs.next()) {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Duplicate table name for this store.");
+			}
+			
+			String brandId = byodUtil.getGeneralConfig(connection, "BRAND_ID");
+			String imagePath = jsonObj.isNull("roomType_image_path") ? null
+					: byodUtil.saveImageFile(brandId,"imgRT", jsonObj.getString("roomType_image_path"), null);
+			
+			int count = 1;
+			sqlStatement = "INSERT INTO hotel_room_type (name, image_path, hotel_room_base_price, created_date) "
+					+ "VALUES (?, ?, ?, NOW());";
+			stmt = connection.prepareStatement(sqlStatement,PreparedStatement.RETURN_GENERATED_KEYS);	// wan - 17092019
+			stmt.setString(count++, jsonObj.getString("roomType_name"));
+			stmt.setString(count++, imagePath);
+			stmt.setString(count++, jsonObj.getString("roomType_price"));
+			stmt.executeUpdate();
+			rs = stmt.getGeneratedKeys();
+			 
+			if(rs.next()) {
+				jsonObj.put("id", rs.getInt(1));
+			}
+			
+		}catch(Exception ex) {
+			ex.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Server error. Please contact support.");
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.OK);
+	}
+	
+	@PostMapping(value = {"/ecpos/updateRoomType"}, produces = "application/json")
+	public ResponseEntity<?> updateRoomType(@RequestBody String formfield, HttpServletRequest request, HttpServletResponse response) {
+		//JSONArray jsonArray = new JSONArray();
+		JSONObject jsonObj = null;
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		int count = 1;
+		
+		try {
+			jsonObj  =  new JSONObject(formfield);
+			connection = dbConnectionUtil.retrieveConnection(request);
+			
+			// getting existing image
+			String existingImage = null;
+			String sqlStatement = "SELECT image_path FROM hotel_room_type WHERE id = ?;";
+			stmt = connection.prepareStatement(sqlStatement);
+			stmt.setLong(1, jsonObj.getLong("id"));
+			rs = stmt.executeQuery();
+			if(rs.next()) {
+				existingImage = rs.getString("image_path");
+			}
+			String brandId = byodUtil.getGeneralConfig(connection, "BRAND_ID");
+			String imagePath = jsonObj.isNull("roomType_image_path") ? null
+					: byodUtil.saveImageFile(brandId,"imgRT", jsonObj.getString("roomType_image_path"), existingImage);
+			
+			if(imagePath == null) {
+				sqlStatement = "UPDATE hotel_room_type SET name = ?, hotel_room_base_price = ?, "
+						+ "last_updated_date = now() WHERE id = ?;";
+			} else {
+				sqlStatement = "UPDATE hotel_room_type SET name = ?, image_path = ?, "
+						+ "hotel_room_base_price = ?, last_updated_date = now() WHERE id = ?;";
+			}
+			
+			stmt = connection.prepareStatement(sqlStatement,PreparedStatement.RETURN_GENERATED_KEYS);	// wan - 17092019
+			stmt.setString(count++, jsonObj.getString("roomType_name"));
+			if(imagePath != null) {
+				stmt.setString(count++, imagePath);
+			}
+			stmt.setString(count++, jsonObj.getString("roomType_price"));
+			stmt.setLong(count++, jsonObj.getLong("id"));
+			
+			stmt.executeUpdate();
+			rs = stmt.getGeneratedKeys();
+			 
+			if(rs.next()) {
+				jsonObj.put("id", rs.getInt(1));
+			}
+			
+		}catch(Exception ex) {
+			ex.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Server error. Please contact support.");
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.OK);
+	}
+	
+	@PostMapping(value = {"/ecpos/createRoomCategory"}, produces = "application/json")
+	public ResponseEntity<?> createRoomCategory(@RequestBody String formfield, HttpServletRequest request, HttpServletResponse response) {
+		JSONObject jsonObj = null;
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		
+		try {
+			jsonObj  =  new JSONObject(formfield);
+			connection = dbConnectionUtil.retrieveConnection(request);		
+			
+			String sqlStatement = "SELECT id FROM hotel_room_category_lookup WHERE name = ?";
+			stmt = connection.prepareStatement(sqlStatement);
+			stmt.setString(1, jsonObj.getString("roomCategory_name"));
+			rs = stmt.executeQuery();
+			if(rs.next()) {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN).body("Duplicate table name for this store.");
+			}
+			
+			int count = 1;
+			sqlStatement = "INSERT INTO hotel_room_category_lookup (name, created_date) "
+					+ "VALUES (?, NOW());";
+			stmt = connection.prepareStatement(sqlStatement,PreparedStatement.RETURN_GENERATED_KEYS);	// wan - 17092019
+			stmt.setString(count++, jsonObj.getString("roomCategory_name"));
+			stmt.executeUpdate();
+			rs = stmt.getGeneratedKeys();
+			 
+			if(rs.next()) {
+				jsonObj.put("id", rs.getInt(1));
+			}
+			
+		}catch(Exception ex) {
+			ex.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body("Server error. Please contact support.");
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.OK);
+	}
+	
+	@PostMapping(value = {"/ecpos/updateRoomCategory"}, produces = "application/json")
+	public ResponseEntity<?> updateRoomCategory(@RequestBody String formfield, HttpServletRequest request, HttpServletResponse response) {
+		//JSONArray jsonArray = new JSONArray();
+		JSONObject jsonObj = null;
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		int count = 1;
+		
+		try {
+			jsonObj  =  new JSONObject(formfield);
+			connection = dbConnectionUtil.retrieveConnection(request);
+			
+			String sqlStatement = "UPDATE hotel_room_category_lookup SET name = ?, "
+					+ "last_updated_date = now() WHERE id = ?;";
+			
+			stmt = connection.prepareStatement(sqlStatement,PreparedStatement.RETURN_GENERATED_KEYS);	// wan - 17092019
+			stmt.setString(count++, jsonObj.getString("roomCategory_name"));
 			stmt.setLong(count++, jsonObj.getLong("id"));
 			
 			stmt.executeUpdate();

@@ -34,8 +34,11 @@
 									<button type="button" class="btn pull-right btn-success ml-3" data-toggle="modal" data-target="#staffListModal">
 										<span class="btn-label"><i class="fa fa-edit"></i></span> Manage Staff
 									</button>
-									<button type="button" class="btn pull-right btn-info ml-3" data-toggle="modal" data-target="#tableListModal">
+									<button type="button" id="manageTableBtn" class="btn pull-right btn-info ml-3" data-toggle="modal" data-target="#tableListModal">
 										<span class="btn-label"><i class="fa fa-edit"></i></span> Manage Table
+									</button>
+									<button type="button" id="manageRoomBtn" class="btn pull-right btn-info ml-3" data-toggle="modal" data-target="#roomListModal">
+										<span class="btn-label"><i class="fa fa-edit"></i></span> Manage Room
 									</button>
 									<button type="button" class="btn pull-right btn-primary ml-3" ng-click="ecposModalType('create')">
 										<span class="btn-label"><i class="fa fa-plus"></i></span> Add ECPOS
@@ -389,6 +392,265 @@
 		</div>
 	</div>
 	<!-- Loading Modal [END] -->
+	
+	<!-- Room List Modal [START] -->
+	<div class="modal fade" id="roomListModal" role="dialog" aria-labelledby="roomListModal" aria-hidden="true">
+		<div class="modal-dialog modal-lg">
+		    <div class="modal-content">
+		    <form id="tableListForm" method="POST" accept-charset="UTF-8" role="form" class="form-signin">
+		      <div class="modal-header">
+		        <h5>Room List</h5>	
+		        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+		          <span aria-hidden="true">&times;</span>
+		        </button>
+		      </div>
+		      <div class="modal-body">
+		      		<div class="table-responsive">
+									<table id="roomList_dtable" class="table table-bordered table-hover display" style="width:100%">
+										<thead>
+											<tr>
+												<th>ID</th>
+												<th>Room Number</th>
+												<th>Floor</th>
+												<th>Type</th>
+												<th>Category</th>
+												<th>Price/Night</th>
+											</tr>
+										</thead>										
+										<tbody>									
+										</tbody>
+									</table>
+								</div>			       									  				 									
+		      </div>
+		      <div class="modal-footer">
+				<button type="button" class="btn btn-social btn-danger bg-aqua" data-toggle="modal" data-target="#roomTypeListModal" ng-click="roomTypeListModalType()">
+					<span class="btn-label"><i class="fa fa-edit"></i></span> Room Type
+				</button>
+				<button type="button" class="btn btn-social btn-warning bg-aqua" data-toggle="modal" data-target="#roomCategoryListModal" ng-click="roomCategoryListModalType()">
+					<span class="btn-label"><i class="fa fa-edit"></i></span> Room Category
+				</button>
+				<button type="button" class="btn btn-social ml-auto btn-primary bg-aqua" data-toggle="modal" data-target="#roomModal" ng-click="roomModalType('create')">
+					<span class="btn-label"><i class="fa fa-plus"></i></span> Add Room
+				</button>
+		      </div>
+		       </form>		      
+		    </div>
+		</div>
+	</div>
+	<!-- Room List Modal [END] -->
+	
+	<!-- Room Type List Modal [START] -->
+	<div class="modal fade" id="roomTypeListModal" role="dialog" aria-labelledby="roomTypeListModal" aria-hidden="true">
+		<div class="modal-dialog modal-lg">
+		    <div class="modal-content">
+		    <form id="tableListForm" method="POST" accept-charset="UTF-8" role="form" class="form-signin">
+		      <div class="modal-header">
+		        <h5>Room Type List</h5>	
+		        <button type="button" class="close" ng-click="resetRoomTypeListModal()" aria-label="Close">
+		          <span aria-hidden="true">&times;</span>
+		        </button>
+		      </div>
+		      <div class="modal-body">
+		      		<div class="table-responsive">
+									<table id="roomTypeList_dtable" class="table table-bordered table-hover display" style="width:100%">
+										<thead>
+											<tr>
+												<th>ID</th>
+												<th>Room Type Name</th>
+												<th>Base Price</th>
+											</tr>
+										</thead>										
+										<tbody>									
+										</tbody>
+									</table>
+								</div>			       									  				 									
+		      </div>
+		      <div class="modal-footer">
+		      	<button type="button" class="btn btn-social pull-right btn-primary bg-aqua" data-toggle="modal" data-target="#roomTypeModal" ng-click="roomTypeModalType('create')">
+					<span class="btn-label"><i class="fa fa-plus"></i></span> Add Room Type
+				</button>
+		      </div>
+		       </form>		      
+		    </div>
+		</div>
+	</div>
+	<!-- Room Type List Modal [END] -->
+	
+	<!-- Room Category List Modal [START] -->
+	<div class="modal fade" id="roomCategoryListModal" role="dialog" aria-labelledby="roomCategoryListModal" aria-hidden="true">
+		<div class="modal-dialog modal-lg">
+		    <div class="modal-content">
+		    <form id="tableListForm" method="POST" accept-charset="UTF-8" role="form" class="form-signin">
+		      <div class="modal-header">
+		        <h5>Room Category List</h5>	
+		        <button type="button" class="close" ng-click="resetRoomCategoryListModal()" aria-label="Close">
+		          <span aria-hidden="true">&times;</span>
+		        </button>
+		      </div>
+		      <div class="modal-body">
+		      		<div class="table-responsive">
+									<table id="roomCategoryList_dtable" class="table table-bordered table-hover display" style="width:100%">
+										<thead>
+											<tr>
+												<th>ID</th>
+												<th>Room Category Name</th>
+											</tr>
+										</thead>										
+										<tbody>									
+										</tbody>
+									</table>
+								</div>			       									  				 									
+		      </div>
+		      <div class="modal-footer">
+		      	<button type="button" class="btn btn-social pull-right btn-primary bg-aqua" data-toggle="modal" data-target="#roomCategoryModal" ng-click="roomCategoryModalType('create')">
+					<span class="btn-label"><i class="fa fa-plus"></i></span> Add Room Category
+				</button>
+		      </div>
+		       </form>		      
+		    </div>
+		</div>
+	</div>
+	<!-- Room Category List Modal [END] -->
+	
+	<!-- Create Room Modal -->
+	<div class="modal fade" id="roomModal" tabindex="-1" role="dialog" aria-labelledby="roomModal" aria-hidden="true">
+		<div class="modal-dialog modal-lg">
+		    <div class="modal-content">
+		    <form id="roomForm" method="POST" accept-charset="UTF-8" role="form" class="form-signin" ng-submit="submitRoom()">
+		      <div class="modal-header">
+		        <h5 ng-show="actionRoom == 'create'">Create Room</h5>
+		        <h5 ng-show="actionRoom == 'update'">Edit Room</h5>		
+		        <button type="button" class="close" ng-click="resetRoomModal()" aria-label="Close">
+		          <span aria-hidden="true">&times;</span>
+		        </button>
+		      </div>
+		      <div class="modal-body">
+		      	<div class="form-section">
+					<div class="row">
+						<div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
+							<div class="form-group">
+								<label class="login-label">Room Number</label>
+								<input class="form-control" name="roomNumber" placeholder="Room Number" ng-model="room.number" type="text" required> 
+							</div>
+						</div>
+						<div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
+							<div class="form-group">
+								<label class="login-label">Room Type</label>
+								<select class="form-control" ng-model="room.type" 
+								ng-options="type.id as type.name for type in room_types" required>
+									<option value="" disabled>-- SELECT --</option>
+								</select> 
+							</div>
+						</div>
+						<div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
+							<div class="form-group">
+								<label class="login-label">Floor Number</label>
+								<input class="form-control" name="floor" placeholder="Floor Number" ng-model="room.floor" type="text" required> 
+							</div>
+						</div>
+						<div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
+							<div class="form-group">
+								<label class="login-label">Room Category</label>
+								<select class="form-control" ng-model="room.category" 
+								ng-options="category.id as category.name for category in room_categories" required>
+									<option value="" disabled>-- SELECT --</option>
+								</select> 
+							</div>
+						</div>
+					</div>	
+				</div>				       									  				 									
+		      </div>
+		      <div class="modal-footer">
+		      	<button class="btn btn-primary" ng-show="actionRoom == 'create'" type="submit"> Submit</button>
+		      	<button class="btn btn-primary" ng-show="actionRoom == 'update'" type="submit"> Update</button>
+		      </div>
+		       </form>		      
+		    </div>
+		</div>
+	</div>
+	
+	<!-- Create Room Type Modal -->
+	<div class="modal fade" id="roomTypeModal" tabindex="-1" role="dialog" aria-labelledby="roomTypeModal" aria-hidden="true">
+		<div class="modal-dialog modal-lg">
+		    <div class="modal-content">
+		    <form id="roomForm" method="POST" accept-charset="UTF-8" role="form" class="form-signin" ng-submit="submitRoomType()">
+		      <div class="modal-header">
+		        <h5 ng-show="actionRoomType == 'create'">Create Room Type</h5>
+		        <h5 ng-show="actionRoomType == 'update'">Edit Room Type</h5>		
+		        <button type="button" class="close" ng-click="resetRoomTypeModal()" aria-label="Close">
+		          <span aria-hidden="true">&times;</span>
+		        </button>
+		      </div>
+		      <div class="modal-body">
+		      	<div class="form-section">
+					<div class="row">
+						<div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
+							<div class="form-group">
+								<label class="login-label">Room Type Name</label>
+								<input class="form-control" name="roomTypeName" placeholder="Name" ng-model="roomType.name" type="text" required> 
+							</div>
+						</div>
+						<div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
+							<div class="form-group">
+								<label class="login-label">Room Price</label>
+								<input class="form-control" name="roomPrice" placeholder="Name" ng-model="roomType.base_price" type="text" required> 
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						 <div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
+						 	<div class="form-group">
+						 		<img style="max-width:100%;max-height:100%;" ng-show="roomType.image_path!=null"  ng-src="{{roomType.image_path}}"/>
+						 	</div>									
+							<div class="form-group">																	
+								<label class="login-label">Image <i class="fa fa-info-circle ii" data-toggle="tooltip" data-placement="top" title="Image cannot exceed 150kb, image aspect ratio is within 1:1 to 2:1, minimum width of 300px and minimum height of 200px."></i></label> 
+								<input id="roomTypeImage" type="file" accept="image/*"/> 
+							</div>
+						</div>
+					</div>	
+				</div>				       									  				 									
+		      </div>
+		      <div class="modal-footer">
+		      	<button class="btn btn-primary" ng-show="actionRoomType == 'create'" type="submit"> Submit</button>
+		      	<button class="btn btn-primary" ng-show="actionRoomType == 'update'" type="submit"> Update</button>
+		      </div>
+		       </form>		      
+		    </div>
+		</div>
+	</div>
+	
+	<!-- Create Room Category Modal -->
+	<div class="modal fade" id="roomCategoryModal" tabindex="-1" role="dialog" aria-labelledby="roomCategoryModal" aria-hidden="true">
+		<div class="modal-dialog modal-lg">
+		    <div class="modal-content">
+		    <form id="roomForm" method="POST" accept-charset="UTF-8" role="form" class="form-signin" ng-submit="submitRoomCategory()">
+		      <div class="modal-header">
+		        <h5 ng-show="actionRoomCategory == 'create'">Create Room Category</h5>
+		        <h5 ng-show="actionRoomCategory == 'update'">Edit Room Category</h5>		
+		        <button type="button" class="close" ng-click="resetRoomCategoryModal()" aria-label="Close">
+		          <span aria-hidden="true">&times;</span>
+		        </button>
+		      </div>
+		      <div class="modal-body">
+		      	<div class="form-section">
+					<div class="row">
+						<div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
+							<div class="form-group">
+								<label class="login-label">Room Category Name</label>
+								<input class="form-control" name="roomCategoryName" placeholder="Name" ng-model="roomCategory.name" type="text" required> 
+							</div>
+						</div>
+					</div>
+				</div>				       									  				 									
+		      </div>
+		      <div class="modal-footer">
+		      	<button class="btn btn-primary" ng-show="actionRoomCategory == 'create'" type="submit"> Submit</button>
+		      	<button class="btn btn-primary" ng-show="actionRoomCategory == 'update'" type="submit"> Update</button>
+		      </div>
+		       </form>		      
+		    </div>
+		</div>
+	</div>
 </div>
 </body>
 </html>
