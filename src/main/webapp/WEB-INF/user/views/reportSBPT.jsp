@@ -105,8 +105,9 @@
 																<tr>
 																	<th>No</th>
 																	<th>Store Name</th>
-																	<th>Store Address</th>
+																	<!-- <th>Store Address</th> -->
 																	<!-- <th>Staff Name</th> -->
+																	<th>Receipt Number</th>
 																	<th>Payment Type</th>
 																	<th>Payment Method</th>
 																	<th>Sales (RM)</th>

@@ -177,6 +177,8 @@ public class ReportRestController {
 					"select st.store_name as store_name, st.store_address as store_address, ");
 			query.append("stf.staff_name as staff_name, pml.name as method_pay, ptl.name as type_pay, ");
 			query.append("truncate(tt.transaction_amount,2) as money, tt.created_date as trx_date ");
+			//Add receipt number
+			query.append(", cc.receipt_number as receipt_number ");
 			query.append("from transaction tt ");
 			query.append("left join `check` cc on (tt.check_id = cc.id) ");
 			query.append("left join payment_method_lookup pml on (tt.payment_method = pml.id) ");
@@ -215,6 +217,7 @@ public class ReportRestController {
 				jsonObj.put("type_pay", rs.getString("type_pay"));
 				jsonObj.put("money", rs.getString("money"));
 				jsonObj.put("trx_date", rs.getString("trx_date"));
+				jsonObj.put("receipt_number", rs.getString("receipt_number"));
 				jsonArray.put(jsonObj);
 			}
 
@@ -247,6 +250,8 @@ public class ReportRestController {
 		StringBuffer query = new StringBuffer(
 				"select st.store_name as store_name, st.store_address as store_address, stf.staff_name as staff_name, pml.name as method_pay, ptl.name as type_pay, ");
 		query.append("truncate(tt.transaction_amount,2) as money, tt.created_date as trx_date ");
+		// Add receipt number
+		query.append(", cc.receipt_number as receipt_number ");
 		query.append("from transaction tt ");
 		query.append("left join `check` cc on (tt.check_id = cc.id) ");
 		query.append("left join payment_method_lookup pml on (tt.payment_method = pml.id) ");
@@ -316,22 +321,25 @@ public class ReportRestController {
 			cell.setCellStyle(style);
 			cell = row.createCell(1);
 			cell.setCellValue("Branch Name");
-			cell.setCellStyle(style);
-			cell = row.createCell(2);
-			cell.setCellValue("Branch Address");
+//			cell.setCellStyle(style);
+//			cell = row.createCell(2);
+//			cell.setCellValue("Branch Address");
 			
 			if(reportType.equalsIgnoreCase("3")) {
 				cell.setCellStyle(style);
-				cell = row.createCell(3);
+				cell = row.createCell(2);
 				cell.setCellValue("Staff Name");
 				cell.setCellStyle(style);
-				cell = row.createCell(4);
+				cell = row.createCell(3);
 				cell.setCellValue("Sales (RM)");
 				cell.setCellStyle(style);
-				cell = row.createCell(5);
+				cell = row.createCell(4);
 				cell.setCellValue("Date");
 				cell.setCellStyle(style);
 			}else if(reportType.equalsIgnoreCase("4")) {
+				cell.setCellStyle(style);
+				cell = row.createCell(2);
+				cell.setCellValue("Receipt Number");
 				cell.setCellStyle(style);
 				cell = row.createCell(3);
 				cell.setCellValue("Payment Type");
@@ -355,17 +363,19 @@ public class ReportRestController {
 				cell.setCellValue(iNumbering++);
 				cell = row.createCell(1);
 				cell.setCellValue(rs.getString("store_name"));
-				cell = row.createCell(2);
-				cell.setCellValue(rs.getString("store_address"));
+//				cell = row.createCell(2);
+//				cell.setCellValue(rs.getString("store_address"));
 				
 				if(reportType.equalsIgnoreCase("3")) {
-					cell = row.createCell(3);
+					cell = row.createCell(2);
 					cell.setCellValue(rs.getString("staff_name"));
-					cell = row.createCell(4);
+					cell = row.createCell(3);
 					cell.setCellValue(rs.getDouble("money"));
-					cell = row.createCell(5);
+					cell = row.createCell(4);
 					cell.setCellValue(rs.getString("trx_date"));
 				}else if(reportType.equalsIgnoreCase("4")) {
+					cell = row.createCell(2);
+					cell.setCellValue(rs.getString("receipt_number"));
 					cell = row.createCell(3);
 					cell.setCellValue(rs.getString("method_pay"));
 					cell = row.createCell(4);
@@ -453,8 +463,12 @@ public class ReportRestController {
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		StringBuffer query = new StringBuffer(
-				"select count(cd.menu_item_name) as total_item, cd.menu_item_name as item_name, truncate(cd.menu_item_price, 2) as item_price, tt.created_date as trxdate from check_detail cd ");
+				"select count(cd.menu_item_name) as total_item, cd.menu_item_name as item_name, truncate(cd.menu_item_price, 2) as item_price, tt.created_date as trxdate, cc.category_name as category_name from check_detail cd ");
 		query.append("left join `check` ch on (cd.check_id = ch.id) ");
+		//Add Category - Start
+		query.append("left join category_menu_item cmi on (cd.menu_item_id = cmi.menu_item_id) ");
+		query.append("left join category cc on (cmi.category_id = cc.group_category_id) ");
+		//Add Category - End
 		query.append("left join transaction tt on (cd.check_id = tt.check_id) ");
 		query.append("where tt.transaction_status = 3 ");
 		query.append("and tt.created_date between '" + subStr1 + "' and '" + subStr2 + "' ");
@@ -483,7 +497,7 @@ public class ReportRestController {
 			sheet.addMergedRegion(new CellRangeAddress(0, // first row (0-based)
 					0, // last row (0-based)
 					0, // first column (0-based)
-					3 // last column (0-based)
+					4 // last column (0-based)
 			));
 
 			int iNumbering = 1;
@@ -511,13 +525,16 @@ public class ReportRestController {
 			cell.setCellValue("#");
 			cell.setCellStyle(style);
 			cell = row.createCell(1);
-			cell.setCellValue("Item Sold");
+			cell.setCellValue("Category");
 			cell.setCellStyle(style);
 			cell = row.createCell(2);
-			cell.setCellValue("Item");
+			cell.setCellValue("Item Sold");
 			cell.setCellStyle(style);
 			cell = row.createCell(3);
-			cell.setCellValue("Price");
+			cell.setCellValue("Item");
+			cell.setCellStyle(style);
+			cell = row.createCell(4);
+			cell.setCellValue("Price (RM)");
 			cell.setCellStyle(style);
 //			cell = row.createCell(4);
 //			cell.setCellValue("Date");
@@ -530,11 +547,13 @@ public class ReportRestController {
 				cell = row.createCell(0);
 				cell.setCellValue(iNumbering++);
 				cell = row.createCell(1);
-				cell.setCellValue(rs.getString("total_item"));
+				cell.setCellValue(rs.getString("category_name"));
 				cell = row.createCell(2);
-				cell.setCellValue(rs.getString("item_name"));
+				cell.setCellValue(rs.getInt("total_item"));
 				cell = row.createCell(3);
-				cell.setCellValue(rs.getString("item_price"));
+				cell.setCellValue(rs.getString("item_name"));
+				cell = row.createCell(4);
+				cell.setCellValue(rs.getDouble("item_price"));
 //				cell = row.createCell(4);
 //				cell.setCellValue(rs.getString("trxdate"));
 
@@ -545,7 +564,7 @@ public class ReportRestController {
 			sheet.autoSizeColumn(1);
 			sheet.autoSizeColumn(2);
 			sheet.autoSizeColumn(3);
-//			sheet.autoSizeColumn(4);
+			sheet.autoSizeColumn(4);
 
 			// write it as an excel attachment
 			ByteArrayOutputStream outByteStream = new ByteArrayOutputStream();
@@ -692,7 +711,11 @@ public class ReportRestController {
 
 			String newSubStr2 = new SimpleDateFormat("yyyy-MM-dd").format(datePlusOne);
 			StringBuffer query = new StringBuffer(
-					"select count(cd.menu_item_name) as total_item, cd.menu_item_name as item_name, truncate(cd.menu_item_price, 2) as item_price, tt.created_date as trxdate from check_detail cd ");
+					"select count(cd.menu_item_name) as total_item, cd.menu_item_name as item_name, truncate(cd.menu_item_price, 2) as item_price, cc.category_name as category, tt.created_date as trxdate from check_detail cd ");
+			// Add category - Start
+			query.append("left join category_menu_item cmi on (cd.menu_item_id = cmi.menu_item_id) ");
+			query.append("left join category cc on (cmi.category_id = cc.group_category_id) ");
+			// Add Category - End
 			query.append("left join `check` ch on (cd.check_id = ch.id) ");
 			query.append("left join transaction tt on (cd.check_id = tt.check_id) ");
 			query.append("where tt.transaction_status = 3 ");
@@ -712,6 +735,7 @@ public class ReportRestController {
 			while (rs.next()) {
 				JSONObject jsonObj = new JSONObject();
 				jsonObj.put("no", i++);
+				jsonObj.put("category", rs.getString("category"));
 				jsonObj.put("total_item", rs.getString("total_item"));
 				jsonObj.put("item_name", rs.getString("item_name"));
 				jsonObj.put("item_price", rs.getString("item_price"));

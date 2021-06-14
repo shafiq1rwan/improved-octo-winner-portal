@@ -89,9 +89,10 @@
 															style="width: 100%">
 															<thead>
 																<tr>
-																	<th>No</th>
-																	<th>Total Item</th>
+																	<!-- <th>No</th> -->
+																	<th>Category</th>
 																	<th>Item Name</th>
+																	<th>Item Sold</th>
 																	<th>Item Price (RM)</th>
 																</tr>
 															</thead>

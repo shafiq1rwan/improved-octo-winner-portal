@@ -54,9 +54,10 @@
 						"destroy" : true,
 						"searching" : true,
 						"columns" : [ 
-							{"data" : "no"}, 
-							{"data" : "total_item"}, 
+							/* {"data" : "no"},  */
+							{"data" : "category"},
 							{"data" : "item_name"}, 
+							{"data" : "total_item"}, 
 							{"data" : "item_price"}, 
 						],
 						"scrollX" : true

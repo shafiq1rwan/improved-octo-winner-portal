@@ -58,8 +58,9 @@
 						"columns" : [ 
 							{"data" : "no"}, 
 							{"data" : "store_name"}, 
-							{"data" : "store_address"}, 
+							/* {"data" : "store_address"},  */
 							/* {"data" : "staff_name"},  */
+							{"data" : "receipt_number"},
 							{"data" : "method_pay"}, 
 							{"data" : "type_pay"}, 
 							{"data" : "money"}, 
