@@ -37,7 +37,7 @@
 			var employee = "undefined";
 			var paymentType = "undefined";
 			
-			$('#menuItem_dtable')
+			$('#menuItem_dtableDetail')
 			.DataTable(
 					{
 						"ajax" : {
@@ -66,6 +66,7 @@
 						],
 						"scrollX" : true
 					});
+			$scope.refreshTableSummary();
 		}
 		
 		$scope.getDropdownList = function(){
@@ -138,6 +139,45 @@
 						  dangerMode: true,
 					});
 			});
+		}
+		
+		$scope.refreshTableSummary = function(){	
+			
+			var date1 = moment($scope.reportStartDate).format();
+			var date2 = moment($scope.reportEndDate).format();
+			var store = $scope.storeName;
+			var employee = "undefined";
+			var paymentType = "undefined";
+			
+			$('#menuItem_dtableSummary')
+			.DataTable(
+					{
+						"ajax" : {
+							"url" : '${pageContext.request.contextPath}/report/salesByStoreSummary/'+date1+"/"+date2+"/"+store,
+							"dataSrc": function ( json ) {                
+				                return json;
+				            },  
+							"statusCode" : {
+								403 : function() {
+									alert("Session TIME OUT");
+									$(location)
+											.attr('href',
+													'${pageContext.request.contextPath}/admin');
+								}
+							}
+						},
+						"processing": true,
+						"destroy" : true,
+						"searching" : true,
+						"columns" : [ 
+							{"data" : "no"}, 
+							{"data" : "date_range"},
+							{"data" : "store_name"}, 
+							{"data" : "quantity"}, 
+							{"data" : "money"}
+						],
+						"scrollX" : true
+					});
 		}
 	});
 </script>

@@ -85,7 +85,8 @@ public class ReportRestController {
 					title = "Sales by Payment Type Report";
 				}
 
-				summaryReport(subStr1, newSubStr2, request, connection, response, store, title, employee, paymentType, reportType);
+				summaryReport(subStr1, newSubStr2, request, connection, response, store, title, employee, paymentType,
+						reportType);
 			}
 
 		} catch (Exception ex) {
@@ -177,7 +178,7 @@ public class ReportRestController {
 					"select st.store_name as store_name, st.store_address as store_address, ");
 			query.append("stf.staff_name as staff_name, pml.name as method_pay, ptl.name as type_pay, ");
 			query.append("truncate(tt.transaction_amount,2) as money, tt.created_date as trx_date ");
-			//Add receipt number
+			// Add receipt number
 			query.append(", cc.receipt_number as receipt_number ");
 			query.append("from transaction tt ");
 			query.append("left join `check` cc on (tt.check_id = cc.id) ");
@@ -199,7 +200,7 @@ public class ReportRestController {
 			if (!paymentType.equalsIgnoreCase("undefined") && !paymentType.equalsIgnoreCase("0")) {
 				query.append(" and pml.id = " + paymentType);
 			}
-			
+
 			query.append(" ORDER BY tt.created_date DESC");
 
 			connection = dbConnectionUtil.retrieveConnection(request);
@@ -265,14 +266,14 @@ public class ReportRestController {
 			query.append(" and st.id = " + store);
 		}
 
-		if (!employee.equalsIgnoreCase("undefined") && !employee.equalsIgnoreCase("0") ) {
+		if (!employee.equalsIgnoreCase("undefined") && !employee.equalsIgnoreCase("0")) {
 			query.append(" and stf.id = " + employee);
 		}
 
 		if (!paymentType.equalsIgnoreCase("undefined") && !paymentType.equalsIgnoreCase("0")) {
 			query.append(" and pml.id = " + paymentType);
 		}
-		
+
 		query.append(" ORDER BY tt.created_date DESC");
 
 		connection = dbConnectionUtil.retrieveConnection(request);
@@ -324,8 +325,8 @@ public class ReportRestController {
 //			cell.setCellStyle(style);
 //			cell = row.createCell(2);
 //			cell.setCellValue("Branch Address");
-			
-			if(reportType.equalsIgnoreCase("3")) {
+
+			if (reportType.equalsIgnoreCase("3")) {
 				cell.setCellStyle(style);
 				cell = row.createCell(2);
 				cell.setCellValue("Staff Name");
@@ -336,7 +337,7 @@ public class ReportRestController {
 				cell = row.createCell(4);
 				cell.setCellValue("Date");
 				cell.setCellStyle(style);
-			}else if(reportType.equalsIgnoreCase("4")) {
+			} else if (reportType.equalsIgnoreCase("4")) {
 				cell.setCellStyle(style);
 				cell = row.createCell(2);
 				cell.setCellValue("Receipt Number");
@@ -354,7 +355,7 @@ public class ReportRestController {
 				cell.setCellValue("Date");
 				cell.setCellStyle(style);
 			}
-			
+
 			while (rs.next()) {
 
 				// Report Content
@@ -365,15 +366,15 @@ public class ReportRestController {
 				cell.setCellValue(rs.getString("store_name"));
 //				cell = row.createCell(2);
 //				cell.setCellValue(rs.getString("store_address"));
-				
-				if(reportType.equalsIgnoreCase("3")) {
+
+				if (reportType.equalsIgnoreCase("3")) {
 					cell = row.createCell(2);
 					cell.setCellValue(rs.getString("staff_name"));
 					cell = row.createCell(3);
 					cell.setCellValue(rs.getDouble("money"));
 					cell = row.createCell(4);
 					cell.setCellValue(rs.getString("trx_date"));
-				}else if(reportType.equalsIgnoreCase("4")) {
+				} else if (reportType.equalsIgnoreCase("4")) {
 					cell = row.createCell(2);
 					cell.setCellValue(rs.getString("receipt_number"));
 					cell = row.createCell(3);
@@ -385,7 +386,7 @@ public class ReportRestController {
 					cell = row.createCell(6);
 					cell.setCellValue(rs.getString("trx_date"));
 				}
-				
+
 				totalSales = totalSales + rs.getDouble("money");
 
 			}
@@ -428,7 +429,8 @@ public class ReportRestController {
 			response.setContentType("application/ms-excel");
 			response.setContentLength(outArray.length);
 			response.setHeader("Expires:", "0"); // eliminates browser caching
-			response.setHeader("Content-Disposition", "attachment; filename=" + title.replaceAll("\\s+","") + dtf.format(now) + ".xls");
+			response.setHeader("Content-Disposition",
+					"attachment; filename=" + title.replaceAll("\\s+", "") + dtf.format(now) + ".xls");
 			OutputStream outStream = response.getOutputStream();
 			outStream.write(outArray);
 			outStream.flush();
@@ -465,10 +467,10 @@ public class ReportRestController {
 		StringBuffer query = new StringBuffer(
 				"select count(cd.menu_item_name) as total_item, cd.menu_item_name as item_name, truncate(cd.menu_item_price, 2) as item_price, tt.created_date as trxdate, cc.category_name as category_name from check_detail cd ");
 		query.append("left join `check` ch on (cd.check_id = ch.id) ");
-		//Add Category - Start
+		// Add Category - Start
 		query.append("left join category_menu_item cmi on (cd.menu_item_id = cmi.menu_item_id) ");
 		query.append("left join category cc on (cmi.category_id = cc.group_category_id) ");
-		//Add Category - End
+		// Add Category - End
 		query.append("left join transaction tt on (cd.check_id = tt.check_id) ");
 		query.append("where tt.transaction_status = 3 ");
 		query.append("and tt.created_date between '" + subStr1 + "' and '" + subStr2 + "' ");
@@ -531,7 +533,7 @@ public class ReportRestController {
 			cell.setCellValue("Item Sold");
 			cell.setCellStyle(style);
 			cell = row.createCell(3);
-			cell.setCellValue("Item");
+			cell.setCellValue("Item Name");
 			cell.setCellStyle(style);
 			cell = row.createCell(4);
 			cell.setCellValue("Price (RM)");
@@ -689,9 +691,9 @@ public class ReportRestController {
 		}
 	}
 
-	@GetMapping(value = { "/getBestSellingItem/{date1}/{date2}/{store}" }, produces = "application/json")
+	@GetMapping(value = { "/getBestSellingItem/{date1}/{date2}/{store}/{category}" }, produces = "application/json")
 	public ResponseEntity<?> getBestSellingItem(@PathVariable String date1, @PathVariable String date2,
-			@PathVariable String store, HttpServletRequest request, HttpServletResponse response) {
+			@PathVariable String store, @PathVariable String category, HttpServletRequest request, HttpServletResponse response) {
 
 		Connection connection = null;
 		PreparedStatement stmt = null;
@@ -722,7 +724,11 @@ public class ReportRestController {
 			query.append("and tt.created_date between '" + subStr1 + "' and '" + newSubStr2 + "' ");
 
 			if (!store.equalsIgnoreCase("undefined") && !store.equalsIgnoreCase("0")) {
-				query.append("and tt.store_id = " + store);
+				query.append(" and tt.store_id = " + store);
+			}
+			
+			if(!category.equalsIgnoreCase("undefined") && !category.equalsIgnoreCase("0")) {
+				query.append(" and cc.group_category_id = " + category);
 			}
 
 			query.append(" group by cd.menu_item_name");
@@ -1075,6 +1081,122 @@ public class ReportRestController {
 				}
 			} catch (SQLException e) {
 				e.printStackTrace();
+			}
+		}
+	}
+
+	@GetMapping(value = { "/salesByStoreSummary/{date1}/{date2}/{store}" }, produces = "application/json")
+	public ResponseEntity<?> salesByStoreSummary(@PathVariable String date1, @PathVariable String date2,
+			@PathVariable String store, HttpServletRequest request, HttpServletResponse response) {
+
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		JSONArray jsonArray = new JSONArray();
+
+		System.out.println("date1: " + date1);
+		System.out.println("date2: " + date2);
+		System.out.println("storeName: " + store);
+
+		try {
+
+			String subStr1 = date1.substring(0, 10);
+			String subStr2 = date2.substring(0, 10);
+
+			Date datePlusOne = new SimpleDateFormat("yyyy-MM-dd").parse(subStr2);
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(datePlusOne);
+			cal.add(Calendar.DATE, 1);
+			datePlusOne = cal.getTime();
+
+			String newSubStr2 = new SimpleDateFormat("yyyy-MM-dd").format(datePlusOne);
+
+			StringBuffer query = new StringBuffer("SELECT st.store_name AS store_name, ");
+			query.append("st.store_address AS store_address, ");
+			query.append("substring(tt.created_date, 1, 10) as datetrx, ");
+			query.append("SUM(cc.total_item_quantity) as quantity, ");
+			query.append("SUM(TRUNCATE(tt.transaction_amount, 2)) AS money ");
+			query.append("FROM transaction tt LEFT JOIN `check` cc ON (tt.check_id = cc.id) ");
+			query.append("LEFT JOIN payment_method_lookup pml ON (tt.payment_method = pml.id) ");
+			query.append("LEFT JOIN payment_type_lookup ptl ON (tt.payment_type = ptl.id) ");
+			query.append("LEFT JOIN store st ON (tt.store_id = st.id) ");
+			query.append("LEFT JOIN staff stf ON (tt.staff_id = stf.id) ");
+			query.append("WHERE tt.transaction_status = 3 ");
+			query.append("AND tt.created_date BETWEEN '" + subStr1 + "' AND '" + newSubStr2 + "' ");
+
+			if (!store.equalsIgnoreCase("undefined") && !store.equalsIgnoreCase("0")) {
+				query.append("AND st.id = " + store);
+			}
+
+			connection = dbConnectionUtil.retrieveConnection(request);
+			stmt = connection.prepareStatement(query.toString());
+			rs = stmt.executeQuery();
+			
+			while (rs.next()) {
+				if (!(rs.getString("store_name") == null)) {
+					JSONObject jsonObj = new JSONObject();
+					jsonObj.put("no", 1);
+					jsonObj.put("date_range", subStr1.replace("-", "/") + " - " + newSubStr2.replace("-", "/"));
+					jsonObj.put("store_name", rs.getString("store_name"));
+					jsonObj.put("quantity", rs.getString("quantity"));
+					jsonObj.put("money", rs.getString("money"));
+					jsonArray.put(jsonObj);
+				}
+			}
+
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		} finally {
+			try {
+				if (stmt != null)
+					stmt.close();
+				if (rs != null) {
+					rs.close();
+					rs = null;
+				}
+				if (connection != null) {
+					connection.close();
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		return ResponseEntity.ok().body(jsonArray.toString());
+	}
+	
+	@GetMapping(value = "/getCategoryList", produces = "application/json")
+	public ResponseEntity<?> getCategoryList(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		JSONArray jsonArr = new JSONArray();
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+
+		JSONObject jsonDefault = new JSONObject();
+		jsonDefault.put("id", "0");
+		jsonDefault.put("name", "All");
+		jsonArr.put(jsonDefault);
+
+		try {
+			connection = dbConnectionUtil.retrieveConnection(request);
+			stmt = connection.prepareStatement("SELECT * FROM category ");
+			rs = (ResultSet) stmt.executeQuery();
+
+			while (rs.next()) {
+				JSONObject jsonObj = new JSONObject();
+				jsonObj.put("id", rs.getLong("id"));
+				jsonObj.put("name", rs.getString("category_name"));
+				jsonArr.put(jsonObj);
+			}
+			return ResponseEntity.ok(jsonArr.toString());
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return ResponseEntity.badRequest().body(ex.getMessage());
+		} finally {
+			if (stmt != null) {
+				stmt.close();
+			}
+			if (rs != null) {
+				rs.close();
 			}
 		}
 	}

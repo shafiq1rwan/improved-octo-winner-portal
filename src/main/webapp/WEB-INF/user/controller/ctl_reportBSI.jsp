@@ -32,12 +32,13 @@
 			var store = $scope.storeName;
 			var employee = "undefined";
 			var paymentType = "undefined";
+			var category = $scope.categoryName;
 			
 			$('#menuItem_dtable2')
 			.DataTable(
 					{
 						"ajax" : {
-							"url" : '${pageContext.request.contextPath}/report/getBestSellingItem/'+date1+"/"+date2+"/"+store,
+							"url" : '${pageContext.request.contextPath}/report/getBestSellingItem/'+date1+"/"+date2+"/"+store+"/"+category,
 							"dataSrc": function ( json ) {                
 				                return json;
 				            },  
@@ -104,6 +105,22 @@
 			.then(
 				function(response) {	
 					$scope.storeItem = response.data;
+				},
+				function(response) {
+					swal({
+						  title: "Error",
+						  text: response.data,
+						  icon: "warning",
+						  dangerMode: true,
+					});
+			});
+			
+			$http
+			.get(
+				'${pageContext.request.contextPath}/report/getCategoryList/')
+			.then(
+				function(response) {	
+					$scope.categoryItem = response.data;
 				},
 				function(response) {
 					swal({

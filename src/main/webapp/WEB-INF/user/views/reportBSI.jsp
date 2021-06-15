@@ -21,10 +21,6 @@
 					<div class="row">
 						<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
 							<div class="card mb-3">
-								<div class="card-header d-flex flex-row justify-content-between">
-									<h3> </h3>
-								</div>
-
 								<div class="card-body">
 									<div ng-init="initiation();">
 										<div class="row"
@@ -32,7 +28,8 @@
 											<div class="col-md-12"
 												style="padding-right: 2px; padding-left: 2px;">
 												<form ng-submit="generateReport()">
-													<div class="row">
+												<div class="card" style="background-color: lightgoldenrodyellow;">
+													<div class="row" style="padding-top: 10px; padding-left: 6px; padding-right: 6px;">
 														<div
 															class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
 															<table width='100%'>
@@ -60,31 +57,40 @@
 																					<option value="" disabled selected hidden>Choose a store</option>
 																				</select>
 																			</div></td>
+																		<td><div class="form-group">
+																				<label for="storeName">Category</label> 
+																				<select
+																					id="categoryName" class="form-control"
+																					ng-model="categoryName" ng-change="mit.id == 1"
+																					ng-options="mit.id as mit.name for mit in categoryItem">
+																					<option value="" disabled selected hidden>Choose a category</option>
+																				</select>
+																			</div></td>
 																		<td
 																			style="padding-top: 10px; padding-left: 10px; padding-right: 10px"><div
 																				class="form-group">
 																				<label for="startDate"> </label><br>
 																				<button id="" class="btn btn-block btn-primary"
 																					type="button" ng-click="refreshTable()">
-																					<i class="fas fa-search"></i> Run
+																					<i class="fas fa-search"></i> Search
 																				</button>
 																			</div></td>
 																		<td style="padding-top: 10px"><div
 																				class="form-group">
 																				<label for="startDate"> </label><br>
-																				<button class="btn btn-block"
-																					style="background: #605ca8; color: white;"
+																				<button class="btn btn-success"
 																					type="submit">
-																					<i class="fas fa-cloud-download"></i> Export
+																					<i class="fas fa-download"></i> Export
 																				</button>
 																			</div></td>
 																	</tr>
 																</tbody>
 															</table>
 														</div>
-													</div>
+													</div></div><br>
 													<!-- <br /> -->
-													<div class="row">
+													<div class="card">
+													<div class="row" style="margin: 8px;">
 														<table id="menuItem_dtable2" class="table table-bordered"
 															style="width: 100%">
 															<thead>
@@ -97,7 +103,7 @@
 																</tr>
 															</thead>
 														</table>
-													</div>
+													</div></div>
 												</form>
 											</div>
 										</div>

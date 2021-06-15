@@ -8,6 +8,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Base64;
 import java.util.Date;
@@ -38,7 +39,7 @@ public class ByodUtil {
 		this.request = request;
 	}
 
-	public String createUniqueBackendId(String prefix) {
+	public String createUniqueBackendId(String prefix) throws ParseException {
 		String resultString = "";
 		Date currentDate = new Date();	
 		SimpleDateFormat standardDateFormat = new SimpleDateFormat("ddMMyyyy");
@@ -48,14 +49,16 @@ public class ByodUtil {
 		return resultString;
 	}
 
-	private int getSequence(String code) {
+	private int getSequence(String code) throws ParseException {
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(dbConnectionUtil.setupDataSource(request));
 		boolean isSameDay = false;
 		int sequence = 0;
 		SimpleDateFormat standardDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 
 		Map<String, Object> backendSequenceResult = jdbcTemplate.queryForMap("SELECT * FROM backend_sequence WHERE backend_sequence_code = ?", new Object[] {code});
-		Date databaseDate = (Date) backendSequenceResult.get("modified_date");
+//		Date databaseDate = (Date) backendSequenceResult.get("modified_date");
+		Date databaseDate = sdf.parse(backendSequenceResult.get("modified_date").toString().replace("T", " "));
 		Date currentDate = new Date();
 		
 		System.out.println("Yesterday " + standardDateFormat.format(databaseDate));
@@ -73,7 +76,7 @@ public class ByodUtil {
 		return sequence;
 	}
 	
-	public String createUniqueActivationId(String prefix) {
+	public String createUniqueActivationId(String prefix) throws ParseException {
 		String resultString = "";
 		Date currentDate = new Date();	
 		SimpleDateFormat standardDateFormat = new SimpleDateFormat("ddMMyyyy");
@@ -83,14 +86,15 @@ public class ByodUtil {
 		return resultString;
 	}
 
-	private String getActivationIdSequence(String code) {
+	private String getActivationIdSequence(String code) throws ParseException {
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(dbConnectionUtil.setupDataSource(request));
 		boolean isSameDay = false;
 		int sequence = 0;
 		SimpleDateFormat standardDateFormat = new SimpleDateFormat("dd/MM/yyyy");
-
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+		
 		Map<String, Object> backendSequenceResult = jdbcTemplate.queryForMap("SELECT * FROM device_type_lookup WHERE prefix = ?", new Object[] {code});
-		Date databaseDate = (Date) backendSequenceResult.get("modified_date");
+		Date databaseDate = sdf.parse(backendSequenceResult.get("modified_date").toString().replace("T", " "));
 		Date currentDate = new Date();
 		
 		System.out.println("Yesterday " + standardDateFormat.format(databaseDate));
@@ -158,7 +162,7 @@ public class ByodUtil {
 		return imageName + ".png";
 	}*/
 	
-	public String saveImageFile(String brandId, String image_prefix, String base64_img, String existing) {
+	public String saveImageFile(String brandId, String image_prefix, String base64_img, String existing) throws ParseException {
 		boolean checker = false;
 		String uploadPath = filePath;
 		String imageName = createUniqueBackendId(image_prefix);
