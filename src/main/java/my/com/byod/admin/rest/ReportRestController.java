@@ -23,7 +23,9 @@ import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -714,10 +716,8 @@ public class ReportRestController {
 			String newSubStr2 = new SimpleDateFormat("yyyy-MM-dd").format(datePlusOne);
 			StringBuffer query = new StringBuffer(
 					"select count(cd.menu_item_name) as total_item, cd.menu_item_name as item_name, truncate(cd.menu_item_price, 2) as item_price, cc.category_name as category, tt.created_date as trxdate from check_detail cd ");
-			// Add category - Start
 			query.append("left join category_menu_item cmi on (cd.menu_item_id = cmi.menu_item_id) ");
-			query.append("left join category cc on (cmi.category_id = cc.group_category_id) ");
-			// Add Category - End
+			query.append("left join category cc on (cmi.category_id = cc.id) ");
 			query.append("left join `check` ch on (cd.check_id = ch.id) ");
 			query.append("left join transaction tt on (cd.check_id = tt.check_id) ");
 			query.append("where tt.transaction_status = 3 ");
@@ -728,7 +728,7 @@ public class ReportRestController {
 			}
 			
 			if(!category.equalsIgnoreCase("undefined") && !category.equalsIgnoreCase("0")) {
-				query.append(" and cc.group_category_id = " + category);
+				query.append(" and cc.id = " + category);
 			}
 
 			query.append(" group by cd.menu_item_name");
@@ -877,6 +877,7 @@ public class ReportRestController {
 			StringBuffer query = new StringBuffer("SELECT st.store_name AS store_name, ");
 			query.append("st.store_address AS store_address, ");
 			query.append("substring(tt.created_date, 1, 10) as datetrx, ");
+			query.append("cc.total_item_quantity as quantity, ");
 			query.append("SUM(TRUNCATE(tt.transaction_amount, 2)) AS money ");
 			query.append("FROM transaction tt LEFT JOIN `check` cc ON (tt.check_id = cc.id) ");
 			query.append("LEFT JOIN payment_method_lookup pml ON (tt.payment_method = pml.id) ");
@@ -904,7 +905,8 @@ public class ReportRestController {
 				jsonObj.put("no", i++);
 				jsonObj.put("trx_date", rs.getString("datetrx"));
 				jsonObj.put("store_name", rs.getString("store_name"));
-				jsonObj.put("store_address", rs.getString("store_address"));
+//				jsonObj.put("store_address", rs.getString("store_address"));
+				jsonObj.put("quantity", rs.getString("quantity"));
 				jsonObj.put("money", rs.getString("money"));
 				jsonArray.put(jsonObj);
 			}
@@ -938,7 +940,9 @@ public class ReportRestController {
 	public void salesByStoreReport(String subStr1, String subStr2, HttpServletRequest request, Connection connection,
 			HttpServletResponse response, String store) throws ParseException {
 		PreparedStatement stmt = null;
+		PreparedStatement stmtSummary = null;
 		ResultSet rs = null;
+		ResultSet rsSummary = null;
 
 		String getDate = subStr2.substring(0, 10);
 
@@ -950,9 +954,11 @@ public class ReportRestController {
 
 		String newSubStr2 = new SimpleDateFormat("yyyy-MM-dd").format(datePlusOne);
 
+		//Detail Report
 		StringBuffer query = new StringBuffer("SELECT st.store_name AS store_name, ");
 		query.append("st.store_address AS store_address, ");
 		query.append("substring(tt.created_date, 1, 10) as datetrx, ");
+		query.append("SUM(cc.total_item_quantity) as quantity, ");
 		query.append("SUM(TRUNCATE(tt.transaction_amount, 2)) AS money ");
 		query.append("FROM transaction tt LEFT JOIN `check` cc ON (tt.check_id = cc.id) ");
 		query.append("LEFT JOIN payment_method_lookup pml ON (tt.payment_method = pml.id) ");
@@ -969,14 +975,31 @@ public class ReportRestController {
 		query.append(
 				" GROUP BY DAY(tt.created_date) , MONTH(tt.created_date) , YEAR(tt.created_date) , st.store_name , st.store_address ");
 		query.append("ORDER BY tt.created_date DESC");
+		
+		// Summary Report
+		StringBuffer querySummary = new StringBuffer("SELECT st.store_name AS store_name, ");
+		querySummary.append("st.store_address AS store_address, ");
+		querySummary.append("substring(tt.created_date, 1, 10) as datetrx, ");
+		querySummary.append("SUM(cc.total_item_quantity) as quantity, ");
+		querySummary.append("SUM(TRUNCATE(tt.transaction_amount, 2)) AS money ");
+		querySummary.append("FROM transaction tt LEFT JOIN `check` cc ON (tt.check_id = cc.id) ");
+		querySummary.append("LEFT JOIN payment_method_lookup pml ON (tt.payment_method = pml.id) ");
+		querySummary.append("LEFT JOIN payment_type_lookup ptl ON (tt.payment_type = ptl.id) ");
+		querySummary.append("LEFT JOIN store st ON (tt.store_id = st.id) ");
+		querySummary.append("LEFT JOIN staff stf ON (tt.staff_id = stf.id) ");
+		querySummary.append("WHERE tt.transaction_status = 3 ");
+		querySummary.append("AND tt.created_date BETWEEN '" + subStr1 + "' AND '" + newSubStr2 + "' ");
 
-		System.out.println("Query: " + query);
+		if (!store.equalsIgnoreCase("undefined") && !store.equalsIgnoreCase("0")) {
+			querySummary.append("AND st.id = " + store);
+		}
 
 		connection = dbConnectionUtil.retrieveConnection(request);
 		try {
 			stmt = connection.prepareStatement(query.toString());
-			System.out.println(stmt);
+			stmtSummary = connection.prepareStatement(querySummary.toString());
 			rs = stmt.executeQuery();
+			rsSummary = stmtSummary.executeQuery();
 
 			DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
 			LocalDateTime now = LocalDateTime.now();
@@ -998,19 +1021,86 @@ public class ReportRestController {
 			// Report Title
 			row = sheet.createRow(iLoopData++);
 			HSSFCell cell = row.createCell(0);
+			
+			CellStyle styleHeader = wb.createCellStyle();
+			Font fontHeader = wb.createFont();
+			fontHeader.setBold(true);
+			styleHeader.setFont(fontHeader);
+			
 			CellStyle style = wb.createCellStyle();
 			Font font = wb.createFont();
 			font.setBold(true);
 			style.setFont(font);
+			style.setBorderBottom(BorderStyle.THIN);
+			style.setBorderLeft(BorderStyle.THIN);
+			style.setBorderRight(BorderStyle.THIN);
+			style.setBorderTop(BorderStyle.THIN);
+			style.setFillBackgroundColor(IndexedColors.PALE_BLUE.getIndex());
 
 			CellStyle style2 = wb.createCellStyle();
-			style2.setBorderTop(BorderStyle.DOUBLE);
-			style2.setBorderBottom(BorderStyle.DOUBLE);
+			style2.setBorderBottom(BorderStyle.THIN);
+			style2.setBorderLeft(BorderStyle.THIN);
+			style2.setBorderRight(BorderStyle.THIN);
+			style2.setBorderTop(BorderStyle.THIN);
 
 			cell = row.createCell(0);
-			cell.setCellValue("Sales by Store Report");
-			cell.setCellStyle(style);
+			cell.setCellValue("Sales by Store Report (From "+subStr1+" to "+subStr2+")");
+			cell.setCellStyle(styleHeader);
 
+			// Add Blank Spacing
+			row = sheet.createRow(iLoopData++);
+			row = sheet.createRow(iLoopData++);
+			cell = row.createCell(0);
+			cell.setCellValue("Summary");
+			cell.setCellStyle(styleHeader);
+			
+			// Report Summary
+			row = sheet.createRow(iLoopData++);
+			cell = row.createCell(0);
+			cell.setCellValue("#");
+			cell.setCellStyle(style);
+			cell = row.createCell(1);
+			cell.setCellValue("Date");
+			cell.setCellStyle(style);
+			cell = row.createCell(2);
+			cell.setCellValue("Store Name");
+			cell.setCellStyle(style);
+			cell = row.createCell(3);
+			cell.setCellValue("Quantity Sold");
+			cell.setCellStyle(style);
+			cell = row.createCell(4);
+			cell.setCellValue("Total Sales (RM)");
+			cell.setCellStyle(style);
+			
+			while (rsSummary.next()) {
+
+				// Report Content
+				row = sheet.createRow(iLoopData++);
+				cell = row.createCell(0);
+				cell.setCellValue(iNumbering++);
+				cell.setCellStyle(style2);
+				cell = row.createCell(1);
+				cell.setCellValue(rsSummary.getString("datetrx"));
+				cell.setCellStyle(style2);
+				cell = row.createCell(2);
+				cell.setCellValue(rsSummary.getString("store_name"));
+				cell.setCellStyle(style2);
+				cell = row.createCell(3);
+				cell.setCellValue(rsSummary.getString("quantity"));
+				cell.setCellStyle(style2);
+				cell = row.createCell(4);
+				cell.setCellValue(rsSummary.getString("money"));
+				cell.setCellStyle(style2);
+
+			}
+			
+			// Add Blank Spacing
+			row = sheet.createRow(iLoopData++);
+			row = sheet.createRow(iLoopData++);
+			cell = row.createCell(0);
+			cell.setCellValue("Details");
+			cell.setCellStyle(styleHeader);
+			
 			// Report Header
 			row = sheet.createRow(iLoopData++);
 			cell = row.createCell(0);
@@ -1023,26 +1113,33 @@ public class ReportRestController {
 			cell.setCellValue("Store Name");
 			cell.setCellStyle(style);
 			cell = row.createCell(3);
-			cell.setCellValue("Store Address");
+			cell.setCellValue("Quantity Sold");
 			cell.setCellStyle(style);
 			cell = row.createCell(4);
 			cell.setCellValue("Total Sales (RM)");
 			cell.setCellStyle(style);
-
+			
+			iNumbering = 1;
 			while (rs.next()) {
 
 				// Report Content
 				row = sheet.createRow(iLoopData++);
 				cell = row.createCell(0);
 				cell.setCellValue(iNumbering++);
+				cell.setCellStyle(style2);
 				cell = row.createCell(1);
 				cell.setCellValue(rs.getString("datetrx"));
+				cell.setCellStyle(style2);
 				cell = row.createCell(2);
 				cell.setCellValue(rs.getString("store_name"));
+				cell.setCellStyle(style2);
 				cell = row.createCell(3);
-				cell.setCellValue(rs.getString("store_address"));
+//				cell.setCellValue(rs.getString("store_address"));
+				cell.setCellValue(rs.getString("quantity"));
+				cell.setCellStyle(style2);
 				cell = row.createCell(4);
 				cell.setCellValue(rs.getString("money"));
+				cell.setCellStyle(style2);
 
 			}
 

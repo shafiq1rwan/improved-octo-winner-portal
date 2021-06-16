@@ -61,7 +61,7 @@
 							 	var html;
 							 	
 							 	if($scope.role === 'ROLE_SUPER_ADMIN'){
-							 		html = '<button data-toggle="modal" data-target="#brandUserModal" data-keyboard="false" data-backdrop="static" ng-click="getUsersByBrand('+ id +')" type="button" class="btn btn-default custom-fontsize"><b><i class="fa fa-check-square-o"></i> Assign</b></button> <button ng-click="redirectToBrand('+ id +')" type="button" class="btn btn-primary custom-fontsize"><b><i class="fa fa-plug"></i> Connect</b></button> <button ng-click="promptEditBrandModal('+ id +')" type="button" class="btn btn-danger custom-fontsize"><b><i class="fa fa-pencil"></i> Edit</b></button>'
+							 		html = '<button data-toggle="modal" data-target="#brandUserModal" data-keyboard="false" data-backdrop="static" ng-click="getUsersByBrand('+ id +')" type="button" class="btn btn-success custom-fontsize"><b><i class="fa fa-check-square-o"></i> Assign</b></button> <button ng-click="redirectToBrand('+ id +')" type="button" class="btn btn-primary custom-fontsize"><b><i class="fa fa-plug"></i> Connect</b></button> <button ng-click="promptEditBrandModal('+ id +')" type="button" class="btn btn-danger custom-fontsize"><b><i class="fa fa-pencil"></i> Edit</b></button>'
 							 	} 
 							 	else {
 							 		html = '<div class="btn-toolbar justify-content-between"><button ng-click="redirectToBrand('+ id +')" type="button" class="btn btn-primary custom-fontsize"><b><i class="fa fa-plug"></i>Connect</b></button></div>';

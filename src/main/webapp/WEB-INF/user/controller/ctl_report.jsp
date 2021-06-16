@@ -61,7 +61,7 @@
 							{"data" : "no"}, 
 							{"data" : "trx_date"},
 							{"data" : "store_name"}, 
-							{"data" : "store_address"}, 
+							{"data" : "quantity"}, 
 							{"data" : "money"}
 						],
 						"scrollX" : true

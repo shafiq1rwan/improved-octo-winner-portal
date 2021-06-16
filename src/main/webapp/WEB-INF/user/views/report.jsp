@@ -106,7 +106,7 @@
 																	<th>No</th>
 																	<th>Date</th>
 																	<th>Store Name</th>
-																	<th>Store Address</th>
+																	<th>Quantity Sold</th>
 																	<th>Sales (RM)</th>
 																</tr>
 															</thead>

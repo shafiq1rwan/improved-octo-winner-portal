@@ -32,23 +32,23 @@
 													<div class="row" style="padding-top: 10px; padding-left: 6px; padding-right: 6px;">
 														<div
 															class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
-															<table width='100%'>
+															<table>
 																<tbody>
 																	<tr>
-																		<td><div class="form-group">
+																		<td style="padding-right: 10px;"><div class="form-group">
 																				<label for="startDate">Starting Date</label><br>
 																				<md-datepicker id="startDate"
 																					ng-model="reportStartDate"
 																					md-placeholder="Enter date"
 																					ng-change="dateChanged()" required></md-datepicker>
 																			</div></td>
-																		<td><div class="form-group">
+																		<td style="padding-right: 10px;"><div class="form-group">
 																				<label for="endDate">Ending Date</label><br>
 																				<md-datepicker id="endDate" ng-model="reportEndDate"
 																					md-min-date="reportStartDate"
 																					md-placeholder="Enter date" required></md-datepicker>
 																			</div></td>
-																		<td><div class="form-group">
+																		<td style="padding-right: 10px;"><div class="form-group">
 																				<label for="storeName">Store Name</label> 
 																				<select
 																					id="storeName" class="form-control"
@@ -57,7 +57,7 @@
 																					<option value="" disabled selected hidden>Choose a store</option>
 																				</select>
 																			</div></td>
-																		<td><div class="form-group">
+																		<td style="padding-right: 10px;"><div class="form-group">
 																				<label for="storeName">Category</label> 
 																				<select
 																					id="categoryName" class="form-control"
@@ -67,10 +67,10 @@
 																				</select>
 																			</div></td>
 																		<td
-																			style="padding-top: 10px; padding-left: 10px; padding-right: 10px"><div
+																			style="padding-top: 10px; padding-right: 10px"><div
 																				class="form-group">
 																				<label for="startDate"> </label><br>
-																				<button id="" class="btn btn-block btn-primary"
+																				<button id="" class="btn btn-primary"
 																					type="button" ng-click="refreshTable()">
 																					<i class="fas fa-search"></i> Search
 																				</button>
