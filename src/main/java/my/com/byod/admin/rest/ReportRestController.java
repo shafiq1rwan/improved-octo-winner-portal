@@ -467,11 +467,12 @@ public class ReportRestController {
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		StringBuffer query = new StringBuffer(
-				"select count(cd.menu_item_name) as total_item, cd.menu_item_name as item_name, truncate(cd.menu_item_price, 2) as item_price, tt.created_date as trxdate, cc.category_name as category_name from check_detail cd ");
+				"select count(cd.menu_item_name) as total_item, cd.menu_item_name as item_name, truncate(cd.menu_item_price, 2) as item_price, tt.created_date as trxdate, ");
+		query.append("case when cc.category_name is not null then cc.category_name else '-' end as category_name from check_detail cd ");
 		query.append("left join `check` ch on (cd.check_id = ch.id) ");
 		// Add Category - Start
 		query.append("left join category_menu_item cmi on (cd.menu_item_id = cmi.menu_item_id) ");
-		query.append("left join category cc on (cmi.category_id = cc.group_category_id) ");
+		query.append("left join category cc on (cmi.category_id = cc.id) ");
 		// Add Category - End
 		query.append("left join transaction tt on (cd.check_id = tt.check_id) ");
 		query.append("where tt.transaction_status = 3 ");
@@ -715,7 +716,7 @@ public class ReportRestController {
 
 			String newSubStr2 = new SimpleDateFormat("yyyy-MM-dd").format(datePlusOne);
 			StringBuffer query = new StringBuffer(
-					"select count(cd.menu_item_name) as total_item, cd.menu_item_name as item_name, truncate(cd.menu_item_price, 2) as item_price, cc.category_name as category, tt.created_date as trxdate from check_detail cd ");
+					"select count(cd.menu_item_name) as total_item, cd.menu_item_name as item_name, truncate(cd.menu_item_price, 2) as item_price, case when cc.category_name is not null then cc.category_name else '-' end as category , tt.created_date as trxdate from check_detail cd ");
 			query.append("left join category_menu_item cmi on (cd.menu_item_id = cmi.menu_item_id) ");
 			query.append("left join category cc on (cmi.category_id = cc.id) ");
 			query.append("left join `check` ch on (cd.check_id = ch.id) ");
