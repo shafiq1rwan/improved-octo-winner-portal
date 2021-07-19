@@ -320,7 +320,7 @@
 				$http({
 					method : 'GET',
 					headers : {'Content-Type' : 'application/json'},
-					url : ('${pageContext.request.contextPath}/menu/menuItem/getAllMenuItemByType?menuItemType=-1')
+					url : ('${pageContext.request.contextPath}/menu/menuItem/getAllMenuItemByType?menuItemType=0')
 				})
 				.then(function(response) {
 					if(response.status == "200") {
