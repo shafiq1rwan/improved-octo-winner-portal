@@ -1878,8 +1878,7 @@ public class DeviceConfigRestController {
 
 		String[] tableNames = { "category", "category_menu_item", "combo_detail", "combo_item_detail", "menu_item",
 				"menu_item_display_period", "menu_item_group", "menu_item_group_sequence", "menu_item_modifier_group",
-				"menu_item_promo_period", "modifier_group", "modifier_item_sequence", "tax_charge", 
-				"menu_item_group", "menu_item_group_sequence"};
+				"menu_item_promo_period", "modifier_group", "modifier_item_sequence", "tax_charge"};
 
 		try {
 			for (String table : tableNames) {
