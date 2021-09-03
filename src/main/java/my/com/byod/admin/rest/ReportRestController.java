@@ -1234,7 +1234,7 @@ public class ReportRestController {
 				if (!(rs.getString("store_name") == null)) {
 					JSONObject jsonObj = new JSONObject();
 					jsonObj.put("no", 1);
-					jsonObj.put("date_range", subStr1.replace("-", "/") + " - " + newSubStr2.replace("-", "/"));
+					jsonObj.put("date_range", subStr1.replace("-", "/") + " - " + subStr2.replace("-", "/"));
 					jsonObj.put("store_name", rs.getString("store_name"));
 					jsonObj.put("quantity", rs.getString("quantity"));
 					jsonObj.put("money", rs.getString("money"));
